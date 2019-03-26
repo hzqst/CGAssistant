@@ -5,9 +5,9 @@ crossgate cheat program（暂时只有道具能用，补全偏移后可以在时
 
 ### Requirement
 
-VS2015 or VS2017
+VS2017
 
-QT 5.12
+QT 5.12 for msvc2017
 
 ### Build Instruction
 
