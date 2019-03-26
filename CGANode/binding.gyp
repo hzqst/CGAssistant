@@ -10,7 +10,7 @@
 		"../rest_rpc/spdlog/include/",
 		"../rest_rpc/iguana/",
 		"../rest_rpc/iguana/third_party/msgpack/include/",
-		"../boost_1_63_0/"
+		"../boost/"
       ],
 	  
 	  "conditions": [
@@ -42,7 +42,7 @@
                                         "LinkIncremental": 1,
                                         "AdditionalLibraryDirectories": [
 											"../../Debug/",
-                                            "../../boost_1_63_0/stage/lib"
+                                            "../../boost/stage/lib"
                                         ]
                                     }
                                 }
@@ -64,7 +64,7 @@
                                         "LinkTimeCodeGeneration": 1,
                                         "AdditionalLibraryDirectories": [
                                             "../../Release/",
-											"../../boost_1_63_0/stage/lib"
+											"../../boost/stage/lib"
                                         ]
                                     }
                                 }

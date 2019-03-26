@@ -54,7 +54,7 @@ FORMS    += mainwindow.ui \
 
 RC_FILE += CGAssistant.rc
 
-INCLUDEPATH += "../boost_1_63_0"
+INCLUDEPATH += "../boost"
 INCLUDEPATH += "../rest_rpc/iguana/third_party/msgpack/include"
 
 DISTFILES +=
@@ -67,6 +67,6 @@ QMAKE_CFLAGS += /MP /Gm-
 
 Release:LIBS += -L"../Release/" -lCGALib
 Debug:LIBS += -L"../Debug/" -lCGALib
-LIBS += -L"../boost_1_63_0/stage/lib"
+LIBS += -L"../boost/stage/lib"
 LIBS += -luser32
 LIBS += -lgdi32

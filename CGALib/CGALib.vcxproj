@@ -84,7 +84,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;CGA_EXPORT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>../boost_1_63_0;../rest_rpc/;../rest_rpc/spdlog/include;../rest_rpc/iguana;../rest_rpc/iguana/third_party/msgpack/include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../boost;../rest_rpc/;../rest_rpc/spdlog/include;../rest_rpc/iguana;../rest_rpc/iguana/third_party/msgpack/include</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <DisableSpecificWarnings>4101</DisableSpecificWarnings>
@@ -93,7 +93,7 @@
       <SubSystem>Windows</SubSystem>
     </Link>
     <Lib>
-      <AdditionalLibraryDirectories>../boost_1_63_0/stage/lib</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>../boost/stage/lib</AdditionalLibraryDirectories>
     </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -117,7 +117,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;CGA_EXPORT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>../boost_1_63_0;../rest_rpc/;../rest_rpc/spdlog/include;../rest_rpc/iguana;../rest_rpc/iguana/third_party/msgpack/include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../boost;../rest_rpc/;../rest_rpc/spdlog/include;../rest_rpc/iguana;../rest_rpc/iguana/third_party/msgpack/include</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <DisableSpecificWarnings>4101</DisableSpecificWarnings>
@@ -128,7 +128,7 @@
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
     <Lib>
-      <AdditionalLibraryDirectories>../boost_1_63_0/stage/lib</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>../boost/stage/lib</AdditionalLibraryDirectories>
     </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -140,7 +140,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>../boost_1_63_0;../rest_rpc/;../rest_rpc/spdlog/include;../rest_rpc/iguana;../rest_rpc/iguana/third_party/msgpack/include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../boost;../rest_rpc/;../rest_rpc/spdlog/include;../rest_rpc/iguana;../rest_rpc/iguana/third_party/msgpack/include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -148,7 +148,7 @@
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
     <Lib>
-      <AdditionalLibraryDirectories>../boost_1_63_0/stage/lib</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>../boost/stage/lib</AdditionalLibraryDirectories>
     </Lib>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -56,7 +56,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;DETOURS_32BIT;DETOURS_X86;WIN32;_DEBUG;_WINDOWS;_USRDLL;CGAHOOK_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>../boost_1_63_0;../rest_rpc/;../rest_rpc/spdlog/include;../rest_rpc/iguana;../rest_rpc/iguana/third_party/msgpack/include;../Detours/</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../boost;../rest_rpc/;../rest_rpc/spdlog/include;../rest_rpc/iguana;../rest_rpc/iguana/third_party/msgpack/include;../Detours/</AdditionalIncludeDirectories>
       <AdditionalOptions>-D_SCL_SECURE_NO_WARNINGS %(AdditionalOptions)</AdditionalOptions>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <DisableSpecificWarnings>4091</DisableSpecificWarnings>
@@ -64,7 +64,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>../boost_1_63_0/stage/lib</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>../boost/stage/lib</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -76,7 +76,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;DETOURS_32BIT;DETOURS_X86;WIN32;NDEBUG;_WINDOWS;_USRDLL;CGAHOOK_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>../boost_1_63_0;../rest_rpc/;../rest_rpc/spdlog/include;../rest_rpc/iguana;../rest_rpc/iguana/third_party/msgpack/include;../Detours/</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../boost;../rest_rpc/;../rest_rpc/spdlog/include;../rest_rpc/iguana;../rest_rpc/iguana/third_party/msgpack/include;../Detours/</AdditionalIncludeDirectories>
       <AdditionalOptions>-D_SCL_SECURE_NO_WARNINGS %(AdditionalOptions)</AdditionalOptions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <DisableSpecificWarnings>4091</DisableSpecificWarnings>
@@ -86,7 +86,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>../boost_1_63_0/stage/lib</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>../boost/stage/lib</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
       <Command>copy $(OutDir)$(TargetName)$(TargetExt) "..\build\CGAHook.dll"</Command>
