@@ -1,0 +1,51 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.28307.168
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CGAHook", "cgahook\cgahook.vcxproj", "{1159C2B4-D6BA-4167-9B7E-FB6C75004394}"
+	ProjectSection(ProjectDependencies) = postProject
+		{85FCBAC1-6F19-4754-B277-97E6386F6D51} = {85FCBAC1-6F19-4754-B277-97E6386F6D51}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CGALib", "CGALib\CGALib.vcxproj", "{85FCBAC1-6F19-4754-B277-97E6386F6D51}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CGAssistant", "CGAssistant\CGAssistant.vcxproj", "{74C8E26A-259F-31D8-BBC6-5976B698BC79}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
+		Release|x64 = Release|x64
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{1159C2B4-D6BA-4167-9B7E-FB6C75004394}.Debug|x64.ActiveCfg = Debug|Win32
+		{1159C2B4-D6BA-4167-9B7E-FB6C75004394}.Debug|x86.ActiveCfg = Debug|Win32
+		{1159C2B4-D6BA-4167-9B7E-FB6C75004394}.Debug|x86.Build.0 = Debug|Win32
+		{1159C2B4-D6BA-4167-9B7E-FB6C75004394}.Release|x64.ActiveCfg = Release|Win32
+		{1159C2B4-D6BA-4167-9B7E-FB6C75004394}.Release|x86.ActiveCfg = Release|Win32
+		{1159C2B4-D6BA-4167-9B7E-FB6C75004394}.Release|x86.Build.0 = Release|Win32
+		{85FCBAC1-6F19-4754-B277-97E6386F6D51}.Debug|x64.ActiveCfg = Debug|x64
+		{85FCBAC1-6F19-4754-B277-97E6386F6D51}.Debug|x64.Build.0 = Debug|x64
+		{85FCBAC1-6F19-4754-B277-97E6386F6D51}.Debug|x86.ActiveCfg = Debug|Win32
+		{85FCBAC1-6F19-4754-B277-97E6386F6D51}.Debug|x86.Build.0 = Debug|Win32
+		{85FCBAC1-6F19-4754-B277-97E6386F6D51}.Release|x64.ActiveCfg = Release|x64
+		{85FCBAC1-6F19-4754-B277-97E6386F6D51}.Release|x64.Build.0 = Release|x64
+		{85FCBAC1-6F19-4754-B277-97E6386F6D51}.Release|x86.ActiveCfg = Release|Win32
+		{85FCBAC1-6F19-4754-B277-97E6386F6D51}.Release|x86.Build.0 = Release|Win32
+		{74C8E26A-259F-31D8-BBC6-5976B698BC79}.Debug|x64.ActiveCfg = Debug|Win32
+		{74C8E26A-259F-31D8-BBC6-5976B698BC79}.Debug|x86.ActiveCfg = Debug|Win32
+		{74C8E26A-259F-31D8-BBC6-5976B698BC79}.Debug|x86.Build.0 = Debug|Win32
+		{74C8E26A-259F-31D8-BBC6-5976B698BC79}.Release|x64.ActiveCfg = Release|Win32
+		{74C8E26A-259F-31D8-BBC6-5976B698BC79}.Release|x86.ActiveCfg = Release|Win32
+		{74C8E26A-259F-31D8-BBC6-5976B698BC79}.Release|x86.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {0EECE82D-A01A-4BB1-BAC8-82E7A2E6B666}
+		Qt5Version = Qt5.7.0 32
+	EndGlobalSection
+EndGlobal

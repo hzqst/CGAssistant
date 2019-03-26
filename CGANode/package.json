@@ -1,0 +1,16 @@
+{
+  "name": "node_cga",
+  "version": "0.0.0",
+  "description": "Node.js API For CGAssistant",
+  "main": "cgaapi.js",
+  "private": true,
+  "dependencies": {
+    "bindings": "~1.2.1",
+    "nan": "^2.0.0",
+	"async": "latest"
+  },
+  "scripts": {
+    "test": "node cgaapi.js"
+  },
+  "gypfile": true
+}

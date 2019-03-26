@@ -1,0 +1,1 @@
+%userprofile%\AppData\Local\Google\Chrome\Application\chrome.exe "D:\CGAssistant\CGAssistant\devtools\bundled/inspector.html" --allow-file-access-from-files
