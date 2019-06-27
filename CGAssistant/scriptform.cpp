@@ -6,6 +6,9 @@
 #include <QMessageBox>
 #include <QTextEdit>
 
+#include "../CGALib/gameinterface.h"
+extern CGA::CGAInterface *g_CGAInterface;
+
 ScriptForm::ScriptForm(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::ScriptForm)
@@ -106,7 +109,10 @@ void ScriptForm::OnNodeFinish(int exitCode, QProcess::ExitStatus exitStatus)
     ui->pushButton_load->setEnabled(true);
     ui->pushButton_run->setEnabled(true);
     ui->pushButton_debug->setEnabled(true);
-    ui->pushButton_kill->setEnabled(false);    
+    ui->pushButton_kill->setEnabled(false);
+
+    //restore everything...
+    g_CGAInterface->FixMapWarpStuck(2);
 }
 
 void ScriptForm::OnCloseWindow()
@@ -206,16 +212,18 @@ void ScriptForm::on_pushButton_debug_clicked()
 
 void ScriptForm::on_pushButton_kill_clicked()
 {
-    ui->pushButton_kill->setEnabled(false);
+    if(ui->pushButton_kill->isEnabled()){
+        ui->pushButton_kill->setEnabled(false);
 
-    m_node->kill();
-    m_webview->load(QUrl());
+        m_node->kill();
+        m_webview->load(QUrl());
 
-    if(m_bDebugging)
-        m_output->clear();
+        if(m_bDebugging)
+            m_output->clear();
 
-    m_output->show();
-    m_webview->hide();
+        m_output->show();
+        m_webview->hide();
+    }
 }
 
 void ScriptForm::OnNotifyAttachProcessOk(quint32 ProcessId, quint32 port, quint32 hWnd)

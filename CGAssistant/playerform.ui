@@ -577,6 +577,16 @@
        </layout>
       </item>
       <item>
+       <widget class="QCheckBox" name="checkBox_SwitchAnim">
+        <property name="text">
+         <string>SwitchAnim off</string>
+        </property>
+        <property name="tristate">
+         <bool>false</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
        <layout class="QHBoxLayout" name="horizontalLayout_12">
         <item alignment="Qt::AlignLeft">
          <widget class="QLabel" name="label_workacc">

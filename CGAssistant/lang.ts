@@ -35,11 +35,11 @@ meet Lv1 enemy</source>
     </message>
     <message>
         <source>Load</source>
-        <translation>加载</translation>
+        <translation type="vanished">加载</translation>
     </message>
     <message>
         <source>Save</source>
-        <translation>保存</translation>
+        <translation type="vanished">保存</translation>
     </message>
     <message>
         <source>font-weight:bold; font-size:14px;</source>
@@ -219,7 +219,7 @@ meet Lv1 enemy</source>
     </message>
     <message>
         <source>Boomerang</source>
-        <translation>回力标</translation>
+        <translation>回力标 (人多的一排)</translation>
     </message>
     <message>
         <source>from %1</source>
@@ -251,11 +251,123 @@ meet Lv1 enemy</source>
     </message>
     <message>
         <source>Pet with highest lv</source>
-        <translation>等级最高</translation>
+        <translation>等级最高的宠物</translation>
     </message>
     <message>
         <source>Pet with highest hp</source>
-        <translation>血量最多</translation>
+        <translation>血量最多的宠物</translation>
+    </message>
+    <message>
+        <source>Low HP Percentage</source>
+        <translation>低血量比例</translation>
+    </message>
+    <message>
+        <source>High HP Percentage</source>
+        <translation>高血量比例</translation>
+    </message>
+    <message>
+        <source>Lv Max</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>LogBack</source>
+        <translation>登出</translation>
+    </message>
+    <message>
+        <source>Round</source>
+        <translation>回合</translation>
+    </message>
+    <message>
+        <source>Double Action</source>
+        <translation>二动</translation>
+    </message>
+    <message>
+        <source>Teammate Debuff</source>
+        <translation>队友异常状态</translation>
+    </message>
+    <message>
+        <source>Single Debuff</source>
+        <translation>单体异常状态</translation>
+    </message>
+    <message>
+        <source>Multi Debuff</source>
+        <translation>T字形异常状态</translation>
+    </message>
+    <message>
+        <source>Sleep</source>
+        <translation>昏睡</translation>
+    </message>
+    <message>
+        <source>Medusa</source>
+        <translation>石化</translation>
+    </message>
+    <message>
+        <source>Drunk</source>
+        <translation>醉酒</translation>
+    </message>
+    <message>
+        <source>Chaos</source>
+        <translation>混乱</translation>
+    </message>
+    <message>
+        <source>Forget</source>
+        <translation>遗忘</translation>
+    </message>
+    <message>
+        <source>Any</source>
+        <translation>任意</translation>
+    </message>
+    <message>
+        <source>Enemy MultiTarget HP</source>
+        <translation>敌人T字形血量</translation>
+    </message>
+    <message>
+        <source>Multi Magic</source>
+        <translation>强力魔法</translation>
+    </message>
+    <message>
+        <source>Poison</source>
+        <translation>中毒</translation>
+    </message>
+    <message>
+        <source>Condition</source>
+        <translation>条件</translation>
+    </message>
+    <message>
+        <source>AND IF</source>
+        <translation>并且 如果</translation>
+    </message>
+    <message>
+        <source>Teammate MultiTarget HP</source>
+        <translation>队友T字形血量</translation>
+    </message>
+    <message>
+        <source>Teammate All HP</source>
+        <translation>队友全体血量</translation>
+    </message>
+    <message>
+        <source>Enemy SingleRow Count</source>
+        <translation>敌人一排人数</translation>
+    </message>
+    <message>
+        <source>Enemy All HP</source>
+        <translation>敌人全体血量</translation>
+    </message>
+    <message>
+        <source>Enemy Level</source>
+        <translation>敌人等级</translation>
+    </message>
+    <message>
+        <source>Enemy Average Level</source>
+        <translation>敌人平均等级</translation>
+    </message>
+    <message>
+        <source>Less Unit Row</source>
+        <translation>人少的一排</translation>
+    </message>
+    <message>
+        <source>Teammate MP</source>
+        <translation>队友蓝量</translation>
     </message>
 </context>
 <context>
@@ -279,6 +391,10 @@ meet Lv1 enemy</source>
     <message>
         <source>Pet Target</source>
         <translation>宠物目标</translation>
+    </message>
+    <message>
+        <source>Condition2</source>
+        <translation>条件2</translation>
     </message>
 </context>
 <context>
@@ -339,11 +455,11 @@ meet Lv1 enemy</source>
     </message>
     <message>
         <source>Save</source>
-        <translation>保存</translation>
+        <translation type="vanished">保存</translation>
     </message>
     <message>
         <source>Load</source>
-        <translation>加载</translation>
+        <translation type="vanished">加载</translation>
     </message>
     <message>
         <source>Items</source>
@@ -367,7 +483,7 @@ meet Lv1 enemy</source>
     </message>
     <message>
         <source>Error</source>
-        <translation>错误</translation>
+        <translation type="vanished">错误</translation>
     </message>
     <message>
         <source>Failed to load setting file.</source>
@@ -383,27 +499,35 @@ meet Lv1 enemy</source>
     </message>
     <message>
         <source>Load item settings</source>
-        <translation>加载物品设置</translation>
+        <translation type="vanished">加载物品设置</translation>
     </message>
     <message>
         <source>json files(*.json)</source>
-        <translation>json文件(*.json)</translation>
+        <translation type="vanished">json文件(*.json)</translation>
     </message>
     <message>
         <source>Failed to load item settings from file.</source>
-        <translation>读取物品设置失败。</translation>
+        <translation type="vanished">读取物品设置失败。</translation>
     </message>
     <message>
         <source>Failed to load item settings with invalid format.</source>
-        <translation>读取物品设置失败，格式不正确。</translation>
+        <translation type="vanished">读取物品设置失败，格式不正确。</translation>
     </message>
     <message>
         <source>Save item settings</source>
-        <translation>保存物品设置</translation>
+        <translation type="vanished">保存物品设置</translation>
     </message>
     <message>
         <source>Failed to save item settings to file.</source>
-        <translation>保存物品设置失败。</translation>
+        <translation type="vanished">保存物品设置失败。</translation>
+    </message>
+    <message>
+        <source>Auto Tweak</source>
+        <translation>自动堆叠</translation>
+    </message>
+    <message>
+        <source>Add to auto-tweak...</source>
+        <translation>添加到自动堆叠...</translation>
     </message>
 </context>
 <context>
@@ -435,6 +559,25 @@ meet Lv1 enemy</source>
     <message>
         <source>Script</source>
         <translation>脚本</translation>
+    </message>
+    <message>
+        <source>Map</source>
+        <translation>地图</translation>
+    </message>
+</context>
+<context>
+    <name>MapForm</name>
+    <message>
+        <source>Form</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Show Crosshair</source>
+        <translation>显示十字准星</translation>
+    </message>
+    <message>
+        <source>Download Map</source>
+        <translation>下载地图</translation>
     </message>
 </context>
 <context>
@@ -535,6 +678,51 @@ meet Lv1 enemy</source>
         <source>Move speed</source>
         <translation>移动速度</translation>
     </message>
+    <message>
+        <source>Clock</source>
+        <translation>卡时</translation>
+    </message>
+    <message>
+        <source>Save</source>
+        <translation>保存</translation>
+    </message>
+    <message>
+        <source>Load</source>
+        <translation>加载</translation>
+    </message>
+    <message>
+        <source>json files(*.json)</source>
+        <translation>json文件(*.json)</translation>
+    </message>
+    <message>
+        <source>Error</source>
+        <translation>错误</translation>
+    </message>
+    <message>
+        <source>Failed to save settings file.
+error: %1</source>
+        <translation>保存配置文件失败，错误: %1</translation>
+    </message>
+    <message>
+        <source>Load player settings</source>
+        <translation>加载玩家配置</translation>
+    </message>
+    <message>
+        <source>Failed to load item settings from file.</source>
+        <translation>读取物品设置失败。</translation>
+    </message>
+    <message>
+        <source>Failed to load item settings with invalid format.</source>
+        <translation>读取物品设置失败，格式不正确。</translation>
+    </message>
+    <message>
+        <source>SwitchAnim off</source>
+        <translation>屏蔽切图</translation>
+    </message>
+    <message>
+        <source>Save player settings</source>
+        <translation>保存玩家配置</translation>
+    </message>
 </context>
 <context>
     <name>ProcessForm</name>
@@ -558,6 +746,10 @@ meet Lv1 enemy</source>
         <source>Failed to attach to process.
 %1</source>
         <translation>附加进程失败. %1</translation>
+    </message>
+    <message>
+        <source>Syncronize Window</source>
+        <translation>窗口同步</translation>
     </message>
 </context>
 <context>
@@ -634,6 +826,110 @@ meet Lv1 enemy</source>
         <source>Call pet with highest health</source>
         <translation>放出最高血量的宠物</translation>
     </message>
+    <message>
+        <source>LogBack</source>
+        <translation>登出</translation>
+    </message>
+    <message>
+        <source>Round %1%2</source>
+        <translation>回合数 %1%2</translation>
+    </message>
+    <message>
+        <source>DoubleAction</source>
+        <translation>二动</translation>
+    </message>
+    <message>
+        <source>Any</source>
+        <translation>任意</translation>
+    </message>
+    <message>
+        <source>Sleep</source>
+        <translation>昏睡</translation>
+    </message>
+    <message>
+        <source>Medusa</source>
+        <translation>石化</translation>
+    </message>
+    <message>
+        <source>Drunk</source>
+        <translation>醉酒</translation>
+    </message>
+    <message>
+        <source>Chaos</source>
+        <translation>混乱</translation>
+    </message>
+    <message>
+        <source>Forget</source>
+        <translation>遗忘</translation>
+    </message>
+    <message>
+        <source>Teammate Debuff %1 %2</source>
+        <translation>队友异常状态 %1 %2</translation>
+    </message>
+    <message>
+        <source>Enemy MultiTarget Hp %1%2</source>
+        <translation type="vanished">敌方T字形累加血量 %1%2</translation>
+    </message>
+    <message>
+        <source>Poison</source>
+        <translation>中毒</translation>
+    </message>
+    <message>
+        <source>HP: %1 / %2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>MP: %1 / %2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>XP: %1 / %2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Upgrade: %1</source>
+        <translation>升级经验: %1</translation>
+    </message>
+    <message>
+        <source>Loyalty: %1</source>
+        <translation>忠诚: %1</translation>
+    </message>
+    <message>
+        <source>Ignore</source>
+        <translation>忽略</translation>
+    </message>
+    <message>
+        <source>Enemy SingleRow Count %1%2</source>
+        <translation>敌人一排数量 %1%2</translation>
+    </message>
+    <message>
+        <source>Enemy MultiTarget HP %1%2</source>
+        <translation>敌人T字形血量 %1%2</translation>
+    </message>
+    <message>
+        <source>Teammate MultiTarget HP %1%2</source>
+        <translation>队友T字形血量 %1%2</translation>
+    </message>
+    <message>
+        <source>Enemy All HP %1%2</source>
+        <translation>敌人全体血量 %1%2</translation>
+    </message>
+    <message>
+        <source>Teammate All HP %1%2</source>
+        <translation>队友全体血量 %1%2</translation>
+    </message>
+    <message>
+        <source>Enemy Level %1%2</source>
+        <translation>敌人等级 %1%2</translation>
+    </message>
+    <message>
+        <source>Enemy Average Level %1%2</source>
+        <translation>敌人平均等级 %1%2</translation>
+    </message>
+    <message>
+        <source>TeammateMP %1%2</source>
+        <translation>队友蓝量 %1%2</translation>
+    </message>
 </context>
 <context>
     <name>ScriptForm</name>
@@ -659,7 +955,7 @@ meet Lv1 enemy</source>
     </message>
     <message>
         <source>Debugger</source>
-        <translation>调试器</translation>
+        <translation type="vanished">调试器</translation>
     </message>
     <message>
         <source>Debugging with pid %2...</source>
@@ -705,6 +1001,10 @@ error: %1</source>
     <message>
         <source>Debugging with pid %1...</source>
         <translation>正在调试进程 %1 ...</translation>
+    </message>
+    <message>
+        <source>Console / Debugger</source>
+        <translation>控制台 / 调试器</translation>
     </message>
 </context>
 </TS>

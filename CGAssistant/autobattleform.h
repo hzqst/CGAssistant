@@ -25,7 +25,8 @@ private slots:
     void OnCloseWindow();
     void on_horizontalSlider_delayFrom_valueChanged(int value);
     void on_horizontalSlider_delayTo_valueChanged(int value);
-    void on_comboBox_condition_type_currentIndexChanged(int index);
+    void on_comboBox_condition_type_currentIndexChanged(int index);    
+    void on_comboBox_condition2_type_currentIndexChanged(int index);
     void on_comboBox_playerAction_currentIndexChanged(int index);
     void on_comboBox_playerTarget_currentIndexChanged(int index);
     void on_comboBox_petAction_currentIndexChanged(int index);

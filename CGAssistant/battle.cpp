@@ -1,5 +1,5 @@
 #include <QTimer>
-#include <QTime>
+#include <QDateTime>
 #include "battle.h"
 
 extern CGA::CGAInterface *g_CGAInterface;
@@ -18,6 +18,21 @@ static int GetPetPosition(int playerPos)
     return -1;
 }
 
+CBattleCondition_Ignore::CBattleCondition_Ignore()
+{
+
+}
+
+void CBattleCondition_Ignore::GetConditionName(QString &str)
+{
+    str = QObject::tr("Ignore");
+}
+
+bool CBattleCondition_Ignore::Check(CGA_BattleContext_t &context, int &conditionTarget)
+{
+    return true;
+}
+
 CBattleCondition_EnemyCount::CBattleCondition_EnemyCount(int relation, int value)
 {
     m_relation = relation;
@@ -29,7 +44,7 @@ void CBattleCondition_EnemyCount::GetConditionName(QString &str)
     str = QObject::tr("EnemyCount %1%2").arg(s_BattleCondRelationNumber[m_relation], QString::number(m_value));
 }
 
-bool CBattleCondition_EnemyCount::Check(CGA_BattleContext_t &context)
+bool CBattleCondition_EnemyCount::Check(CGA_BattleContext_t &context, int &conditionTarget)
 {
     switch (m_relation)
     {
@@ -50,6 +65,62 @@ bool CBattleCondition_EnemyCount::Check(CGA_BattleContext_t &context)
     return false;
 }
 
+CBattleCondition_EnemySingleRowCount::CBattleCondition_EnemySingleRowCount(int relation, int value)
+{
+    m_relation = relation;
+    m_value = value;
+}
+
+void CBattleCondition_EnemySingleRowCount::GetConditionName(QString &str)
+{
+    str = QObject::tr("Enemy SingleRow Count %1%2").arg(s_BattleCondRelationNumber[m_relation], QString::number(m_value));
+}
+
+bool CBattleCondition_EnemySingleRowCount::Check(CGA_BattleContext_t &context, int &conditionTarget)
+{
+    switch (m_relation)
+    {
+    case BattleCond_NumRel_EGT:
+        if( context.m_iFrontCount >= m_value)
+            return true;
+        if( context.m_iBackCount >= m_value)
+            return true;
+        break;
+    case BattleCond_NumRel_GT:
+        if( context.m_iFrontCount > m_value)
+            return true;
+        if( context.m_iBackCount > m_value)
+            return true;
+        break;
+    case BattleCond_NumRel_ELT:
+        if( context.m_iFrontCount <= m_value)
+            return true;
+        if( context.m_iBackCount <= m_value)
+            return true;
+        break;
+    case BattleCond_NumRel_LT:
+        if( context.m_iFrontCount < m_value)
+            return true;
+        if( context.m_iBackCount < m_value)
+            return true;
+        break;
+    case BattleCond_NumRel_EQ:
+        if( context.m_iFrontCount == m_value)
+            return true;
+        if( context.m_iBackCount == m_value)
+            return true;
+        break;
+    case BattleCond_NumRel_NEQ:
+        if( context.m_iFrontCount != m_value)
+            return true;
+        if( context.m_iBackCount != m_value)
+            return true;
+        break;
+    }
+
+    return false;
+}
+
 CBattleCondition_PlayerHp::CBattleCondition_PlayerHp(int relation, int value, bool percentage)
 {
     m_relation = relation;
@@ -63,43 +134,106 @@ void CBattleCondition_PlayerHp::GetConditionName(QString &str)
     if(m_percentage)
         str += QLatin1String("%");
 }
-bool CBattleCondition_PlayerHp::Check(CGA_BattleContext_t &context)
+
+bool CBattleCondition_PlayerHp::Check(CGA_BattleContext_t &context, int &conditionTarget)
 {
     if(context.m_iPlayerPosition < 0 || context.m_iPlayerPosition > 20)
         return false;
+
     int curv = context.m_UnitGroup[context.m_iPlayerPosition].curhp;
     int maxv = context.m_UnitGroup[context.m_iPlayerPosition].maxhp;
+
     if(m_percentage){
         switch (m_relation)
         {
         case BattleCond_NumRel_EGT:
-            return curv * 100 / maxv >= m_value;
+            if(curv * 100 / maxv >= m_value)
+            {
+                conditionTarget = context.m_iPlayerPosition;
+                return true;
+            }
+            break;
         case BattleCond_NumRel_GT:
-            return curv * 100 / maxv > m_value;
+            if(curv * 100 / maxv > m_value)
+            {
+                conditionTarget = context.m_iPlayerPosition;
+                return true;
+            }
+            break;
         case BattleCond_NumRel_ELT:
-            return curv * 100 / maxv <= m_value;
+            if(curv * 100 / maxv <= m_value)
+            {
+                conditionTarget = context.m_iPlayerPosition;
+                return true;
+            }
+            break;
         case BattleCond_NumRel_LT:
-            return curv * 100 / maxv < m_value;
+            if(curv * 100 / maxv < m_value)
+            {
+                conditionTarget = context.m_iPlayerPosition;
+                return true;
+            }
+            break;
         case BattleCond_NumRel_EQ:
-            return curv * 100 / maxv == m_value;
+            if(curv * 100 / maxv == m_value)
+            {
+                conditionTarget = context.m_iPlayerPosition;
+                return true;
+            }
+            break;
         case BattleCond_NumRel_NEQ:
-            return curv * 100 / maxv != m_value;
+            if(curv * 100 / maxv != m_value)
+            {
+                conditionTarget = context.m_iPlayerPosition;
+                return true;
+            }
+            break;
         }
     } else {
         switch (m_relation)
         {
         case BattleCond_NumRel_EGT:
-            return curv >= m_value;
+            if(curv >= m_value)
+            {
+                conditionTarget = context.m_iPlayerPosition;
+                return true;
+            }
+            break;
         case BattleCond_NumRel_GT:
-            return curv > m_value;
+            if(curv > m_value)
+            {
+                conditionTarget = context.m_iPlayerPosition;
+                return true;
+            }
+            break;
         case BattleCond_NumRel_ELT:
-            return curv <= m_value;
+            if(curv <= m_value)
+            {
+                conditionTarget = context.m_iPlayerPosition;
+                return true;
+            }
+            break;
         case BattleCond_NumRel_LT:
-            return curv < m_value;
+            if(curv < m_value)
+            {
+                conditionTarget = context.m_iPlayerPosition;
+                return true;
+            }
+            break;
         case BattleCond_NumRel_EQ:
-            return curv == m_value;
+            if(curv == m_value)
+            {
+                conditionTarget = context.m_iPlayerPosition;
+                return true;
+            }
+            break;
         case BattleCond_NumRel_NEQ:
-            return curv != m_value;
+            if(curv != m_value)
+            {
+                conditionTarget = context.m_iPlayerPosition;
+                return true;
+            }
+            break;
         }
     }
 
@@ -118,7 +252,7 @@ void CBattleCondition_PlayerMp::GetConditionName(QString &str)
     if(m_percentage)
         str += QLatin1String("%");
 }
-bool CBattleCondition_PlayerMp::Check(CGA_BattleContext_t &context)
+bool CBattleCondition_PlayerMp::Check(CGA_BattleContext_t &context, int &conditionTarget)
 {
     if(context.m_iPlayerPosition < 0 || context.m_iPlayerPosition > 20)
         return false;
@@ -128,33 +262,93 @@ bool CBattleCondition_PlayerMp::Check(CGA_BattleContext_t &context)
         switch (m_relation)
         {
         case BattleCond_NumRel_EGT:
-            return curv * 100 / maxv >= m_value;
+            if(curv * 100 / maxv >= m_value)
+            {
+                conditionTarget = context.m_iPlayerPosition;
+                return true;
+            }
+            break;
         case BattleCond_NumRel_GT:
-            return curv * 100 / maxv > m_value;
+            if(curv * 100 / maxv > m_value)
+            {
+                conditionTarget = context.m_iPlayerPosition;
+                return true;
+            }
+            break;
         case BattleCond_NumRel_ELT:
-            return curv * 100 / maxv <= m_value;
+            if(curv * 100 / maxv <= m_value)
+            {
+                conditionTarget = context.m_iPlayerPosition;
+                return true;
+            }
+            break;
         case BattleCond_NumRel_LT:
-            return curv * 100 / maxv < m_value;
+            if(curv * 100 / maxv < m_value)
+            {
+                conditionTarget = context.m_iPlayerPosition;
+                return true;
+            }
+            break;
         case BattleCond_NumRel_EQ:
-            return curv * 100 / maxv == m_value;
+            if(curv * 100 / maxv == m_value)
+            {
+                conditionTarget = context.m_iPlayerPosition;
+                return true;
+            }
+            break;
         case BattleCond_NumRel_NEQ:
-            return curv * 100 / maxv != m_value;
+            if(curv * 100 / maxv != m_value)
+            {
+                conditionTarget = context.m_iPlayerPosition;
+                return true;
+            }
+            break;
         }
     } else {
         switch (m_relation)
         {
         case BattleCond_NumRel_EGT:
-            return curv >= m_value;
+            if(curv >= m_value)
+            {
+                conditionTarget = context.m_iPlayerPosition;
+                return true;
+            }
+            break;
         case BattleCond_NumRel_GT:
-            return curv > m_value;
+            if(curv > m_value)
+            {
+                conditionTarget = context.m_iPlayerPosition;
+                return true;
+            }
+            break;
         case BattleCond_NumRel_ELT:
-            return curv <= m_value;
+            if(curv <= m_value)
+            {
+                conditionTarget = context.m_iPlayerPosition;
+                return true;
+            }
+            break;
         case BattleCond_NumRel_LT:
-            return curv < m_value;
+            if(curv < m_value)
+            {
+                conditionTarget = context.m_iPlayerPosition;
+                return true;
+            }
+            break;
         case BattleCond_NumRel_EQ:
-            return curv == m_value;
+            if(curv == m_value)
+            {
+                conditionTarget = context.m_iPlayerPosition;
+                return true;
+            }
+            break;
         case BattleCond_NumRel_NEQ:
-            return curv != m_value;
+            if(curv != m_value)
+            {
+                conditionTarget = context.m_iPlayerPosition;
+                return true;
+            }
+            break;
         }
     }
     return false;
@@ -174,7 +368,7 @@ void CBattleCondition_PetHp::GetConditionName(QString &str)
         str += QLatin1String("%");
 }
 
-bool CBattleCondition_PetHp::Check(CGA_BattleContext_t &context)
+bool CBattleCondition_PetHp::Check(CGA_BattleContext_t &context, int &conditionTarget)
 {
     if(context.m_iPetPosition < 0 || context.m_iPetPosition > 20)
         return false;
@@ -184,33 +378,93 @@ bool CBattleCondition_PetHp::Check(CGA_BattleContext_t &context)
         switch (m_relation)
         {
         case BattleCond_NumRel_EGT:
-            return curv * 100 / maxv >= m_value;
+            if(curv * 100 / maxv >= m_value)
+            {
+                conditionTarget = context.m_iPlayerPosition;
+                return true;
+            }
+            break;
         case BattleCond_NumRel_GT:
-            return curv * 100 / maxv > m_value;
+            if(curv * 100 / maxv > m_value)
+            {
+                conditionTarget = context.m_iPlayerPosition;
+                return true;
+            }
+            break;
         case BattleCond_NumRel_ELT:
-            return curv * 100 / maxv <= m_value;
+            if(curv * 100 / maxv <= m_value)
+            {
+                conditionTarget = context.m_iPlayerPosition;
+                return true;
+            }
+            break;
         case BattleCond_NumRel_LT:
-            return curv * 100 / maxv < m_value;
+            if(curv * 100 / maxv < m_value)
+            {
+                conditionTarget = context.m_iPlayerPosition;
+                return true;
+            }
+            break;
         case BattleCond_NumRel_EQ:
-            return curv * 100 / maxv == m_value;
+            if(curv * 100 / maxv == m_value)
+            {
+                conditionTarget = context.m_iPlayerPosition;
+                return true;
+            }
+            break;
         case BattleCond_NumRel_NEQ:
-            return curv * 100 / maxv != m_value;
+            if(curv * 100 / maxv != m_value)
+            {
+                conditionTarget = context.m_iPlayerPosition;
+                return true;
+            }
+            break;
         }
     } else {
         switch (m_relation)
         {
         case BattleCond_NumRel_EGT:
-            return curv >= m_value;
+            if(curv >= m_value)
+            {
+                conditionTarget = context.m_iPlayerPosition;
+                return true;
+            }
+            break;
         case BattleCond_NumRel_GT:
-            return curv > m_value;
+            if(curv > m_value)
+            {
+                conditionTarget = context.m_iPlayerPosition;
+                return true;
+            }
+            break;
         case BattleCond_NumRel_ELT:
-            return curv <= m_value;
+            if(curv <= m_value)
+            {
+                conditionTarget = context.m_iPlayerPosition;
+                return true;
+            }
+            break;
         case BattleCond_NumRel_LT:
-            return curv < m_value;
+            if(curv < m_value)
+            {
+                conditionTarget = context.m_iPlayerPosition;
+                return true;
+            }
+            break;
         case BattleCond_NumRel_EQ:
-            return curv == m_value;
+            if(curv == m_value)
+            {
+                conditionTarget = context.m_iPlayerPosition;
+                return true;
+            }
+            break;
         case BattleCond_NumRel_NEQ:
-            return curv != m_value;
+            if(curv != m_value)
+            {
+                conditionTarget = context.m_iPlayerPosition;
+                return true;
+            }
+            break;
         }
     }
     return false;
@@ -228,7 +482,7 @@ void CBattleCondition_PetMp::GetConditionName(QString &str)
     if(m_percentage)
         str += QLatin1String("%");
 }
-bool CBattleCondition_PetMp::Check(CGA_BattleContext_t &context)
+bool CBattleCondition_PetMp::Check(CGA_BattleContext_t &context, int &conditionTarget)
 {
     if(context.m_iPetPosition < 0 || context.m_iPetPosition > 20)
         return false;
@@ -238,33 +492,93 @@ bool CBattleCondition_PetMp::Check(CGA_BattleContext_t &context)
         switch (m_relation)
         {
         case BattleCond_NumRel_EGT:
-            return curv * 100 / maxv >= m_value;
+            if(curv * 100 / maxv >= m_value)
+            {
+                conditionTarget = context.m_iPlayerPosition;
+                return true;
+            }
+            break;
         case BattleCond_NumRel_GT:
-            return curv * 100 / maxv > m_value;
+            if(curv * 100 / maxv > m_value)
+            {
+                conditionTarget = context.m_iPlayerPosition;
+                return true;
+            }
+            break;
         case BattleCond_NumRel_ELT:
-            return curv * 100 / maxv <= m_value;
+            if(curv * 100 / maxv <= m_value)
+            {
+                conditionTarget = context.m_iPlayerPosition;
+                return true;
+            }
+            break;
         case BattleCond_NumRel_LT:
-            return curv * 100 / maxv < m_value;
+            if(curv * 100 / maxv < m_value)
+            {
+                conditionTarget = context.m_iPlayerPosition;
+                return true;
+            }
+            break;
         case BattleCond_NumRel_EQ:
-            return curv * 100 / maxv == m_value;
+            if(curv * 100 / maxv == m_value)
+            {
+                conditionTarget = context.m_iPlayerPosition;
+                return true;
+            }
+            break;
         case BattleCond_NumRel_NEQ:
-            return curv * 100 / maxv != m_value;
+            if(curv * 100 / maxv != m_value)
+            {
+                conditionTarget = context.m_iPlayerPosition;
+                return true;
+            }
+            break;
         }
     } else {
         switch (m_relation)
         {
         case BattleCond_NumRel_EGT:
-            return curv >= m_value;
+            if(curv >= m_value)
+            {
+                conditionTarget = context.m_iPlayerPosition;
+                return true;
+            }
+            break;
         case BattleCond_NumRel_GT:
-            return curv > m_value;
+            if(curv > m_value)
+            {
+                conditionTarget = context.m_iPlayerPosition;
+                return true;
+            }
+            break;
         case BattleCond_NumRel_ELT:
-            return curv <= m_value;
+            if(curv <= m_value)
+            {
+                conditionTarget = context.m_iPlayerPosition;
+                return true;
+            }
+            break;
         case BattleCond_NumRel_LT:
-            return curv < m_value;
+            if(curv < m_value)
+            {
+                conditionTarget = context.m_iPlayerPosition;
+                return true;
+            }
+            break;
         case BattleCond_NumRel_EQ:
-            return curv == m_value;
+            if(curv == m_value)
+            {
+                conditionTarget = context.m_iPlayerPosition;
+                return true;
+            }
+            break;
         case BattleCond_NumRel_NEQ:
-            return curv != m_value;
+            if(curv != m_value)
+            {
+                conditionTarget = context.m_iPlayerPosition;
+                return true;
+            }
+            break;
         }
     }
     return false;
@@ -276,13 +590,15 @@ CBattleCondition_TeammateHp::CBattleCondition_TeammateHp(int relation, int value
     m_value = value;
     m_percentage = percentage;
 }
+
 void CBattleCondition_TeammateHp::GetConditionName(QString &str)
 {
     str = QObject::tr("TeammateHP %1%2").arg(s_BattleCondRelationNumber[m_relation], QString::number(m_value));
     if(m_percentage)
         str += QLatin1String("%");
 }
-bool CBattleCondition_TeammateHp::Check(CGA_BattleContext_t &context)
+
+bool CBattleCondition_TeammateHp::Check(CGA_BattleContext_t &context, int &conditionTarget)
 {
     for(int i = 0;i < 0xA; ++i)
     {
@@ -290,27 +606,46 @@ bool CBattleCondition_TeammateHp::Check(CGA_BattleContext_t &context)
             continue;
         int curv = context.m_UnitGroup[i].curhp;
         int maxv = context.m_UnitGroup[i].maxhp;
+        //qDebug("curhp%d maxhp%d v%d r%d p%d", curv, maxv, m_value, m_relation, m_percentage?1:0);
         if(m_percentage){
             switch (m_relation)
             {
             case BattleCond_NumRel_EGT:
-                if(curv * 100 / maxv >= m_value)
+                if(curv * 100 / maxv >= m_value){
+                    conditionTarget = i;
                     return true;
+                }
+                break;
             case BattleCond_NumRel_GT:
-                if(curv * 100 / maxv > m_value)
+                if(curv * 100 / maxv > m_value){
+                    conditionTarget = i;
                     return true;
+                }
+                break;
             case BattleCond_NumRel_ELT:
-                if(curv * 100 / maxv <= m_value)
-                    return true;;
+                if(curv * 100 / maxv <= m_value){
+                    conditionTarget = i;
+                    return true;
+                }
+                break;
             case BattleCond_NumRel_LT:
-                if(curv * 100 / maxv < m_value)
+                if(curv * 100 / maxv < m_value){
+                    conditionTarget = i;
                     return true;
+                }
+                break;
             case BattleCond_NumRel_EQ:
-                if(curv * 100 / maxv == m_value)
+                if(curv * 100 / maxv == m_value){
+                    conditionTarget = i;
                     return true;
+                }
+                break;
             case BattleCond_NumRel_NEQ:
-                if(curv * 100 / maxv != m_value)
+                if(curv * 100 / maxv != m_value){
+                    conditionTarget = i;
                     return true;
+                }
+                break;
             }
         }
         else
@@ -318,24 +653,568 @@ bool CBattleCondition_TeammateHp::Check(CGA_BattleContext_t &context)
             switch (m_relation)
             {
             case BattleCond_NumRel_EGT:
-                if( curv >= m_value)
+                if( curv >= m_value){
+                    conditionTarget = i;
                     return true;
+                }
+                break;
             case BattleCond_NumRel_GT:
-                if( curv > m_value)
+                if( curv > m_value){
+                    conditionTarget = i;
                     return true;
+                }
+                break;
             case BattleCond_NumRel_ELT:
-                if( curv <= m_value)
+                if( curv <= m_value){
+                    conditionTarget = i;
                     return true;
+                }
+                break;
             case BattleCond_NumRel_LT:
-                if( curv < m_value)
+                if( curv < m_value){
+                    conditionTarget = i;
                     return true;
+                }
+                break;
             case BattleCond_NumRel_EQ:
-                if( curv == m_value)
+                if( curv == m_value){
+                    conditionTarget = i;
                     return true;
+                }
+                break;
             case BattleCond_NumRel_NEQ:
-                if( curv != m_value)
+                if( curv != m_value){
+                    conditionTarget = i;
                     return true;
+                }
+                break;
             }
+        }
+    }
+    return false;
+}
+
+CBattleCondition_TeammateMp::CBattleCondition_TeammateMp(int relation, int value, bool percentage)
+{
+    m_relation = relation;
+    m_value = value;
+    m_percentage = percentage;
+}
+
+void CBattleCondition_TeammateMp::GetConditionName(QString &str)
+{
+    str = QObject::tr("TeammateMP %1%2").arg(s_BattleCondRelationNumber[m_relation], QString::number(m_value));
+    if(m_percentage)
+        str += QLatin1String("%");
+}
+
+bool CBattleCondition_TeammateMp::Check(CGA_BattleContext_t &context, int &conditionTarget)
+{
+    for(int i = 0;i < 0xA; ++i)
+    {
+        if(!context.m_UnitGroup[i].exist)
+            continue;
+        int curv = context.m_UnitGroup[i].curmp;
+        int maxv = context.m_UnitGroup[i].maxmp;
+        //qDebug("curhp%d maxhp%d v%d r%d p%d", curv, maxv, m_value, m_relation, m_percentage?1:0);
+        if(m_percentage){
+            switch (m_relation)
+            {
+            case BattleCond_NumRel_EGT:
+                if(curv * 100 / maxv >= m_value){
+                    conditionTarget = i;
+                    return true;
+                }
+                break;
+            case BattleCond_NumRel_GT:
+                if(curv * 100 / maxv > m_value){
+                    conditionTarget = i;
+                    return true;
+                }
+                break;
+            case BattleCond_NumRel_ELT:
+                if(curv * 100 / maxv <= m_value){
+                    conditionTarget = i;
+                    return true;
+                }
+                break;
+            case BattleCond_NumRel_LT:
+                if(curv * 100 / maxv < m_value){
+                    conditionTarget = i;
+                    return true;
+                }
+                break;
+            case BattleCond_NumRel_EQ:
+                if(curv * 100 / maxv == m_value){
+                    conditionTarget = i;
+                    return true;
+                }
+                break;
+            case BattleCond_NumRel_NEQ:
+                if(curv * 100 / maxv != m_value){
+                    conditionTarget = i;
+                    return true;
+                }
+                break;
+            }
+        }
+        else
+        {
+            switch (m_relation)
+            {
+            case BattleCond_NumRel_EGT:
+                if( curv >= m_value){
+                    conditionTarget = i;
+                    return true;
+                }
+                break;
+            case BattleCond_NumRel_GT:
+                if( curv > m_value){
+                    conditionTarget = i;
+                    return true;
+                }
+                break;
+            case BattleCond_NumRel_ELT:
+                if( curv <= m_value){
+                    conditionTarget = i;
+                    return true;
+                }
+                break;
+            case BattleCond_NumRel_LT:
+                if( curv < m_value){
+                    conditionTarget = i;
+                    return true;
+                }
+                break;
+            case BattleCond_NumRel_EQ:
+                if( curv == m_value){
+                    conditionTarget = i;
+                    return true;
+                }
+                break;
+            case BattleCond_NumRel_NEQ:
+                if( curv != m_value){
+                    conditionTarget = i;
+                    return true;
+                }
+                break;
+            }
+        }
+    }
+    return false;
+}
+
+
+CBattleCondition_EnemyMultiTargetHp::CBattleCondition_EnemyMultiTargetHp(int relation, int value, bool percentage)
+{
+    m_relation = relation;
+    m_value = value;
+    m_percentage = percentage;
+}
+
+void CBattleCondition_EnemyMultiTargetHp::GetConditionName(QString &str)
+{
+    str = QObject::tr("Enemy MultiTarget HP %1%2").arg(s_BattleCondRelationNumber[m_relation], QString::number(m_value));
+}
+
+bool CBattleCondition_EnemyMultiTargetHp::Check(CGA_BattleContext_t &context, int &conditionTarget)
+{
+    for(int i = 0xA;i < 20; ++i)
+    {
+        if(!context.m_UnitGroup[i].exist)
+            continue;
+        int curv = context.m_UnitGroup[i].curhp;
+        int maxv = context.m_UnitGroup[i].maxhp;
+        //qDebug("curhp%d maxhp%d v%d r%d p%d", curv, maxv, m_value, m_relation, m_percentage?1:0);
+        if(m_percentage){
+            switch (m_relation)
+            {
+            case BattleCond_NumRel_EGT:
+                if(curv * 100 / maxv >= m_value){
+                    conditionTarget = i;
+                    return true;
+                }
+                break;
+            case BattleCond_NumRel_GT:
+                if(curv * 100 / maxv > m_value){
+                    conditionTarget = i;
+                    return true;
+                }
+                break;
+            case BattleCond_NumRel_ELT:
+                if(curv * 100 / maxv <= m_value){
+                    conditionTarget = i;
+                    return true;
+                }
+                break;
+            case BattleCond_NumRel_LT:
+                if(curv * 100 / maxv < m_value){
+                    conditionTarget = i;
+                    return true;
+                }
+                break;
+            case BattleCond_NumRel_EQ:
+                if(curv * 100 / maxv == m_value){
+                    conditionTarget = i;
+                    return true;
+                }
+                break;
+            case BattleCond_NumRel_NEQ:
+                if(curv * 100 / maxv != m_value){
+                    conditionTarget = i;
+                    return true;
+                }
+                break;
+            }
+        }
+        else
+        {
+            switch (m_relation)
+            {
+            case BattleCond_NumRel_EGT:
+                if( curv >= m_value){
+                    conditionTarget = i;
+                    return true;
+                }
+                break;
+            case BattleCond_NumRel_GT:
+                if( curv > m_value){
+                    conditionTarget = i;
+                    return true;
+                }
+                break;
+            case BattleCond_NumRel_ELT:
+                if( curv <= m_value){
+                    conditionTarget = i;
+                    return true;
+                }
+                break;
+            case BattleCond_NumRel_LT:
+                if( curv < m_value){
+                    conditionTarget = i;
+                    return true;
+                }
+                break;
+            case BattleCond_NumRel_EQ:
+                if( curv == m_value){
+                    conditionTarget = i;
+                    return true;
+                }
+                break;
+            case BattleCond_NumRel_NEQ:
+                if( curv != m_value){
+                    conditionTarget = i;
+                    return true;
+                }
+                break;
+            }
+        }
+    }
+    return false;
+}
+
+CBattleCondition_TeammateMultiTargetHp::CBattleCondition_TeammateMultiTargetHp(int relation, int value, bool percentage)
+{
+    m_relation = relation;
+    m_value = value;
+    m_percentage = percentage;
+}
+
+void CBattleCondition_TeammateMultiTargetHp::GetConditionName(QString &str)
+{
+    str = QObject::tr("Teammate MultiTarget HP %1%2").arg(s_BattleCondRelationNumber[m_relation], QString::number(m_value));
+    if(m_percentage)
+        str += QLatin1String("%");
+}
+
+bool CBattleCondition_TeammateMultiTargetHp::Check(CGA_BattleContext_t &context, int &conditionTarget)
+{
+    for(int i = 0;i < 0xA; ++i)
+    {
+        if(!context.m_UnitGroup[i].exist)
+            continue;
+        int curv = context.m_UnitGroup[i].multi_hp;
+        int maxv = context.m_UnitGroup[i].multi_maxhp;
+        qDebug("CBattleCondition_TeammateMultiTargetHp curhp%d maxhp%d v%d r%d p%d", curv, maxv, m_value, m_relation, m_percentage?1:0);
+        if(m_percentage){
+            switch (m_relation)
+            {
+            case BattleCond_NumRel_EGT:
+                if(curv * 100 / maxv >= m_value){
+                    conditionTarget = i;
+                    return true;
+                }
+                break;
+            case BattleCond_NumRel_GT:
+                if(curv * 100 / maxv > m_value){
+                    conditionTarget = i;
+                    return true;
+                }
+                break;
+            case BattleCond_NumRel_ELT:
+                if(curv * 100 / maxv <= m_value){
+                    conditionTarget = i;
+                    return true;
+                }
+                break;
+            case BattleCond_NumRel_LT:
+                if(curv * 100 / maxv < m_value){
+                    conditionTarget = i;
+                    return true;
+                }
+                break;
+            case BattleCond_NumRel_EQ:
+                if(curv * 100 / maxv == m_value){
+                    conditionTarget = i;
+                    return true;
+                }
+                break;
+            case BattleCond_NumRel_NEQ:
+                if(curv * 100 / maxv != m_value){
+                    conditionTarget = i;
+                    return true;
+                }
+                break;
+            }
+        }
+        else
+        {
+            switch (m_relation)
+            {
+            case BattleCond_NumRel_EGT:
+                if( curv >= m_value){
+                    conditionTarget = i;
+                    return true;
+                }
+                break;
+            case BattleCond_NumRel_GT:
+                if( curv > m_value){
+                    conditionTarget = i;
+                    return true;
+                }
+                break;
+            case BattleCond_NumRel_ELT:
+                if( curv <= m_value){
+                    conditionTarget = i;
+                    return true;
+                }
+                break;
+            case BattleCond_NumRel_LT:
+                if( curv < m_value){
+                    conditionTarget = i;
+                    return true;
+                }
+                break;
+            case BattleCond_NumRel_EQ:
+                if( curv == m_value){
+                    conditionTarget = i;
+                    return true;
+                }
+                break;
+            case BattleCond_NumRel_NEQ:
+                if( curv != m_value){
+                    conditionTarget = i;
+                    return true;
+                }
+                break;
+            }
+        }
+    }
+    return false;
+}
+
+CBattleCondition_EnemyAllHp::CBattleCondition_EnemyAllHp(int relation, int value, bool percentage)
+{
+    m_relation = relation;
+    m_value = value;
+    m_percentage = percentage;
+}
+
+void CBattleCondition_EnemyAllHp::GetConditionName(QString &str)
+{
+    str = QObject::tr("Enemy All HP %1%2").arg(s_BattleCondRelationNumber[m_relation], QString::number(m_value));
+}
+
+bool CBattleCondition_EnemyAllHp::Check(CGA_BattleContext_t &context, int &conditionTarget)
+{
+    int curv = 0, maxv = 0;
+    for(int i = 0xA;i < 20; ++i)
+    {
+        if(!context.m_UnitGroup[i].exist)
+            continue;
+        curv += context.m_UnitGroup[i].curhp;
+        maxv += context.m_UnitGroup[i].maxhp;
+    }
+
+    if(m_percentage){
+        switch (m_relation)
+        {
+        case BattleCond_NumRel_EGT:
+            if(curv * 100 / maxv >= m_value){
+                return true;
+            }
+            break;
+        case BattleCond_NumRel_GT:
+            if(curv * 100 / maxv > m_value){
+                return true;
+            }
+            break;
+        case BattleCond_NumRel_ELT:
+            if(curv * 100 / maxv <= m_value){
+                return true;
+            }
+            break;
+        case BattleCond_NumRel_LT:
+            if(curv * 100 / maxv < m_value){
+                return true;
+            }
+            break;
+        case BattleCond_NumRel_EQ:
+            if(curv * 100 / maxv == m_value){
+                return true;
+            }
+            break;
+        case BattleCond_NumRel_NEQ:
+            if(curv * 100 / maxv != m_value){
+                return true;
+            }
+            break;
+        }
+    }
+    else
+    {
+        switch (m_relation)
+        {
+        case BattleCond_NumRel_EGT:
+            if( curv >= m_value){
+                return true;
+            }
+            break;
+        case BattleCond_NumRel_GT:
+            if( curv > m_value){
+                return true;
+            }
+            break;
+        case BattleCond_NumRel_ELT:
+            if( curv <= m_value){
+                return true;
+            }
+            break;
+        case BattleCond_NumRel_LT:
+            if( curv < m_value){
+                return true;
+            }
+            break;
+        case BattleCond_NumRel_EQ:
+            if( curv == m_value){
+                return true;
+            }
+            break;
+        case BattleCond_NumRel_NEQ:
+            if( curv != m_value){
+                return true;
+            }
+            break;
+        }
+    }
+
+    return false;
+}
+
+CBattleCondition_TeammateAllHp::CBattleCondition_TeammateAllHp(int relation, int value, bool percentage)
+{
+    m_relation = relation;
+    m_value = value;
+    m_percentage = percentage;
+}
+
+void CBattleCondition_TeammateAllHp::GetConditionName(QString &str)
+{
+    str = QObject::tr("Teammate All HP %1%2").arg(s_BattleCondRelationNumber[m_relation], QString::number(m_value));
+    if(m_percentage)
+        str += QLatin1String("%");
+}
+
+bool CBattleCondition_TeammateAllHp::Check(CGA_BattleContext_t &context, int &conditionTarget)
+{
+    int curv = 0, maxv = 0;
+    for(int i = 0;i < 0xA; ++i)
+    {
+        if(!context.m_UnitGroup[i].exist)
+            continue;
+        curv += context.m_UnitGroup[i].curhp;
+        maxv += context.m_UnitGroup[i].maxhp;
+    }
+
+    if(m_percentage){
+        switch (m_relation)
+        {
+        case BattleCond_NumRel_EGT:
+            if(curv * 100 / maxv >= m_value){
+                return true;
+            }
+            break;
+        case BattleCond_NumRel_GT:
+            if(curv * 100 / maxv > m_value){
+                return true;
+            }
+            break;
+        case BattleCond_NumRel_ELT:
+            if(curv * 100 / maxv <= m_value){
+                return true;
+            }
+            break;
+        case BattleCond_NumRel_LT:
+            if(curv * 100 / maxv < m_value){
+                return true;
+            }
+            break;
+        case BattleCond_NumRel_EQ:
+            if(curv * 100 / maxv == m_value){
+                return true;
+            }
+            break;
+        case BattleCond_NumRel_NEQ:
+            if(curv * 100 / maxv != m_value){
+                return true;
+            }
+            break;
+        }
+    }
+    else
+    {
+        switch (m_relation)
+        {
+        case BattleCond_NumRel_EGT:
+            if( curv >= m_value){
+                return true;
+            }
+            break;
+        case BattleCond_NumRel_GT:
+            if( curv > m_value){
+                return true;
+            }
+            break;
+        case BattleCond_NumRel_ELT:
+            if( curv <= m_value){
+                return true;
+            }
+            break;
+        case BattleCond_NumRel_LT:
+            if( curv < m_value){
+                return true;
+            }
+            break;
+        case BattleCond_NumRel_EQ:
+            if( curv == m_value){
+                return true;
+            }
+            break;
+        case BattleCond_NumRel_NEQ:
+            if( curv != m_value){
+                return true;
+            }
+            break;
         }
     }
     return false;
@@ -351,26 +1230,282 @@ void CBattleCondition_EnemyUnit::GetConditionName(QString &str)
 {
     str = QObject::tr("Enemy %1%2").arg( s_BattleCondRelationString[m_relation], m_UnitName);
 }
-bool CBattleCondition_EnemyUnit::Check(CGA_BattleContext_t &context)
+
+bool CBattleCondition_EnemyUnit::Check(CGA_BattleContext_t &context, int &conditionTarget)
 {
     for(int i = 0xA;i < 20; ++i)
     {
         if(!context.m_UnitGroup[i].exist)
             continue;
         if(context.m_UnitGroup[i].name == m_UnitName){
-            if(m_relation == BattleCond_StrRel_CONTAIN)
+            if(m_relation == BattleCond_StrRel_CONTAIN){
+                conditionTarget = i;
                 return true;
+            }
         }
     }
     return (m_relation == BattleCond_StrRel_NOT_CONTAIN) ? true : false;
 }
 
+CBattleCondition_Round::CBattleCondition_Round(int relation, int value)
+{
+    m_relation = relation;
+    m_value = value;
+}
+
+void CBattleCondition_Round::GetConditionName(QString &str)
+{
+    str = QObject::tr("Round %1%2").arg(s_BattleCondRelationNumber[m_relation], QString::number(m_value));
+}
+
+bool CBattleCondition_Round::Check(CGA_BattleContext_t &context, int &conditionTarget)
+{
+    switch (m_relation)
+    {
+    case BattleCond_NumRel_EGT:
+        return context.m_iRoundCount >= m_value;
+    case BattleCond_NumRel_GT:
+        return context.m_iRoundCount > m_value;
+    case BattleCond_NumRel_ELT:
+        return context.m_iRoundCount <= m_value;
+    case BattleCond_NumRel_LT:
+        return context.m_iRoundCount < m_value;
+    case BattleCond_NumRel_EQ:
+        return context.m_iRoundCount == m_value;
+    case BattleCond_NumRel_NEQ:
+        return context.m_iRoundCount != m_value;
+    }
+
+    return false;
+}
+
+CBattleCondition_DoubleAction::CBattleCondition_DoubleAction()
+{
+
+}
+
+void CBattleCondition_DoubleAction::GetConditionName(QString &str)
+{
+    str = QObject::tr("DoubleAction");
+}
+
+bool CBattleCondition_DoubleAction::Check(CGA_BattleContext_t &context, int &conditionTarget)
+{
+    if(context.m_bIsDouble)
+        return true;
+
+    return false;
+}
+
+CBattleCondition_TeammateDebuff::CBattleCondition_TeammateDebuff(int relation, int value)
+{
+    m_relation = relation;
+    m_value = value;
+}
+
+void CBattleCondition_TeammateDebuff::GetConditionName(QString &str)
+{
+    using namespace CGA;
+    QString debuff;
+    if(m_value == FL_DEBUFF_ANY){
+        debuff += QObject::tr("Any");
+    } else {
+        if(m_value & FL_DEBUFF_SLEEP){
+           if(!debuff.isEmpty())
+               debuff += " ";
+           debuff += QObject::tr("Sleep");
+        }
+        if(m_value & FL_DEBUFF_MEDUSA){
+            if(!debuff.isEmpty())
+                debuff += " ";
+           debuff += QObject::tr("Medusa");
+        }
+        if(m_value & FL_DEBUFF_DRUNK){
+            if(!debuff.isEmpty())
+                debuff += " ";
+           debuff += QObject::tr("Drunk");
+        }
+        if(m_value & FL_DEBUFF_CHAOS){
+            if(!debuff.isEmpty())
+                debuff += " ";
+           debuff += QObject::tr("Chaos");
+        }
+        if(m_value & FL_DEBUFF_FORGET){
+            if(!debuff.isEmpty())
+                debuff += " ";
+           debuff += QObject::tr("Forget");
+        }
+        if(m_value & FL_DEBUFF_POISON){
+            if(!debuff.isEmpty())
+                debuff += " ";
+           debuff += QObject::tr("Poison");
+        }
+    }
+
+    str = QObject::tr("Teammate Debuff %1 %2").arg(s_BattleCondRelationString[m_relation], debuff);
+}
+
+bool CBattleCondition_TeammateDebuff::Check(CGA_BattleContext_t &context, int &conditionTarget)
+{
+    switch (m_relation)
+    {
+    case BattleCond_StrRel_CONTAIN:{
+        for(int i = 0;i < 10; ++i){
+            if(context.m_UnitGroup[i].exist)
+            {
+                if(context.m_UnitGroup[i].flags & m_value)
+                {
+                    conditionTarget = i;
+                    return true;
+               }
+            }
+        }
+        return false;
+    }
+    case BattleCond_StrRel_NOT_CONTAIN:{
+        for(int i = 0;i < 10; ++i){
+            if(context.m_UnitGroup[i].exist)
+            {
+                if(context.m_UnitGroup[i].flags & m_value)
+                  return false;
+            }
+        }
+        return true;
+    }
+    }
+
+    return false;
+}
+
+CBattleCondition_EnemyLevel::CBattleCondition_EnemyLevel(int relation, int value)
+{
+    m_relation = relation;
+    m_value = value;
+}
+
+void CBattleCondition_EnemyLevel::GetConditionName(QString &str)
+{
+    str = QObject::tr("Enemy Level %1%2").arg(s_BattleCondRelationNumber[m_relation], QString::number(m_value));
+}
+
+bool CBattleCondition_EnemyLevel::Check(CGA_BattleContext_t &context, int &conditionTarget)
+{
+    for(int i = 0xA;i < 20; ++i)
+    {
+        if(!context.m_UnitGroup[i].exist)
+            continue;
+        int curv = context.m_UnitGroup[i].level;
+
+        switch (m_relation)
+        {
+        case BattleCond_NumRel_EGT:
+            if( curv >= m_value){
+                conditionTarget = i;
+                return true;
+            }
+            break;
+        case BattleCond_NumRel_GT:
+            if( curv > m_value){
+                conditionTarget = i;
+                return true;
+            }
+            break;
+        case BattleCond_NumRel_ELT:
+            if( curv <= m_value){
+                conditionTarget = i;
+                return true;
+            }
+            break;
+        case BattleCond_NumRel_LT:
+            if( curv < m_value){
+                conditionTarget = i;
+                return true;
+            }
+            break;
+        case BattleCond_NumRel_EQ:
+            if( curv == m_value){
+                conditionTarget = i;
+                return true;
+            }
+            break;
+        case BattleCond_NumRel_NEQ:
+            if( curv != m_value){
+                conditionTarget = i;
+                return true;
+            }
+            break;
+        }
+    }
+    return false;
+}
+
+CBattleCondition_EnemyAvgLevel::CBattleCondition_EnemyAvgLevel(int relation, int value)
+{
+    m_relation = relation;
+    m_value = value;
+}
+
+void CBattleCondition_EnemyAvgLevel::GetConditionName(QString &str)
+{
+    str = QObject::tr("Enemy Average Level %1%2").arg(s_BattleCondRelationNumber[m_relation], QString::number(m_value));
+}
+
+bool CBattleCondition_EnemyAvgLevel::Check(CGA_BattleContext_t &context, int &conditionTarget)
+{
+    int level = 0, count = 0;
+    for(int i = 0xA;i < 20; ++i)
+    {
+        if(!context.m_UnitGroup[i].exist)
+            continue;
+        level += context.m_UnitGroup[i].level;
+        count += 1;
+    }
+
+    float avg = (float)level / count;
+
+    switch (m_relation)
+    {
+    case BattleCond_NumRel_EGT:
+        if( avg >= (float)m_value){
+            return true;
+        }
+        break;
+    case BattleCond_NumRel_GT:
+        if( avg > (float)m_value){
+            return true;
+        }
+        break;
+    case BattleCond_NumRel_ELT:
+        if( avg <= (float)m_value){
+            return true;
+        }
+        break;
+    case BattleCond_NumRel_LT:
+        if( avg < (float)m_value){
+            return true;
+        }
+        break;
+    case BattleCond_NumRel_EQ:
+        if( avg == (float)m_value){
+            return true;
+        }
+        break;
+    case BattleCond_NumRel_NEQ:
+        if( avg != (float)m_value){
+            return true;
+        }
+        break;
+    }
+
+    return false;
+}
 
 void CBattleAction_PlayerAttack::GetActionName(QString &str)
 {
     str = QObject::tr("Attack");
 }
-bool CBattleAction_PlayerAttack::DoAction(int target, CGA_BattleContext_t &context)
+
+bool CBattleAction_PlayerAttack::DoAction(int target, int defaultTarget, CGA_BattleContext_t &context)
 {
     bool result = false;
     g_CGAInterface->BattleNormalAttack(target, result);
@@ -381,7 +1516,8 @@ void CBattleAction_PlayerDefense::GetActionName(QString &str)
 {
     str = QObject::tr("Defense");
 }
-bool CBattleAction_PlayerDefense::DoAction(int target, CGA_BattleContext_t &context)
+
+bool CBattleAction_PlayerDefense::DoAction(int target, int defaultTarget, CGA_BattleContext_t &context)
 {
     bool result = false;
     g_CGAInterface->BattleDefense(result);
@@ -393,7 +1529,7 @@ void CBattleAction_PlayerEscape::GetActionName(QString &str)
     str = QObject::tr("Escape");
 }
 
-bool CBattleAction_PlayerEscape::DoAction(int target, CGA_BattleContext_t &context)
+bool CBattleAction_PlayerEscape::DoAction(int target, int defaultTarget, CGA_BattleContext_t &context)
 {
     bool result = false;
     g_CGAInterface->BattleEscape(result);
@@ -405,7 +1541,7 @@ void CBattleAction_PlayerExchangePosition::GetActionName(QString &str)
     str = QObject::tr("Exchange Position");
 }
 
-bool CBattleAction_PlayerExchangePosition::DoAction(int target, CGA_BattleContext_t &context)
+bool CBattleAction_PlayerExchangePosition::DoAction(int target, int defaultTarget, CGA_BattleContext_t &context)
 {
     bool result = false;
     g_CGAInterface->BattleExchangePosition(result);
@@ -442,7 +1578,7 @@ void CBattleAction_PlayerChangePet::GetActionName(QString &str)
     }
 }
 
-bool CBattleAction_PlayerChangePet::DoAction(int target, CGA_BattleContext_t &context)
+bool CBattleAction_PlayerChangePet::DoAction(int target, int defaultTarget, CGA_BattleContext_t &context)
 {
     int petid;
     bool found = false;
@@ -535,20 +1671,41 @@ void CBattleAction_PlayerSkillAttack::GetActionName(QString &str)
         str += QObject::tr(" Lv Max");
 }
 
-bool CBattleAction_PlayerSkillAttack::DoAction(int target, CGA_BattleContext_t &context)
+int CBattleAction_PlayerSkillAttack::GetTargetFlags(CGA_BattleContext_t &context)
+{
+    if(!context.m_PlayerSkills.data())
+        return 0;
+
+    int skill_pos, skill_level;
+    if(!GetSkill(context, skill_pos, skill_level))
+        return 0;
+
+    for(int i = 0;i < context.m_PlayerSkills->size(); ++i)
+    {
+        const CGA_SkillInfo_t &skill = context.m_PlayerSkills->at(i);
+        if(skill_pos == skill.id)
+        {
+            int flags = skill.subskills.at(skill_level).flags;
+            return flags;
+        }
+    }
+    return 0;
+}
+
+bool CBattleAction_PlayerSkillAttack::DoAction(int target, int defaultTarget, CGA_BattleContext_t &context)
 {
     int skill_pos, skill_level;
 
     bool result = false;
     if(context.m_bIsSkillPerformed == false && GetSkill(context, skill_pos, skill_level)){
+        qDebug("BattleSkillAttack %d %d %d", skill_pos, skill_level, target);
         FixTarget(context, skill_pos, skill_level, target);
         g_CGAInterface->BattleSkillAttack(skill_pos, skill_level, target, result);
-        //qDebug("BattleSkillAttack %d %d %d", skill_pos, skill_level, target);
     }
 
     if(!result){
-        g_CGAInterface->BattleNormalAttack(target, result);
-        //qDebug("BattleNormalAttack %d %d", skill_pos, target);
+        qDebug("BattleNormalAttack %d %d", skill_pos, target);
+        g_CGAInterface->BattleNormalAttack(defaultTarget, result);
     }
     return result;
 }
@@ -562,14 +1719,16 @@ bool CBattleAction_PlayerSkillAttack::GetSkill(CGA_BattleContext_t &context, int
         const CGA_SkillInfo_t &skill = context.m_PlayerSkills->at(i);
         if(m_SkillName == skill.name)
         {
-            skillpos = i;
+            skillpos = skill.id;
             skilllevel = skill.lv;
             if(m_SkillLevel >= 1 && skilllevel > m_SkillLevel)
                 skilllevel = m_SkillLevel;
             int playerMp = context.m_UnitGroup[context.m_iPlayerPosition].curmp;
             const CGA_SubSkills_t &subsks = skill.subskills;
             for(int j = subsks.size() - 1; j >= 0; --j){
-                if(skilllevel >= subsks.at(j).level && playerMp >= subsks.at(j).cost){
+                if(skilllevel >= subsks.at(j).level &&
+                        subsks.at(j).available &&
+                       playerMp >= subsks.at(j).cost){
                     skilllevel = j;
                     //qDebug("j = %d", skilllevel);
                     return true;
@@ -587,24 +1746,36 @@ void CBattleAction_PlayerSkillAttack::FixTarget(CGA_BattleContext_t &context, in
     if(!context.m_PlayerSkills.data())
         return;
 
-    const CGA_SkillInfo_t &skill = context.m_PlayerSkills->at(skill_pos);
-    int flags = skill.subskills.at(skill_level).flags;
+    for(int i = 0;i < context.m_PlayerSkills->size(); ++i)
+    {
+        const CGA_SkillInfo_t &skill = context.m_PlayerSkills->at(i);
+        if(skill_pos == skill.id)
+        {
+            int flags = skill.subskills.at(skill_level).flags;
 
-    if(flags & FL_SKILL_SINGLE)
-        return;
-    if(flags & FL_SKILL_MULTI){
-        target = target + 20;
-        return;
+            if(!(flags & FL_SKILL_SELECT_TARGET)){
+                target = 0;
+                return;
+            }
+            if(flags & FL_SKILL_SINGLE){
+                return;
+            }
+            if(flags & FL_SKILL_MULTI){
+                target = target + 20;
+                return;
+            }
+            if(flags & FL_SKILL_ALL){
+                target = (target >= 10 && target <= 19) ? 41 : 40;
+                return;
+            }
+            if(flags & FL_SKILL_BOOM){
+                target = 42;
+                return;
+            }
+            target = -1;
+            return;
+        }
     }
-    if(flags & FL_SKILL_ALL){
-        target = (target >= 10 && target <= 19) ? 41 : 40;
-        return;
-    }
-    if(flags & FL_SKILL_BOOM){
-        target = 42;
-        return;
-    }
-    target = -1;
 }
 
 CBattleAction_PlayerUseItem::CBattleAction_PlayerUseItem(QString &itemName)
@@ -630,7 +1801,7 @@ void CBattleAction_PlayerUseItem::GetActionName(QString &str)
     str = QObject::tr("Use item %1").arg(m_ItemName);
 }
 
-bool CBattleAction_PlayerUseItem::DoAction(int target, CGA_BattleContext_t &context)
+bool CBattleAction_PlayerUseItem::DoAction(int target, int defaultTarget, CGA_BattleContext_t &context)
 {
     //TODO
     int itempos;;
@@ -657,6 +1828,21 @@ bool CBattleAction_PlayerUseItem::GetItemPosition(CGA_BattleContext_t &context, 
     return false;
 }
 
+CBattleAction_PlayerLogBack::CBattleAction_PlayerLogBack()
+{
+
+}
+
+void CBattleAction_PlayerLogBack::GetActionName(QString &str)
+{
+    str = QObject::tr("LogBack");
+}
+
+bool CBattleAction_PlayerLogBack::DoAction(int target, int defaultTarget, CGA_BattleContext_t &context)
+{
+    return g_CGAInterface->LogBack();
+}
+
 CBattleAction_PetSkillAttack::CBattleAction_PetSkillAttack(QString &skillName)
 {
     m_SkillName = skillName;
@@ -667,26 +1853,13 @@ void CBattleAction_PetSkillAttack::GetActionName(QString &str)
     str = m_SkillName;
 }
 
-bool CBattleAction_PetSkillAttack::DoAction(int target, CGA_BattleContext_t &context)
-{
-    int skillpos = -1;
-
-    bool result = false;
-    if(GetSkill(context, skillpos))
-        g_CGAInterface->BattlePetSkillAttack(skillpos, target, result);
-
-    qDebug("BattlePetSkillAttack %d %d\n", skillpos, target);
-
-    return result;
-}
-
-bool CBattleAction_PetSkillAttack::GetSkill(CGA_BattleContext_t &context, int &skillpos)
+int CBattleAction_PetSkillAttack::GetTargetFlags(CGA_BattleContext_t &context)
 {
     if(context.m_iPetId == -1)
-        return false;
+        return 0;
 
     if(!context.m_Pets.data())
-        return false;
+        return 0;
 
     for(int i = 0 ;i < context.m_Pets->size(); ++i ){
         const CGA_PetInfo_t &pet = context.m_Pets->at(i);
@@ -694,17 +1867,93 @@ bool CBattleAction_PetSkillAttack::GetSkill(CGA_BattleContext_t &context, int &s
             const CGA_PetSkillList_t &petskills = pet.skills;
 
             for(int j = 0; j < petskills.size(); ++j){
-                if(petskills.at(j).name == m_SkillName && context.m_UnitGroup[context.m_iPetPosition].curmp >= petskills.at(j).cost){
-                    skillpos = j;
+                if(petskills.at(j).name == m_SkillName){
+
+                    return petskills.at(j).flags;
+                }
+            }
+            break;
+        }
+    }
+
+    return 0;
+}
+
+bool CBattleAction_PetSkillAttack::DoAction(int target, int defaultTarget, CGA_BattleContext_t &context)
+{
+    int skillpos = -1;
+
+    bool result = false;
+    bool bUseDefaultTarget = false;
+    if(GetSkill(context, skillpos, bUseDefaultTarget))
+    {
+        //qDebug("target1=%d", target);
+        target = bUseDefaultTarget ? defaultTarget : target;
+        //qDebug("target2=%d", target);
+        FixTarget(context, skillpos, target);
+        //qDebug("target3=%d", target);
+        result = g_CGAInterface->BattlePetSkillAttack(skillpos, target, result);
+    }
+    qDebug("BattlePetSkillAttack %d %d\n", skillpos, target);
+
+    return result;
+}
+
+bool CBattleAction_PetSkillAttack::GetSkill(CGA_BattleContext_t &context, int &skillpos, bool &bUseDefaultTarget)
+{
+    if(context.m_iPetId == -1)
+        return false;
+
+    if(!context.m_Pets.data())
+        return false;
+
+    const unsigned char szAttack[] = {0xB9, 0xA5, 0xBB, 0xF7, 0};
+    QString attack = QString::fromLocal8Bit((const char *)szAttack);
+
+    const unsigned char szGuard[] = {0xB7, 0xC0, 0xD3, 0xF9, 0};
+    QString guard = QString::fromLocal8Bit((const char *)szGuard);
+
+    for(int i = 0 ;i < context.m_Pets->size(); ++i ){
+        const CGA_PetInfo_t &pet = context.m_Pets->at(i);
+        if(pet.id == context.m_iPetId){
+            const CGA_PetSkillList_t &petskills = pet.skills;
+
+            for(int j = 0; j < petskills.size(); ++j){
+                //char *ppp = petskills.at(j).name.toLocal8Bit().data();
+
+                if(
+                        petskills.at(j).name == m_SkillName &&
+                        context.m_UnitGroup[context.m_iPetPosition].curmp >= petskills.at(j).cost &&
+                        (context.m_iPetSkillAllowBit & (1 << petskills.at(j).pos))
+                        ){
+                    skillpos = petskills.at(j).pos;
+                    return true;
+                }
+
+            }
+
+            for(int j = 0; j < petskills.size(); ++j){
+                if(
+                        petskills.at(j).name == attack &&
+                        (context.m_iPetSkillAllowBit & (1 << petskills.at(j).pos))
+                        ){
+
+                    //qDebug("find attack");
+                    skillpos = petskills.at(j).pos;
+                    bUseDefaultTarget = true;
                     return true;
                 }
             }
 
-            const char szAttack[] = {-71,-91,-69,-9};
-            QString attack = QString::fromLocal8Bit(szAttack);
             for(int j = 0; j < petskills.size(); ++j){
-                if(petskills.at(j).name == attack){//Attack
-                    skillpos = j;
+                if(
+                        petskills.at(j).name == guard &&
+                        (context.m_iPetSkillAllowBit & (1 << petskills.at(j).pos))
+                        ){
+
+                    //qDebug("find guard");
+                    skillpos = petskills.at(j).pos;
+                    bUseDefaultTarget = true;
                     return true;
                 }
             }
@@ -724,29 +1973,36 @@ void CBattleAction_PetSkillAttack::FixTarget(CGA_BattleContext_t &context, int s
     for(int i = 0 ;i < context.m_Pets->size(); ++i )
     {
         const CGA_PetInfo_t &pet = context.m_Pets->at(i);
-        if(i == context.m_iPetId)
+        if(pet.id == context.m_iPetId)
         {
             const CGA_PetSkillList_t &petskills = pet.skills;
             for(int j = 0; j < petskills.size(); ++j){
-                int flags = petskills.at(j).flags;
-
-                if(flags & FL_SKILL_SINGLE)
-                    return;
-                if(flags & FL_SKILL_MULTI){
-                    target = target + 20;
+                if(petskills.at(j).pos == skillpos){
+                    int flags = petskills.at(j).flags;
+                    //qDebug("skill name = %s", petskills.at(j).name.toLocal8Bit().data());
+                    //qDebug("skill flags = %X", flags);
+                    if(!(flags & FL_SKILL_SELECT_TARGET)){
+                        target = 0;
+                        return;
+                    }
+                    if(flags & FL_SKILL_SINGLE)
+                        return;
+                    if(flags & FL_SKILL_MULTI){
+                        //qDebug("multi skill");
+                        target = target + 20;
+                        return;
+                    }
+                    if(flags & FL_SKILL_ALL){
+                        target = (target >= 10 && target <= 19) ? 41 : 40;
+                        return;
+                    }
+                    if(flags & FL_SKILL_BOOM){
+                        target = 42;
+                        return;
+                    }
+                    target = 255;
                     return;
                 }
-                if(flags & FL_SKILL_ALL){
-                    target = (target >= 10 && target <= 19) ? 41 : 40;
-                    return;
-                }
-                if(flags & FL_SKILL_BOOM){
-                    target = 42;
-                    return;
-                }
-                target = -1;
-
-                return;
             }
         }
     }
@@ -757,7 +2013,7 @@ void CBattleTarget_Self::GetTargetName(QString &str)
     str += s_BattleTargetString[BattleTarget_Self];
 }
 
-int CBattleTarget_Self::GetTarget(CGA_BattleContext_t &context)
+int CBattleTarget_Self::GetTarget(int unitpos, int flags, CGA_BattleContext_t &context)
 {
     return context.m_iPlayerPosition;
 }
@@ -767,9 +2023,19 @@ void CBattleTarget_Pet::GetTargetName(QString &str)
     str += s_BattleTargetString[BattleTarget_Pet];
 }
 
-int CBattleTarget_Pet::GetTarget(CGA_BattleContext_t &context)
+int CBattleTarget_Pet::GetTarget(int unitpos, int flags, CGA_BattleContext_t &context)
 {
     return context.m_iPetPosition;
+}
+
+void CBattleTarget_Condition::GetTargetName(QString &str)
+{
+    str += s_BattleTargetString[BattleTarget_Condition];
+}
+
+int CBattleTarget_Condition::GetTarget(int unitpos, int flags, CGA_BattleContext_t &context)
+{
+    return context.m_iConditionTarget;
 }
 
 CBattleTarget_Enemy::CBattleTarget_Enemy(int select)
@@ -789,7 +2055,7 @@ bool compareFront(const CGA_BattleUnit_t & a, const CGA_BattleUnit_t & b){
 }
 
 bool compareBack(const CGA_BattleUnit_t & a, const CGA_BattleUnit_t & b){
-    return a.pos > b.pos;
+    return a.pos < b.pos;
 }
 
 bool compareLowHP(const CGA_BattleUnit_t & a, const CGA_BattleUnit_t & b){
@@ -797,6 +2063,14 @@ bool compareLowHP(const CGA_BattleUnit_t & a, const CGA_BattleUnit_t & b){
 }
 
 bool compareHighHP(const CGA_BattleUnit_t & a, const CGA_BattleUnit_t & b){
+    return a.curhp > b.curhp;
+}
+
+bool compareLowHPPercent(const CGA_BattleUnit_t & a, const CGA_BattleUnit_t & b){
+    return (float)a.curhp / (float)a.maxhp < (float)b.curhp / (float)b.maxhp;
+}
+
+bool compareHighHPPercent(const CGA_BattleUnit_t & a, const CGA_BattleUnit_t & b){
     return a.curhp > b.curhp;
 }
 
@@ -808,15 +2082,38 @@ bool compareHighLv(const CGA_BattleUnit_t & a, const CGA_BattleUnit_t & b){
     return a.level > b.level;
 }
 
-int CBattleTarget_Enemy::GetTarget(CGA_BattleContext_t &context)
+bool compareSingleDebuff(const CGA_BattleUnit_t & a, const CGA_BattleUnit_t & b){
+    return a.flags > b.flags;
+}
+
+bool compareMultiDebuff(const CGA_BattleUnit_t & a, const CGA_BattleUnit_t & b){
+    return a.debuff > b.debuff;
+}
+
+bool compareMultiMagic(const CGA_BattleUnit_t & a, const CGA_BattleUnit_t & b){
+    return a.multi_hp > b.multi_hp;
+}
+
+int CBattleTarget_Enemy::GetTarget(int unitpos, int flags, CGA_BattleContext_t &context)
 {
     QList<CGA_BattleUnit_t> newGroup;
 
     for(int i = 0;i < 20; ++i)
     {
         const CGA_BattleUnit_t &unit = context.m_UnitGroup[i];
-        if(unit.exist && unit.pos >= 0xA)
+        if(unit.exist && unit.pos >= 10){
+
+            //qDebug("flags %X isback %d unitpos %d", flags, unit.isback ? 1 : 0, unit.pos);
+            if((flags & FL_SKILL_FRONT_ONLY) && unit.isback && context.m_UnitGroup[unitpos].isback &&
+                    ( (unitpos == context.m_iPlayerPosition && (context.m_iWeaponAllowBit & 0x80) ) || (unitpos == context.m_iPetPosition) )
+                    )
+            {
+                //qDebug("u%d ignored", unit.pos);
+                continue;
+            }
+
             newGroup.append(unit);
+        }
     }
 
     if(!newGroup.size())
@@ -837,6 +2134,12 @@ int CBattleTarget_Enemy::GetTarget(CGA_BattleContext_t &context)
         break;
     case BattleTarget_Select_HighHP:
         std::sort(newGroup.begin(), newGroup.end(), compareHighHP );
+        break;
+    case BattleTarget_Select_LowHPPercent:
+        std::sort(newGroup.begin(), newGroup.end(), compareLowHPPercent );
+        break;
+    case BattleTarget_Select_HighHPPercent:
+        std::sort(newGroup.begin(), newGroup.end(), compareHighHPPercent );
         break;
     case BattleTarget_Select_LowLv:
         std::sort(newGroup.begin(), newGroup.end(), compareLowLv );
@@ -868,6 +2171,15 @@ int CBattleTarget_Enemy::GetTarget(CGA_BattleContext_t &context)
         else
             std::sort(newGroup.begin(), newGroup.end(), compareBack );
         break;
+    case BattleTarget_Select_LessUnitRow:
+        if(context.m_iBackCount > context.m_iFrontCount)
+            std::sort(newGroup.begin(), newGroup.end(), compareFront );
+        else
+            std::sort(newGroup.begin(), newGroup.end(), compareBack );
+        break;
+    case BattleTarget_Select_MultiMagic:
+        std::sort(newGroup.begin(), newGroup.end(), compareMultiMagic );
+        break;
     }
 
     return newGroup[0].pos;
@@ -885,7 +2197,7 @@ void CBattleTarget_Teammate::GetTargetName(QString &str)
     str += s_BattleTargetSelectString[m_Select];
 }
 
-int CBattleTarget_Teammate::GetTarget(CGA_BattleContext_t &context)
+int CBattleTarget_Teammate::GetTarget(int unitpos, int flags, CGA_BattleContext_t &context)
 {
     QList<CGA_BattleUnit_t> newGroup;
 
@@ -915,36 +2227,46 @@ int CBattleTarget_Teammate::GetTarget(CGA_BattleContext_t &context)
     case BattleTarget_Select_HighHP:
         std::sort(newGroup.begin(), newGroup.end(), compareHighHP );
         break;
+    case BattleTarget_Select_LowHPPercent:
+        std::sort(newGroup.begin(), newGroup.end(), compareLowHPPercent );
+        break;
+    case BattleTarget_Select_HighHPPercent:
+        std::sort(newGroup.begin(), newGroup.end(), compareHighHPPercent );
+        break;
     case BattleTarget_Select_LowLv:
         std::sort(newGroup.begin(), newGroup.end(), compareLowLv );
         break;
     case BattleTarget_Select_HighLv:
         std::sort(newGroup.begin(), newGroup.end(), compareHighLv );
         break;
-    case BattleTarget_Select_Goatfarm:
-        //TODO:
+    case BattleTarget_Select_SingleDebuff:
+        std::sort(newGroup.begin(), newGroup.end(), compareSingleDebuff );
         break;
-    case BattleTarget_Select_Boomerang:
-        //TODO:
+    case BattleTarget_Select_MultiDebuff:
+        std::sort(newGroup.begin(), newGroup.end(), compareMultiDebuff );
         break;
     }
 
     return newGroup[0].pos;
 }
 
-CBattleSetting::CBattleSetting(CBattleCondition *cond, CBattleAction *playerAction, CBattleTarget *playerTarget, CBattleAction *petAction, CBattleTarget *petTarget)
+CBattleSetting::CBattleSetting(CBattleCondition *cond, CBattleCondition *cond2, CBattleAction *playerAction, CBattleTarget *playerTarget, CBattleAction *petAction, CBattleTarget *petTarget)
 {
-    m_conditions = cond;
+    m_condition = cond;
+    m_condition2 = cond2;
     m_playerAction = playerAction;
     m_playerTarget = playerTarget;
     m_petAction = petAction;
     m_petTarget = petTarget;
+    m_defaultTarget = new CBattleTarget_Enemy(BattleTarget_Select_Random);
 }
 
 CBattleSetting::~CBattleSetting()
 {
-    if(m_conditions)
-        delete m_conditions;
+    if(m_condition)
+        delete m_condition;
+    if(m_condition2)
+        delete m_condition2;
     if(m_playerAction)
         delete m_playerAction;
     if(m_playerTarget)
@@ -953,42 +2275,78 @@ CBattleSetting::~CBattleSetting()
         delete m_petAction;
     if(m_petTarget)
         delete m_petTarget;
+    if(m_defaultTarget)
+        delete m_defaultTarget;
 }
 
 bool CBattleSetting::DoAction(CGA_BattleContext_t &context)
 {
-    if(!m_conditions->Check(context))
+    int conditionTarget = -1, condition2Target = -1;
+
+    qDebug("checking condition %d %d", GetConditionTypeId(), GetCondition2TypeId());
+
+    if(!m_condition && !m_condition2)
         return false;
+
+    if(m_condition && !m_condition->Check(context, conditionTarget))
+        return false;
+
+    qDebug("checking condition 1 pass");
+
+    if(m_condition2 && !m_condition2->Check(context, condition2Target))
+        return false;
+
+    qDebug("checking condition 2 pass");
+
+    if(conditionTarget != -1){
+        context.m_iConditionTarget = conditionTarget;
+        //qDebug("m_iConditionTarget = %d", conditionTarget);
+    } else if(condition2Target != -1){
+        context.m_iConditionTarget = condition2Target;
+        //qDebug("m_iConditionTarget = %d", condition2Target);
+    } else {
+        context.m_iConditionTarget = -1;
+    }
 
     bool bIsPet = (context.m_iPlayerStatus == 4 && context.m_iPetPosition >= 0 && context.m_iPetId != -1) ? true : false;
 
-    //qDebug("isPet=%d", bIsPet ? 1 : 0);
-
+    int flags = 0;
     int target = -1;
+    int defaultTarget = -1;
+    int defaultFlags = FL_SKILL_SINGLE | FL_SKILL_TO_PET | FL_SKILL_TO_TEAMMATE | FL_SKILL_TO_ENEMY | FL_SKILL_FRONT_ONLY | FL_SKILL_SELECT_TARGET;
     if(!bIsPet && m_playerAction)
     {
-        if(m_playerTarget)
-            target = m_playerTarget->GetTarget(context);
+        flags = m_playerAction->GetTargetFlags(context);
 
-        if(m_playerAction->DoAction(target, context))
+        if(m_playerTarget)
+            target = m_playerTarget->GetTarget(context.m_iPlayerPosition, flags, context);
+
+        if(m_defaultTarget)
+            defaultTarget = m_defaultTarget->GetTarget(context.m_iPlayerPosition, defaultFlags, context);
+
+        //qDebug("m_playerAction DoAction");
+
+        if(m_playerAction->DoAction(target, defaultTarget, context))
             return true;
+
+        qDebug("m_playerAction failed to DoAction");
     }
 
     if(bIsPet && m_petAction)
     {
-        if(m_petTarget)
-            target = m_petTarget->GetTarget(context);
+        flags = m_petAction->GetTargetFlags(context);
 
-        if(m_petAction->DoAction(target, context))
+        if(m_petTarget)
+            target = m_petTarget->GetTarget(context.m_iPetPosition, flags, context);
+
+        if(m_defaultTarget)
+            defaultTarget = m_defaultTarget->GetTarget(context.m_iPetPosition, flags, context);
+
+        if(m_petAction->DoAction(target, defaultTarget, context))
             return true;
     }
 
     return false;
-}
-
-void CBattleSetting::GetConditionName(QString &str)
-{
-    m_conditions->GetConditionName(str);
 }
 
 void CBattleSetting::GetPlayerActionName(QString &str)
@@ -1015,19 +2373,60 @@ void CBattleSetting::GetPetTargetName(QString &str)
         m_petTarget->GetTargetName(str);
 }
 
+void CBattleSetting::GetConditionName(QString &str)
+{
+    if(m_condition)
+        m_condition->GetConditionName(str);
+}
+
 int CBattleSetting::GetConditionTypeId()
 {
-    return m_conditions->GetConditionTypeId();
+    if (m_condition)
+        return m_condition->GetConditionTypeId();
+
+    return -1;
 }
 
 int CBattleSetting::GetConditionRelId()
 {
-    return m_conditions->GetConditionRelId();
+    if (m_condition)
+        return m_condition->GetConditionRelId();
+
+    return -1;
 }
 
 void CBattleSetting::GetConditionValue(QString &str)
 {
-    m_conditions->GetConditionValue(str);
+    if(m_condition)
+        m_condition->GetConditionValue(str);
+}
+
+void CBattleSetting::GetCondition2Name(QString &str)
+{
+    if(m_condition2)
+        m_condition2->GetConditionName(str);
+}
+
+int CBattleSetting::GetCondition2TypeId()
+{
+    if(m_condition2)
+        return m_condition2->GetConditionTypeId();
+
+    return -1;
+}
+
+int CBattleSetting::GetCondition2RelId()
+{
+    if(m_condition2)
+        return m_condition2->GetConditionRelId();
+
+    return -1;
+}
+
+void CBattleSetting::GetCondition2Value(QString &str)
+{
+    if(m_condition2)
+        m_condition2->GetConditionValue(str);
 }
 
 int CBattleSetting::GetPlayerActionTypeId()
@@ -1121,6 +2520,7 @@ CBattleWorker::CBattleWorker()
     m_bShowHPMP = false;
     m_iDelayFrom = 0;
     m_iDelayTo = 0;
+    m_LastWarpMap202 = 0;
 
     QTimer *timer = new QTimer(this);
     connect(timer, SIGNAL(timeout()), this, SLOT(OnLockCountdown()));
@@ -1131,14 +2531,39 @@ CBattleWorker::CBattleWorker()
 
 void CBattleWorker::OnLockCountdown()
 {
-    if(!m_bLockCountdown)
-        return;
-
+    int worldStatus = 0;
     int gameStatus = 0;
-    if(!g_CGAInterface->GetGameStatus(gameStatus) && gameStatus != 10)
-        return;
 
-    g_CGAInterface->SetBattleEndTick(1000*30);
+    g_CGAInterface->BattleSetHighSpeedEnabled(m_bHighSpeed);
+
+    if(g_CGAInterface->GetGameStatus(gameStatus) && gameStatus == 202)
+    {
+        auto timestamp = QDateTime::currentDateTime().toTime_t();
+        if(m_LastWarpMap202 == 0)
+        {
+            m_LastWarpMap202 = timestamp;
+        }
+        else if(timestamp - m_LastWarpMap202 >= 5)
+        {
+            g_CGAInterface->FixMapWarpStuck(0);
+            m_LastWarpMap202 = timestamp + 8;
+            qDebug("fix warp");
+        }
+    }
+    else {
+        m_LastWarpMap202 = 0;
+    }
+
+    if (g_CGAInterface->GetWorldStatus(worldStatus) && worldStatus != 10)
+	{
+		m_BattleContext.m_iLastRound = -1;
+		return;
+	}
+
+    if(m_bLockCountdown)
+    {
+        g_CGAInterface->SetBattleEndTick(1000*30);
+    }
 }
 
 #if 0
@@ -1169,8 +2594,11 @@ void CBattleWorker::GetBattleUnits()
 
     CGA_BattleUnitGroup_t &group = m_BattleContext.m_UnitGroup;
 
-    for(int i = 0;i < 20; ++i)
+    for(int i = 0;i < 20; ++i){
         group[i].exist = false;
+        group[i].isback = false;
+        group[i].debuff = 0;
+    }
 
     CGA::cga_battle_units_t us;
     if(g_CGAInterface->GetBattleUnits(us))
@@ -1178,14 +2606,23 @@ void CBattleWorker::GetBattleUnits()
         for(size_t i = 0;i < us.size(); ++i)
         {
             const CGA::cga_battle_unit_t &u = us.at(i);
+
             group[u.pos].exist = true;
             group[u.pos].name = QString::fromStdString(u.name);
-            group[u.pos].curhp =u.curhp;
-            group[u.pos].maxhp =u.maxhp;
-            group[u.pos].curmp =u.curmp;
-            group[u.pos].maxmp =u.maxmp;
-            group[u.pos].level =u.level;
+            group[u.pos].curhp = u.curhp;
+            group[u.pos].maxhp = u.maxhp;
+            group[u.pos].curmp = u.curmp;
+            group[u.pos].maxmp = u.maxmp;
+            group[u.pos].level = u.level;
+            group[u.pos].flags = u.flags;
             group[u.pos].pos = u.pos;
+
+            group[u.pos].debuff = 0;
+            group[u.pos].multi_hp = 0;
+            group[u.pos].multi_maxhp = 0;
+
+            //if(u.flags != 0)
+            //    qDebug("pos %d flags %X", u.pos, u.flags);
 
             if(u.pos >= 0xF && u.pos <= 0x13)
                 m_BattleContext.m_iFrontCount ++;
@@ -1199,6 +2636,408 @@ void CBattleWorker::GetBattleUnits()
 
             if(u.pos == GetPetPosition(m_BattleContext.m_iPlayerPosition))
                 m_BattleContext.m_iPetPosition = u.pos;
+        }
+        for(size_t i = 0;i < 20; ++i)
+        {
+            if(group[i].exist)
+            {
+                if(i >= 0 && i <= 4 && group[i+5].exist){
+                   group[i].isback = true;
+                }
+                else if(i >= 10 && i <= 14 && group[5+i].exist){
+                   group[i].isback = true;
+                }
+                if((group[i].flags & FL_DEBUFF_ANY))
+                    group[i].debuff ++;
+
+                group[i].multi_hp += group[i].curhp;
+                group[i].multi_maxhp += group[i].maxhp;
+
+                if(i == 0){
+                    if(group[1].exist && (group[1].flags & FL_DEBUFF_ANY))
+                        group[i].debuff ++;
+                    if(group[2].exist && (group[2].flags & FL_DEBUFF_ANY))
+                        group[i].debuff ++;
+                    if(group[5].exist && (group[5].flags & FL_DEBUFF_ANY))
+                        group[i].debuff ++;
+
+                    if(group[1].exist)
+                        group[i].multi_hp += group[1].curhp;
+                    if(group[2].exist)
+                        group[i].multi_hp += group[2].curhp;
+                    if(group[5].exist)
+                        group[i].multi_hp += group[5].curhp;
+
+                    if(group[1].exist)
+                        group[i].multi_maxhp += group[1].maxhp;
+                    if(group[2].exist)
+                        group[i].multi_maxhp += group[2].maxhp;
+                    if(group[5].exist)
+                        group[i].multi_maxhp += group[5].maxhp;
+                }
+                else if(i == 1){
+                    if(group[0].exist && (group[0].flags & FL_DEBUFF_ANY))
+                        group[i].debuff ++;
+                    if(group[3].exist && (group[3].flags & FL_DEBUFF_ANY))
+                        group[i].debuff ++;
+                    if(group[6].exist && (group[6].flags & FL_DEBUFF_ANY))
+                        group[i].debuff ++;
+
+                    if(group[0].exist)
+                        group[i].multi_hp += group[0].curhp;
+                    if(group[3].exist)
+                        group[i].multi_hp += group[3].curhp;
+                    if(group[6].exist)
+                        group[i].multi_hp += group[6].curhp;
+
+                    if(group[0].exist)
+                        group[i].multi_maxhp += group[0].maxhp;
+                    if(group[3].exist)
+                        group[i].multi_maxhp += group[3].maxhp;
+                    if(group[6].exist)
+                        group[i].multi_maxhp += group[6].maxhp;
+                }
+                else if(i == 2){
+                    if(group[0].exist && (group[0].flags & FL_DEBUFF_ANY))
+                        group[i].debuff ++;
+                    if(group[4].exist && (group[4].flags & FL_DEBUFF_ANY))
+                        group[i].debuff ++;
+                    if(group[7].exist && (group[7].flags & FL_DEBUFF_ANY))
+                        group[i].debuff ++;
+
+                    if(group[0].exist)
+                        group[i].multi_hp += group[0].curhp;
+                    if(group[4].exist)
+                        group[i].multi_hp += group[4].curhp;
+                    if(group[7].exist)
+                        group[i].multi_hp += group[7].curhp;
+
+                    if(group[0].exist)
+                        group[i].multi_maxhp += group[0].maxhp;
+                    if(group[4].exist)
+                        group[i].multi_maxhp += group[4].maxhp;
+                    if(group[7].exist)
+                        group[i].multi_maxhp += group[7].maxhp;
+                }
+                else if(i == 3){
+                    if(group[1].exist && (group[1].flags & FL_DEBUFF_ANY))
+                        group[i].debuff ++;
+                    if(group[8].exist && (group[8].flags & FL_DEBUFF_ANY))
+                        group[i].debuff ++;
+
+                    if(group[1].exist)
+                        group[i].multi_hp += group[1].curhp;
+                    if(group[8].exist)
+                        group[i].multi_hp += group[8].curhp;
+
+                    if(group[1].exist)
+                        group[i].multi_maxhp += group[1].maxhp;
+                    if(group[8].exist)
+                        group[i].multi_maxhp += group[8].maxhp;
+                }
+                else if(i == 4){
+                    if(group[2].exist && (group[2].flags & FL_DEBUFF_ANY))
+                        group[i].debuff ++;
+                    if(group[9].exist && (group[9].flags & FL_DEBUFF_ANY))
+                        group[i].debuff ++;
+
+                    if(group[2].exist)
+                        group[i].multi_hp += group[2].curhp;
+                    if(group[9].exist)
+                        group[i].multi_hp += group[9].curhp;
+
+                    if(group[2].exist)
+                        group[i].multi_maxhp += group[2].maxhp;
+                    if(group[9].exist)
+                        group[i].multi_maxhp += group[9].maxhp;
+                }
+                else if(i == 5){
+                    if(group[0].exist && (group[0].flags & FL_DEBUFF_ANY))
+                        group[i].debuff ++;
+                    if(group[6].exist && (group[6].flags & FL_DEBUFF_ANY))
+                        group[i].debuff ++;
+                    if(group[7].exist && (group[7].flags & FL_DEBUFF_ANY))
+                        group[i].debuff ++;
+
+                    if(group[0].exist)
+                        group[i].multi_hp += group[0].curhp;
+                    if(group[6].exist)
+                        group[i].multi_hp += group[6].curhp;
+                    if(group[7].exist)
+                        group[i].multi_hp += group[7].curhp;
+
+                    if(group[0].exist)
+                        group[i].multi_maxhp += group[0].maxhp;
+                    if(group[6].exist)
+                        group[i].multi_maxhp += group[6].maxhp;
+                    if(group[7].exist)
+                        group[i].multi_maxhp += group[7].maxhp;
+                }
+                else if(i == 6){
+                    if(group[1].exist && (group[1].flags & FL_DEBUFF_ANY))
+                        group[i].debuff ++;
+                    if(group[5].exist && (group[5].flags & FL_DEBUFF_ANY))
+                        group[i].debuff ++;
+                    if(group[8].exist && (group[8].flags & FL_DEBUFF_ANY))
+                        group[i].debuff ++;
+
+                    if(group[1].exist)
+                        group[i].multi_hp += group[1].curhp;
+                    if(group[5].exist)
+                        group[i].multi_hp += group[5].curhp;
+                    if(group[8].exist)
+                        group[i].multi_hp += group[8].curhp;
+
+                    if(group[1].exist)
+                        group[i].multi_maxhp += group[1].maxhp;
+                    if(group[5].exist)
+                        group[i].multi_maxhp += group[5].maxhp;
+                    if(group[8].exist)
+                        group[i].multi_maxhp += group[8].maxhp;
+                }
+                else if(i == 7){
+                    if(group[2].exist && (group[2].flags & FL_DEBUFF_ANY))
+                        group[i].debuff ++;
+                    if(group[5].exist && (group[5].flags & FL_DEBUFF_ANY))
+                        group[i].debuff ++;
+                    if(group[9].exist && (group[9].flags & FL_DEBUFF_ANY))
+                        group[i].debuff ++;
+
+                    if(group[2].exist)
+                        group[i].multi_hp += group[2].curhp;
+                    if(group[5].exist)
+                        group[i].multi_hp += group[5].curhp;
+                    if(group[9].exist)
+                        group[i].multi_hp += group[9].curhp;
+
+                    if(group[2].exist)
+                        group[i].multi_maxhp += group[2].maxhp;
+                    if(group[5].exist)
+                        group[i].multi_maxhp += group[5].maxhp;
+                    if(group[9].exist)
+                        group[i].multi_maxhp += group[9].maxhp;
+                }
+                else if(i == 8){
+                    if(group[6].exist && (group[6].flags & FL_DEBUFF_ANY))
+                        group[i].debuff ++;
+                    if(group[3].exist && (group[3].flags & FL_DEBUFF_ANY))
+                        group[i].debuff ++;
+
+                    if(group[6].exist)
+                        group[i].multi_hp += group[6].curhp;
+                    if(group[3].exist)
+                        group[i].multi_hp += group[3].curhp;
+
+                    if(group[6].exist)
+                        group[i].multi_maxhp += group[6].maxhp;
+                    if(group[3].exist)
+                        group[i].multi_maxhp += group[3].maxhp;
+                }
+                else if(i == 9){
+                    if(group[4].exist && (group[4].flags & FL_DEBUFF_ANY))
+                        group[i].debuff ++;
+                    if(group[7].exist && (group[7].flags & FL_DEBUFF_ANY))
+                        group[i].debuff ++;
+
+                    if(group[4].exist)
+                        group[i].multi_hp += group[4].curhp;
+                    if(group[7].exist)
+                        group[i].multi_hp += group[7].curhp;
+
+                    if(group[4].exist)
+                        group[i].multi_maxhp += group[4].maxhp;
+                    if(group[7].exist)
+                        group[i].multi_maxhp += group[7].maxhp;
+                } else if(i == 0xA){
+                    if(group[0xB].exist && (group[0xB].flags & FL_DEBUFF_ANY))
+                        group[i].debuff ++;
+                    if(group[0xC].exist && (group[0xC].flags & FL_DEBUFF_ANY))
+                        group[i].debuff ++;
+                    if(group[0xF].exist && (group[0xF].flags & FL_DEBUFF_ANY))
+                        group[i].debuff ++;
+
+                    if(group[0xB].exist)
+                        group[i].multi_hp += group[0xB].curhp;
+                    if(group[0xC].exist)
+                        group[i].multi_hp += group[0xC].curhp;
+                    if(group[0xF].exist)
+                        group[i].multi_hp += group[0xF].curhp;
+
+                    if(group[0xB].exist)
+                        group[i].multi_maxhp += group[0xB].maxhp;
+                    if(group[0xC].exist)
+                        group[i].multi_maxhp += group[0xC].maxhp;
+                    if(group[0xF].exist)
+                        group[i].multi_maxhp += group[0xF].maxhp;
+                } else if(i == 0xB){
+                    if(group[0x10].exist && (group[0x10].flags & FL_DEBUFF_ANY))
+                        group[i].debuff ++;
+                    if(group[0xA].exist && (group[0xA].flags & FL_DEBUFF_ANY))
+                        group[i].debuff ++;
+                    if(group[0xD].exist && (group[0xD].flags & FL_DEBUFF_ANY))
+                        group[i].debuff ++;
+
+                    if(group[0x10].exist)
+                        group[i].multi_hp += group[0x10].curhp;
+                    if(group[0xA].exist)
+                        group[i].multi_hp += group[0xA].curhp;
+                    if(group[0xD].exist)
+                        group[i].multi_hp += group[0xD].curhp;
+
+                    if(group[0x10].exist)
+                        group[i].multi_maxhp += group[0x10].maxhp;
+                    if(group[0xA].exist)
+                        group[i].multi_maxhp += group[0xA].maxhp;
+                    if(group[0xD].exist)
+                        group[i].multi_maxhp += group[0xD].maxhp;
+                } else if(i == 0xC){
+                    if(group[0x11].exist && (group[0x11].flags & FL_DEBUFF_ANY))
+                        group[i].debuff ++;
+                    if(group[0xA].exist && (group[0xA].flags & FL_DEBUFF_ANY))
+                        group[i].debuff ++;
+                    if(group[0xE].exist && (group[0xE].flags & FL_DEBUFF_ANY))
+                        group[i].debuff ++;
+
+                    if(group[0x11].exist)
+                        group[i].multi_hp += group[0x11].curhp;
+                    if(group[0xA].exist)
+                        group[i].multi_hp += group[0xA].curhp;
+                    if(group[0xE].exist)
+                        group[i].multi_hp += group[0xE].curhp;
+
+                    if(group[0x11].exist)
+                        group[i].multi_maxhp += group[0x11].maxhp;
+                    if(group[0xA].exist)
+                        group[i].multi_maxhp += group[0xA].maxhp;
+                    if(group[0xE].exist)
+                        group[i].multi_maxhp += group[0xE].maxhp;
+                }else if(i == 0xD){
+                    if(group[0x12].exist && (group[0x12].flags & FL_DEBUFF_ANY))
+                        group[i].debuff ++;
+                    if(group[0xB].exist && (group[0xB].flags & FL_DEBUFF_ANY))
+                        group[i].debuff ++;
+
+                    if(group[0x12].exist)
+                        group[i].multi_hp += group[0x12].curhp;
+                    if(group[0xB].exist)
+                        group[i].multi_hp += group[0xB].curhp;
+
+                    if(group[0x12].exist)
+                        group[i].multi_maxhp += group[0x12].maxhp;
+                    if(group[0xB].exist)
+                        group[i].multi_maxhp += group[0xB].maxhp;
+                }else if(i == 0xE){
+                    if(group[0x13].exist && (group[0x13].flags & FL_DEBUFF_ANY))
+                        group[i].debuff ++;
+                    if(group[0xC].exist && (group[0xC].flags & FL_DEBUFF_ANY))
+                        group[i].debuff ++;
+
+                    if(group[0x13].exist)
+                        group[i].multi_hp += group[0x13].curhp;
+                    if(group[0xC].exist)
+                        group[i].multi_hp += group[0xC].curhp;
+
+                    if(group[0x13].exist)
+                        group[i].multi_maxhp += group[0x13].maxhp;
+                    if(group[0xC].exist)
+                        group[i].multi_maxhp += group[0xC].maxhp;
+                }else if(i == 0xF){
+                    if(group[0x10].exist && (group[0x10].flags & FL_DEBUFF_ANY))
+                        group[i].debuff ++;
+                    if(group[0x11].exist && (group[0x11].flags & FL_DEBUFF_ANY))
+                        group[i].debuff ++;
+                    if(group[0xA].exist && (group[0xA].flags & FL_DEBUFF_ANY))
+                        group[i].debuff ++;
+
+                    if(group[0x10].exist)
+                        group[i].multi_hp += group[0x10].curhp;
+                    if(group[0x11].exist)
+                        group[i].multi_hp += group[0x11].curhp;
+                    if(group[0xA].exist)
+                        group[i].multi_hp += group[0xA].curhp;
+
+                    if(group[0x10].exist)
+                        group[i].multi_maxhp += group[0x10].maxhp;
+                    if(group[0x11].exist)
+                        group[i].multi_maxhp += group[0x11].maxhp;
+                    if(group[0xA].exist)
+                        group[i].multi_maxhp += group[0xA].maxhp;
+                }else if(i == 0x10){
+                    if(group[0xB].exist && (group[0xB].flags & FL_DEBUFF_ANY))
+                        group[i].debuff ++;
+                    if(group[0xF].exist && (group[0xF].flags & FL_DEBUFF_ANY))
+                        group[i].debuff ++;
+                    if(group[0x12].exist && (group[0x12].flags & FL_DEBUFF_ANY))
+                        group[i].debuff ++;
+
+                    if(group[0xB].exist)
+                        group[i].multi_hp += group[0xB].curhp;
+                    if(group[0xF].exist)
+                        group[i].multi_hp += group[0xF].curhp;
+                    if(group[0x12].exist)
+                        group[i].multi_hp += group[0x12].curhp;
+
+                    if(group[0xB].exist)
+                        group[i].multi_maxhp += group[0xB].maxhp;
+                    if(group[0xF].exist)
+                        group[i].multi_maxhp += group[0xF].maxhp;
+                    if(group[0x12].exist)
+                        group[i].multi_maxhp += group[0x12].maxhp;
+                }else if(i == 0x11){
+                    if(group[0xC].exist && (group[0xC].flags & FL_DEBUFF_ANY))
+                        group[i].debuff ++;
+                    if(group[0xF].exist && (group[0xF].flags & FL_DEBUFF_ANY))
+                        group[i].debuff ++;
+                    if(group[0x13].exist && (group[0x13].flags & FL_DEBUFF_ANY))
+                        group[i].debuff ++;
+
+                    if(group[0xC].exist)
+                        group[i].multi_hp += group[0xC].curhp;
+                    if(group[0xF].exist)
+                        group[i].multi_hp += group[0xF].curhp;
+                    if(group[0x13].exist)
+                        group[i].multi_hp += group[0x13].curhp;
+
+                    if(group[0xC].exist)
+                        group[i].multi_maxhp += group[0xC].maxhp;
+                    if(group[0xF].exist)
+                        group[i].multi_maxhp += group[0xF].maxhp;
+                    if(group[0x13].exist)
+                        group[i].multi_maxhp += group[0x13].maxhp;
+                }else if(i == 0x12){
+                    if(group[0x10].exist && (group[0x10].flags & FL_DEBUFF_ANY))
+                        group[i].debuff ++;
+                    if(group[0xD].exist && (group[0xD].flags & FL_DEBUFF_ANY))
+                        group[i].debuff ++;
+
+                    if(group[0x10].exist)
+                        group[i].multi_hp += group[0x10].curhp;
+                    if(group[0xD].exist)
+                        group[i].multi_hp += group[0xD].curhp;
+
+                    if(group[0x10].exist)
+                        group[i].multi_maxhp += group[0x10].maxhp;
+                    if(group[0xD].exist)
+                        group[i].multi_maxhp += group[0xD].maxhp;
+                }else if(i == 0x13){
+                    if(group[0x11].exist && (group[0x11].flags & FL_DEBUFF_ANY))
+                        group[i].debuff ++;
+                    if(group[0xE].exist && (group[0xE].flags & FL_DEBUFF_ANY))
+                        group[i].debuff ++;
+
+                    if(group[0x11].exist)
+                        group[i].multi_hp += group[0x11].curhp;
+                    if(group[0xE].exist)
+                        group[i].multi_hp += group[0xE].curhp;
+
+                    if(group[0x11].exist)
+                        group[i].multi_maxhp += group[0x11].maxhp;
+                    if(group[0xE].exist)
+                        group[i].multi_maxhp += group[0xE].maxhp;
+                }
+
+                //qDebug("pos %d debuff %X", i, group[i].debuff);
+            }
         }
     }
 }
@@ -1248,12 +3087,28 @@ void CBattleWorker::OnNotifyBattleAction(int flags)
     if(!g_CGAInterface->IsConnected() || !g_CGAInterface->IsInGame(ingame) || !ingame)
         return;
 
+    if(flags & FL_BATTLE_ACTION_END)
+    {
+        m_BattleContext.m_iLastRound = -1;
+        return;
+    }
+
     int gameStatus = 0;
     if(!g_CGAInterface->GetGameStatus(gameStatus) && gameStatus != 10)
         return;
 
-    if(!g_CGAInterface->GetBattlePlayerStatus(m_BattleContext.m_iPlayerStatus) || !m_BattleContext.m_iPlayerStatus)
+    CGA::cga_battle_context_t ctx;
+
+    if(!g_CGAInterface->GetBattleContext(ctx))
         return;
+
+    m_BattleContext.m_iPlayerPosition = ctx.player_pos;
+    m_BattleContext.m_iPlayerStatus = ctx.player_status;
+    m_BattleContext.m_iRoundCount = ctx.round_count;
+    m_BattleContext.m_iPetId = ctx.petid;
+    m_BattleContext.m_iWeaponAllowBit = ctx.weapon_allowbit;
+    m_BattleContext.m_iSkillAllowBit = ctx.skill_allowbit;
+    m_BattleContext.m_iPetSkillAllowBit = ctx.petskill_allowbit;
 
     if(m_BattleContext.m_iPlayerStatus != 1 && m_BattleContext.m_iPlayerStatus != 4)
         return;
@@ -1261,11 +3116,6 @@ void CBattleWorker::OnNotifyBattleAction(int flags)
     m_BattleContext.m_bIsPlayer = (flags & FL_BATTLE_ACTION_ISPLAYER) ? true : false;
     m_BattleContext.m_bIsDouble = (flags & FL_BATTLE_ACTION_ISDOUBLE) ? true : false;
     m_BattleContext.m_bIsSkillPerformed = (flags & FL_BATTLE_ACTION_ISSKILLPERFORMED) ? true : false;
-
-    g_CGAInterface->BattleSetHighSpeedEnabled(m_bHighSpeed);
-    g_CGAInterface->GetBattleRoundCount(m_BattleContext.m_iRoundCount);
-    g_CGAInterface->GetBattlePlayerPosition(m_BattleContext.m_iPlayerPosition);
-    g_CGAInterface->GetBattlePetId(m_BattleContext.m_iPetId);
 
     //qDebug("petid = %d m_bIsSkillPerformed = %d\n", m_BattleContext.m_iPetId, m_BattleContext.m_bIsSkillPerformed ? 1 : 0);
 
@@ -1281,8 +3131,8 @@ void CBattleWorker::OnNotifyBattleAction(int flags)
         if(((m_BattleContext.m_iRoundCount == 0 && !m_bFirstRoundNoDelay) || m_BattleContext.m_iRoundCount > 0) && m_BattleContext.m_iLastRound != m_BattleContext.m_iRoundCount)
         {
             int randDelay = qrand() * (m_iDelayTo - m_iDelayFrom) / RAND_MAX + m_iDelayFrom;
-            if(randDelay < 100)
-                randDelay = 100;
+            if(randDelay < 1)
+                randDelay = 1;
             if(randDelay > 10000)
                 randDelay = 10000;
             QTimer::singleShot( randDelay, this, SLOT(OnPerformanceBattle()) );
@@ -1292,10 +3142,9 @@ void CBattleWorker::OnNotifyBattleAction(int flags)
             OnPerformanceBattle();
         }
 
-        if(m_BattleContext.m_iLastRound != m_BattleContext.m_iRoundCount){
-            m_BattleContext.m_bIsSkillPerformed = false;
-            m_BattleContext.m_iLastRound = m_BattleContext.m_iRoundCount;
-        }
+        qDebug("m_iRoundCount %d m_iLastRound %d", m_BattleContext.m_iRoundCount, m_BattleContext.m_iLastRound);
+
+		m_BattleContext.m_iLastRound = m_BattleContext.m_iRoundCount;
     }
 }
 
@@ -1312,8 +3161,6 @@ void CBattleWorker::OnSetAutoBattle(int state)
 void CBattleWorker::OnSetHighSpeed(int state)
 {
     m_bHighSpeed = state ? true : false;
-
-    g_CGAInterface->BattleSetHighSpeedEnabled(m_bHighSpeed);
 }
 
 void CBattleWorker::OnSetFRND(int state)

@@ -6,6 +6,7 @@
 #include <QHash>
 #include <QStandardItemModel>
 #include "itemdropper.h"
+#include "itemtweaker.h"
 
 namespace Ui {
 class ItemForm;
@@ -29,12 +30,16 @@ public slots:
     void OnCloseWindow();
 
 private slots:
-    void on_lineEdit_drop_returnPressed();
-    void OnItemDropperDeletePressed(int row);
     void on_tableView_customContextMenuRequested(const QPoint &pos);
     void OnDropItemAction();
     void OnAddAutoDropAction();
+    void OnAddAutoTweakAction();
     void AddItemDropper(const QString &str);
+    void AddItemTweaker(const QString &str);
+    void on_lineEdit_drop_returnPressed();
+    void on_lineEdit_tweak_returnPressed();
+    void OnItemDropperDeletePressed(int row);
+    void OnItemTweakerDeletePressed(int row);
 
 private:
     void GetRowColumnFromItemPos(int itempos, int &row, int &col);
@@ -47,10 +52,13 @@ private:
     QHash<int, QString> m_IdMap;
 public:
     CItemDropperModel *m_model_Drop;
+    CItemTweakerModel *m_model_Tweaker;
 public slots:
+    bool ParseItemTweaker(const QJsonValue &val);
     bool ParseItemDropper(const QJsonValue &val);
     bool ParseItemIdMap(const QJsonValue &val);
     void SaveItemDropper(QJsonArray &arr);
+    void SaveItemTweaker(QJsonArray &arr);
     void SaveItemIdMap(QJsonObject &obj);
 };
 

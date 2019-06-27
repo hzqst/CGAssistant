@@ -22,6 +22,8 @@ private slots:
     void on_pushButton_attach_clicked();
     void on_checkBox_syncwnd_stateChanged(int arg1);
 
+    void on_comboBox_size_currentIndexChanged(int index);
+
 public slots:
     void OnCloseWindow();
     void OnNotifyAttachProcessOk(quint32 ProcessId, quint32 port, quint32 hwnd);

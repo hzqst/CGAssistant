@@ -61,6 +61,7 @@ typedef struct CGA_PetInfo_s
         maxxp = 0;
         flags = 0;
         battle_flags = 0;
+        loyality = 0;
         default_battle = false;
     }
 
@@ -70,6 +71,7 @@ typedef struct CGA_PetInfo_s
     int mp, maxmp;
     int xp, maxxp;
     int flags, battle_flags;
+    int loyality;
     bool default_battle;
     QString name, realname, showname;
     CGA_PetSkillList_t skills;
@@ -82,8 +84,10 @@ typedef struct CGA_SubSkill_s
         level = 0;
         cost = 0;
         flags = 0;
+        available = false;
     }
     int level, cost, flags;
+    bool available;
     QString name;
 }CGA_SubSkill_t;
 
@@ -135,8 +139,70 @@ public:
     virtual void GetName(QString &str) = 0;
 };
 
+class CItemTweaker
+{
+public:
+    virtual bool ShouldTweak(const CGA_ItemInfo_t &item) = 0;
+    virtual void GetName(QString &str) = 0;
+    virtual int GetMaxCount() { return m_maxcount; }
+protected:
+    int m_maxcount;
+};
+
 typedef QSharedPointer<CItemDropper> CItemDropperPtr;
 typedef QList<CItemDropperPtr> CItemDropperList;
+
+typedef QSharedPointer<CItemTweaker> CItemTweakerPtr;
+typedef QList<CItemTweakerPtr> CItemTweakerList;
+
+typedef struct CGA_MapCellData_s
+{
+    CGA_MapCellData_s()
+    {
+        xbottom = 0;
+        ybottom = 0;
+        xsize = 0;
+        ysize = 0;
+    }
+    int xbottom;
+    int ybottom;
+    int xsize;
+    int ysize;
+    std::vector<short> cells;
+}CGA_MapCellData_t;
+
+typedef struct CGA_MapUnit_s
+{
+    CGA_MapUnit_s()
+    {
+        valid = 0;
+        type = 0;
+        unit_id = 0;
+        model_id = 0;
+        xpos = 0;
+        ypos = 0;
+        item_count = 0;
+        injury = 0;
+        level = 0;
+        flags = 0;
+    }
+    int valid;
+    int type;
+    int unit_id;
+    int model_id;
+    int xpos;
+    int ypos;
+    int item_count;
+    int injury;
+    int level;
+    int flags;
+    QString unit_name;
+    QString nick_name;
+    QString title_name;
+    QString item_name;
+}CGA_MapUnit_t;
+
+typedef QVector<CGA_MapUnit_t> CGA_MapUnits_t;
 
 typedef struct CGA_NPCDialog_s
 {
@@ -173,7 +239,9 @@ public slots:
     void OnQueueGetItemInfo();
     void OnQueueGetMapInfo();
     void OnQueueFreqMove();
+    void OnQueueDownloadMap();
     void OnSyncItemDroppers(CItemDropperList list);
+    void OnSyncItemTweakers(CItemTweakerList list);
     void OnQueueDropItem(int itempos, int itemid);
     void OnNotifyAttachProcessOk(quint32 ProcessId, quint32 port, quint32 hWnd);
     void OnNotifyNPCDialog(QSharedPointer<CGA_NPCDialog_t> dlg);
@@ -182,16 +250,21 @@ public slots:
     void OnSetWorkDelay(int value);
     void OnSetFreqMove(int state);
     void OnSetWorkAcc(int value);
+    void OnSetNoSwitchAnim(int state);
+    void OnDownloadMap(int xsize, int ysize);
+    void OnTabChanged(int tabindex);
 signals:
     void NotifyGetInfoFailed(bool bIsConnected, bool bIsInGame);
     void NotifyGetPlayerInfo(QSharedPointer<CGA_PlayerInfo_t> player);
     void NotifyGetPetsInfo(QSharedPointer<CGA_PetList_t> pets);
     void NotifyGetSkillsInfo(QSharedPointer<CGA_SkillList_t> skills);
     void NotifyGetItemsInfo(QSharedPointer<CGA_ItemList_t> items);
-    void NotifyGetMapInfo(QString name, int x, int y, int gameStatus, int battleStatus);
+    void NotifyGetMapCellInfo(QSharedPointer<CGA_MapCellData_t> coll, QSharedPointer<CGA_MapCellData_t> obj, QSharedPointer<CGA_MapUnits_t> units);
+    void NotifyGetMapInfo(QString name, int index1, int index2, int index3, int x, int y, int gameStatus, int battleStatus);
     void NotifyNPCDialog(QSharedPointer<CGA_NPCDialog_t> dlg);
 private:
     CItemDropperList m_ItemDroppers;
+    CItemTweakerList m_ItemTweakers;
     QString m_NurseMessage;
     int m_NurseNPCId;
     bool m_bFreqMove;
@@ -201,6 +274,15 @@ private:
     int m_MoveSpeed;
     int m_WorkDelay;
     int m_WorkAcc;
+    bool m_bNoSwitchAnim;
+    bool m_bHighSpeedBattle;
+
+    int m_DownloadMapX;
+    int m_DownloadMapY;
+    int m_DownloadMapXSize;
+    int m_DownloadMapYSize;
+    bool m_IsDownloadingMap;
+    int m_tabindex;
 };
 
 #endif // PLAYER_H

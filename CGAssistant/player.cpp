@@ -7,7 +7,10 @@ Q_DECLARE_METATYPE(QSharedPointer<CGA_PetList_t>)
 Q_DECLARE_METATYPE(QSharedPointer<CGA_SkillList_t>)
 Q_DECLARE_METATYPE(QSharedPointer<CGA_ItemList_t>)
 Q_DECLARE_METATYPE(QSharedPointer<CGA_NPCDialog_t>)
+Q_DECLARE_METATYPE(QSharedPointer<CGA_MapCellData_t>)
+Q_DECLARE_METATYPE(QSharedPointer<CGA_MapUnits_t>)
 Q_DECLARE_METATYPE(CItemDropperList)
+Q_DECLARE_METATYPE(CItemTweakerList)
 
 CPlayerWorker::CPlayerWorker(QObject *parent) : QObject(parent)
 {
@@ -16,7 +19,10 @@ CPlayerWorker::CPlayerWorker(QObject *parent) : QObject(parent)
     qRegisterMetaType<QSharedPointer<CGA_SkillList_t>>("QSharedPointer<CGA_SkillList_t>");
     qRegisterMetaType<QSharedPointer<CGA_ItemList_t>>("QSharedPointer<CGA_ItemList_t>");
     qRegisterMetaType<QSharedPointer<CGA_NPCDialog_t>>("QSharedPointer<CGA_NPCDialog_t>");
+    qRegisterMetaType<QSharedPointer<CGA_MapCellData_t>>("QSharedPointer<CGA_MapCellData_t>");
+    qRegisterMetaType<QSharedPointer<CGA_MapUnits_t>>("QSharedPointer<CGA_MapUnits_t>");
     qRegisterMetaType<CItemDropperList>("CItemDropperList");
+    qRegisterMetaType<CItemTweakerList>("CItemTweakerList");
 
     QTimer *timer = new QTimer(this);
     connect(timer, SIGNAL(timeout()), this, SLOT(OnQueueGetPlayerInfo()));
@@ -34,12 +40,19 @@ CPlayerWorker::CPlayerWorker(QObject *parent) : QObject(parent)
     connect(timer4, SIGNAL(timeout()), this, SLOT(OnQueueFreqMove()));
     timer4->start(100);
 
+    QTimer *timer5 = new QTimer(this);
+    connect(timer5, SIGNAL(timeout()), this, SLOT(OnQueueDownloadMap()));
+    timer5->start(500);
+
     m_bFreqMove = false;
     m_bAutoSupply = false;
     m_NurseNPCId = 0;
     m_MoveSpeed = 100;
     m_WorkAcc = 100;
     m_WorkDelay = 6500;
+    m_bNoSwitchAnim = false;
+    m_IsDownloadingMap = false;
+    m_tabindex = 0;
 
     const ushort nurse_message[] = {35201,22238,22797,21527,65311,0};
 
@@ -51,6 +64,12 @@ CPlayerWorker::CPlayerWorker(QObject *parent) : QObject(parent)
 void CPlayerWorker::OnSyncItemDroppers(CItemDropperList list)
 {
     m_ItemDroppers = list;
+}
+
+void CPlayerWorker::OnSyncItemTweakers(CItemTweakerList list)
+{
+    //qDebug("tweaker");
+    m_ItemTweakers = list;
 }
 
 void CPlayerWorker::OnQueueDropItem(int itempos, int itemid)
@@ -80,6 +99,56 @@ void CPlayerWorker::OnTweakDropItem(QSharedPointer<CGA_ItemList_t> items)
                     return;
             }
         }
+        for(int j = 0; j < m_ItemTweakers.size(); ++j)
+        {
+            if(m_ItemTweakers[j]->ShouldTweak(item))
+            {
+                 for(int k = 0; k < items->size(); ++k)
+                {
+                    if(k != i && items->at(k).itemid == item.itemid && items->at(k).count < m_ItemTweakers[j]->GetMaxCount())
+                    {
+                        //tweak it now
+                        //qDebug("tweak now %d %d", items->at(k).pos, item.pos);
+                        bool result = false;
+                        if(g_CGAInterface->MoveItem(items->at(k).pos, item.pos, -1, result))//std::min(m_ItemTweakers[j]->GetMaxCount() - item.count, items->at(k).count)
+                            return;
+                    }
+                }
+            }
+        }
+    }
+}
+
+void CPlayerWorker::OnDownloadMap(int xsize, int ysize)
+{
+    m_DownloadMapX = 0;
+    m_DownloadMapY = 0;
+    m_DownloadMapXSize = xsize;
+    m_DownloadMapYSize = ysize;
+    m_IsDownloadingMap = true;
+}
+
+void CPlayerWorker::OnQueueDownloadMap()
+{
+    if(!m_IsDownloadingMap)
+        return;
+
+    int ingame = 0;
+    bool connected = g_CGAInterface->IsConnected();
+    if(!connected || !g_CGAInterface->IsInGame(ingame) || !ingame)
+        return;
+
+    g_CGAInterface->RequestDownloadMap(m_DownloadMapX, m_DownloadMapY, m_DownloadMapX+24, m_DownloadMapY+24);
+
+    m_DownloadMapX += 24;
+
+    if(m_DownloadMapX > m_DownloadMapXSize){
+        m_DownloadMapX = 0;
+        m_DownloadMapY += 24;
+    }
+
+    if(m_DownloadMapY > m_DownloadMapYSize){
+        m_IsDownloadingMap = false;
     }
 }
 
@@ -120,12 +189,14 @@ void CPlayerWorker::OnQueueGetMapInfo()
     std::string name;
     float x = 0, y = 0;
     int worldStatus = 0, gameStatus = 0;
+    int index1 = 0, index2 = 0, index3 = 0;
     g_CGAInterface->GetMapName(name);
     g_CGAInterface->GetMapXYFloat(x, y);
+    g_CGAInterface->GetMapIndex(index1, index2, index3);
     g_CGAInterface->GetWorldStatus(worldStatus);
     g_CGAInterface->GetGameStatus(gameStatus);
 
-    NotifyGetMapInfo(QString::fromStdString(name), (int)(x / 64.0f), (int)(y / 64.0f), worldStatus, gameStatus);
+    NotifyGetMapInfo(QString::fromStdString(name), index1, index2, index3, (int)(x / 64.0f), (int)(y / 64.0f), worldStatus, gameStatus);
 }
 
 void CPlayerWorker::OnQueueGetItemInfo()
@@ -150,10 +221,12 @@ void CPlayerWorker::OnQueueGetItemInfo()
                 items->append(item);
             }
         }
+
+        if(!items->empty())
+            OnTweakDropItem(items);
+
+        NotifyGetItemsInfo(items);
     }
-    NotifyGetItemsInfo(items);
-    if(!items->empty())
-        OnTweakDropItem(items);
 }
 
 void CPlayerWorker::OnQueueGetPlayerInfo()
@@ -163,12 +236,17 @@ void CPlayerWorker::OnQueueGetPlayerInfo()
     QSharedPointer<CGA_PlayerInfo_t> player(new CGA_PlayerInfo_t);
     QSharedPointer<CGA_PetList_t> pets(new CGA_PetList_t);
     QSharedPointer<CGA_SkillList_t> skills(new CGA_SkillList_t);
+    QSharedPointer<CGA_MapCellData_t> mapcollision(new CGA_MapCellData_t);
+    QSharedPointer<CGA_MapCellData_t> mapobject(new CGA_MapCellData_t);
+    QSharedPointer<CGA_MapUnits_t> mapunits(new CGA_MapUnits_t);
+
     if(g_CGAInterface->IsConnected() && g_CGAInterface->IsInGame(ingame) && ingame)
     {
-        //update value
+        //syncronize value
         g_CGAInterface->SetMoveSpeed(m_MoveSpeed);
         g_CGAInterface->SetWorkDelay(m_WorkDelay);
         g_CGAInterface->SetWorkAcceleration(m_WorkAcc);
+        g_CGAInterface->SetNoSwitchAnim(m_bNoSwitchAnim);
 
         CGA::cga_player_info_t info;
         if(g_CGAInterface->GetPlayerInfo(info))
@@ -205,6 +283,7 @@ void CPlayerWorker::OnQueueGetPlayerInfo()
                 pet.maxxp = petinfo.maxxp;
                 pet.flags = petinfo.flags;
                 pet.battle_flags = petinfo.battle_flags;
+                pet.loyality = petinfo.loyality;
                 pet.name = QString::fromStdString(petinfo.name);
                 pet.realname = QString::fromStdString(petinfo.realname);
                 pet.showname = pet.name.isEmpty() ? pet.realname : pet.name;
@@ -218,7 +297,7 @@ void CPlayerWorker::OnQueueGetPlayerInfo()
                     {
                         CGA_PetSkillInfo_t skill;
                         const CGA::cga_pet_skill_info_t &skinfo = skillsinfo.at(j);
-                        skill.pos = (int)i;
+                        skill.pos = (int)skinfo.index;
                         skill.name = QString::fromStdString(skinfo.name);
                         skill.info = QString::fromStdString(skinfo.info);
                         skill.cost = skinfo.cost;
@@ -256,10 +335,55 @@ void CPlayerWorker::OnQueueGetPlayerInfo()
                         subsk.level = subskinfo.level;
                         subsk.cost = subskinfo.cost;
                         subsk.flags = subskinfo.flags;
+                        subsk.available = subskinfo.available;
                         skill.subskills.append(subsk);
                     }
                 }
                 skills->append(skill);
+            }
+        }
+
+        int st;
+        if(g_CGAInterface->GetGameStatus(st) && st == 3 && m_tabindex == 5)
+        {
+            CGA::cga_map_cells_t cells;
+            if(g_CGAInterface->GetMapCollisionTable(true, cells))
+            {
+                mapcollision->xbottom = cells.x_bottom;
+                mapcollision->ybottom = cells.y_bottom;
+                mapcollision->xsize = cells.x_size;
+                mapcollision->ysize = cells.y_size;
+                mapcollision->cells = cells.cell;
+            }
+
+            if(g_CGAInterface->GetMapObjectTable(true, cells))
+            {
+                mapobject->xbottom = cells.x_bottom;
+                mapobject->ybottom = cells.y_bottom;
+                mapobject->xsize = cells.x_size;
+                mapobject->ysize = cells.y_size;
+                mapobject->cells = cells.cell;
+            }
+
+            CGA::cga_map_units_t units;
+            if(g_CGAInterface->GetMapUnits(units))
+            {
+                mapunits->resize((int)units.size());
+                for(int i = 0;i < mapunits->size(); ++i){
+                    (*mapunits)[i].valid = units[i].valid;
+                    (*mapunits)[i].type = units[i].type;
+                    (*mapunits)[i].unit_id = units[i].unit_id;
+                    (*mapunits)[i].model_id = units[i].model_id;
+                    (*mapunits)[i].xpos = units[i].xpos;
+                    (*mapunits)[i].ypos = units[i].ypos;
+                    (*mapunits)[i].item_count = units[i].item_count;
+                    (*mapunits)[i].injury = units[i].injury;
+                    (*mapunits)[i].level = units[i].level;
+                    (*mapunits)[i].unit_name = QString::fromStdString(units[i].unit_name);
+                    (*mapunits)[i].nick_name = QString::fromStdString(units[i].nick_name);
+                    (*mapunits)[i].title_name = QString::fromStdString(units[i].title_name);
+                    (*mapunits)[i].item_name = QString::fromStdString(units[i].item_name);
+                }
             }
         }
     }
@@ -267,6 +391,7 @@ void CPlayerWorker::OnQueueGetPlayerInfo()
     NotifyGetPlayerInfo(player);
     NotifyGetPetsInfo(pets);
     NotifyGetSkillsInfo(skills);
+    NotifyGetMapCellInfo(mapcollision, mapobject, mapunits);
 }
 
 void CPlayerWorker::NotifyNPCDialogCallback(CGA::cga_npc_dialog_t npcdlg)
@@ -328,11 +453,11 @@ void CPlayerWorker::OnNotifyNPCDialog(QSharedPointer<CGA_NPCDialog_t> dlg)
             {
                 bool bNeedHP = NeedHPSupply(playerinfo);
                 bool bNeedMP = NeedMPSupply(playerinfo);
-                if(bNeedHP && !bNeedMP)
+                if(bNeedHP && (!bNeedMP || playerinfo.gold < playerinfo.maxmp-playerinfo.mp))
                 {
                     g_CGAInterface->ClickNPCDialog(0, 2, result);
                 }
-                else if(bNeedMP)
+                else if(bNeedMP && playerinfo.gold >= playerinfo.maxmp-playerinfo.mp)
                 {
                     g_CGAInterface->ClickNPCDialog(0, 0, result);
                 }
@@ -359,6 +484,11 @@ void CPlayerWorker::OnNotifyNPCDialog(QSharedPointer<CGA_NPCDialog_t> dlg)
             }
         }
     }
+}
+
+void CPlayerWorker::OnSetNoSwitchAnim(int state)
+{
+    m_bNoSwitchAnim = state ? true : false;
 }
 
 void CPlayerWorker::OnSetAutoSupply(int state)
@@ -390,4 +520,9 @@ void CPlayerWorker::OnSetWorkAcc(int value)
 void CPlayerWorker::OnNotifyAttachProcessOk(quint32 ProcessId, quint32 port, quint32 hWnd)
 {
     g_CGAInterface->RegisterNPCDialogNotify(std::bind(&CPlayerWorker::NotifyNPCDialogCallback, this, std::placeholders::_1));
+}
+
+void CPlayerWorker::OnTabChanged(int tabindex)
+{
+    m_tabindex = tabindex;
 }

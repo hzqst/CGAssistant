@@ -28,11 +28,16 @@ ItemForm::ItemForm(CPlayerWorker *worker, QWidget *parent) :
     m_model_Drop = new CItemDropperModel(ui->listView_drop);
     ui->listView_drop->setModel(m_model_Drop);
 
+    m_model_Tweaker = new CItemTweakerModel(ui->listView_tweak);
+    ui->listView_tweak->setModel(m_model_Tweaker);
+
     connect(this, &ItemForm::QueueDropItem, m_worker, &CPlayerWorker::OnQueueDropItem, Qt::QueuedConnection);
     connect(m_model_Drop, SIGNAL(syncList(CItemDropperList)), m_worker, SLOT(OnSyncItemDroppers(CItemDropperList)), Qt::ConnectionType::QueuedConnection);
+    connect(m_model_Tweaker, SIGNAL(syncList(CItemTweakerList)), m_worker, SLOT(OnSyncItemTweakers(CItemTweakerList)), Qt::ConnectionType::QueuedConnection);
     connect(m_worker, &CPlayerWorker::NotifyGetInfoFailed, this, &ItemForm::OnNotifyGetInfoFailed, Qt::QueuedConnection);
     connect(m_worker, &CPlayerWorker::NotifyGetItemsInfo, this, &ItemForm::OnNotifyGetItemsInfo, Qt::ConnectionType::QueuedConnection);
     connect(ui->listView_drop, &MyListView::NotifyDeletePressed, this, &ItemForm::OnItemDropperDeletePressed);
+    connect(ui->listView_tweak, &MyListView::NotifyDeletePressed, this, &ItemForm::OnItemTweakerDeletePressed);
 
     m_item_Menu = new QMenu(this);
 }
@@ -169,6 +174,56 @@ private:
     int m_itemid;
 };
 
+class CItemNameTweaker : public CItemTweaker
+{
+public:
+    CItemNameTweaker(const QString &name, int maxcount)
+    {
+        m_name = name;
+        m_maxcount = maxcount;
+    }
+
+    virtual bool ShouldTweak(const CGA_ItemInfo_t &item)
+    {
+        if(0 == item.name.compare(m_name, Qt::CaseInsensitive) && item.count < m_maxcount)
+            return true;
+        return false;
+    }
+
+    virtual void GetName(QString &str)
+    {
+        str = QString("%1|%2").arg(m_name).arg(m_maxcount);
+    }
+
+private:
+    QString m_name;
+};
+
+class CItemIdTweaker : public CItemTweaker
+{
+public:
+    CItemIdTweaker(int itemid, int maxcount)
+    {
+        m_itemid = itemid;
+        m_maxcount = maxcount;
+    }
+
+    virtual bool ShouldTweak(const CGA_ItemInfo_t &item)
+    {
+        if(item.itemid == m_itemid && item.count < m_maxcount)
+            return true;
+        return false;
+    }
+
+    virtual void GetName(QString &str)
+    {
+        str = QString("#%1|%2").arg(m_itemid).arg(m_maxcount);
+    }
+
+private:
+    int m_itemid;
+};
+
 void ItemForm::AddItemDropper(const QString &str)
 {
     if(str.isEmpty())
@@ -190,6 +245,36 @@ void ItemForm::AddItemDropper(const QString &str)
     ui->lineEdit_drop->clear();
 }
 
+void ItemForm::AddItemTweaker(const QString &str)
+{
+    if(str.isEmpty())
+        return;
+
+    auto strip = str.indexOf("|");
+    if(strip <= 0)
+        return;
+
+    bool bValue = false;
+    int maxcount = str.mid(strip+1).toInt(&bValue);
+    if(!(bValue && maxcount > 0))
+        return;
+
+    if(str.at(0) == '#'){
+        int value = str.mid(1, strip-1).toInt(&bValue);
+        if(bValue && value > 0)
+        {
+            CItemTweakerPtr ptr(new CItemIdTweaker(value, maxcount));
+            m_model_Tweaker->appendRow(ptr);
+            ui->lineEdit_tweak->clear();
+            return;
+        }
+    }
+
+    CItemTweakerPtr ptr(new CItemNameTweaker(str.mid(0, strip), maxcount));
+    m_model_Tweaker->appendRow(ptr);
+    ui->lineEdit_tweak->clear();
+}
+
 void ItemForm::on_lineEdit_drop_returnPressed()
 {
     AddItemDropper(ui->lineEdit_drop->text());
@@ -198,6 +283,11 @@ void ItemForm::on_lineEdit_drop_returnPressed()
 void ItemForm::OnItemDropperDeletePressed(int row)
 {
     m_model_Drop->removeRow(row);
+}
+
+void ItemForm::OnItemTweakerDeletePressed(int row)
+{
+    m_model_Tweaker->removeRow(row);
 }
 
 void ItemForm::on_tableView_customContextMenuRequested(const QPoint &pos)
@@ -219,6 +309,12 @@ void ItemForm::on_tableView_customContextMenuRequested(const QPoint &pos)
                 pAction->setProperty("itemid", qItem->data(Qt::UserRole + 10085).toInt());
                 connect(pAction, SIGNAL(triggered(bool)), this, SLOT(OnAddAutoDropAction()));
             }
+            {
+                auto pAction = m_item_Menu->addAction(tr("Add to auto-tweak..."));
+                pAction->setProperty("itemid", qItem->data(Qt::UserRole + 10085).toInt());
+                pAction->setProperty("itemname", qItem->data(Qt::UserRole + 10086).toString());
+                connect(pAction, SIGNAL(triggered(bool)), this, SLOT(OnAddAutoTweakAction()));
+            }
             m_item_Menu->exec(QCursor::pos());
         }
     }
@@ -234,6 +330,12 @@ void ItemForm::OnAddAutoDropAction()
 {
     auto pAction = qobject_cast<QAction*>(sender());
     AddItemDropper(QString("#%1").arg(pAction->property("itemid").toInt()));
+}
+
+void ItemForm::OnAddAutoTweakAction()
+{
+    auto pAction = qobject_cast<QAction*>(sender());
+    ui->lineEdit_tweak->setText(QString("%1|").arg(pAction->property("itemname").toString()));
 }
 
 bool ItemForm::ParseItemIdMap(const QJsonValue &val)
@@ -293,6 +395,41 @@ void ItemForm::SaveItemDropper(QJsonArray &arr)
     }
 }
 
+bool ItemForm::ParseItemTweaker(const QJsonValue &val)
+{
+    if(!val.isArray())
+        return false;
+    const QJsonArray arr = val.toArray();
+    QJsonArray::const_iterator itor = arr.constBegin();
+    m_model_Tweaker->removeRows(0, m_model_Tweaker->rowCount());
+    while(itor != arr.constEnd())
+    {
+        if((*itor).isString())
+        {
+            QString line = (*itor).toString();
+            if(!line.isEmpty())
+                AddItemTweaker(line);
+        }
+        ++itor;
+    }
+    return true;
+}
+
+void ItemForm::SaveItemTweaker(QJsonArray &arr)
+{
+    int rowCount = m_model_Tweaker->rowCount();
+    for(int i = 0;i < rowCount; ++i)
+    {
+        CItemTweaker *tweaker = m_model_Tweaker->TweakerFromIndex(m_model_Tweaker->index(i, 0));
+        if(tweaker)
+        {
+            QString str;
+            tweaker->GetName(str);
+            arr.insert(arr.end(), str);
+        }
+    }
+}
+
 void ItemForm::SaveItemIdMap(QJsonObject &obj)
 {
     QHash<int, QString>::const_iterator itor = m_IdMap.constBegin();
@@ -301,4 +438,9 @@ void ItemForm::SaveItemIdMap(QJsonObject &obj)
         obj.insert(QString::number(itor.key()), itor.value());
         ++itor;
     }
+}
+
+void ItemForm::on_lineEdit_tweak_returnPressed()
+{
+     AddItemTweaker(ui->lineEdit_tweak->text());
 }

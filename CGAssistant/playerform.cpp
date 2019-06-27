@@ -7,8 +7,8 @@
 #include <QJsonArray>
 
 PlayerForm::PlayerForm(CPlayerWorker *worker, QWidget *parent) :
-    QWidget(parent), m_worker(worker),
-    ui(new Ui::PlayerForm)
+    QWidget(parent),
+    ui(new Ui::PlayerForm), m_worker(worker)
 {
     ui->setupUi(this);
 
@@ -22,6 +22,7 @@ PlayerForm::PlayerForm(CPlayerWorker *worker, QWidget *parent) :
     ui->label_workdelayval->setText(tr("%1 ms").arg(ui->horizontalSlider_workdelay->value()));
     ui->label_workaccval->setText(tr("%1 %").arg(ui->horizontalSlider_workacc->value()));
 
+    connect(ui->checkBox_SwitchAnim, SIGNAL(stateChanged(int)), m_worker, SLOT(OnSetNoSwitchAnim(int)), Qt::QueuedConnection);
     connect(ui->checkBox_autoSupply, SIGNAL(stateChanged(int)), m_worker, SLOT(OnSetAutoSupply(int)), Qt::QueuedConnection);
     connect(ui->checkBox_freqMove, SIGNAL(stateChanged(int)), m_worker, SLOT(OnSetFreqMove(int)), Qt::QueuedConnection);
     connect(ui->horizontalSlider_movespd, SIGNAL(valueChanged(int)), m_worker, SLOT(OnSetMoveSpeed(int)), Qt::ConnectionType::QueuedConnection);
@@ -93,7 +94,7 @@ void PlayerForm::OnNotifyGetPetsInfo(QSharedPointer<CGA_PetList_t> pets)
             m_model_Pet->insertRow(i, item);
         }
 
-        str = QString("HP: %1 / %2").arg(pet.hp).arg(pet.maxhp);
+        str = QObject::tr("HP: %1 / %2").arg(pet.hp).arg(pet.maxhp);
         if(item->rowCount() >= 1){
             if( str != item->child(0)->text() )
                 item->child(0)->setText(str);
@@ -101,7 +102,7 @@ void PlayerForm::OnNotifyGetPetsInfo(QSharedPointer<CGA_PetList_t> pets)
             item->insertRow(0, new QStandardItem(str));
         }
 
-        str = QString("MP: %1 / %2").arg(pet.mp).arg(pet.maxmp);
+        str = QObject::tr("MP: %1 / %2").arg(pet.mp).arg(pet.maxmp);
         if(item->rowCount() >= 2){
             if( str != item->child(1)->text() )
                 item->child(1)->setText(str);
@@ -109,7 +110,7 @@ void PlayerForm::OnNotifyGetPetsInfo(QSharedPointer<CGA_PetList_t> pets)
             item->insertRow(1, new QStandardItem(str));
         }
 
-        str = QString("XP: %1 / %2").arg(pet.xp).arg(pet.maxxp);
+        str = QObject::tr("XP: %1 / %2").arg(pet.xp).arg(pet.maxxp);
         if(item->rowCount() >= 3){
             if( str != item->child(2)->text() )
                 item->child(2)->setText(str);
@@ -117,15 +118,31 @@ void PlayerForm::OnNotifyGetPetsInfo(QSharedPointer<CGA_PetList_t> pets)
             item->insertRow(2, new QStandardItem(str));
         }
 
+        str = QObject::tr("Upgrade: %1").arg(pet.maxxp-pet.xp);
+        if(item->rowCount() >= 4){
+            if( str != item->child(3)->text() )
+                item->child(3)->setText(str);
+        } else {
+            item->insertRow(3, new QStandardItem(str));
+        }
+
+        str = QObject::tr("Loyality: %1").arg(pet.loyality);
+        if(item->rowCount() >= 5){
+            if( str != item->child(4)->text() )
+                item->child(4)->setText(str);
+        } else {
+            item->insertRow(4, new QStandardItem(str));
+        }
+
         for(int j = 0;j < pet.skills.size(); ++j)
         {
             const CGA_PetSkillInfo_t &sk = pet.skills.at(j);
             str = QString("%1 MP %2").arg( sk.name, QString::number(sk.cost) );
-            if(item->rowCount() >= 4+j){
-                if( str != item->child(3+j)->text() )
-                    item->child(3+j)->setText(str);
+            if(item->rowCount() >= 6+j){
+                if( str != item->child(5+j)->text() )
+                    item->child(5+j)->setText(str);
             } else {
-                item->insertRow(3+j, new QStandardItem(str));
+                item->insertRow(5+j, new QStandardItem(str));
             }
         }
     }
@@ -191,7 +208,7 @@ void PlayerForm::OnNotifyGetSkillsInfo(QSharedPointer<CGA_SkillList_t> skills)
     }
 }
 
-void PlayerForm::OnNotifyGetMapInfo(QString name, int x, int y, int worldStatus, int gameStatus)
+void PlayerForm::OnNotifyGetMapInfo(QString name, int index1, int index2, int index3, int x, int y, int worldStatus, int gameStatus)
 {
     if(name != ui->lineEdit_map->text())
         ui->lineEdit_map->setText(name);
@@ -226,10 +243,10 @@ void PlayerForm::OnNotifyGetPlayerInfo(QSharedPointer<CGA_PlayerInfo_t> player)
     if(ui->lineEdit_punchClock->text() != str)
         ui->lineEdit_punchClock->setText(str);
 
-    //if(player->usingpunchclock)
-    //    ui->lineEdit_punchClock->setStyleSheet("{color:red;}");
-    //else
-    //     ui->lineEdit_punchClock->setStyleSheet("");
+    if(player->usingpunchclock)
+        ui->lineEdit_punchClock->setStyleSheet("{color:red;}");
+    else
+         ui->lineEdit_punchClock->setStyleSheet("");
 
     str = QString("%1 / %2").arg(player->hp).arg(player->maxhp);
     if(ui->lineEdit_hp->text() != str)
@@ -305,6 +322,7 @@ void PlayerForm::SaveSettings(QByteArray &data)
     QJsonObject obj;
 
     QJsonObject player;
+    player.insert("noswitchanim", ui->checkBox_SwitchAnim->isChecked());
     player.insert("autosupply", ui->checkBox_autoSupply->isChecked());
     player.insert("freqmove", ui->checkBox_freqMove->isChecked());
     player.insert("movespd", ui->horizontalSlider_movespd->value());
@@ -324,6 +342,10 @@ void PlayerForm::SaveSettings(QByteArray &data)
     SaveItemDropper(drop);
     obj.insert("itemdroplist", drop);
 
+    QJsonArray tweak;
+    SaveItemTweaker(tweak);
+    obj.insert("itemtweaklist", tweak);
+
     doc.setObject(obj);
     data = doc.toJson(QJsonDocument::JsonFormat::Indented);
 }
@@ -331,7 +353,7 @@ void PlayerForm::SaveSettings(QByteArray &data)
 void PlayerForm::on_pushButton_save_clicked()
 {
     QFileDialog *fileDialog = new QFileDialog(this);
-    fileDialog->setWindowTitle(tr("Save llayer settings"));
+    fileDialog->setWindowTitle(tr("Save player settings"));
     fileDialog->setDirectory(".");
     fileDialog->setAcceptMode(QFileDialog::AcceptSave);
     fileDialog->setNameFilter(tr("json files(*.json)"));
@@ -359,6 +381,7 @@ bool PlayerForm::ParsePlayerSettings(const QJsonValue &val)
 
     auto playerobj = val.toObject();
 
+    ui->checkBox_SwitchAnim->setChecked(playerobj.take("noswitchanim").toBool());
    ui->checkBox_autoSupply->setChecked(playerobj.take("autosupply").toBool());
    ui->checkBox_freqMove->setChecked(playerobj.take("freqmove").toBool());
    ui->horizontalSlider_movespd->setValue(playerobj.take("movespd").toInt());
@@ -395,7 +418,10 @@ bool PlayerForm::ParseSettings(const QByteArray &data, QJsonDocument &doc)
     {
         ParseItemDropper(obj.take("itemdroplist"));
     }
-
+    if(obj.contains("itemtweaklist"))
+    {
+        ParseItemTweaker(obj.take("itemtweaklist"));
+    }
     return true;
 }
 

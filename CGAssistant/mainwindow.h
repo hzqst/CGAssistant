@@ -30,6 +30,8 @@ private:
 signals:
     void NotifyCloseWindow();
     void NotifyChangeWindow(Qt::WindowStates);
+private slots:
+    void on_tabWidget_currentChanged(int index);
 };
 
 #endif // MAINWINDOW_H
