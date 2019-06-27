@@ -3,4 +3,4 @@
 	url = https://github.com/boostorg/boost.git
 [submodule "rest_rpc"]
 	path = rest_rpc
-	url = https://github.com/topcpporg/rest_rpc
+	url = https://github.com/hzqst/rest_rpc
