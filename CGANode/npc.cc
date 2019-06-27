@@ -21,20 +21,57 @@ public:
 	CGA::cga_npc_dialog_t m_dlg;
 };
 
-boost::shared_mutex  g_NPCDialog_Lock;
+class NPCDialogCacheData
+{
+public:
+	NPCDialogCacheData(const CGA::cga_npc_dialog_t &dlg, uint64_t time) : m_dlg(dlg), m_time(time)
+	{
+	
+	}
+	CGA::cga_npc_dialog_t m_dlg;
+	uint64_t m_time;
+};
+
+boost::shared_mutex g_NPCDialog_Lock;
 std::vector<NPCDialogNotifyData *> g_NPCDialog_Asyncs;
+std::vector<NPCDialogCacheData *> g_NPCDialog_Caches;
+
+void NPCDialogNotifyDoAsyncCall(const CGA::cga_npc_dialog_t &dlg)
+{
+	if (g_NPCDialog_Asyncs.size())
+	{
+		for (size_t i = 0; i < g_NPCDialog_Asyncs.size(); ++i)
+		{
+			const auto data = g_NPCDialog_Asyncs[i];
+			data->m_dlg = dlg;
+			data->m_result = true;
+			uv_async_send(data->m_async);
+		}
+		g_NPCDialog_Asyncs.clear();
+	}
+	else
+	{
+		auto hrtime = uv_hrtime();
+		for (auto &p = g_NPCDialog_Caches.begin(); p != g_NPCDialog_Caches.end(); )
+		{
+			if (hrtime - (*p)->m_time > CGA_NOTIFY_MAX_CACHE_TIME)
+			{
+				delete *p;
+				p = g_NPCDialog_Caches.erase(p);
+			}
+			else
+			{
+				p++;
+			}
+		}
+		g_NPCDialog_Caches.emplace_back(new NPCDialogCacheData(dlg, uv_hrtime()));
+	}
+}
 
 void NPCDialogNotify(CGA::cga_npc_dialog_t dlg)
 {
 	boost::unique_lock<boost::shared_mutex> lock(g_NPCDialog_Lock);
-	for (size_t i = 0; i < g_NPCDialog_Asyncs.size(); ++i)
-	{
-		const auto data = g_NPCDialog_Asyncs[i];
-		data->m_dlg = dlg;
-		data->m_result = true;
-		uv_async_send(&data->m_async);
-	}
-	g_NPCDialog_Asyncs.clear();
+	NPCDialogNotifyDoAsyncCall(dlg);
 }
 
 void NPCDialogAsyncCallBack(uv_async_t *handle)
@@ -64,9 +101,9 @@ void NPCDialogAsyncCallBack(uv_async_t *handle)
 
 	data->m_callback.Reset();
 
-	uv_timer_stop(&data->m_timer);
-	uv_close((uv_handle_t*)handle, NULL);
-	uv_close((uv_handle_t*)&data->m_timer, NULL);
+	uv_timer_stop(data->m_timer);
+	uv_close((uv_handle_t*)handle, FreeUVHandleCallBack);
+	uv_close((uv_handle_t*)data->m_timer, FreeUVHandleCallBack);
 	delete handle->data;
 }
 
@@ -77,12 +114,7 @@ void NPCDialogTimerCallBack(uv_timer_t *handle)
 
 	auto data = (NPCDialogNotifyData *)handle->data;
 
-	Handle<Value> argv[1];
-	argv[0] = Nan::TypeError("Async callback timeout.");
-
-	Local<Function>::New(isolate, data->m_callback)->Call(isolate->GetCurrentContext()->Global(), 1, argv);
-
-	data->m_callback.Reset();
+	bool asyncNotCalled = false;
 
 	{
 		boost::unique_lock<boost::shared_mutex> lock(g_NPCDialog_Lock);
@@ -90,16 +122,27 @@ void NPCDialogTimerCallBack(uv_timer_t *handle)
 		{
 			if (g_NPCDialog_Asyncs[i] == data)
 			{
+				asyncNotCalled = true;
 				g_NPCDialog_Asyncs.erase(g_NPCDialog_Asyncs.begin() + i);
 				break;
 			}
 		}
 	}
 
-	uv_timer_stop(handle);
-	uv_close((uv_handle_t*)&data->m_async, NULL);
-	uv_close((uv_handle_t*)handle, NULL);
-	delete handle->data;
+	if (asyncNotCalled)
+	{
+		Handle<Value> argv[1];
+		argv[0] = Nan::TypeError("Async callback timeout.");
+
+		Local<Function>::New(isolate, data->m_callback)->Call(isolate->GetCurrentContext()->Global(), 1, argv);
+
+		data->m_callback.Reset();
+
+		uv_timer_stop(handle);
+		uv_close((uv_handle_t*)data->m_async, FreeUVHandleCallBack);
+		uv_close((uv_handle_t*)handle, FreeUVHandleCallBack);
+		delete handle->data;
+	}
 }
 
 void AsyncWaitNPCDialog(const Nan::FunctionCallbackInfo<v8::Value>& info)
@@ -112,6 +155,7 @@ void AsyncWaitNPCDialog(const Nan::FunctionCallbackInfo<v8::Value>& info)
 		Nan::ThrowTypeError("Arg[0] must be a function.");
 		return;
 	}
+
 	if (info.Length() >= 2 && !info[1]->IsUndefined())
 	{
 		timeout = (int)info[1]->IntegerValue();
@@ -119,18 +163,37 @@ void AsyncWaitNPCDialog(const Nan::FunctionCallbackInfo<v8::Value>& info)
 			timeout = 0;
 	}
 
-	boost::unique_lock<boost::shared_mutex> lock(g_NPCDialog_Lock);
-
 	auto callback = Local<Function>::Cast(info[0]);
 	NPCDialogNotifyData *data = new NPCDialogNotifyData();
 	data->m_callback.Reset(isolate, callback);
-	data->m_async.data = data;
-	data->m_timer.data = data;
+	data->m_async->data = data;
+	data->m_timer->data = data;
 
-	g_NPCDialog_Asyncs.push_back(data);
+	{
+		boost::unique_lock<boost::shared_mutex> lock(g_NPCDialog_Lock);
+
+		g_NPCDialog_Asyncs.emplace_back(data);
+
+		auto hrtime = uv_hrtime();
+		for (auto &p = g_NPCDialog_Caches.begin(); p != g_NPCDialog_Caches.end(); )
+		{
+			if (hrtime - (*p)->m_time > CGA_NOTIFY_MAX_CACHE_TIME)
+			{
+				delete *p;
+				p = g_NPCDialog_Caches.erase(p);
+			}
+			else
+			{
+				NPCDialogNotifyDoAsyncCall((*p)->m_dlg);
+				delete *p;
+				g_NPCDialog_Caches.erase(p);
+				break;
+			}
+		}
+	}
 
 	if(timeout)
-		uv_timer_start(&data->m_timer, NPCDialogTimerCallBack, timeout, 0);
+		uv_timer_start(data->m_timer, NPCDialogTimerCallBack, timeout, 0);
 }
 
 void ClickNPCDialog(const Nan::FunctionCallbackInfo<v8::Value>& info)

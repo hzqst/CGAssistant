@@ -17,7 +17,7 @@ const int index2player_flags[] = {
 
 void WriteLog(LPCSTR fmt, ...)
 {
-	char buffer[256];
+	char buffer[4096];
 	va_list argptr;
 	int cnt;
 	va_start(argptr, fmt);
@@ -28,6 +28,27 @@ void WriteLog(LPCSTR fmt, ...)
 	if (fp)
 	{
 		setlocale(LC_ALL, "chs");
+
+		SYSTEMTIME tm;
+		GetLocalTime(&tm);
+		fprintf(fp, "%02d:%02d:%02d.%03d\t", tm.wHour, tm.wMinute, tm.wSecond, tm.wMilliseconds);
+
+		fputs(buffer, fp);
+		fclose(fp);
+	}
+}
+
+void WriteLog2(LPCSTR buffer)
+{
+	FILE *fp = fopen("D:\\cga_log.txt", "a+");
+	if (fp)
+	{
+		setlocale(LC_ALL, "chs");
+
+		SYSTEMTIME tm;
+		GetLocalTime(&tm);
+		fprintf(fp, "%02d:%02d:%02d.%03d\t", tm.wHour, tm.wMinute, tm.wSecond, tm.wMilliseconds);
+
 		fputs(buffer, fp);
 		fclose(fp);
 	}
@@ -56,20 +77,159 @@ void CXorValue::set(int value)
 	key2 = value ^ key1;
 }
 
+char *NET_FindDelimeter(const char *src, char deli)
+{
+	char *p2;
+	for (auto p = (char *)src; ; p = p2 + 1)
+	{
+		while (1)
+		{
+			if (!*p)
+				return 0;
+			if (*p >= 128 || *p == 255)
+				break;
+			if (*p == deli)
+				return p + 1;
+			++p;
+		}
+		p2 = p + 1;
+		if (!*(char *)p2)
+			break;
+	}
+	return NULL;
+}
+
+int NET_SubStrDelimeter(const char *src, char deli, int len, char *buf)
+{
+	int i;
+
+	for (i = 0; i < len; ++i)
+	{
+		if (src[i] >= 128 || src[i] == 255)
+		{
+			buf[i] = src[i];
+			++i;
+			if (i >= len)
+				break;
+			buf[i] = src[i];
+			if (!buf[i])
+				return 1;
+		}
+		else
+		{
+			if (src[i] == deli)
+			{
+				buf[i] = 0;
+				return 0;
+			}
+			buf[i] = src[i];
+			if (!buf[i])
+				return 1;
+		}
+	}
+	buf[i] = 0;
+	return 1;
+}
+
+int NET_ParseDelimeter(const char *src, char deli, int position, int buflen, char *buf)
+{
+	auto p = (char *)src;
+	for (int i = 0; i < position - 1 && p; ++i)
+		p = NET_FindDelimeter(p, deli);
+
+	if (p)
+		return NET_SubStrDelimeter(p, deli, buflen, buf);
+
+	*buf = 0;
+	return 1;
+}
+
+int NET_ParseInteger(const char *src, char deli, int position)
+{
+	char buf[128] = {0};
+
+	NET_ParseDelimeter(src, deli, position, 127, buf);
+	if (buf[0])
+		return atoi((const char *)buf);
+
+	return -1;
+}
+
+int NET_ParseHexInteger(const char *src, char deli, int position)
+{
+	char buf[128] = { 0 };
+
+	NET_ParseDelimeter(src, deli, position, 127, buf);
+	if (buf[0]) {
+		int res;
+		if(1 == sscanf(buf, "%X", &res))
+			return res;
+	}
+
+	return -1;
+}
+
+char NET_EscapeCharFromTable(char ch)
+{
+	static char table[] = "n\nc,z|y\\";
+
+	for (int i = 0; i < 4; ++i)
+	{
+		if (table[2 * i] == ch)
+			return table[2 * i + 1];
+	}
+	return ch;
+}
+
+char *NET_EscapeStringEx(char *src)
+{
+	size_t len; // kr00_4@1
+	int v2; // ST18_4@4
+	int v4; // [sp+14h] [bp-8h]@1
+
+	len = strlen(src);
+	v4 = 0;
+	for (size_t i = 0; i < len; ++i)
+	{
+		if (src[i] & 0x80)
+		{
+			src[v4] = src[i];
+			v2 = v4 + 1;
+			++i;
+			src[v2] = src[i];
+			v4 = v2 + 1;
+		}
+		else if (src[i] == '\\')
+		{
+			++i;
+			src[v4++] = NET_EscapeCharFromTable(src[i]);
+		}
+		else
+		{
+			src[v4++] = src[i];
+		}
+	}
+	src[v4] = 0;
+	return src;
+}
+
 void CGA_NotifyBattleAction(int flags);
 void CGA_NotifyPlayerMenu(const cga_player_menu_items_t &players);
 void CGA_NotifyUnitMenu(const cga_unit_menu_items_t &units);
 void CGA_NotifyNPCDialog(const cga_npc_dialog_t &dlg);
 void CGA_NotifyWorkingResult(const CGA::cga_working_result_t &result);
 void CGA_NotifyChatMsg(const CGA::cga_chat_msg_t &msg);
+void CGA_NotifyTradeStuffs(const CGA::cga_trade_stuff_info_t &msg);
+void CGA_NotifyTradeDialog(const CGA::cga_trade_dialog_t &msg);
+void CGA_NotifyTradeState(int state);
 
 void CGAService::NewBATTLE_PlayerAction()
 {
-	int prevPlayerStatus = GetBattlePlayerStatus();
+	int prevPlayerStatus = *g_btl_player_status;
 
 	BATTLE_PlayerAction();
 
-	int playerStatus = GetBattlePlayerStatus();
+	int playerStatus = *g_btl_player_status;
 
 	if (prevPlayerStatus == 2 && playerStatus == 0)
 	{
@@ -81,7 +241,7 @@ void CGAService::NewBATTLE_PlayerAction()
 		int flags = FL_BATTLE_ACTION_ISPLAYER;
 		if (m_btl_double_action)
 			flags |= FL_BATTLE_ACTION_ISDOUBLE;
-		if (GetBattleSkillPerformed())
+		if (*g_btl_skill_performed)
 			flags |= FL_BATTLE_ACTION_ISSKILLPERFORMED;
 
 		CGA_NotifyBattleAction(flags);
@@ -92,7 +252,7 @@ void CGAService::NewBATTLE_PlayerAction()
 		int flags = 0;
 		if (m_btl_double_action)
 			flags |= FL_BATTLE_ACTION_ISDOUBLE;
-		if (GetBattleSkillPerformed())
+		if (*g_btl_skill_performed)
 			flags |= FL_BATTLE_ACTION_ISSKILLPERFORMED;
 
 		CGA_NotifyBattleAction(flags);
@@ -104,8 +264,699 @@ void __cdecl NewBATTLE_PlayerAction()
 	g_CGAService.NewBATTLE_PlayerAction();
 }
 
+void CGAService::NewNET_ParseTradeItemsPackets(int a1, const char *buf)
+{
+	WriteLog("NewNET_ParseTradeItemsPackets\n");
+
+	NET_ParseTradeItemsPackets(a1, buf);
+
+	cga_trade_stuff_info_t info(TRADE_STUFFS_ITEM);
+
+	char buffer[1024];
+
+	for (int i = 0; ; ++i)
+	{
+		int position = 14 * i + 1;
+		int itempos = NET_ParseInteger(buf, '|', position);
+		
+		if (NET_ParseDelimeter(buf, 124, position + 1, 255, buffer) == 1)
+			break;
+		NET_EscapeStringEx(buffer);
+		std::string itemname = boost::locale::conv::to_utf<char>(buffer, "GBK");
+
+		NET_ParseDelimeter(buf, 124, position + 3, 767, buffer);
+		NET_EscapeStringEx(buffer);
+		std::string itemattr = boost::locale::conv::to_utf<char>(buffer, "GBK");
+
+		NET_ParseDelimeter(buf, 124, position + 13, 255, buffer);
+		NET_EscapeStringEx(buffer);
+		std::string itemattr2 = boost::locale::conv::to_utf<char>(buffer, "GBK");
+
+		int image_id = NET_ParseInteger(buf, '|', position + 4);
+		int level = NET_ParseInteger(buf, '|', position + 8);
+		int type = NET_ParseInteger(buf, '|', position + 9);
+		int item_id = NET_ParseInteger(buf, '|', position + 10);
+		int count = NET_ParseInteger(buf, '|', position + 12);
+
+		info.items.emplace_back(
+			itemname,
+			itemattr,
+			itemattr2,
+			std::string(),
+			std::string(),
+			item_id,
+			count,
+			itempos,
+			level,
+			type,
+			false
+		);
+	}
+
+	CGA_NotifyTradeStuffs(info);
+}
+
+void __cdecl NewNET_ParseTradeItemsPackets(int a1, const char *buf)
+{
+	g_CGAService.NewNET_ParseTradeItemsPackets(a1, buf);
+}
+
+void CGAService::NewNET_ParseTradePetPackets(int a1, int index, const char *buf)
+{
+	NET_ParseTradePetPackets(a1, index, buf);
+
+	WriteLog("NewNET_ParseTradePetPackets\n");
+
+	WriteLog2(buf);
+
+	char name[256];
+
+	if (0 == NET_ParseDelimeter(buf, '|', 1, 255, name))
+	{
+		cga_trade_stuff_info_t info(TRADE_STUFFS_PET);
+
+		NET_EscapeStringEx(name);
+		info.pet.index = index;
+		info.pet.name = boost::locale::conv::to_utf<char>(name, "GBK");
+		info.pet.level = NET_ParseInteger(buf, '|', 2);
+		info.pet.detail.points_remain = NET_ParseInteger(buf, '|', 3);
+		info.pet.race = NET_ParseInteger(buf, '|', 4);
+		info.pet.maxhp = NET_ParseInteger(buf, '|', 5);
+		info.pet.maxmp = NET_ParseInteger(buf, '|', 6);
+		info.pet.detail.points_endurance = NET_ParseInteger(buf, '|', 7);
+		info.pet.detail.points_strength = NET_ParseInteger(buf, '|', 8);
+		info.pet.detail.points_defense = NET_ParseInteger(buf, '|', 9);
+		info.pet.detail.points_agility = NET_ParseInteger(buf, '|', 10);
+		info.pet.detail.points_magical = NET_ParseInteger(buf, '|', 11);
+		info.pet.loyality = NET_ParseInteger(buf, '|', 12);
+		info.pet.skill_count = NET_ParseInteger(buf, '|', 13);
+		if (0 == NET_ParseDelimeter(buf, '|', 14, 255, name))
+		{
+			NET_EscapeStringEx(name);
+			info.pet.realname = boost::locale::conv::to_utf<char>(name, "GBK");
+		}
+		info.pet.image_id = NET_ParseInteger(buf, '|', 15);
+		info.pet.detail.value_attack = NET_ParseInteger(buf, '|', 16);
+		info.pet.detail.value_defensive = NET_ParseInteger(buf, '|', 17);
+		info.pet.detail.value_agility = NET_ParseInteger(buf, '|', 18);
+		info.pet.detail.value_spirit = NET_ParseInteger(buf, '|', 19);
+		info.pet.detail.value_recovery = NET_ParseInteger(buf, '|', 20);
+		info.pet.detail.element_earth = NET_ParseInteger(buf, '|', 21);
+		info.pet.detail.element_water = NET_ParseInteger(buf, '|', 22);
+		info.pet.detail.element_fire = NET_ParseInteger(buf, '|', 23);
+		info.pet.detail.element_wind = NET_ParseInteger(buf, '|', 24);
+
+		CGA_NotifyTradeStuffs(info);
+	}
+}
+
+void __cdecl NewNET_ParseTradePetPackets(int a1, int index, const char *buf)
+{
+	g_CGAService.NewNET_ParseTradePetPackets(a1, index, buf);
+}
+
+void CGAService::NewNET_ParseTradePetSkillPackets(int a1, int index, const char *buf)
+{
+	NET_ParseTradePetSkillPackets(a1, index, buf);
+
+	WriteLog("NewNET_ParseTradePetSkillPackets\n");
+
+	WriteLog2(buf);
+
+	cga_trade_stuff_info_t info(TRADE_STUFFS_PETSKILL);
+
+	char name[256];
+
+	info.petskills.index = index;
+
+	for (int i = 0; i < 10; ++i)
+	{
+		if (1 != NET_ParseDelimeter(buf, '|', i + 1, 255, name))
+		{
+			NET_EscapeStringEx(name);
+
+			info.petskills.skills.emplace_back(boost::locale::conv::to_utf<char>(name, "GBK"));
+		}
+	}
+
+	CGA_NotifyTradeStuffs(info);
+}
+
+void __cdecl NewNET_ParseTradePetSkillPackets(int a1, int index, const char *buf)
+{
+	g_CGAService.NewNET_ParseTradePetSkillPackets(a1, index, buf);
+}
+
+void CGAService::NewNET_ParseTradeGoldPackets(int a1, int gold)
+{
+	WriteLog("NewNET_ParseTradeGoldPackets\n");
+
+	NET_ParseTradeGoldPackets(a1, gold);
+
+	cga_trade_stuff_info_t info(TRADE_STUFFS_GOLD);
+
+	info.gold = gold;
+
+	CGA_NotifyTradeStuffs(info);
+}
+
+void __cdecl NewNET_ParseTradeGoldPackets(int a1, int gold)
+{
+	g_CGAService.NewNET_ParseTradeGoldPackets(a1, gold);
+}
+
+void CGAService::NewNET_ParseTradePlayers(int a1, const char *src, char *src2)
+{
+	WriteLog("NewNET_ParseTradePlayers\n");
+
+	NET_ParseTradePlayers(a1, src, src2);
+
+	char buf[256];
+	int numplayers = 0;
+	int position = 1;
+
+	cga_player_menu_items_t players;
+
+	for (int i = 0; i < 10; ++i)
+	{
+		if (numplayers >= 10)
+			break;
+		if (NET_ParseDelimeter(src, '|', position, 255, buf) == 1)
+			break;
+		NET_EscapeStringEx(buf);
+		
+		std::string playername = boost::locale::conv::to_utf<char>(buf, "GBK");
+
+		if (NET_ParseDelimeter(src2, '|', position, 255, buf) == 1)
+			break;
+		NET_EscapeStringEx(buf);
+
+		int playerlevel = atoi(buf);
+		
+		players.emplace_back(
+			playername,
+			playerlevel,
+			i
+		);
+
+		++position;
+		++numplayers;
+	}
+
+	m_player_menu_type = PLAYER_MENU_TRADE;
+
+	CGA_NotifyPlayerMenu(players);
+}
+
+void __cdecl NewNET_ParseTradePlayers(int a1, const char *src, char *src2)
+{
+	g_CGAService.NewNET_ParseTradePlayers(a1, src, src2);
+}
+
+void CGAService::NewNET_ParseHealPlayers(int a1, const char *src)
+{
+	WriteLog("NewNET_ParseHealPlayers %s\n", src);
+
+	NET_ParseHealPlayers(a1, src);
+
+	char buf[256];
+	int numplayers = 0;
+	int position = 1;
+
+	cga_player_menu_items_t players;
+
+	std::string playername;
+
+	playername = boost::locale::conv::to_utf<char>((*g_playerBase)->name, "GBK");
+
+	players.emplace_back(
+		playername,
+		0,
+		numplayers
+	);
+
+	numplayers++;
+
+	for (int i = 0; i < 5; ++i)
+	{
+		if (g_team_player_base[i].valid && 
+			g_team_player_base[i].unit_id != (*g_playerBase)->unitid)
+		{
+			playername = boost::locale::conv::to_utf<char>(g_team_player_base[i].name, "GBK");
+			if (playername.empty())
+			{
+				if (g_team_player_base[i].actor) {
+					playername = boost::locale::conv::to_utf<char>((char *)g_team_player_base[i].actor + 196, "GBK");
+				}
+
+				/*for (int j = 0; j < *g_unit_count; ++j)
+				{
+					if (g_map_units[j].valid && g_map_units[j].unit_id == g_team_player_base[i].unit_id)
+					{
+						playername = boost::locale::conv::to_utf<char>(g_map_units[j].unit_name, "GBK");
+						break;
+					}
+				}*/
+			}
+
+			players.emplace_back(
+				playername,
+				1,
+				numplayers
+			);
+			numplayers++;
+		}
+	}
+
+	for (int i = 0; i < 10; ++i)
+	{
+		if (numplayers >= 10)
+			break;
+		if (NET_ParseDelimeter(src, '|', position, 255, buf) == 1)
+			break;
+		NET_EscapeStringEx(buf);
+
+		playername = boost::locale::conv::to_utf<char>(buf, "GBK");
+
+		int type = NET_ParseInteger(src, '|', position);
+		if (type == 1)
+			break;
+
+		players.emplace_back(
+			playername,
+			type ? 3 : 2,
+			numplayers
+		);
+
+		++position;
+		++numplayers;
+	}
+
+	m_player_menu_type = PLAYER_MENU_HEAL;
+
+	CGA_NotifyPlayerMenu(players);
+}
+
+void __cdecl NewNET_ParseHealPlayers(int a1, const char *src)
+{
+	g_CGAService.NewNET_ParseHealPlayers(a1, src);
+}
+
+void CGAService::NewNET_ParseHealUnits(int a1, const char *src)
+{
+	WriteLog("NewNET_ParseHealUnits\n");
+
+	NET_ParseHealUnits(a1, src);
+
+	char buf[128];
+	int numunits = 0;
+	std::string unitname;
+
+	cga_unit_menu_items_t units;
+
+	if (g_heal_player_menu_type[*g_heal_player_menu_select])
+	{
+		int i = 0;
+		int position = 1;
+		while (i < 6)
+		{
+			if (NET_ParseDelimeter(src, '|', position++, 127, buf) == 1)
+				break;
+			if (*g_heal_menu_type != 1 || i)
+			{
+				NET_EscapeStringEx(buf);
+				unitname = boost::locale::conv::to_utf<char>(buf, "GBK");
+				int level = NET_ParseInteger(src, '|', position++);
+				int health = NET_ParseInteger(src, '|', position++);
+				int hp = NET_ParseInteger(src, '|', position++);
+				int maxhp = NET_ParseInteger(src, '|', position++);
+				int mp = NET_ParseInteger(src, '|', position++);
+				int maxmp = NET_ParseInteger(src, '|', position++);
+				int color = 0;
+				switch (g_heal_player_menu_type[*g_heal_player_menu_select])
+				{
+				case 1:
+					if (i)
+						color = 5;
+					else
+						color = 1;
+					break;
+				case 2:
+					if (i)
+						color = 6;
+					else
+						color = 2;
+					break;
+				case 3:
+					color = 3;
+					break;
+				}
+
+				units.emplace_back(
+					unitname,
+					level,
+					health,
+					hp,
+					maxhp,
+					mp,
+					maxmp,
+					color,
+					numunits
+				);
+				numunits++;
+			}
+			else
+			{
+				position += 6;
+				++numunits;
+			}
+		}
+	}
+	else 
+	{
+		if (*g_heal_menu_type != 1)
+		{
+			unitname = boost::locale::conv::to_utf<char>((*g_playerBase)->name, "GBK");
+			units.emplace_back(
+				unitname,
+				(*g_playerBase)->level,
+				(*g_playerBase)->health,
+				(*g_playerBase)->hp.decode(),
+				(*g_playerBase)->maxhp.decode(),
+				(*g_playerBase)->mp.decode(),
+				(*g_playerBase)->maxmp.decode(),
+				0,
+				numunits
+			);
+			numunits++;
+		}
+		for (int i = 0; i < 5; ++i)
+		{
+			if (g_pet_base[i].level)
+			{
+				unitname = boost::locale::conv::to_utf<char>(g_pet_base[i].name, "GBK");
+				if (unitname.empty())
+					unitname = boost::locale::conv::to_utf<char>(g_pet_base[i].realname, "GBK");
+				units.emplace_back(
+					unitname,
+					g_pet_base[i].level,
+					g_pet_base[i].health,
+					g_pet_base[i].hp.decode(),
+					g_pet_base[i].maxhp.decode(),
+					g_pet_base[i].mp.decode(),
+					g_pet_base[i].maxmp.decode(),
+					4,
+					numunits
+				);
+				numunits++;
+			}
+		}
+	}
+
+	m_unit_menu_type = UNIT_MENU_HEAL;
+
+	CGA_NotifyUnitMenu(units);
+}
+
+void __cdecl NewNET_ParseHealUnits(int a1, const char *src)
+{
+	g_CGAService.NewNET_ParseHealUnits(a1, src);
+}
+
+void CGAService::NewNET_ParseItemPlayers(int a1, const char *src)
+{
+	WriteLog("NewNET_ParseItemPlayers\n");
+
+	NET_ParseItemPlayers(a1, src);
+
+	char buf[256];
+	int numplayers = 0;
+	int position = 1;
+
+	cga_player_menu_items_t players;
+
+	std::string playername;
+
+	playername = boost::locale::conv::to_utf<char>((*g_playerBase)->name, "GBK");
+
+	players.emplace_back(
+		playername,
+		0,
+		numplayers
+	);
+
+	numplayers++;
+
+	for (int i = 0; i < 5; ++i)
+	{
+		if (g_team_player_base[i].valid &&
+			g_team_player_base[i].unit_id != (*g_playerBase)->unitid)
+		{
+			playername = boost::locale::conv::to_utf<char>(g_team_player_base[i].name, "GBK");
+
+			if (playername.empty())
+			{
+				if (g_team_player_base[i].actor) {
+					playername = boost::locale::conv::to_utf<char>((char *)g_team_player_base[i].actor + 196, "GBK");
+				}
+				/*for (int j = 0; j < *g_unit_count; ++j)
+				{
+					if (g_map_units[j].valid && g_map_units[j].unit_id == g_team_player_base[i].unit_id)
+					{
+						playername = boost::locale::conv::to_utf<char>(g_map_units[j].unit_name, "GBK");
+						break;
+					}
+				}*/
+			}
+
+			players.emplace_back(
+				playername,
+				1,
+				numplayers
+			);
+			numplayers++;
+		}
+	}
+
+	for (int i = 0; i < 10; ++i)
+	{
+		if (numplayers >= 10)
+			break;
+		if (NET_ParseDelimeter(src, '|', position, 255, buf) == 1)
+			break;
+		NET_EscapeStringEx(buf);
+
+		playername = boost::locale::conv::to_utf<char>(buf, "GBK");
+
+		int type = NET_ParseInteger(src, '|', position);
+		if (type == 1)
+			break;
+
+		players.emplace_back(
+			playername,
+			type ? 3 : 2,
+			numplayers
+		);
+
+		++position;
+		++numplayers;
+	}
+
+	m_player_menu_type = PLAYER_MENU_ITEM;
+
+	CGA_NotifyPlayerMenu(players);
+}
+
+void __cdecl NewNET_ParseItemPlayers(int a1, const char *src)
+{
+	g_CGAService.NewNET_ParseItemPlayers(a1, src);
+}
+
+void CGAService::NewNET_ParseItemUnits(int a1, const char *src)
+{
+	WriteLog("NewNET_ParseItemUnits\n");
+
+	NET_ParseItemUnits(a1, src);
+
+	char buf[128];
+	int numunits = 0;
+	std::string unitname;
+
+	cga_unit_menu_items_t units;
+
+	if (g_item_player_menu_type[10 * (*g_item_player_select)])
+	{
+		int i = 0;
+		int position = 1;
+		while (i < 6)
+		{
+			if (NET_ParseDelimeter(src, '|', position++, 127, buf) == 1)
+				break;
+			
+			NET_EscapeStringEx(buf);
+			unitname = boost::locale::conv::to_utf<char>(buf, "GBK");
+			int level = NET_ParseInteger(src, '|', position++);
+			int health = NET_ParseInteger(src, '|', position++);
+			int hp = NET_ParseInteger(src, '|', position++);
+			int maxhp = NET_ParseInteger(src, '|', position++);
+			int mp = NET_ParseInteger(src, '|', position++);
+			int maxmp = NET_ParseInteger(src, '|', position++);
+			int color = 0;
+			switch (g_heal_player_menu_type[*g_heal_player_menu_select])
+			{
+			case 1:
+				if (i)
+					color = 5;
+				else
+					color = 1;
+				break;
+			case 2:
+				if (i)
+					color = 6;
+				else
+					color = 2;
+				break;
+			case 3:
+				color = 3;
+				break;
+			}
+
+			units.emplace_back(
+				unitname,
+				level,
+				health,
+				hp,
+				maxhp,
+				mp,
+				maxmp,
+				color,
+				numunits
+			);
+			numunits++;
+		}
+	}
+	else
+	{
+		unitname = boost::locale::conv::to_utf<char>((*g_playerBase)->name, "GBK");
+		units.emplace_back(
+			unitname,
+			(*g_playerBase)->level,
+			(*g_playerBase)->health,
+			(*g_playerBase)->hp.decode(),
+			(*g_playerBase)->maxhp.decode(),
+			(*g_playerBase)->mp.decode(),
+			(*g_playerBase)->maxmp.decode(),
+			0,
+			numunits
+		);
+		numunits++;
+
+		for (int i = 0; i < 5; ++i)
+		{
+			if (g_pet_base[i].level)
+			{
+				unitname = boost::locale::conv::to_utf<char>(g_pet_base[i].name, "GBK");
+				if(unitname.empty())
+					unitname = boost::locale::conv::to_utf<char>(g_pet_base[i].realname, "GBK");
+				units.emplace_back(
+					unitname,
+					g_pet_base[i].level,
+					g_pet_base[i].health,
+					g_pet_base[i].hp.decode(),
+					g_pet_base[i].maxhp.decode(),
+					g_pet_base[i].mp.decode(),
+					g_pet_base[i].maxmp.decode(),
+					4,
+					numunits
+				);
+				numunits++;
+			}
+		}
+	}
+
+	m_unit_menu_type = UNIT_MENU_ITEM;
+
+	CGA_NotifyUnitMenu(units);
+}
+
+void __cdecl NewNET_ParseItemUnits(int a1, const char *src)
+{
+	g_CGAService.NewNET_ParseItemUnits(a1, src);
+}
+
+bool CGAService::ParseIsKnockout(const char *buf)
+{
+	return false;
+
+	char *p = (char *)buf + 2;
+
+	while (p)
+	{
+		p = strstr(p, "SKL|");
+		if (p)
+		{
+			p += 4;
+			char *src = strstr(p, "|a");
+			char *dst = strstr(p, "|d");
+			if (src && dst)
+			{
+				int srcpos = -1, dstpos = -1;
+				sscanf(src + 2, "%X", &srcpos);
+				sscanf(dst + 2, "%X", &dstpos);
+
+				if (dstpos >= 0 && dstpos < 20 && m_battle_units[dstpos].exist 
+					&& dstpos == *g_btl_player_pos)//0 == strcmp(m_battle_units[dstpos].name, (*g_playerBase)->name))
+				{
+					char temp[32];
+					sprintf(temp, "|d%X|", dstpos);
+					char *flags = dst + strlen(temp);
+					int flagsv = -1;
+					sscanf(flags, "%X", &flagsv);
+					if (flagsv != -1 && (flagsv & 0x20060) == 0x20060) {
+						WriteLog("knockout %X\n", flagsv);
+						return true;
+					}
+				}
+			}
+		}
+	}
+	return false;
+}
+
+bool CGAService::ParseIsEscape(const char *buf)
+{
+	char *p = (char *)buf + 2;
+
+	while (p)
+	{
+		p = strstr(p, "ESC|");
+		if (p)
+		{
+			p += 4;
+			char *pos = strstr(p, "|e");
+			char *sta = strstr(p, "|f");
+			if (pos && sta)
+			{
+				int srcpos = -1, status = -1;
+				sscanf(pos + 2, "%X", &srcpos);
+				sscanf(sta + 2, "%X", &status);
+
+				if (srcpos >= 0 && srcpos < 20 && m_battle_units[srcpos].exist
+					&& srcpos == *g_btl_player_pos)//0 == strcmp(m_battle_units[srcpos].name, (*g_playerBase)->name) && status == 1)
+				{
+					WriteLog("escaped %X\n", srcpos);
+					return true;
+				}
+			}
+		}
+	}
+	return false;
+}
+
 void CGAService::NewNET_ParseBattlePackets(int a1, const char *buf)
 {
+	WriteLog("NewNET_ParseBattlePackets %s\n", buf);
+
 	if (*buf == 'M')
 	{
 		if (m_btl_highspeed_enable)
@@ -113,9 +964,18 @@ void CGAService::NewNET_ParseBattlePackets(int a1, const char *buf)
 			if (strstr(buf, "END|"))//battle end
 			{
 				NET_ParseBattlePackets(a1, "M|END|");
+
+				CGA_NotifyBattleAction(FL_BATTLE_ACTION_END);
 			}
 			else
 			{
+				if (ParseIsKnockout(buf) || ParseIsEscape(buf))
+				{
+					NET_ParseBattlePackets(a1, "M|END|");
+					CGA_NotifyBattleAction(FL_BATTLE_ACTION_END);
+					return;
+				}
+
 				NET_ParseBattlePackets(a1, "M|");
 			}
 			return;
@@ -291,7 +1151,7 @@ void __cdecl NewNET_ParseWorkingResult(int a1, int success, int type, const char
 
 void CGAService::NewNET_ParseChatMsg(int a1, int unitid, const char *buf, int color, int size)
 {
-	WriteLog("u=%d, buf=%s, color=%d, size=%d\n", unitid, buf, color, size);
+	WriteLog("NewNET_ParseChatMsg u=%d, buf=%s, color=%d, size=%d\n", unitid, buf, color, size);
 
 	if (buf[0] == 'P' && buf[1] == '|')
 	{
@@ -307,15 +1167,104 @@ void __cdecl NewNET_ParseChatMsg(int a1, int unitid, const char *buf, int color,
 	g_CGAService.NewNET_ParseChatMsg(a1, unitid, buf, color, size);
 }
 
+void CGAService::NewNET_ParseSysMsg(int a1, const char *buf)
+{
+	char temp[4096];
+	strcpy(temp, buf);
+	NET_EscapeStringEx(temp);
+	cga_chat_msg_t msg(-1, boost::locale::conv::to_utf<char>(temp, "GBK"), 0, 0);
+	CGA_NotifyChatMsg(msg);
+
+	WriteLog("NewNET_ParseSysMsg %s\n", temp);
+
+	NET_ParseSysMsg(a1, buf);
+}
+
+void __cdecl NewNET_ParseSysMsg(int a1, const char *buf)
+{
+	g_CGAService.NewNET_ParseSysMsg(a1, buf);
+}
+
+void CGAService::NewNET_ParseReadyTrade()
+{
+	WriteLog("NewNET_ParseConfirmTrade\n");
+
+	NET_ParseReadyTrade();
+
+	CGA_NotifyTradeState(TRADE_STATE_READY);
+}
+
+void __cdecl NewNET_ParseReadyTrade()
+{
+	g_CGAService.NewNET_ParseReadyTrade();
+}
+
+
+void CGAService::NewNET_ParseConfirmTrade(int a1, int a2)
+{
+	WriteLog("NewNET_ParseConfirmTrade\n");
+
+	NET_ParseConfirmTrade(a1, a2);
+
+	if(a2 == 1)
+		CGA_NotifyTradeState(TRADE_STATE_CONFIRM);
+	else if (a2 == 0)
+		CGA_NotifyTradeState(TRADE_STATE_CANCEL);
+	else if (a2 == 2)
+		CGA_NotifyTradeState(TRADE_STATE_SUCCEED);
+}
+
+void __cdecl NewNET_ParseConfirmTrade(int a1, int a2)
+{
+	g_CGAService.NewNET_ParseConfirmTrade(a1, a2);
+}
+
+void __cdecl NewNET_ParseMeetEnemy(int a1, int a2, int a3)
+{
+	g_CGAService.NET_ParseMeetEnemy(a1, a2, a3);
+
+	WriteLog("NewNET_ParseMeetEnemy %d %d %d\n", a1, a2, a3);
+}
+
 void __cdecl NewR_DrawText(int a1)
 {
 	g_CGAService.R_DrawText(a1);
-	g_CGAService.DrawBattleInfo();
+	g_CGAService.DrawCustomText();
 }
 
 void CGAService::NewMove_Player()
 {
 	(*g_playerBase)->move_speed = m_move_speed;
+
+	auto x = g_player_xpos->decode();
+	auto y = g_player_ypos->decode();
+
+	if (*g_disable_move == 0 &&
+		*g_map_xf == x * 64.0 &&
+		*g_map_yf == y * 64.0)
+	{
+		DWORD xy = ((x & 0xFFFF) << 16) | (y & 0xFFFF);
+		bool bAddToHistory = false;
+		if (!m_move_history.empty())
+		{
+			if (xy != m_move_history.back())
+			{
+				bAddToHistory = true;
+			}
+		}
+		else
+		{
+			bAddToHistory = true;
+		}
+
+		if (bAddToHistory)
+		{
+			if (m_move_history.size() > 128)
+				m_move_history.pop_front();
+
+			m_move_history.push_back(xy);
+		}
+	}
 
 	if (m_move_to & 2)
 	{
@@ -368,97 +1317,6 @@ void CGAService::NewMove_Player()
 void __cdecl NewMove_Player()
 {
 	g_CGAService.NewMove_Player();
-}
-
-void CGAService::NewUI_PlayerMenuShowup(int a1)
-{
-	UI_PlayerMenuShowup(a1);
-
-	if (a1 == -1)
-	{
-		cga_player_menu_items_t players;
-
-		int count = *g_player_menu_count - *g_player_menu_begin;
-		players.reserve(count);
-		for (int i = 0; i < count; ++i)
-		{
-			players.emplace_back(
-				boost::locale::conv::to_utf<char>((*g_player_menu_name)[i], "GBK"),
-				(*g_player_menu_color)[i],
-				*g_player_menu_begin + i
-			);
-		}
-
-		CGA_NotifyPlayerMenu(players);
-	}
-}
-
-void __cdecl NewUI_PlayerMenuShowup(int a1)
-{
-	g_CGAService.NewUI_PlayerMenuShowup(a1);
-}
-
-int CGAService::NewUI_PlayerMenuMouseEvent(int widget_index, char flags)
-{
-	if (m_menu_item_selected == 1 && m_menu_item_select_index + 14 == widget_index)
-	{
-		flags = 2;
-		m_menu_item_selected = 0;
-	}
-	return UI_PlayerMenuMouseEvent(widget_index, flags);
-}
-
-int __cdecl NewUI_PlayerMenuMouseEvent(int widget_index, char flags)
-{
-	return g_CGAService.NewUI_PlayerMenuMouseEvent(widget_index, flags);
-}
-
-void CGAService::NewUI_UnitMenuShowup(int a1)
-{
-	UI_UnitMenuShowup(a1);
-
-	if (a1 == -1)
-	{
-		cga_unit_menu_items_t units;
-		int count = *g_unit_menu_count;
-		units.reserve(count);
-		for (int i = 0; i < count; ++i)
-		{
-			units.emplace_back(
-				boost::locale::conv::to_utf<char>((*g_unit_menu_base)[i].name, "GBK"),
-				(*g_unit_menu_base)[i].level,
-				(*g_unit_menu_base)[i].health,
-				(*g_unit_menu_base)[i].hp,
-				(*g_unit_menu_base)[i].maxhp,
-				(*g_unit_menu_base)[i].mp,
-				(*g_unit_menu_base)[i].maxmp,
-				(*g_unit_menu_base)[i].color,
-				*g_unit_menu_begin + i
-			);
-		}
-
-		CGA_NotifyUnitMenu(units);
-	}
-}
-
-void __cdecl NewUI_UnitMenuShowup(int a1)
-{
-	g_CGAService.NewUI_UnitMenuShowup(a1);
-}
-
-int CGAService::NewUI_UnitMenuMouseEvent(int widget_index, char flags)
-{
-	if (m_menu_item_selected == 2 && m_menu_item_select_index + 16 == widget_index) 
-	{
-		flags = 2;
-		m_menu_item_selected = 0;
-	}
-	return UI_UnitMenuMouseEvent(widget_index, flags);
-}
-
-int __cdecl NewUI_UnitMenuMouseEvent(int widget_index, char flags)
-{
-	return g_CGAService.NewUI_UnitMenuMouseEvent(widget_index, flags);
 }
 
 void CGAService::NewNPC_ShowDialogInternal(int type, int options, int dlgid, int objid, const char *message)
@@ -550,6 +1408,20 @@ int __cdecl NewUI_HandleLearnSkillConfirmMouseEvent(int index, char flags)
 	return g_CGAService.UI_HandleLearnSkillConfirmMouseEvent(index, flags);
 }
 
+int __cdecl NewUI_HandleForgetSkillMouseEvent(int index, char flags)
+{
+	if (g_CGAService.m_ui_forget_skill_index != -1) 
+	{
+		flags = 2;
+		index = g_CGAService.m_ui_forget_skill_index + 0x45;
+		g_CGAService.m_ui_forget_skill_index = -1;
+
+		return g_CGAService.UI_HandleForgetSkillMouseEvent(index, flags);
+	}
+
+	return g_CGAService.UI_HandleForgetSkillMouseEvent(index, flags);
+}
+
 int CGAService::NewUI_HandleEnablePlayerFlagsMouseEvent(int index, char flags)
 {
 	if (index >= 17 && index < 17 + _ARRAYSIZE(index2player_flags))
@@ -584,7 +1456,7 @@ int CGAService::NewUI_HandleCraftItemSlotMouseEvent(int index, char flags)
 
 		--m_ui_craftdialog_additemcount;
 
-		for (int i = 0; i < 5; ++i)
+		for (int i = 0; i < 6; ++i)
 		{
 			if (m_ui_craftdialog_additem[i] != -1)
 			{
@@ -631,18 +1503,24 @@ int CGAService::NewUI_HandleCraftItemButtonMouseEvent(int index, char flags)
 	if (m_ui_craftdialog_click_begin && (*g_craft_step == 0 || *g_craft_step == 3))
 	{
 		m_ui_craftdialog_click_begin = false;
-		flags |= 2;		
+		flags |= 2;
 
 		char backup_acc = *g_work_accelerate;
 		char backup_percent = g_work_accelerate_percent[0];
 
-		*g_work_accelerate = 1;
-		g_work_accelerate_percent[0] = m_work_acceleration;
+		if (m_work_acceleration)
+		{
+			*g_work_accelerate = 1;
+			g_work_accelerate_percent[0] = m_work_acceleration;
+		}
 
 		int result = UI_HandleCraftItemButtonMouseEvent(index, flags);
 
-		*g_work_accelerate = backup_acc;
-		g_work_accelerate_percent[0] = backup_percent;
+		if (m_work_acceleration)
+		{
+			*g_work_accelerate = backup_acc;
+			g_work_accelerate_percent[0] = backup_percent;
+		}
 
 		return result;
 	}
@@ -653,6 +1531,72 @@ int CGAService::NewUI_HandleCraftItemButtonMouseEvent(int index, char flags)
 int __cdecl NewUI_HandleCraftItemButtonMouseEvent(int index, char flags)
 {
 	return g_CGAService.NewUI_HandleCraftItemButtonMouseEvent(index, flags);
+}
+
+int __cdecl NewUI_PlaySwitchAnim(int a1, char a2, float a3)
+{
+	if (g_CGAService.m_ui_noswitchanim)
+		return 1;
+
+	return g_CGAService.UI_PlaySwitchAnim(a1, a2, a3);
+}
+
+void CGAService::NewUI_OpenTradeDialog(const char *playerName, int playerLevel)
+{
+	UI_OpenTradeDialog(playerName, playerLevel);
+
+	auto name = boost::locale::conv::to_utf<char>(playerName, "GBK");
+
+	cga_trade_dialog_t dlg(name, playerLevel);
+
+	CGA_NotifyTradeDialog(dlg);
+}
+
+void __cdecl NewUI_OpenTradeDialog(const char *playerName, int playerLevel)
+{
+	g_CGAService.NewUI_OpenTradeDialog(playerName, playerLevel);
+}
+
+void __cdecl NewActor_SetAnimation(void *actor, int anim, int a3)
+{
+	auto v3 = *(void **)((char *)actor + 12);
+	if (v3 == NULL || IsBadReadPtr(v3, 0x38))//crash fix
+		return;
+
+	g_CGAService.Actor_SetAnimation(actor, anim, a3);
+}
+
+int __cdecl NewIsMapObjectEntrance(int xpos, int ypos)
+{
+	if(g_CGAService.m_move_checkwarp)
+		return g_CGAService.IsMapObjectEntrance(xpos, ypos);
+
+	return 0;
+}
+
+void CGAService::NewNET_WritePrepareCraftItemPacket_cgitem(int a1, int a2)
+{
+	if (m_work_immediate == true)
+	{
+		*g_craft_done_tick = 0;
+	}
+	else
+	{
+		NET_WritePrepareCraftItemPacket_cgitem(a1, a2);
+	}
+}
+
+void __cdecl NewNET_WritePrepareCraftItemPacket_cgitem(int a1, int a2)
+{
+	g_CGAService.NewNET_WritePrepareCraftItemPacket_cgitem(a1, a2);
+}
+
+int __cdecl NewGetBattleUnitDistance(void *a1, float a2, float a3)
+{
+	if (g_CGAService.m_ui_noswitchanim)
+		return 0;
+
+	return g_CGAService.GetBattleUnitDistance(a1, a2, a3);
 }
 
 ULONG MH_GetModuleSize(HMODULE hModule)
@@ -731,15 +1675,16 @@ void CGAService::Initialize(game_type type)
 
 		g_logback = CONVERT_GAMEVAR(int *, 0x957160);
 		g_item_cur_using = CONVERT_GAMEVAR(int *, 0x8E3ACC);
-		g_item_menu_players = CONVERT_GAMEVAR(item_menu_player_t *, 0x94C2F8);
+		/*g_item_menu_players = CONVERT_GAMEVAR(item_menu_player_t *, 0x94C2F8);
 		g_item_menu_player_count = CONVERT_GAMEVAR(int *, 0x8E3C38);
 		g_item_menu_units = CONVERT_GAMEVAR(item_menu_unit_t *, 0x946870);
 		g_item_menu_unit_count = CONVERT_GAMEVAR(int *, 0x94BAC8);
 		g_player_menu_clickable = CONVERT_GAMEVAR(char *, 0x8C3909);
-		g_unit_menu_clickable = CONVERT_GAMEVAR(char *, 0x8B9187);
+		g_unit_menu_clickable = CONVERT_GAMEVAR(char *, 0x8B9187);*/
 
 		g_unit_count = CONVERT_GAMEVAR(int *, 0x245774);
 		g_map_units = CONVERT_GAMEVAR(map_unit_t *, 0x245B34);
+
 		g_npc_dialog_show = CONVERT_GAMEVAR(int *, 0x90162C);
 		g_npc_dialog_type = CONVERT_GAMEVAR(int *, 0x2130FC);
 		g_npc_dialog_option = CONVERT_GAMEVAR(int *, 0x95520C);
@@ -753,7 +1698,6 @@ void CGAService::Initialize(game_type type)
 		g_map_x_size = CONVERT_GAMEVAR(short *, 0x81EF14);
 		g_map_y_size = CONVERT_GAMEVAR(short *, 0x806164);
 		g_map_collision_table = CONVERT_GAMEVAR(short *, 0x5D6178);
-
 		g_mutex = CONVERT_GAMEVAR(HANDLE *, 0x5D5D1C);
 
 		Sys_CheckModify = CONVERT_GAMEVAR(char(__cdecl *)(const char *), 0x1448B0);
@@ -771,13 +1715,13 @@ void CGAService::Initialize(game_type type)
 		NET_WriteLogbackPacket_cgse = CONVERT_GAMEVAR(void(__cdecl *)(void *, int, const char *), 0x6ACD0);
 		Move_Player = CONVERT_GAMEVAR(void(__cdecl *)(), 0x89070);
 		CL_MoveItemEx = CONVERT_GAMEVAR(void(__cdecl *)(int), 0);//TODO
-		UI_ClickLogout = CONVERT_GAMEVAR(void(__cdecl *)(int, int), 0x40E0);
-		UI_PlayerMenuSelect = CONVERT_GAMEVAR(int(__cdecl **)(int, int), 0);//TODO
-		UI_UnitMenuSelect = CONVERT_GAMEVAR(int(__cdecl **)(int, int), 0);//TODO
-		UI_PlayerMenuShowup = CONVERT_GAMEVAR(int(__cdecl *)(int), 0x1A190);
-		UI_PlayerMenuMouseEvent = CONVERT_GAMEVAR(int(__cdecl *)(int, char), 0);//TODO
-		UI_UnitMenuShowup = CONVERT_GAMEVAR(int(__cdecl *)(int), 0x8B5F0);
-		UI_UnitMenuMouseEvent = CONVERT_GAMEVAR(int(__cdecl *)(int, char), 0x8B7C0);
+		UI_HandleLogoutMouseEvent = CONVERT_GAMEVAR(int(__cdecl *)(int, char), 0x40E0);
+		//UI_PlayerMenuSelect = CONVERT_GAMEVAR(int(__cdecl **)(int, int), 0);//TODO
+		//UI_UnitMenuSelect = CONVERT_GAMEVAR(int(__cdecl **)(int, int), 0);//TODO
+		//UI_PlayerMenuShowup = CONVERT_GAMEVAR(int(__cdecl *)(int), 0x1A190);
+		//UI_PlayerMenuMouseEvent = CONVERT_GAMEVAR(int(__cdecl *)(int, char), 0);//TODO
+		//UI_UnitMenuShowup = CONVERT_GAMEVAR(int(__cdecl *)(int), 0x8B5F0);
+		//UI_UnitMenuMouseEvent = CONVERT_GAMEVAR(int(__cdecl *)(int, char), 0x8B7C0);
 		NPC_ShowDialogInternal = CONVERT_GAMEVAR(void(__cdecl *)(int, int, int, int, const char *), 0xED060);
 		NPC_ClickDialog = CONVERT_GAMEVAR(int(__cdecl *)(int, int, int, char), 0x28A0);
 		NPC_ClickExchangeDialog = CONVERT_GAMEVAR(void(__cdecl *)(int), 0);//TODO
@@ -792,8 +1736,10 @@ void CGAService::Initialize(game_type type)
 		g_playerBase_cgitem = CONVERT_GAMEVAR(playerbase_t *, 0xE12C30);//ok
 		g_playerBase = &g_playerBase_cgitem;
 		g_bank_item_base = CONVERT_GAMEVAR(bank_item_info_t *, 0x8E4C38);//ok
+		g_npcdlg_item_base = CONVERT_GAMEVAR(npcdlg_item_info_t *, 0x8D3198);//ok
 		g_player_name = CONVERT_GAMEVAR(char *, 0xBDB998);//ok
 		g_pet_base = CONVERT_GAMEVAR(pet_t *, 0xE109F8);//ok
+		g_player_remain_points = CONVERT_GAMEVAR(int *, 0x8E3C50);//ok
 		g_pet_id = CONVERT_GAMEVAR(int *, 0x8B4164);//ok
 		g_job_name = CONVERT_GAMEVAR(char *, 0xC1CD48);//ok
 		g_skill_base = CONVERT_GAMEVAR(skill_t *, 0xC1CD64);//ok
@@ -822,36 +1768,30 @@ void CGAService::Initialize(game_type type)
 		g_btl_buffer_index = CONVERT_GAMEVAR(int *, 0x23B828);//ok
 		g_btl_round_count = CONVERT_GAMEVAR(int *, 0x23FA1C);//ok
 		g_btl_player_pos = CONVERT_GAMEVAR(int *, 0x23FA94);//ok
+		g_btl_petskill_allowbit = CONVERT_GAMEVAR(int *, 0x23F9BC);//ok
 		g_btl_skill_allowbit = CONVERT_GAMEVAR(int *, 0x23FA28);//ok
+		g_btl_weapon_allowbit = CONVERT_GAMEVAR(int *, 0x23FA9C);//ok
 		g_btl_player_status = CONVERT_GAMEVAR(int *, 0x23FA44);//ok
 		g_btl_petid = CONVERT_GAMEVAR(int *, 0x23F9C0);//ok
 		g_btl_action_done = CONVERT_GAMEVAR(int *, 0x23F924);//ok
 		g_btl_skill_performed = CONVERT_GAMEVAR(int *, 0x23F9F8);//ok
 		g_btl_round_endtick = CONVERT_GAMEVAR(unsigned int *, 0x23F92C);//ok
+		g_btl_unit_base = CONVERT_GAMEVAR(char *, 0x235798);//ok
 
 		g_net_socket = CONVERT_GAMEVAR(int *, 0xBD7108);//ok
 
 		g_item_base = CONVERT_GAMEVAR(item_t *, 0x8C70B0);//ok
 		g_item_info_base = CONVERT_GAMEVAR(item_info_t *, 0xE12DCC);//ok
+		g_trade_item_base = CONVERT_GAMEVAR(item_t *, 0x8BF2C0);//ok
 
 		g_logback = CONVERT_GAMEVAR(int *, 0xB12AA4);//ok
 		g_item_cur_using = CONVERT_GAMEVAR(int *, 0x8CEFFC);//ok
-		g_item_menu_players = CONVERT_GAMEVAR(item_menu_player_t *, 0x92F638);//ok
-		g_item_menu_player_count = CONVERT_GAMEVAR(int *, 0x8CF00C);//ok
-		g_item_menu_units = CONVERT_GAMEVAR(item_menu_unit_t *, 0x929BA0);//ok
-		g_item_menu_unit_count = CONVERT_GAMEVAR(int *, 0x92EE00);//ok
-		g_player_menu_clickable = CONVERT_GAMEVAR(char *, 0x8BE8C1);//ok
-		g_unit_menu_clickable = CONVERT_GAMEVAR(char *, 0x8B415F);//ok
 
-		g_unit_menu_base = CONVERT_GAMEVAR(unit_menu_t **, 0xD38E60 - 0x400000);//ok
-		g_unit_menu_count = CONVERT_GAMEVAR(int *, 0xCB4140 - 0x400000);//ok
-		g_unit_menu_begin = CONVERT_GAMEVAR(int *, 0xCE4C34 - 0x400000);//ok
+		g_trade_item_array = CONVERT_GAMEVAR(char *, 0x8CF6B0);
+		g_trade_pet_array = CONVERT_GAMEVAR(char *, 0x8BE8BC);
+		g_trade_gold = CONVERT_GAMEVAR(int *, 0x938570);
+
 		g_unit_count = CONVERT_GAMEVAR(int *, 0x23FB0C);//ok
-
-		g_player_menu_name = CONVERT_GAMEVAR(char ***, 0xD29734 - 0x400000);//ok
-		g_player_menu_color = CONVERT_GAMEVAR(char **, 0xCE4AA0 - 0x400000);//ok
-		g_player_menu_count = CONVERT_GAMEVAR(int *, 0xCE4C28 - 0x400000);//ok
-		g_player_menu_begin = CONVERT_GAMEVAR(int *, 0xCDBB24 - 0x400000);//ok
 		g_map_units = CONVERT_GAMEVAR(map_unit_t *, 0x240008);//ok
 
 		g_npc_dialog_show = CONVERT_GAMEVAR(int *, 0x8E4A98);//ok
@@ -861,28 +1801,68 @@ void CGAService::Initialize(game_type type)
 		g_npc_dialog_npcid = CONVERT_GAMEVAR(int *, 0x8CF6A0);//ok
 
 		g_work_basedelay = CONVERT_GAMEVAR(int *, 0x8B4190);//ok
+		g_disable_move = CONVERT_GAMEVAR(short *, 0x801144);//ok
+		g_is_moving = CONVERT_GAMEVAR(int *, 0x8AB2F4);//ok
+		g_do_switch_map = CONVERT_GAMEVAR(int *, 0x8AB2F8);//ok
+		g_switch_map_frames = CONVERT_GAMEVAR(int *, 0x8AB2FC);//ok
+		g_switch_map_type = CONVERT_GAMEVAR(int *, 0x8AB300);//ok
 
 		g_map_x_bottom = CONVERT_GAMEVAR(short *, 0x819ED4);//ok
 		g_map_y_bottom = CONVERT_GAMEVAR(short *, 0x819ED0);//ok
 		g_map_x_size = CONVERT_GAMEVAR(short *, 0x801134);//ok
 		g_map_y_size = CONVERT_GAMEVAR(short *, 0x819EE4);//ok
 		g_map_collision_table = CONVERT_GAMEVAR(short *, 0x5D1148);//ok
-		
+		g_map_index1 = CONVERT_GAMEVAR(int *, 0x81B344);
+		g_map_index2 = CONVERT_GAMEVAR(int *, 0x5D1130);
+		g_map_index3 = CONVERT_GAMEVAR(int *, 0x80114C);
+		g_map_object_table = CONVERT_GAMEVAR(short *, 0x835370);
+
 		g_healing_skill_index = CONVERT_GAMEVAR(int *, 0x8E481C);//ok
 		g_healing_subskill_index = CONVERT_GAMEVAR(int *, 0x8E3C44);//ok
 		g_ui_craftdialog_additem_count = CONVERT_GAMEVAR(char *, 0xF12880-0x400000);//ok
 
+		g_heal_player_menu_type = CONVERT_GAMEVAR(int *, 0x8E3C54);//ok
+		g_heal_player_menu_select = CONVERT_GAMEVAR(int *, 0x929D48);//ok
+		g_heal_menu_type = CONVERT_GAMEVAR(int *, 0x92DA00);//ok
+		g_item_player_menu_type = CONVERT_GAMEVAR(short *, 0x92F638);//ok
+		g_item_player_select = CONVERT_GAMEVAR(int *, 0x9298B0);//ok
+
 		g_craft_step = CONVERT_GAMEVAR(int *, 0xCBF15E - 0x400000);//ok
 		g_work_accelerate = CONVERT_GAMEVAR(char *, 0x63FFFE - 0x400000);//ok;
 		g_work_accelerate_percent = CONVERT_GAMEVAR(char *, 0x627E8C - 0x400000);//ok;
+		g_craft_done_tick = CONVERT_GAMEVAR(int *, 0xCCF858 - 0x400000);//ok
 		g_mutex = CONVERT_GAMEVAR(HANDLE *, 0x5D0D00);//ok
+		g_resolution_width = CONVERT_GAMEVAR(int *, 0x2091EC);//ok
+		g_resolution_height = CONVERT_GAMEVAR(int *, 0x2091F0);//ok
+
+		g_is_in_team = CONVERT_GAMEVAR(short *, 0xE109F0);//ok
+		g_team_flags = CONVERT_GAMEVAR(short *, 0xE12DB2);//ok
+		g_team_player_base = CONVERT_GAMEVAR(team_player_t *, 0xCC25B0);//ok
+		g_title_table = CONVERT_GAMEVAR(char *, 0xCBFFF0);//ok
+
+		g_enableflags = CONVERT_GAMEVAR(short *, 0xE12DBC);//ok
 
 		Sys_CheckModify = CONVERT_GAMEVAR(char(__cdecl *)(const char *), 0x1BD030);//ok
 		COMMON_PlaySound = CONVERT_GAMEVAR(void(__cdecl *)(int, int, int), 0x1B1570);//ok
 		BATTLE_PlayerAction = CONVERT_GAMEVAR(void(__cdecl *)(), 0xD83A0);//ok
+		NET_ParseTradeItemsPackets = CONVERT_GAMEVAR(void(__cdecl *)(int, const char *), 0x183CD0);//ok
+		NET_ParseTradePetPackets = CONVERT_GAMEVAR(void(__cdecl *)(int, int, const char *), 0x183D00);//ok
+		NET_ParseTradePetSkillPackets = CONVERT_GAMEVAR(void(__cdecl *)(int, int, const char *), 0x183D30);//ok
+		NET_ParseTradeGoldPackets = CONVERT_GAMEVAR(void(__cdecl *)(int, int), 0x183CA0);//ok
+		NET_ParseTradePlayers = CONVERT_GAMEVAR(void(__cdecl *)(int , const char *, char *), 0x183BE0);//ok
+		NET_ParseHealPlayers = CONVERT_GAMEVAR(void (__cdecl *)(int , const char *), 0x183B10);
+		NET_ParseHealUnits = CONVERT_GAMEVAR(void(__cdecl *)(int, const char *), 0x183B40);
+		NET_ParseItemPlayers = CONVERT_GAMEVAR(void (__cdecl *)(int , const char *), 0x183B70);
+		NET_ParseItemUnits = CONVERT_GAMEVAR(void(__cdecl *)(int, const char *), 0x183BA0);
+		NET_ParseMeetEnemy = CONVERT_GAMEVAR(void(__cdecl *)(int a1, int a2, int a3), 0x181FB0);
+
 		NET_ParseBattlePackets = CONVERT_GAMEVAR(void(__cdecl *)(int, const char *), 0x1822A0);//ok
 		NET_ParseWorkingResult = CONVERT_GAMEVAR(void(__cdecl *)(int , int , int , const char *), 0x181140);//ok
 		NET_ParseChatMsg = CONVERT_GAMEVAR(void(__cdecl *)(int, int, const char *, int, int), 0x1814F0);//ok
+		NET_ParseSysMsg = CONVERT_GAMEVAR(void(__cdecl *)(int a1, const char *buf), 0x181AA0);//ok
+		NET_ParseReadyTrade = CONVERT_GAMEVAR(void(__cdecl *)(), 0x183C70);
+		NET_ParseConfirmTrade = CONVERT_GAMEVAR(void(__cdecl *)(int a1, int a2), 0x183DB0);
+
 		R_DrawText = CONVERT_GAMEVAR(void(__cdecl *)(int), 0x79490);//ok
 		g_pGameBase = CONVERT_GAMEVAR(void *, 0x2BBA7C);//ok
 		NET_WritePacket3_cgitem = CONVERT_GAMEVAR(void(__cdecl *)(int, int, int, int, int, int, const char *), 0x189530);//ok
@@ -893,16 +1873,25 @@ void CGAService::Initialize(game_type type)
 		NET_WriteDropItemPacket_cgitem = CONVERT_GAMEVAR(void(__cdecl *)(int, int, int, int), 0x187950);//ok
 		NET_WriteMovePacket_cgitem = CONVERT_GAMEVAR(void(__cdecl *)(int, int, const char *), 0x181240);//ok
 		NET_WriteWorkPacket_cgitem = CONVERT_GAMEVAR(void(__cdecl *)(int, int, int, int, const char *), 0x188E50);//ok
-
+		NET_WriteJoinTeamPacket_cgitem = CONVERT_GAMEVAR(void(__cdecl *)(int, int, int, int), 0x1888B0);//ok
+		NET_WriteKickTeamPacket_cgitem = CONVERT_GAMEVAR(void(__cdecl *)(int), 0x1912E0);//ok
+		NET_WriteTradePacket_cgitem = CONVERT_GAMEVAR(void(__cdecl *)(int), 0x188F10);//ok
+		//trade arg2=itemlist 8|0|10|1, arg3=petlist 3|0|4|1 arg4=gold
+		NET_WriteTraceAddItemPacket_cgitem = CONVERT_GAMEVAR(void(__cdecl *)(int, const char *, const char *, int), 0x188FB0);//ok
+		NET_WriteTradeConfirmPacket_cgitem = CONVERT_GAMEVAR(void(__cdecl *)(int), 0x1890A0);//ok
+		NET_WriteTradeRefusePacket_cgitem = CONVERT_GAMEVAR(void(__cdecl *)(int), 0x189050);//ok
+		NET_WriteExchangeCardPacket_cgitem = CONVERT_GAMEVAR(void(__cdecl *)(int, int, int), 0x187E90);//ok
+		NET_WritePKPacket_cgitem = CONVERT_GAMEVAR(void(__cdecl *)(int, int, int), 0x187540);//ok
+		NET_WriteOpenHealDialog_cgitem = CONVERT_GAMEVAR(void(__cdecl *)(int, int), 0x188AA0);//ok
+		NET_WriteMoveItemPacket_cgitem = CONVERT_GAMEVAR(void(__cdecl *)(int, int, int, int), 0x187B30);
+		NET_WriteRequestDownloadMapPacket_cgitem = CONVERT_GAMEVAR(void(__cdecl *)(int, int, int, int , int , int , int), 0x1873D0);
+		NET_WritePrepareCraftItemPacket_cgitem = CONVERT_GAMEVAR(void(__cdecl *)(int, int), 0x189E20);
+		NET_WriteDropPetPacket_cgitem = CONVERT_GAMEVAR(void(__cdecl *)(int, int, int, int), 0x187A90);
+		
 		Move_Player = CONVERT_GAMEVAR(void(__cdecl *)(), 0x98280);//ok
-		UI_ClickLogout = CONVERT_GAMEVAR(void(__cdecl *)(int, int), 0xD2CD0);//ok
+		UI_HandleLogbackMouseEvent = CONVERT_GAMEVAR(int(__cdecl *)(int, char), 0xD2BF0);//ok
+		UI_HandleLogoutMouseEvent = CONVERT_GAMEVAR(int(__cdecl *)(int, char), 0xD2CD0);//ok
 		CL_MoveItemEx = CONVERT_GAMEVAR(void(__cdecl *)(int), 0xC0EC0);//ok
-		UI_PlayerMenuSelect = CONVERT_GAMEVAR(int(__cdecl **)(int, int), 0xCB4144-0x400000);//ok
-		UI_UnitMenuSelect = CONVERT_GAMEVAR(int(__cdecl **)(int, int), 0xCCF014-0x400000);//ok
-		UI_PlayerMenuShowup = CONVERT_GAMEVAR(int(__cdecl *)(int), 0xE0FE0);//ok
-		UI_UnitMenuShowup = CONVERT_GAMEVAR(int(__cdecl *)(int), 0xE18F0);//ok
-		UI_PlayerMenuMouseEvent = CONVERT_GAMEVAR(int(__cdecl *)(int, char), 0xE17A0);//ok
-		UI_UnitMenuMouseEvent = CONVERT_GAMEVAR(int(__cdecl *)(int, char), 0xE1E40);//ok
 		NPC_ShowDialogInternal = CONVERT_GAMEVAR(void(__cdecl *)(int, int, int, int, const char *), 0xDE390);//ok
 		NPC_ClickDialog = CONVERT_GAMEVAR(int(__cdecl *)(int, int, int, char), 0xDEC00);//ok
 		NPC_ClickExchangeDialog = CONVERT_GAMEVAR(void(__cdecl *)(int), 0xE2880);//ok
@@ -912,10 +1901,25 @@ void CGAService::Initialize(game_type type)
 		UI_HandleMiniDialogMouseEvent = CONVERT_GAMEVAR(int(__cdecl *)(int, char), 0xE22E0);//ok
 		UI_IsMouseInRect = CONVERT_GAMEVAR(int(__cdecl *)(int, int, int, int, int), 0x174160);//ok
 		UI_HandleLearnSkillConfirmMouseEvent = CONVERT_GAMEVAR(int(__cdecl *)(int, char), 0x111F20);//ok
+		UI_HandleForgetSkillMouseEvent = CONVERT_GAMEVAR(int(__cdecl *)(int, char), 0x113130);//ok
 		UI_HandleEnablePlayerFlagsMouseEvent = CONVERT_GAMEVAR(int(__cdecl *)(int, char), 0xA9320);//ok
 		UI_HandleCraftItemSlotMouseEvent = CONVERT_GAMEVAR(int(__cdecl *)(int, char), 0xBACA0);//ok
-		UI_HandleCraftItemButtonMouseEvent = CONVERT_GAMEVAR(int(__cdecl *)(int, char), 0xB9BC0);//ok
-		NET_WriteOpenHealDialog_cgitem = CONVERT_GAMEVAR(void(__cdecl *)(int, int), 0x188AA0);//ok
+		UI_HandleCraftItemButtonMouseEvent = CONVERT_GAMEVAR(int(__cdecl *)(int, char), 0xB9BC0);//ok		
+		IsMapObjectEntrance = CONVERT_GAMEVAR(decltype(IsMapObjectEntrance), 0x99800);//ok
+		UI_PlaySwitchAnim = CONVERT_GAMEVAR(int(__cdecl *)(int, char, float), 0x1A07F0);//ok
+		UI_HandleEnableFlags = CONVERT_GAMEVAR(int(__cdecl *)(int, char), 0xA9320);//ok
+		UI_SelectHealPlayer = CONVERT_GAMEVAR(int(__cdecl *)(int, const char *), 0xBF800);//ok
+		UI_SelectItemPlayer = CONVERT_GAMEVAR(int(__cdecl *)(int, const char *), 0xC5280);//ok
+		UI_SelectTradePlayer = CONVERT_GAMEVAR(int(__cdecl *)(int, const char *), 0x1479F0);//ok
+		UI_SelectHealUnit = CONVERT_GAMEVAR(int(__cdecl *)(int), 0xBFB50);
+		UI_SelectItemUnit = CONVERT_GAMEVAR(int(__cdecl *)(int), 0xC5450);
+		UI_SelectTradeAddStuffs = CONVERT_GAMEVAR(int(__cdecl *)(int a1, char a2), 0xFA8F6);
+		UI_OpenTradeDialog = CONVERT_GAMEVAR(void(__cdecl *)(const char *, int), 0x148840);
+		SYS_ResetWindow = CONVERT_GAMEVAR(void(__cdecl *)(), 0x93E10);
+		format_mapname = CONVERT_GAMEVAR(void(__cdecl *)(char *, int , int , int ), 0x95920);
+		BuildMapCollisionTable = CONVERT_GAMEVAR(decltype(BuildMapCollisionTable), 0x9E670);
+		Actor_SetAnimation = CONVERT_GAMEVAR(void(__cdecl *)(void *, int , int), 0x4FCA0);
+		GetBattleUnitDistance = CONVERT_GAMEVAR(int(__cdecl *)(void *a1, float a2, float a3), 0x1A680);
 	}
 
 	m_hFont = CreateFontW(16, 0, 0, 0, FW_THIN, false, false, false,
@@ -925,11 +1929,11 @@ void CGAService::Initialize(game_type type)
 
 	m_btl_showhpmp_enable = false;
 	m_btl_highspeed_enable = false;
-	m_menu_item_selected = 0;
-	m_menu_item_select_index = -1;
 
 	for (int i = 0; i < 20; ++i)
 		m_battle_units[i].exist = false;
+
+	m_btl_effect_flags = 0;
 
 	if (IsInGame() && GetWorldStatus() == 10) {
 		char *battle_buffer = g_btl_buffers + 4096 * ((*g_btl_buffer_index == 0) ? 3 : (*g_btl_buffer_index - 1));
@@ -940,10 +1944,13 @@ void CGAService::Initialize(game_type type)
 	m_move_to_x = 0;
 	m_move_to_y = 0;
 	m_move_speed = 100;
+	m_move_checkwarp = true;
+
 	m_ui_minidialog_loop = false;
 	m_ui_minidialog_loop_index = -1;
 	m_ui_minidialog_click_index = -1;
 	m_ui_learn_skill_confirm = -1;
+	m_ui_forget_skill_index = -1;
 	m_desired_player_enable_flags = 0;
 	m_change_player_enable_flags = 0;
 	m_ui_craftdialog_click_begin = false;
@@ -954,26 +1961,46 @@ void CGAService::Initialize(game_type type)
 		m_ui_craftdialog_additem[i] = -1;
 	m_ui_craftdialog_additemcount = 0;
 	m_work_acceleration = 100;
+	m_work_immediate = false;
+	m_ui_noswitchanim = false;
+	m_player_menu_type = 0;
+	m_unit_menu_type = 0;
 
 	DetourTransactionBegin();
 	DetourAttach(&(void *&)BATTLE_PlayerAction, ::NewBATTLE_PlayerAction);
+	DetourAttach(&(void *&)NET_ParseTradeItemsPackets, ::NewNET_ParseTradeItemsPackets);
+	DetourAttach(&(void *&)NET_ParseTradePetPackets, ::NewNET_ParseTradePetPackets);
+	DetourAttach(&(void *&)NET_ParseTradePetSkillPackets, ::NewNET_ParseTradePetSkillPackets);
+	DetourAttach(&(void *&)NET_ParseTradeGoldPackets, ::NewNET_ParseTradeGoldPackets);
+	DetourAttach(&(void *&)NET_ParseTradePlayers, ::NewNET_ParseTradePlayers);
+	DetourAttach(&(void *&)NET_ParseHealPlayers, ::NewNET_ParseHealPlayers);
+	DetourAttach(&(void *&)NET_ParseHealUnits, ::NewNET_ParseHealUnits);
+	DetourAttach(&(void *&)NET_ParseItemPlayers, ::NewNET_ParseItemPlayers);
+	DetourAttach(&(void *&)NET_ParseItemUnits, ::NewNET_ParseItemUnits);
 	DetourAttach(&(void *&)NET_ParseBattlePackets, ::NewNET_ParseBattlePackets);
 	DetourAttach(&(void *&)NET_ParseWorkingResult, ::NewNET_ParseWorkingResult);
 	DetourAttach(&(void *&)NET_ParseChatMsg, ::NewNET_ParseChatMsg);
+	DetourAttach(&(void *&)NET_ParseSysMsg, ::NewNET_ParseSysMsg);
+	DetourAttach(&(void *&)NET_ParseReadyTrade, ::NewNET_ParseReadyTrade);
+	DetourAttach(&(void *&)NET_ParseConfirmTrade, ::NewNET_ParseConfirmTrade);
+	DetourAttach(&(void *&)NET_ParseMeetEnemy, ::NewNET_ParseMeetEnemy);
 	DetourAttach(&(void *&)R_DrawText, NewR_DrawText);
 	DetourAttach(&(void *&)Move_Player, ::NewMove_Player);
-	DetourAttach(&(void *&)UI_PlayerMenuShowup, ::NewUI_PlayerMenuShowup);
-	DetourAttach(&(void *&)UI_PlayerMenuMouseEvent, ::NewUI_PlayerMenuMouseEvent);
-	DetourAttach(&(void *&)UI_UnitMenuShowup, ::NewUI_UnitMenuShowup);
-	DetourAttach(&(void *&)UI_UnitMenuMouseEvent, ::NewUI_UnitMenuMouseEvent);
 	DetourAttach(&(void *&)NPC_ShowDialogInternal, ::NewNPC_ShowDialogInternal);
 	DetourAttach(&(void *&)Sys_CheckModify, ::NewSys_CheckModify);
 	DetourAttach(&(void *&)UI_HandleMiniDialogMouseEvent, ::NewUI_HandleMiniDialogMouseEvent);
 	DetourAttach(&(void *&)UI_IsMouseInRect, ::NewUI_IsMouseInRect);
 	DetourAttach(&(void *&)UI_HandleLearnSkillConfirmMouseEvent, ::NewUI_HandleLearnSkillConfirmMouseEvent);
+	DetourAttach(&(void *&)UI_HandleForgetSkillMouseEvent, ::NewUI_HandleForgetSkillMouseEvent);
 	DetourAttach(&(void *&)UI_HandleEnablePlayerFlagsMouseEvent, ::NewUI_HandleEnablePlayerFlagsMouseEvent);
 	DetourAttach(&(void *&)UI_HandleCraftItemSlotMouseEvent, ::NewUI_HandleCraftItemSlotMouseEvent);
 	DetourAttach(&(void *&)UI_HandleCraftItemButtonMouseEvent, ::NewUI_HandleCraftItemButtonMouseEvent);
+	DetourAttach(&(void *&)UI_PlaySwitchAnim, ::NewUI_PlaySwitchAnim);
+	DetourAttach(&(void *&)UI_OpenTradeDialog, ::NewUI_OpenTradeDialog);
+	DetourAttach(&(void *&)Actor_SetAnimation, ::NewActor_SetAnimation);
+	DetourAttach(&(void *&)IsMapObjectEntrance, ::NewIsMapObjectEntrance);
+	DetourAttach(&(void *&)NET_WritePrepareCraftItemPacket_cgitem, ::NewNET_WritePrepareCraftItemPacket_cgitem);
+	DetourAttach(&(void *&)GetBattleUnitDistance, ::NewGetBattleUnitDistance);
 	DetourTransactionCommit();
 
 	if (*g_mutex)
@@ -991,11 +2018,12 @@ void CGAService::Uninitialize()
 		return;
 
 	m_initialized = false;
-	DetourTransactionBegin();
+	/*DetourTransactionBegin();
 	DetourDetach(&(void *&)BATTLE_PlayerAction, ::NewBATTLE_PlayerAction);
 	DetourDetach(&(void *&)NET_ParseBattlePackets, ::NewNET_ParseBattlePackets);
 	DetourDetach(&(void *&)NET_ParseWorkingResult, ::NewNET_ParseWorkingResult);
 	DetourDetach(&(void *&)NET_ParseChatMsg, ::NewNET_ParseChatMsg);
+	DetourDetach(&(void *&)NET_ParseSysMsg, ::NewNET_ParseSysMsg);
 	DetourDetach(&(void *&)R_DrawText, NewR_DrawText);
 	DetourDetach(&(void *&)Move_Player, ::NewMove_Player);
 	DetourDetach(&(void *&)UI_PlayerMenuShowup, ::NewUI_PlayerMenuShowup);
@@ -1010,7 +2038,8 @@ void CGAService::Uninitialize()
 	DetourDetach(&(void *&)UI_HandleEnablePlayerFlagsMouseEvent, ::NewUI_HandleEnablePlayerFlagsMouseEvent);
 	DetourDetach(&(void *&)UI_HandleCraftItemSlotMouseEvent, ::NewUI_HandleCraftItemSlotMouseEvent);
 	DetourDetach(&(void *&)UI_HandleCraftItemButtonMouseEvent, ::NewUI_HandleCraftItemButtonMouseEvent);
-	DetourTransactionCommit();
+	DetourDetach(&(void *&)UI_PlaySwitchAnim, ::NewUI_PlaySwitchAnim);
+	DetourTransactionCommit();*/
 
 	if (m_hFont)
 	{
@@ -1021,112 +2050,132 @@ void CGAService::Uninitialize()
 
 const int s_UnitPosToXY[][2] =
 {
-	{ 480, 370 },{ 480 + 60, 370 - 50 },{ 480 - 60, 370 + 50 },{ 480 + 120, 370 - 100 },{ 480 - 120, 370 + 100 },
+	{ 480, 370 },{ 480 + 60, 370 - 50 },{ 480 - 60, 370 + 50 },{ 480 + 120, 370 - 100 },{ 480 - 120, 330 + 100 },//370 too large
 	{ 420, 327 },{ 420 + 60, 327 - 50 },{ 420 - 60, 327 + 50 },{ 420 + 120, 327 - 100 },{ 420 - 120, 317 + 100 },
-	{ 158, 188 },{ 158 + 60, 188 - 50 },{ 158 - 60, 188 + 50 },{ 158 + 120, 158 - 100 },{ 158 - 120, 158 + 100 },
+	{ 158, 188 },{ 158 + 60, 188 - 50 },{ 158 - 60, 188 + 50 },{ 158 + 120, 188 - 100 },{ 180 - 120, 188 + 100 },//158 too small
 	{ 210, 240 },{ 210 + 60, 240 - 50 },{ 210 - 60, 240 + 50 },{ 210 + 120, 240 - 100 },{ 210 - 120, 240 + 100 },
 };
 
-void CGAService::DrawBattleInfo()
+void CGAService::DrawCustomText()
 {
-	if (!m_btl_showhpmp_enable)
-		return;
-
-	LPDIRECTDRAWSURFACE pSurface = GetDirectDrawBackSurface();
-
-	if (GetWorldStatus() == 10)
+	if (m_btl_showhpmp_enable)
 	{
-		HDC hDC;
-		if (S_OK == pSurface->GetDC(&hDC))
+		LPDIRECTDRAWSURFACE pSurface = GetDirectDrawBackSurface();
+
+		if (GetWorldStatus() == 10)
 		{
-			SetBkMode(hDC, TRANSPARENT);
-			SelectObject(hDC, g_CGAService.m_hFont);
-
-			int x, y;
-			char buf[64];
-			for (int i = 0; i < 20; ++i)
+			HDC hDC;
+			if (S_OK == pSurface->GetDC(&hDC))
 			{
-				if (m_battle_units[i].exist)
+				SetBkMode(hDC, TRANSPARENT);
+				SelectObject(hDC, g_CGAService.m_hFont);
+
+				int x, y;
+				char buf[64];
+				for (int i = 0; i < 20; ++i)
 				{
-					x = s_UnitPosToXY[i][0];
-					y = s_UnitPosToXY[i][1];
+					if (m_battle_units[i].exist)
+					{
+						x = s_UnitPosToXY[i][0];
+						y = s_UnitPosToXY[i][1];
 
-					sprintf(buf, "%d / %d", m_battle_units[i].curhp, m_battle_units[i].maxhp);
-					int len = strlen(buf);
+						sprintf(buf, "%d / %d", m_battle_units[i].curhp, m_battle_units[i].maxhp);
+						int len = strlen(buf);
 
-					ABC abc[1];
-					int width = 0;
-					for (int j = 0; j < len; ++j) {
-						GetCharABCWidthsA(hDC, buf[j], buf[j], abc);
-						width += abc[0].abcA + abc[0].abcB + abc[0].abcC;
+						ABC abc[1];
+						int width = 0;
+						for (int j = 0; j < len; ++j) {
+							GetCharABCWidthsA(hDC, buf[j], buf[j], abc);
+							width += abc[0].abcA + abc[0].abcB + abc[0].abcC;
+						}
+						SetTextColor(hDC, RGB(0, 0, 0));
+						TextOutA(hDC, x - width / 2, y, buf, len);
+						SetTextColor(hDC, RGB(255, 200, 0));
+						TextOutA(hDC, x - width / 2 - 1, y - 1, buf, len);
+
+						sprintf(buf, "%d / %d", m_battle_units[i].curmp, m_battle_units[i].maxmp);
+						len = strlen(buf);
+
+						width = 0;
+						for (int j = 0; j < len; ++j) {
+							GetCharABCWidthsA(hDC, buf[j], buf[j], abc);
+							width += abc[0].abcA + abc[0].abcB + abc[0].abcC;
+						}
+						SetTextColor(hDC, RGB(0, 0, 0));
+						TextOutA(hDC, x - width / 2, y + 20, buf, len);
+						SetTextColor(hDC, RGB(0, 200, 255));
+						TextOutA(hDC, x - width / 2 - 1, y - 1 + 20, buf, len);
 					}
-					SetTextColor(hDC, RGB(0, 0, 0));
-					TextOutA(hDC, x - width / 2, y, buf, len);
-					SetTextColor(hDC, RGB(255, 200, 0));
-					TextOutA(hDC, x - width / 2 - 1, y - 1, buf, len);
-
-					sprintf(buf, "%d / %d", m_battle_units[i].curmp, m_battle_units[i].maxmp);
-					len = strlen(buf);
-
-					width = 0;
-					for (int j = 0; j < len; ++j) {
-						GetCharABCWidthsA(hDC, buf[j], buf[j], abc);
-						width += abc[0].abcA + abc[0].abcB + abc[0].abcC;
-					}
-					SetTextColor(hDC, RGB(0, 0, 0));
-					TextOutA(hDC, x - width / 2, y + 20, buf, len);
-					SetTextColor(hDC, RGB(0, 200, 255));
-					TextOutA(hDC, x - width / 2 - 1, y - 1 + 20, buf, len);
 				}
-			}
 
-			pSurface->ReleaseDC(hDC);
+				pSurface->ReleaseDC(hDC);
+			}
+		}
+	}
+
+	if (m_btl_showhpmp_enable)
+	{
+		if (GetWorldStatus() == 9 && GetGameStatus() == 3)
+		{
+			LPDIRECTDRAWSURFACE pSurface = GetDirectDrawBackSurface();
+			HDC hDC;
+			if (S_OK == pSurface->GetDC(&hDC))
+			{
+				SetBkMode(hDC, TRANSPARENT);
+				SelectObject(hDC, g_CGAService.m_hFont);
+
+				int x = 640-64;
+				int y = 480-64;
+
+				char buf[32];
+				sprintf(buf, "(%d, %d)", *g_move_xdest, *g_move_ydest);
+				int len = strlen(buf);
+
+				ABC abc[1];
+				int width = 0;
+				for (int j = 0; j < len; ++j) {
+					GetCharABCWidthsA(hDC, buf[j], buf[j], abc);
+					width += abc[0].abcA + abc[0].abcB + abc[0].abcC;
+				}
+				SetTextColor(hDC, RGB(0, 0, 0));
+				TextOutA(hDC, x - width / 2, y, buf, len);
+				SetTextColor(hDC, RGB(255, 200, 0));
+				TextOutA(hDC, x - width / 2 - 1, y - 1, buf, len);
+
+				pSurface->ReleaseDC(hDC);
+			}
 		}
 	}
 }
 
 void CGAService::ParseBattleUnits(const char *buf, size_t len)
 {
-	if (len < 4)
-		return;
-
-	char *p = (char *)buf + 4;
-	int unitdata[11];
-	char unitname[32];
-	char buf2[256];
-
 	for (int i = 0; i < 20; ++i)
 		m_battle_units[i].exist = false;
 
-	while (*p)
+	m_btl_effect_flags = NET_ParseHexInteger(buf, '|', 2);
+
+	int position = 3;
+
+	while (1)
 	{
-		int parsed = sscanf(p, "%x|%[^|]|%x|%x|%x|%x|%x|%x|%x|%x|%x|%x|",
-			&unitdata[0], unitname, &unitdata[1], &unitdata[2],
-			&unitdata[3], &unitdata[4], &unitdata[5], &unitdata[6],
-			&unitdata[7], &unitdata[8], &unitdata[9], &unitdata[10]);
-		if (parsed < 12)
-			break;
-
-		sprintf(buf2, "%x|%s|%x|%x|%x|%x|%x|%x|%x|%x|%x|%x|",
-			unitdata[0], unitname, unitdata[1], unitdata[2],
-			unitdata[3], unitdata[4], unitdata[5], unitdata[6],
-			unitdata[7], unitdata[8], unitdata[9], unitdata[10]);
-		p += strlen(buf2);
-
-		int pos = unitdata[0];
+		int pos = NET_ParseHexInteger(buf, '|', position);
 
 		if (pos < 0 || pos > 19)
 			break;
 
-		m_battle_units[pos].modelid = unitdata[1];
-		m_battle_units[pos].level = unitdata[3];
-		m_battle_units[pos].curhp = unitdata[4];
-		m_battle_units[pos].maxhp = unitdata[5];
-		m_battle_units[pos].curmp = unitdata[6];
-		m_battle_units[pos].maxmp = unitdata[7];
+		NET_ParseDelimeter(buf, '|', position + 1, 31, m_battle_units[pos].name);
+		
 		m_battle_units[pos].pos = pos;
-		strcpy(m_battle_units[pos].name, unitname);
+		m_battle_units[pos].modelid = NET_ParseHexInteger(buf, '|', position + 2);
+		m_battle_units[pos].level = NET_ParseHexInteger(buf, '|', position + 4);
+		m_battle_units[pos].curhp = NET_ParseHexInteger(buf, '|', position + 5);
+		m_battle_units[pos].maxhp = NET_ParseHexInteger(buf, '|', position + 6);
+		m_battle_units[pos].curmp = NET_ParseHexInteger(buf, '|', position + 7);
+		m_battle_units[pos].maxmp = NET_ParseHexInteger(buf, '|', position + 8);
+		m_battle_units[pos].flags = NET_ParseHexInteger(buf, '|', position + 9);
 		m_battle_units[pos].exist = true;
+		position += 12;
 	}
 }
 
@@ -1197,6 +2246,7 @@ void CGAService::WM_GetPlayerInfo(cga_player_info_t *info)
 	info->xp = (*g_playerBase)->xp.decode();
 	info->maxxp = (*g_playerBase)->maxxp.decode();
 	info->health = (*g_playerBase)->health;
+	info->souls = (*g_playerBase)->souls;
 	info->level = (*g_playerBase)->level;
 	info->gold = (*g_playerBase)->gold;
 	info->unitid = (*g_playerBase)->unitid;
@@ -1205,6 +2255,41 @@ void CGAService::WM_GetPlayerInfo(cga_player_info_t *info)
 	info->petid = *g_pet_id;
 	info->name = boost::locale::conv::to_utf<char>(g_player_name, "GBK");
 	info->job = boost::locale::conv::to_utf<char>(g_job_name, "GBK");
+	for (size_t i = 0; i < 96; ++i)
+	{
+		if (*(g_title_table + 28 * i) != 0)
+			info->titles.emplace_back(boost::locale::conv::to_utf<char>((g_title_table + 28 * i), "GBK"));
+		else
+			break;
+	}
+	info->detail.points_remain = *g_player_remain_points;
+	info->detail.points_endurance = (*g_playerBase)->points_endurance;
+	info->detail.points_strength = (*g_playerBase)->points_strength;
+	info->detail.points_defense = (*g_playerBase)->points_defense;
+	info->detail.points_agility = (*g_playerBase)->points_agility;
+	info->detail.points_magical = (*g_playerBase)->points_magical;
+	info->detail.value_attack = (*g_playerBase)->value_attack;
+	info->detail.value_defensive = (*g_playerBase)->value_defensive;
+	info->detail.value_agility = (*g_playerBase)->value_agility;
+	info->detail.value_spirit = (*g_playerBase)->value_spirit;
+	info->detail.value_recovery = (*g_playerBase)->value_recovery;
+	info->detail.resist_poison = (*g_playerBase)->resist_poison;
+	info->detail.resist_sleep = (*g_playerBase)->resist_sleep;
+	info->detail.resist_medusa = (*g_playerBase)->resist_medusa;
+	info->detail.resist_drunk = (*g_playerBase)->resist_drunk;
+	info->detail.resist_chaos = (*g_playerBase)->resist_chaos;
+	info->detail.resist_forget = (*g_playerBase)->resist_forget;
+	info->detail.fix_critical = (*g_playerBase)->fix_critical;
+	info->detail.fix_strikeback = (*g_playerBase)->fix_strikeback;
+	info->detail.fix_accurancy = (*g_playerBase)->fix_accurancy;
+	info->detail.element_earth = (*g_playerBase)->element_earth;
+	info->detail.element_water = (*g_playerBase)->element_water;
+	info->detail.element_fire = (*g_playerBase)->element_fire;
+	info->detail.element_wind = (*g_playerBase)->element_wind;
+
+	info->manu_endurance = (*g_playerBase)->manu_endurance;
+	info->manu_skillful = (*g_playerBase)->manu_skillful;
+	info->manu_intelligence = (*g_playerBase)->manu_intelligence;
 }
 
 cga_player_info_t CGAService::GetPlayerInfo()
@@ -1238,9 +2323,10 @@ bool CGAService::IsPlayerFlagEnabled(int index)
 
 bool CGAService::IsSkillValid(int skillid)
 {
-	if (skillid < 0 || skillid > 9)
+	if (skillid < 0 || skillid >= 15)
 		return false;
-	return g_skill_base[skillid].valid ? true : false;
+
+	return g_skill_base[skillid].name[0] ? true : false;
 }
 
 void CGAService::WM_GetSkillInfo(int index, cga_skill_info_t *info)
@@ -1259,6 +2345,7 @@ void CGAService::WM_GetSkillInfo(int index, cga_skill_info_t *info)
 		info->pos = g_skill_base[index].pos;
 		info->skill_id = g_skill_base[index].skill_id;
 		info->index = index;
+		info->slotsize = g_skill_base[index].slotsize;
 	}
 }
 
@@ -1274,7 +2361,7 @@ void CGAService::WM_GetSkillsInfo(cga_skills_info_t *info)
 	if (!IsInGame())
 		return;
 
-	for (int i = 0; i < 10; ++i)
+	for (int i = 0; i < 15; ++i)
 	{
 		if (IsSkillValid(i))
 		{
@@ -1287,7 +2374,8 @@ void CGAService::WM_GetSkillsInfo(cga_skills_info_t *info)
 				g_skill_base[i].skill_id,
 				g_skill_base[i].type,
 				g_skill_base[i].pos,
-				i
+				i,
+				g_skill_base[i].slotsize
 			);
 		}
 	}
@@ -1313,6 +2401,7 @@ void CGAService::WM_GetSubSkillInfo(int index, int stage, cga_subskill_info_t *i
 		info->cost = g_skill_base[index].sub[stage].cost;
 		info->level = g_skill_base[index].sub[stage].level;
 		info->flags = g_skill_base[index].sub[stage].flags;
+		info->available = g_skill_base[index].sub[stage].available ? true : false;
 	}
 }
 
@@ -1341,7 +2430,8 @@ void CGAService::WM_GetSubSkillsInfo(int index, cga_subskills_info_t *info)
 					boost::locale::conv::to_utf<char>(g_skill_base[index].sub[i].info, "GBK"),
 					g_skill_base[index].sub[i].cost,
 					g_skill_base[index].sub[i].flags,
-					g_skill_base[index].sub[i].level
+					g_skill_base[index].sub[i].level,
+					g_skill_base[index].sub[i].available ? true : false
 				);
 			}
 		}
@@ -1381,10 +2471,37 @@ void CGAService::WM_GetPetInfo(int index, cga_pet_info_t *info)
 		info->level = g_pet_base[index].level;
 		info->flags = g_pet_base[index].flags;
 		info->race = g_pet_base[index].race;
+		info->loyality = g_pet_base[index].value_loyality;
 		info->battle_flags = g_pet_base[index].battle_flags;
 		info->index = index;
 		info->name = boost::locale::conv::to_utf<char>(g_pet_base[index].name, "GBK");
-		info->realname = boost::locale::conv::to_utf<char>(g_pet_base[index].realname, "GBK");;
+		info->realname = boost::locale::conv::to_utf<char>(g_pet_base[index].realname, "GBK");
+
+		info->detail.points_remain = g_pet_base[index].points_remain;
+		info->detail.points_endurance = g_pet_base[index].points_endurance;
+		info->detail.points_strength = g_pet_base[index].points_strength;
+		info->detail.points_defense = g_pet_base[index].points_defense;
+		info->detail.points_agility = g_pet_base[index].points_agility;
+		info->detail.points_magical = g_pet_base[index].points_magical;
+		info->detail.value_attack = g_pet_base[index].value_attack;
+		info->detail.value_defensive = g_pet_base[index].value_defensive;
+		info->detail.value_agility = g_pet_base[index].value_agility;
+		info->detail.value_spirit = g_pet_base[index].value_spirit;
+		info->detail.value_recovery = g_pet_base[index].value_recovery;
+		info->detail.resist_poison = g_pet_base[index].resist_poison;
+		info->detail.resist_sleep = g_pet_base[index].resist_sleep;
+		info->detail.resist_medusa = g_pet_base[index].resist_medusa;
+		info->detail.resist_drunk = g_pet_base[index].resist_drunk;
+		info->detail.resist_chaos = g_pet_base[index].resist_chaos;
+		info->detail.resist_forget = g_pet_base[index].resist_forget;
+		info->detail.fix_critical = g_pet_base[index].fix_critical;
+		info->detail.fix_strikeback = g_pet_base[index].fix_strikeback;
+		info->detail.fix_accurancy = g_pet_base[index].fix_accurancy;
+		info->detail.fix_dodge = g_pet_base[index].fix_dodge;
+		info->detail.element_earth = g_pet_base[index].element_earth;
+		info->detail.element_water = g_pet_base[index].element_water;
+		info->detail.element_fire = g_pet_base[index].element_fire;
+		info->detail.element_wind = g_pet_base[index].element_wind;
 	}
 }
 
@@ -1417,10 +2534,38 @@ void CGAService::WM_GetPetsInfo(cga_pets_info_t *info)
 				g_pet_base[i].level,
 				g_pet_base[i].flags,
 				g_pet_base[i].race,
+				g_pet_base[i].value_loyality,
 				g_pet_base[i].battle_flags,
 				i,
 				boost::locale::conv::to_utf<char>(g_pet_base[i].name, "GBK"),
-				boost::locale::conv::to_utf<char>(g_pet_base[i].realname, "GBK")
+				boost::locale::conv::to_utf<char>(g_pet_base[i].realname, "GBK"),
+				cga_playerpet_detail_info_t(
+					g_pet_base[i].points_remain,
+					g_pet_base[i].points_endurance,
+					g_pet_base[i].points_strength,
+					g_pet_base[i].points_defense,
+					g_pet_base[i].points_agility,
+					g_pet_base[i].points_magical,
+					g_pet_base[i].value_attack,
+					g_pet_base[i].value_defensive,
+					g_pet_base[i].value_agility,
+					g_pet_base[i].value_spirit,
+					g_pet_base[i].value_recovery,
+					g_pet_base[i].resist_poison,
+					g_pet_base[i].resist_sleep,
+					g_pet_base[i].resist_medusa,
+					g_pet_base[i].resist_drunk,
+					g_pet_base[i].resist_chaos,
+					g_pet_base[i].resist_forget,
+					g_pet_base[i].fix_critical,
+					g_pet_base[i].fix_strikeback,
+					g_pet_base[i].fix_accurancy,
+					g_pet_base[i].fix_dodge,
+					g_pet_base[i].element_earth,
+					g_pet_base[i].element_water,
+					g_pet_base[i].element_fire,
+					g_pet_base[i].element_wind
+				)
 			);
 		}
 	}
@@ -1535,8 +2680,18 @@ void CGAService::WM_GetItemInfo(int itempos, cga_item_info_t *info)
 		else
 		{
 			info->name = boost::locale::conv::to_utf<char>((*g_playerBase)->iteminfos[itempos].name, "GBK");
-			info->attr = boost::locale::conv::to_utf<char>((*g_playerBase)->iteminfos[itempos].attr, "GBK");
-			info->attr2 = boost::locale::conv::to_utf<char>((*g_playerBase)->iteminfos[itempos].attr2, "GBK");
+			//info->attr = boost::locale::conv::to_utf<char>((*g_playerBase)->iteminfos[itempos].attr, "GBK");
+			//info->attr2 = boost::locale::conv::to_utf<char>((*g_playerBase)->iteminfos[itempos].attr2, "GBK");
+			std::string attrs;
+			for (int j = 0; j < 8; ++j) {
+				if ((*g_playerBase)->iteminfos[itempos].attrs[j][0])
+				{
+					if (j != 0)
+						attrs += "\n";
+					attrs += boost::locale::conv::to_utf<char>((*g_playerBase)->iteminfos[itempos].attrs[j], "GBK");
+				}
+			}
+			info->attr = attrs;
 			info->info = boost::locale::conv::to_utf<char>((*g_playerBase)->iteminfos[itempos].info, "GBK");
 			info->info2 = boost::locale::conv::to_utf<char>((*g_playerBase)->iteminfos[itempos].info2, "GBK");
 			info->itemid = (*g_playerBase)->iteminfos[itempos].item_id;
@@ -1573,10 +2728,19 @@ void CGAService::WM_GetItemsInfo(cga_items_info_t *info)
 	{
 		if (IsItemValid(itempos))
 		{
+			std::string attrs;
+			for (int j = 0; j < 8; ++j) {
+				if ((*g_playerBase)->iteminfos[itempos].attrs[j][0])
+				{
+					if (j != 0)
+						attrs += "\n";
+					attrs += boost::locale::conv::to_utf<char>((*g_playerBase)->iteminfos[itempos].attrs[j], "GBK");
+				}
+			}
 			info->emplace_back(
 				boost::locale::conv::to_utf<char>((*g_playerBase)->iteminfos[itempos].name, "GBK"),
-				boost::locale::conv::to_utf<char>((*g_playerBase)->iteminfos[itempos].attr, "GBK"),
-				boost::locale::conv::to_utf<char>((*g_playerBase)->iteminfos[itempos].attr2, "GBK"),
+				attrs,
+				std::string(),//boost::locale::conv::to_utf<char>((*g_playerBase)->iteminfos[itempos].attr, "GBK"),
 				boost::locale::conv::to_utf<char>((*g_playerBase)->iteminfos[itempos].info, "GBK"),
 				boost::locale::conv::to_utf<char>((*g_playerBase)->iteminfos[itempos].info2, "GBK"),
 				(*g_playerBase)->iteminfos[itempos].item_id,
@@ -1641,6 +2805,12 @@ bool CGAService::WM_DropItem(int itempos)
 	if (!IsInGame())
 		return false;
 
+	if (GetWorldStatus() != 9 || GetGameStatus() != 3)
+		return false;
+
+	if (*g_move_xspeed != 0 || *g_move_yspeed != 0)
+		return false;
+
 	if (!IsItemValid(itempos))
 		return false;
 
@@ -1657,23 +2827,63 @@ bool CGAService::DropItem(int itempos)
 	return SendMessageA(g_MainHwnd, WM_CGA_DROP_ITEM, itempos, 0) ? true : false;
 }
 
+bool CGAService::WM_DropPet(int petpos)
+{
+	if (!IsInGame())
+		return false;
+
+	if (GetWorldStatus() != 9 || GetGameStatus() != 3)
+		return false;
+
+	if (*g_move_xspeed != 0 || *g_move_yspeed != 0)
+		return false;
+
+	if (!IsPetValid(petpos))
+		return false;
+
+	if (m_game_type == cg_item_6000)
+		NET_WriteDropPetPacket_cgitem(*g_net_socket, g_player_xpos->decode(), g_player_ypos->decode(), petpos);
+	//else
+		//NET_WritePacket1(*g_net_buffer, *g_net_socket, net_header_dropitem, g_player_xpos->decode(), g_player_ypos->decode(), itempos);
+
+	return true;
+}
+
+bool CGAService::DropPet(int petpos)
+{
+	return SendMessageA(g_MainHwnd, WM_CGA_DROP_PET, petpos, 0) ? true : false;
+}
+
 bool CGAService::WM_MoveItem(cga_move_item_t *mov)
 {
 	if (!IsInGame())
 		return false;
 
+	if (GetWorldStatus() != 9 || GetGameStatus() != 3)
+		return false;
+
+	if (*g_move_xspeed != 0 || *g_move_yspeed != 0)
+		return false;
+
 	if (!IsItemValid(mov->itempos))
 		return false;
 
-	char buffer[64];
-	sprintf(buffer, "I\\z%d\\z%d\\z%d", mov->itempos, mov->dstpos, mov->count);
+	if (mov->itempos >= 100 || mov->dstpos >= 100)
+	{
+		char buffer[64];
+		sprintf(buffer, "I\\z%d\\z%d\\z%d", mov->itempos, mov->dstpos, mov->count);
 
-	if (m_game_type == cg_item_6000)
-		NET_WritePacket3_cgitem(*g_net_socket,
-			g_player_xpos->decode(), g_player_ypos->decode(),
-			*g_npc_dialog_dlgid, *g_npc_dialog_npcid, 0, buffer);
-	//else
-		//NET_WritePacket1(*g_net_buffer, *g_net_socket, net_header_dropitem, g_player_xpos->decode(), g_player_ypos->decode(), itempos);
+		if (m_game_type == cg_item_6000)
+			NET_WritePacket3_cgitem(*g_net_socket,
+				g_player_xpos->decode(), g_player_ypos->decode(),
+				*g_npc_dialog_dlgid, *g_npc_dialog_npcid, 0, buffer);
+		//else
+			//NET_WritePacket1(*g_net_buffer, *g_net_socket, net_header_dropitem, g_player_xpos->decode(), g_player_ypos->decode(), itempos);
+	}
+	else
+	{
+		NET_WriteMoveItemPacket_cgitem(*g_net_socket, mov->itempos, mov->dstpos, mov->count);
+	}
 
 	return true;
 }
@@ -1685,6 +2895,11 @@ bool CGAService::MoveItem(int itempos, int dstpos, int count)
 	mov.dstpos = dstpos;
 	mov.count = count;
 	return SendMessageA(g_MainHwnd, WM_CGA_MOVE_ITEM, (WPARAM)&mov, 0) ? true : false;
+}
+
+std::tuple<int, int, int> CGAService::GetMapIndex()
+{
+	return std::tuple<int, int, int>(*g_map_index1, *g_map_index2, *g_map_index3);
 }
 
 std::tuple<int, int> CGAService::GetMapXY()
@@ -1702,9 +2917,40 @@ std::tuple<float, float> CGAService::GetMoveSpeed()
 	return std::tuple<float, float>(*g_move_xspeed, *g_move_yspeed);
 }
 
+void CGAService::WM_GetMapName(std::string *name)
+{
+	try
+	{
+		*name = boost::locale::conv::to_utf<char>(g_map_name, "GBK");
+	}
+	catch (std::exception &e)
+	{
+		*name = "";
+	}
+}
+
 std::string CGAService::GetMapName()
 {
-	return boost::locale::conv::to_utf<char>(g_map_name, "GBK");
+	std::string name;
+
+	/*
+	SendMessageA(g_MainHwnd, WM_CGA_GET_MAP_NAME, (WPARAM)&name, 0);*/
+
+	char mapname[32];
+
+	strncpy(mapname, g_map_name, 31);
+	mapname[31] = 0;
+
+	try
+	{
+		name = boost::locale::conv::to_utf<char>(mapname, "GBK");
+	}
+	catch (std::exception &e)
+	{
+		name = "";
+	}
+
+	return name;
 }
 
 cga_map_units_t CGAService::GetMapUnits()
@@ -1718,6 +2964,9 @@ cga_map_units_t CGAService::GetMapUnits()
 
 void CGAService::WalkTo(int x, int y)
 {
+	if (g_player_xpos->decode() == x && g_player_ypos->decode() == y)
+		return;
+
 	m_move_to |= 1;
 	m_move_to_x = x;
 	m_move_to_y = y;
@@ -1734,6 +2983,22 @@ void CGAService::SetMoveSpeed(int speed)
 {
 	if(speed >= 1 && speed <= 1000)
 		m_move_speed = speed;
+}
+
+void CGAService::WM_GetMoveHistory(std::vector<DWORD> *v)
+{
+	v->reserve(m_move_history.size());
+	for (auto itor = m_move_history.rbegin(); itor != m_move_history.rend(); ++itor)
+	{
+		v->emplace_back(*itor);
+	}
+}
+
+std::vector<DWORD> CGAService::GetMoveHistory(void)
+{
+	std::vector<DWORD> v;
+	SendMessageA(g_MainHwnd, WM_CGA_GET_MOVE_HISTORY, (WPARAM)&v, NULL);
+	return v;
 }
 
 bool CGAService::IsBattleUnitValid(int pos)
@@ -1755,6 +3020,7 @@ void CGAService::WM_GetBattleUnit(int pos, cga_battle_unit_t *u)
 		u->maxhp = m_battle_units[pos].maxhp;
 		u->curmp = m_battle_units[pos].curmp;
 		u->maxmp = m_battle_units[pos].maxmp;
+		u->flags = m_battle_units[pos].flags;
 		u->pos = m_battle_units[pos].pos;
 	}
 }
@@ -1783,6 +3049,7 @@ void CGAService::WM_GetBattleUnits(cga_battle_units_t *u)
 				m_battle_units[i].maxhp,
 				m_battle_units[i].curmp,
 				m_battle_units[i].maxmp,
+				m_battle_units[i].flags,
 				m_battle_units[i].pos
 			);
 		}
@@ -1796,29 +3063,21 @@ cga_battle_units_t CGAService::GetBattleUnits()
 	return u;
 }
 
-int CGAService::GetBattleRoundCount()
+cga_battle_context_t CGAService::GetBattleContext()
 {
-	return *g_btl_round_count;
-}
+	cga_battle_context_t ctx(
+		*g_btl_round_count,
+		*g_btl_player_pos,
+		*g_btl_player_status,
+		*g_btl_skill_performed,
+		*g_btl_skill_allowbit,
+		*g_btl_petskill_allowbit,
+		*g_btl_weapon_allowbit,
+		*g_btl_petid,
+		m_btl_effect_flags
+		);
 
-int CGAService::GetBattlePlayerPosition()
-{
-	return *g_btl_player_pos;
-}
-
-int CGAService::GetBattlePlayerStatus()
-{
-	return *g_btl_player_status;
-}
-
-int CGAService::GetBattleSkillPerformed()
-{
-	return *g_btl_skill_performed;
-}
-
-int CGAService::GetBattlePetId()
-{
-	return *g_btl_petid;
+	return ctx;
 }
 
 bool CGAService::WM_BattleNormalAttack(int target)
@@ -1835,7 +3094,8 @@ bool CGAService::WM_BattleNormalAttack(int target)
 		NET_WritePacket(*g_net_buffer, *g_net_socket, net_header_battle, buf);
 	*g_btl_action_done = 1;
 	COMMON_PlaySound(57, 320, 240);
-	//Battle_EndSelect();
+
+	WriteLog("BattleNormalAttack %d\n", target);
 
 	return true;
 }
@@ -1851,14 +3111,66 @@ bool CGAService::WM_BattleSkillAttack(int skillpos, int skilllv, int target)
 		return false;
 	if (*g_btl_player_status != 1)
 		return false;
-	if (!g_skill_base[skillpos].valid)
+	if (!g_skill_base[skillpos].name[0])
+	{
+		WriteLog("skill %d not valid\n", skillpos);
 		return false;
+	}
 	if (!(*g_btl_skill_allowbit & (1 << skillpos)))//skill not allowed!!!
+	{
+		WriteLog("skill %d not allowed\n", skillpos);
 		return false;
+	}
 	if (g_skill_base[skillpos].level < skilllv)
+	{
+		WriteLog("skill lv%d not enough\n", skilllv);
 		return false;
-	if (g_skill_base[skillpos].sub[skilllv - 1].cost > m_battle_units[*g_btl_player_pos].curmp)
-		return false;
+	}
+
+	WriteLog("skill %d %d\n", skillpos, skilllv);
+
+	if (g_skill_base[skillpos].sub[skilllv].available == 0)
+	{
+		WriteLog("skill lv%d not available, downgrade\n", skilllv);
+		bool available = false;
+		for (int lv = skilllv - 1; lv >= 0; --lv)
+		{
+			if (g_skill_base[skillpos].sub[lv].available == 1)
+			{
+				skilllv = lv;
+				available = true;
+				break;
+			}
+		}
+
+		if (!available)
+		{
+			WriteLog("skill lv%d not available\n", skilllv);
+			return false;
+		}
+	}
+
+	if (g_skill_base[skillpos].sub[skilllv].cost > m_battle_units[*g_btl_player_pos].curmp)
+	{
+		bool available = false;
+		for (int lv = skilllv - 1; lv >= 0; --lv)
+		{
+			if (g_skill_base[skillpos].sub[lv].cost <= m_battle_units[*g_btl_player_pos].curmp)
+			{
+				skilllv = lv;
+				available = true;
+				break;
+			}
+		}
+
+		if (!available)
+		{
+			WriteLog("skill lv%d no enough mp\n", skilllv);
+			return false;
+		}
+	}
+
+	WriteLog("fixed skill %d %d\n", skillpos, skilllv);
 
 	char buf[32];
 	sprintf(buf, "S|%X|%X|%X", skillpos, skilllv, target);
@@ -1868,6 +3180,8 @@ bool CGAService::WM_BattleSkillAttack(int skillpos, int skilllv, int target)
 		NET_WritePacket(*g_net_buffer, *g_net_socket, net_header_battle, buf);
 	*g_btl_action_done = 1;
 	COMMON_PlaySound(57, 320, 240);
+
+	WriteLog("BattleSkillAttack %d %d %d\n", skillpos, skilllv, target);
 
 	return true;
 }
@@ -2000,8 +3314,29 @@ bool CGAService::WM_BattlePetSkillAttack(int skillpos, int target)
 		return false;
 	if (*g_btl_player_status != 4)
 		return false;
-	//if (g_pet_base[*g_btl_petid].skills[skillpos].cost> m_battle_units[*g_btl_player_pos].curmp)
-	//	return false;	
+
+	if (skillpos == -1 || skillpos == 0xFF)
+	{
+		char buf[32];
+		sprintf(buf, "W|FF");
+		if (m_game_type == cg_item_6000)
+			NET_WriteBattlePacket_cgitem(*g_net_socket, buf);
+		else
+			NET_WritePacket(*g_net_buffer, *g_net_socket, net_header_battle, buf);
+		*g_btl_action_done = 1;
+		COMMON_PlaySound(57, 320, 240);
+
+		WriteLog("BattlePetSkillAttack FF\n");
+		return true;
+	}
+
+	if (!(*g_btl_petskill_allowbit & (1 << skillpos)))//skill not allowed!!!
+	{
+		WriteLog("pet skill %d not allowed\n", skillpos);
+		return false;
+	}
+	//if (g_pet_base[*g_btl_petid].skills[skillpos].cost > m_battle_units[*g_btl_player_pos].curmp)
+	//	return false;
 	char buf[32];
 	sprintf(buf, "W|%X|%X", skillpos, target);
 	if (m_game_type == cg_item_6000)
@@ -2010,6 +3345,8 @@ bool CGAService::WM_BattlePetSkillAttack(int skillpos, int target)
 		NET_WritePacket(*g_net_buffer, *g_net_socket, net_header_battle, buf);
 	*g_btl_action_done = 1;
 	COMMON_PlaySound(57, 320, 240);
+
+	WriteLog("BattlePetSkillAttack %d %d\n", skillpos, target);
 
 	return true;
 }
@@ -2053,13 +3390,20 @@ void CGAService::WM_LogBack()
 	if (!IsInGame() || *g_logback)
 		return;
 
-	if (m_game_type == cg_item_6000)
-		NET_WriteLogbackPacket_cgitem(*g_net_socket);
-	else if (m_game_type == cg_se_3000)
-		NET_WriteLogbackPacket_cgse(*g_net_buffer, *g_net_socket, net_header_logback);
+	if (*g_world_status_cgitem == 10)
+	{
+		UI_HandleLogbackMouseEvent(8, 2);
+	}
+	else
+	{
+		if (m_game_type == cg_item_6000)
+			NET_WriteLogbackPacket_cgitem(*g_net_socket);
+		else if (m_game_type == cg_se_3000)
+			NET_WriteLogbackPacket_cgse(*g_net_buffer, *g_net_socket, net_header_logback);
 
-	COMMON_PlaySound(60, 320, 240);
-	*g_logback = 1;
+		COMMON_PlaySound(60, 320, 240);
+		*g_logback = 1;
+	}
 }
 
 void CGAService::LogOut()
@@ -2072,7 +3416,7 @@ void CGAService::WM_LogOut()
 	if (!IsInGame())
 		return;
 
-	UI_ClickLogout(9, 2);
+	UI_HandleLogoutMouseEvent(9, 2);
 	COMMON_PlaySound(60, 320, 240);
 }
 
@@ -2125,6 +3469,16 @@ bool CGAService::WM_ClickNPCDialog(int option, int index)
 		return false;
 	}
 
+	if (*g_npc_dialog_type == 18)
+	{
+		if (option == 0)
+		{
+			m_ui_forget_skill_index = index;
+			return true;
+		}
+		return false;
+	}
+
 	NPC_ClickDialog(option, index, 0, 0) ? true : false;
 	return true;
 }
@@ -2142,18 +3496,63 @@ bool CGAService::WM_SellNPCStore(cga_sell_items_t *items)
 	std::string buffer;
 	char buf[32];
 
-	if (*g_npc_dialog_type != 7)
+	if (*g_npc_dialog_type != 7 && *g_npc_dialog_type != 6 && *g_npc_dialog_type != 22 && *g_npc_dialog_type != 20)
+	{
+		//WriteLog("type mismatch %d\n", *g_npc_dialog_type);
+		return false;
+	}
+
+	if (*g_npc_dialog_type == 22 || *g_npc_dialog_type == 20) 
+	{
+		for (size_t i = 0; i < items->size(); ++i)
+		{
+			if (items->at(i).itemid != 0 && (*g_playerBase)->iteminfos[items->at(i).itempos].item_id != items->at(i).itemid)
+			{
+				//WriteLog("id mismatch %d %d\n", items->at(i).itemid, (*g_playerBase)->iteminfos[items->at(i).itempos].item_id);
+				return false;
+			}
+			bool allow = false;
+			for (size_t j = 0; j < 20; ++j)
+			{
+				if (g_npcdlg_item_base[j].valid && g_npcdlg_item_base[j].itempos == items->at(i).itempos)
+				{
+					//WriteLog("j=%d g_npcdlg_item_base[j].itempos=%d\n", j, g_npcdlg_item_base[j].itempos);
+					allow = true;
+					break;
+				}
+			}
+			if (allow)
+			{
+				sprintf(buf, "%d", items->at(i).itempos);
+				buffer += buf;
+				if (i != items->size() - 1)
+					buffer += "\\z";
+			}
+		}
+	}
+	else
+	{
+		for (size_t i = 0; i < items->size(); ++i)
+		{
+			if (items->at(i).itemid != 0 && (*g_playerBase)->iteminfos[items->at(i).itempos].item_id != items->at(i).itemid)
+			{
+				//WriteLog("id mismatch %d %d %d\n", items->at(i).itemid, (*g_playerBase)->iteminfos[items->at(i).itempos].item_id, items->at(i).itemid);
+				return false;
+			}
+			if ((*g_playerBase)->iteminfos[items->at(i).itempos].count != 0 && (*g_playerBase)->iteminfos[items->at(i).itempos].count < items->at(i).count) {
+				//WriteLog("count mismatch %d %d\n", (*g_playerBase)->iteminfos[items->at(i).itempos].count, items->at(i).count);
+				return false;
+			}
+			sprintf(buf, "%d\\z%d", items->at(i).itempos, items->at(i).count);
+			buffer += buf;
+			if (i != items->size() - 1)
+				buffer += "\\z";
+		}
+	}
+
+	if (buffer.empty())
 		return false;
 
-	for (size_t i = 0; i < items->size(); ++i)
-	{
-		if (items->at(i).itemid != 0 && g_item_base[items->at(i).itempos].item_id != items->at(i).itemid)
-			return false;
-		if (g_item_base[items->at(i).itempos].count < items->at(i).count)
-			return false;
-		sprintf(buf, "%d\\z%d\\z", items->at(i).itempos, items->at(i).count);
-		buffer += buf;
-	}
 	if(m_game_type == cg_item_6000)
 		NET_WritePacket3_cgitem(*g_net_socket, 
 			g_player_xpos->decode(), g_player_ypos->decode(),
@@ -2164,6 +3563,7 @@ bool CGAService::WM_SellNPCStore(cga_sell_items_t *items)
 			*g_npc_dialog_dlgid, *g_npc_dialog_npcid, 0, buffer.c_str());
 
 	COMMON_PlaySound(79, 320, 240);
+
 	return true;
 }
 
@@ -2214,27 +3614,55 @@ bool CGAService::BuyNPCStore(cga_buy_items_t items)
 	return SendMessageA(g_MainHwnd, WM_CGA_BUY_NPC_STORE, (WPARAM)&items, 0) ? true : false;
 }
 
-bool CGAService::PlayerMenuSelect(int menuindex)
+bool CGAService::WM_PlayerMenuSelect(int menuindex, const char *menustring)
 {
-	if (menuindex >= 0 && menuindex < *g_player_menu_count)
+	if (m_player_menu_type == PLAYER_MENU_HEAL)
 	{
-		m_menu_item_selected = 1;
-		m_menu_item_select_index = menuindex;
-		return true;
+		m_player_menu_type = 0;
+		return UI_SelectHealPlayer(menuindex, menustring) ? true : false;
 	}
+	else if (m_player_menu_type == PLAYER_MENU_ITEM)
+	{
+		m_player_menu_type = 0;
+		return UI_SelectItemPlayer(menuindex, menustring) ? true : false;
+	}
+	else if (m_player_menu_type == PLAYER_MENU_TRADE)
+	{
+		m_player_menu_type = 0;
+		return UI_SelectTradePlayer(menuindex, menustring) ? true : false;
+	}
+	return false;
+}
 
+bool CGAService::PlayerMenuSelect(int menuindex, const std::string &menustring)
+{
+	return SendMessageA(g_MainHwnd, WM_CGA_PLAYER_MENU_SELECT, (WPARAM)menuindex, (LPARAM)menustring.c_str()) ? true : false;
+}
+
+bool CGAService::WM_UnitMenuSelect(int menuindex)
+{
+	if (m_unit_menu_type == UNIT_MENU_HEAL)
+	{
+		m_unit_menu_type = 0;
+		return UI_SelectHealUnit(menuindex) ? true : false;
+	}
+	else if (m_unit_menu_type == UNIT_MENU_ITEM)
+	{
+		m_unit_menu_type = 0;
+		return UI_SelectItemUnit(menuindex) ? true : false;
+	}
 	return false;
 }
 
 bool CGAService::UnitMenuSelect(int menuindex)
 {
-	if (menuindex >= 0 && menuindex < *g_unit_menu_count)
-	{
-		m_menu_item_selected = 2;
-		m_menu_item_select_index = menuindex;
-		return true;
-	}
-	return false;
+	return SendMessageA(g_MainHwnd, WM_CGA_UNIT_MENU_SELECT, (WPARAM)menuindex, 0) ? true : false;
+}
+
+inline void GetActorPosition(void *actor, int &x, int &y)
+{
+	x = *(int *)((char *)actor + 4 * (*(unsigned short *)((char *)actor + 624)) + 544);
+	y = *(int *)((char *)actor + 4 * (*(unsigned short *)((char *)actor + 624)) + 584);
 }
 
 void CGAService::WM_GetMapUnits(cga_map_units_t *units)
@@ -2247,26 +3675,34 @@ void CGAService::WM_GetMapUnits(cga_map_units_t *units)
 		if (g_map_units[i].valid == 0)
 			continue;
 
+		int xpos = g_map_units[i].xpos.decode(), ypos = g_map_units[i].ypos.decode();
+		
+		if (g_map_units[i].actor && g_map_units[i].type == 8)
+		{
+			int x, y;
+			GetActorPosition(g_map_units[i].actor, x, y);
+			if (x != 0 && y != 0)
+			{
+				xpos = x;
+				ypos = y;
+			}
+		}
+
 		units->emplace_back(
 			g_map_units[i].valid,
 			g_map_units[i].type,
 			g_map_units[i].unit_id,
 			g_map_units[i].model_id,
-			g_map_units[i].xpos.decode(),
-			g_map_units[i].ypos.decode(),
+			xpos,
+			ypos,
 			g_map_units[i].item_count,
+			g_map_units[i].injury,
+			g_map_units[i].level,
+			g_map_units[i].flags,
 			boost::locale::conv::to_utf<char>(g_map_units[i].unit_name, "GBK"),
 			boost::locale::conv::to_utf<char>(g_map_units[i].nick_name, "GBK"),
+			boost::locale::conv::to_utf<char>(g_map_units[i].title_name, "GBK"),
 			boost::locale::conv::to_utf<char>(g_map_units[i].item_name, "GBK")
-		);
-
-		WriteLog("name1=%s, name2=%s, name3=%s, unk10=%d, unk11=%d, unk12=%d",
-			g_map_units[i].unit_name,
-			g_map_units[i].nick_name,
-			g_map_units[i].item_name,
-			g_map_units[i].unk10,
-			g_map_units[i].unk11,
-			g_map_units[i].item_count
 		);
 	}
 }
@@ -2295,12 +3731,16 @@ void CGAService::SetWorkDelay(int delay)
 {
 	if (delay < 0)
 		delay = 0;
+
 	*g_work_basedelay = delay - 4500;
 }
 
 void CGAService::SetWorkAcceleration(int percent)
 {
-	m_work_acceleration = percent;
+	if (percent > 0)
+	{
+		m_work_acceleration = percent;
+	}
 }
 
 bool CGAService::WM_StartWork(int skill_index, int sub_index)
@@ -2426,21 +3866,20 @@ bool CGAService::WM_CraftItem(cga_craft_item_t *craft)
 		return false;
 	
 	m_ui_craftdialog_additemcount = 0;
-	int x = 0;
 	for (int i = 0; i < 5; ++i)
 	{
 		m_ui_craftdialog_additem[i] = -1;
 		if (!skill_craft.mats[i].name[0])
 			continue;
-		bool found = false;
-		int itemid = skill_craft.mats[i].itemid;
+		bool found_this_mat = false;
+		int desireditemid = skill_craft.mats[i].itemid;
 		int desiredcount = skill_craft.mats[i].count;
 		for (size_t j = 0; j < 5; ++j)
 		{
 			int itempos = craft->itempos[j];
 			if (itempos >= 8 && IsItemValid(itempos))
 			{
-				if (itemid == (*g_playerBase)->iteminfos[itempos].item_id)
+				if (desireditemid == (*g_playerBase)->iteminfos[itempos].item_id)
 				{
 					int itemcount = (*g_playerBase)->iteminfos[itempos].count;
 					if (!itemcount)
@@ -2449,14 +3888,21 @@ bool CGAService::WM_CraftItem(cga_craft_item_t *craft)
 					{
 						m_ui_craftdialog_additem[m_ui_craftdialog_additemcount] = itempos - 8;
 						++m_ui_craftdialog_additemcount;
-						found = true;
+						found_this_mat = true;
 						break;
 					}
 				}
 			}
 		}
-		if (!found)
+		if (!found_this_mat)
 			return false;
+	}
+
+	int itempos = craft->itempos[5];
+	if (itempos >= 8 && IsItemValid(itempos))
+	{
+		m_ui_craftdialog_additem[m_ui_craftdialog_additemcount] = itempos - 8;
+		++m_ui_craftdialog_additemcount;
 	}
 
 	return true;
@@ -2477,7 +3923,147 @@ bool CGAService::WM_IsMapCellPassable(int x, int y)
 
 bool CGAService::IsMapCellPassable(int x, int y)
 {
-	return SendMessageA(g_MainHwnd, WM_CGA_IS_MAP_CELL_PASSABLE, x, y) ? true : false;
+	int offsetX = x - *g_map_x_bottom;
+	int offsetY = y - *g_map_y_bottom;
+
+	return (offsetX >= 0 && offsetX < *g_map_x_size && offsetY >= 0 && offsetY < *g_map_y_size && (g_map_collision_table[offsetX + offsetY * (*g_map_x_size)] != 1)) ? true : false;
+
+	//return SendMessageA(g_MainHwnd, WM_CGA_IS_MAP_CELL_PASSABLE, x, y) ? true : false;
+}
+
+void CGAService::WM_GetMapCollisionTable(bool loadall, cga_map_cells_t *cells)
+{
+	if (loadall)
+	{
+		char mapname[1024];
+		format_mapname(mapname, *g_map_index1, *g_map_index2, *g_map_index3);
+		auto fp = fopen(mapname, "rb");
+		if (fp)
+		{
+			fseek(fp, 12, SEEK_SET);
+			int xsize = 0, ysize = 0;
+			fread(&xsize, 4, 1, fp);
+			fread(&ysize, 4, 1, fp);
+
+			if (xsize > 0 && ysize > 0 && xsize < 10000 && ysize < 10000)
+			{
+				short *celldata = (short *)malloc(2 * xsize * ysize);
+				short *collisiondata = (short *)malloc(2 * xsize * ysize);
+				short *objectdata = (short *)malloc(2 * xsize * ysize);
+				int bufferSize = std::max(2*51*51, 2 * xsize * ysize);
+				short *collisiontable = (short *)malloc(bufferSize);
+
+				memset(collisiontable, 0, bufferSize);
+
+				fseek(fp, 20, SEEK_SET);
+				fread(celldata, 2 * xsize * ysize, 1, fp);
+
+				fseek(fp, 20 + 2 * xsize * ysize, SEEK_SET);
+				fread(collisiondata, 2 * xsize * ysize, 1, fp);
+	
+				fseek(fp, 20 + 2 * xsize * ysize + 2 * xsize * ysize, SEEK_SET);
+				fread(objectdata, 2 * xsize * ysize, 1, fp);
+				
+				BuildMapCollisionTable(0, 0, xsize, ysize, celldata, collisiondata, objectdata, collisiontable);
+
+				cells->x_bottom = 0;
+				cells->y_bottom = 0;
+				cells->x_size = xsize;
+				cells->y_size = ysize;
+
+				cells->cell.resize(xsize * ysize);
+				memcpy(cells->cell.data(), collisiontable, 2 * xsize * ysize);
+
+				free(celldata);
+				free(collisiondata);
+				free(objectdata);
+				free(collisiontable);
+
+				fclose(fp);
+
+				return;
+			}
+
+			fclose(fp);
+		}
+	}
+
+	cells->x_bottom = *g_map_x_bottom;
+	cells->y_bottom = *g_map_y_bottom;
+	cells->x_size = *g_map_x_size;
+	cells->y_size = *g_map_y_size;
+	cells->cell.resize(cells->x_size*cells->y_size);
+	memcpy(cells->cell.data(), g_map_collision_table, 2 * cells->x_size*cells->y_size);
+}
+
+cga_map_cells_t CGAService::GetMapCollisionTable(bool loadall)
+{
+	cga_map_cells_t cells;
+
+	SendMessageA(g_MainHwnd, WM_CGA_GET_COLLISION_TABLE, loadall ? 1 : 0, (LPARAM)&cells);
+
+	return cells;
+}
+
+void CGAService::WM_GetMapObjectTable(bool loadall, cga_map_cells_t *cells)
+{
+	if (loadall)
+	{
+		char mapname[1024];
+		format_mapname(mapname, *g_map_index1, *g_map_index2, *g_map_index3);
+		auto fp = fopen(mapname, "rb");
+		if (fp)
+		{
+			fseek(fp, 12, SEEK_SET);
+			int xsize = 0, ysize = 0;
+			fread(&xsize, 4, 1, fp);
+			fread(&ysize, 4, 1, fp);
+
+			if (xsize > 0 && ysize > 0 && xsize < 10000 && ysize < 10000)
+			{
+				fseek(fp, 20 + 2 * xsize * ysize + 2 * xsize * ysize, SEEK_SET);
+				
+				int bufferSize = std::max(2 * 51 * 51, 2 * xsize * ysize);
+
+				short *buffer = (short *)malloc(bufferSize);
+				memset(buffer, 0, bufferSize);
+
+				fread(buffer, 2 * xsize * ysize, 1, fp);
+
+				cells->x_bottom = 0;
+				cells->y_bottom = 0;
+				cells->x_size = xsize;
+				cells->y_size = ysize;
+
+				cells->cell.resize(xsize * ysize);
+				memcpy(cells->cell.data(), buffer, 2 * xsize * ysize);
+
+				free(buffer);
+
+				fclose(fp);
+
+				return;
+			}
+
+			fclose(fp);
+		}
+	}
+
+	cells->x_bottom = *g_map_x_bottom;
+	cells->y_bottom = *g_map_y_bottom;
+	cells->x_size = *g_map_x_size;
+	cells->y_size = *g_map_y_size;
+	cells->cell.resize(cells->x_size*cells->y_size);
+	memcpy(cells->cell.data(), g_map_object_table, 2 * cells->x_size*cells->y_size);
+}
+
+cga_map_cells_t CGAService::GetMapObjectTable(bool loadall)
+{
+	cga_map_cells_t cells;
+
+	SendMessageA(g_MainHwnd, WM_CGA_GET_OBJECT_TABLE, loadall ? 1 : 0, (LPARAM)&cells);
+
+	return cells;
 }
 
 bool CGAService::WM_ForceMove(int dir, bool show)
@@ -2588,6 +4174,167 @@ bool CGAService::ForceMoveTo(int x, int y, bool show)
 	return SendMessageA(g_MainHwnd, WM_CGA_FORCE_MOVE_TO, (x & 0xFFFF) | ((y & 0xFFFF) << 16) , show ? 1 : 0) ? true : false;
 }
 
+bool CGAService::DoRequest(int request_type)
+{
+	return SendMessageA(g_MainHwnd, WM_CGA_DO_REQUEST, request_type, 0) ? true : false;
+}
+
+bool CGAService::WM_DoRequest(int request_type)
+{
+	if (!IsInGame())
+		return false;
+
+	if (GetWorldStatus() != 9 || GetGameStatus() != 3)
+		return false;
+
+	if (request_type == REQUEST_TYPE_JOINTEAM) {
+		if (*g_is_in_team)
+			return false;
+
+		NET_WriteJoinTeamPacket_cgitem(*g_net_socket, g_player_xpos->decode(), g_player_ypos->decode(), 1);
+	}
+	else if (request_type == REQUEST_TYPE_LEAVETEAM) {
+		if (!(*g_is_in_team))
+			return false;
+		//if(!(*g_team_flags & 100))
+		//	return false;
+
+		NET_WriteJoinTeamPacket_cgitem(*g_net_socket, g_player_xpos->decode(), g_player_ypos->decode(), 0);
+	}
+	else if (request_type == REQUEST_TYPE_KICKTEAM) {
+		if (!(*g_is_in_team))
+			return false;
+
+		NET_WriteKickTeamPacket_cgitem(*g_net_socket);
+	}
+	else if (request_type == REQUEST_TYPE_TRADE) {
+		NET_WriteTradePacket_cgitem(*g_net_socket);
+	}
+	else if (request_type == REQUEST_TYPE_EXCAHNGECARD) {
+		NET_WriteExchangeCardPacket_cgitem(*g_net_socket, g_player_xpos->decode(), g_player_ypos->decode());
+	}
+	else if (request_type == REQUEST_TYPE_PK) {
+		NET_WritePKPacket_cgitem(*g_net_socket, g_player_xpos->decode(), g_player_ypos->decode());
+	}
+	else if (request_type == REQUEST_TYPE_TRADE_CONFIRM) {
+		NET_WriteTradeConfirmPacket_cgitem(*g_net_socket);
+	}
+	else if (request_type == REQUEST_TYPE_TRADE_REFUSE) {
+		NET_WriteTradeRefusePacket_cgitem(*g_net_socket);
+	}
+	else {
+		return false;
+	}
+
+	return true;
+}
+
+bool CGAService::EnableFlags(int type, bool enable)
+{
+	return SendMessageA(g_MainHwnd, WM_CGA_ENABLE_FLAGS, type, enable ? 1 : 0) ? true : false;
+}
+
+bool CGAService::WM_EnableFlags(int type, bool enable)
+{
+	if (!IsInGame())
+		return false;
+
+	if (GetWorldStatus() != 9 || GetGameStatus() != 3)
+		return false;
+
+	if (type == ENABLE_FLAG_JOINTEAM) {
+		if(((*g_enableflags) & PLAYER_ENABLE_FLAGS_JOINTEAM) && !enable)
+			UI_HandleEnableFlags(19, 2);
+		else if (!((*g_enableflags) & PLAYER_ENABLE_FLAGS_JOINTEAM) && enable)
+			UI_HandleEnableFlags(19, 2);
+	}
+	else if (type == ENABLE_FLAG_TRADE) {
+		if (((*g_enableflags) & PLAYER_ENABLE_FLAGS_TRADE) && !enable)
+			UI_HandleEnableFlags(21, 2);
+		else if (!((*g_enableflags) & PLAYER_ENABLE_FLAGS_TRADE) && enable)
+			UI_HandleEnableFlags(21, 2);
+	}
+	else if (type == ENABLE_FLAG_CARD) {
+		if (((*g_enableflags) & PLAYER_ENABLE_FLAGS_CARD) && !enable)
+			UI_HandleEnableFlags(20, 2);
+		else if (!((*g_enableflags) & PLAYER_ENABLE_FLAGS_CARD) && enable)
+			UI_HandleEnableFlags(20, 2);
+	}
+	else if (type == ENABLE_FLAG_PK) {
+		if (((*g_enableflags) & PLAYER_ENABLE_FLAGS_PK) && !enable)
+			UI_HandleEnableFlags(17, 2);
+		else if (!((*g_enableflags) & PLAYER_ENABLE_FLAGS_PK) && enable)
+			UI_HandleEnableFlags(17, 2);
+	}
+	else if (type == ENABLE_FLAG_TEAMCHAT) {
+		if (((*g_enableflags) & PLAYER_ENABLE_FLAGS_TEAMCHAT) && !enable)
+			UI_HandleEnableFlags(18, 2);
+		else if (!((*g_enableflags) & PLAYER_ENABLE_FLAGS_TEAMCHAT) && enable)
+			UI_HandleEnableFlags(18, 2);
+	}
+	else if (type == ENABLE_FLAG_FAMILY) {
+		if (((*g_enableflags) & PLAYER_ENABLE_FLAGS_FAMILY) && !enable)
+			UI_HandleEnableFlags(22, 2);
+		else if (!((*g_enableflags) & PLAYER_ENABLE_FLAGS_FAMILY) && enable)
+			UI_HandleEnableFlags(22, 2);
+	}
+	else {
+		return false;
+	}
+
+	return true;
+}
+
+void CGAService::TradeAddStuffs(cga_sell_items_t items, cga_sell_pets_t pets, int gold)
+{
+	cga_trade_stuff_t stuff;
+
+	stuff.items = items;
+	stuff.pets = pets;
+	stuff.gold = gold;
+
+	SendMessageA(g_MainHwnd, WM_CGA_TRADE_ADD_STUFFS, (WPARAM)&stuff, 0);
+}
+
+void CGAService::WM_TradeAddStuffs(cga_trade_stuff_t *stuffs)
+{
+	std::string itembuffer, petbuffer;
+	char buf[32];
+
+	for (size_t i = 0; i < stuffs->items.size(); ++i)
+	{
+		sprintf(buf, "%d|%d", stuffs->items.at(i).itempos, i);
+		itembuffer += buf;
+		if (i != stuffs->items.size() - 1)
+			itembuffer += "|";
+	}
+
+	for (size_t i = 0; i < stuffs->pets.size(); ++i)
+	{
+		sprintf(buf, "%d|%d", stuffs->pets.at(i), i);
+		petbuffer += buf;
+		if (i != stuffs->pets.size() - 1)
+			petbuffer += "|";
+	}
+
+	NET_WriteTraceAddItemPacket_cgitem(*g_net_socket, itembuffer.c_str(), petbuffer.c_str(), stuffs->gold);
+	/*for (size_t i = 0; i < 20; ++i)
+		g_trade_item_array[i] = -1;
+	
+	for (size_t i = 0; i < stuffs->items.size() && i < 20; ++i)
+		g_trade_item_array[i] = stuffs->items.at(i).itempos;
+
+	for (size_t i = 0; i < 5; ++i)
+		g_trade_pet_array[i] = -1;
+
+	for (size_t i = 0; i < stuffs->pets.size() && i < 5; ++i)
+		g_trade_pet_array[i] = stuffs->pets.at(i);
+
+	*g_trade_gold = stuffs->gold;
+
+	UI_SelectTradeAddStuffs(2, 2);*/
+}
+
 void CGAService::WM_GetCraftInfo(cga_craft_item_t *craft, cga_craft_info_t *info)
 {
 	if (!IsInGame())
@@ -2662,12 +4409,120 @@ void CGAService::WM_GetCraftsInfo(int skill_index, cga_crafts_info_t *info)
 				}
 			}
 		}
-	}	
+	}
 }
 
 cga_crafts_info_t CGAService::GetCraftsInfo(int skill_index)
 {
 	cga_crafts_info_t info;
-	SendMessageA(g_MainHwnd, WM_CGA_GET_CRAFTS_INFO, skill_index, (LPARAM)&info) ? true : false;
+	SendMessageA(g_MainHwnd, WM_CGA_GET_CRAFTS_INFO, skill_index, (LPARAM)&info);
 	return info;
+}
+
+void CGAService::WM_GetTeamPlayerInfo(cga_team_players_t *info)
+{
+	if (!IsInGame())
+		return;
+
+	if (!*g_is_in_team)
+		return;
+
+	for (int i = 0; i < 5; ++i)
+	{
+		if (g_team_player_base[i].valid)
+		{
+			std::string name;
+
+			if (g_team_player_base[i].unit_id == (*g_playerBase)->unitid)
+				name = boost::locale::conv::to_utf<char>((*g_playerBase)->name, "GBK");
+			else if (g_team_player_base[i].actor)
+				name = boost::locale::conv::to_utf<char>((char *)g_team_player_base[i].actor + 196, "GBK");
+
+			info->emplace_back(
+				g_team_player_base[i].unit_id,
+				g_team_player_base[i].hp,
+				g_team_player_base[i].mp,
+				g_team_player_base[i].maxhp,
+				name
+			);
+		}
+	}
+}
+
+cga_team_players_t CGAService::GetTeamPlayerInfo(void)
+{
+	cga_team_players_t info;
+	SendMessageA(g_MainHwnd, WM_CGA_GET_TEAM_PLAYERS_INFO, (WPARAM)&info, 0);
+	return info;
+}
+
+void CGAService::WM_FixMapWarpStuck(int type)
+{
+	if (type == 0)
+	{
+		WriteLog("FixMapWarpStuck type 0\n");
+
+		*g_disable_move = 0;
+		*g_game_status_cgitem = 1;
+	}
+	else if (type == 1)
+	{
+		WriteLog("FixMapWarpStuck type 1\n");
+
+		if (IsMapObjectEntrance(g_player_xpos->decode(), g_player_ypos->decode()))
+		{
+			*g_do_switch_map = 1;
+			*g_switch_map_frames = 1;
+			*g_switch_map_type = 1;
+			*g_is_moving = 1;
+		}
+	}
+}
+
+void CGAService::FixMapWarpStuck(int type)
+{
+	if (type == 2)
+	{
+		m_move_checkwarp = true;
+	}
+	else if (type == 3)
+	{
+		m_move_checkwarp = false;
+	}
+	else
+	{
+		SendMessageA(g_MainHwnd, WM_CGA_FIX_WARP_STUCK, (WPARAM)type, 0);
+	}
+}
+
+void CGAService::SetNoSwitchAnim(bool enable)
+{
+	m_ui_noswitchanim = enable;
+}
+
+void CGAService::SetImmediateDoneWork(bool enable)
+{
+	m_work_immediate = enable;
+}
+
+void CGAService::WM_SetWindowResolution(int w, int h)
+{
+	*g_resolution_width = w;
+	*g_resolution_height = h;
+	SYS_ResetWindow();
+}
+
+void CGAService::SetWindowResolution(int w, int h)
+{
+	SendMessageA(g_MainHwnd, WM_CGA_SET_WINDOW_RESOLUTION, w, h);
+}
+
+void CGAService::WM_RequestDownloadMap(int xbottom, int ybottom, int xsize, int ysize)
+{
+	NET_WriteRequestDownloadMapPacket_cgitem(*g_net_socket, *g_map_index1, *g_map_index3, xbottom, ybottom, xsize, ysize);
+}
+
+void CGAService::RequestDownloadMap(int xbottom, int ybottom, int xsize, int ysize)
+{
+	SendMessageA(g_MainHwnd, WM_CGA_REQUEST_DOWNLOAD_MAP, xbottom & 0xffff | ((xsize & 0xffff) << 16), ybottom & 0xffff | ((ysize & 0xffff) << 16));
 }

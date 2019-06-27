@@ -12,6 +12,12 @@ CGA::CGAInterface *g_CGAInterface = NULL;
 #include "npc.h"
 #include "work.h"
 #include "chat.h"
+#include "battle.h"
+
+void FreeUVHandleCallBack(uv_handle_t *handle)
+{
+	delete handle;
+}
 
 void LogBack(const Nan::FunctionCallbackInfo<v8::Value>& info) 
 {
@@ -127,10 +133,18 @@ void Init(v8::Local<v8::Object> exports) {
 		Nan::New<v8::FunctionTemplate>(GetMapXY)->GetFunction());
 	exports->Set(Nan::New("GetMapXYFloat").ToLocalChecked(),
 		Nan::New<v8::FunctionTemplate>(GetMapXYFloat)->GetFunction());
+	exports->Set(Nan::New("GetMapIndex").ToLocalChecked(),
+		Nan::New<v8::FunctionTemplate>(GetMapIndex)->GetFunction());
+	exports->Set(Nan::New("GetMoveSpeed").ToLocalChecked(),
+		Nan::New<v8::FunctionTemplate>(GetMoveSpeed)->GetFunction());
 	exports->Set(Nan::New("GetMapName").ToLocalChecked(),
 		Nan::New<v8::FunctionTemplate>(GetMapName)->GetFunction());
 	exports->Set(Nan::New("GetMapUnits").ToLocalChecked(),
 		Nan::New<v8::FunctionTemplate>(GetMapUnits)->GetFunction());
+	exports->Set(Nan::New("GetMapCollisionTable").ToLocalChecked(),
+		Nan::New<v8::FunctionTemplate>(GetMapCollisionTable)->GetFunction());
+	exports->Set(Nan::New("GetMapObjectTable").ToLocalChecked(),
+		Nan::New<v8::FunctionTemplate>(GetMapObjectTable)->GetFunction());
 	exports->Set(Nan::New("WalkTo").ToLocalChecked(),
 		Nan::New<v8::FunctionTemplate>(WalkTo)->GetFunction());
 	exports->Set(Nan::New("TurnTo").ToLocalChecked(),
@@ -149,6 +163,8 @@ void Init(v8::Local<v8::Object> exports) {
 		Nan::New<v8::FunctionTemplate>(LogBack)->GetFunction());
 	exports->Set(Nan::New("LogOut").ToLocalChecked(),
 		Nan::New<v8::FunctionTemplate>(LogOut)->GetFunction());
+	exports->Set(Nan::New("DropPet").ToLocalChecked(),
+		Nan::New<v8::FunctionTemplate>(DropPet)->GetFunction());
 	exports->Set(Nan::New("DropItem").ToLocalChecked(),
 		Nan::New<v8::FunctionTemplate>(DropItem)->GetFunction());
 	exports->Set(Nan::New("UseItem").ToLocalChecked(),
@@ -175,6 +191,8 @@ void Init(v8::Local<v8::Object> exports) {
 		Nan::New<v8::FunctionTemplate>(SayWords)->GetFunction());
 	exports->Set(Nan::New("AsyncWaitWorkingResult").ToLocalChecked(),
 		Nan::New<v8::FunctionTemplate>(AsyncWaitWorkingResult)->GetFunction());
+	exports->Set(Nan::New("SetImmediateDoneWork").ToLocalChecked(),
+		Nan::New<v8::FunctionTemplate>(SetImmediateDoneWork)->GetFunction());
 	exports->Set(Nan::New("StartWork").ToLocalChecked(),
 		Nan::New<v8::FunctionTemplate>(StartWork)->GetFunction());
 	exports->Set(Nan::New("CraftItem").ToLocalChecked(),
@@ -186,7 +204,49 @@ void Init(v8::Local<v8::Object> exports) {
 	exports->Set(Nan::New("GetCraftsInfo").ToLocalChecked(),
 		Nan::New<v8::FunctionTemplate>(GetCraftsInfo)->GetFunction());
 	exports->Set(Nan::New("AsyncWaitChatMsg").ToLocalChecked(),
-		Nan::New<v8::FunctionTemplate>(AsyncWaitChatMsg)->GetFunction());	
+		Nan::New<v8::FunctionTemplate>(AsyncWaitChatMsg)->GetFunction());
+	exports->Set(Nan::New("DoRequest").ToLocalChecked(),
+		Nan::New<v8::FunctionTemplate>(DoRequest)->GetFunction());
+	exports->Set(Nan::New("EnableFlags").ToLocalChecked(),
+		Nan::New<v8::FunctionTemplate>(EnableFlags)->GetFunction());
+	exports->Set(Nan::New("TradeAddStuffs").ToLocalChecked(),
+		Nan::New<v8::FunctionTemplate>(TradeAddStuffs)->GetFunction());
+	exports->Set(Nan::New("AsyncWaitTradeStuffs").ToLocalChecked(),
+		Nan::New<v8::FunctionTemplate>(AsyncWaitTradeStuffs)->GetFunction());
+	exports->Set(Nan::New("AsyncWaitTradeDialog").ToLocalChecked(),
+		Nan::New<v8::FunctionTemplate>(AsyncWaitTradeDialog)->GetFunction());
+	exports->Set(Nan::New("AsyncWaitTradeState").ToLocalChecked(),
+		Nan::New<v8::FunctionTemplate>(AsyncWaitTradeState)->GetFunction());
+	exports->Set(Nan::New("GetTeamPlayerInfo").ToLocalChecked(),
+		Nan::New<v8::FunctionTemplate>(GetTeamPlayerInfo)->GetFunction());
+	exports->Set(Nan::New("FixMapWarpStuck").ToLocalChecked(),
+		Nan::New<v8::FunctionTemplate>(FixMapWarpStuck)->GetFunction());
+	exports->Set(Nan::New("GetMoveHistory").ToLocalChecked(),
+		Nan::New<v8::FunctionTemplate>(GetMoveHistory)->GetFunction());
+	exports->Set(Nan::New("RequestDownloadMap").ToLocalChecked(),
+		Nan::New<v8::FunctionTemplate>(RequestDownloadMap)->GetFunction());
+	exports->Set(Nan::New("AsyncWaitBattleAction").ToLocalChecked(),
+		Nan::New<v8::FunctionTemplate>(AsyncWaitBattleAction)->GetFunction());
+	exports->Set(Nan::New("GetBattleUnits").ToLocalChecked(),
+		Nan::New<v8::FunctionTemplate>(GetBattleUnits)->GetFunction());
+	exports->Set(Nan::New("GetBattleContext").ToLocalChecked(),
+		Nan::New<v8::FunctionTemplate>(GetBattleContext)->GetFunction());
+	exports->Set(Nan::New("BattleNormalAttack").ToLocalChecked(),
+		Nan::New<v8::FunctionTemplate>(BattleNormalAttack)->GetFunction());
+	exports->Set(Nan::New("BattleSkillAttack").ToLocalChecked(),
+		Nan::New<v8::FunctionTemplate>(BattleSkillAttack)->GetFunction());
+	exports->Set(Nan::New("BattleDefense").ToLocalChecked(),
+		Nan::New<v8::FunctionTemplate>(BattleDefense)->GetFunction());
+	exports->Set(Nan::New("BattleEscape").ToLocalChecked(),
+		Nan::New<v8::FunctionTemplate>(BattleEscape)->GetFunction());
+	exports->Set(Nan::New("BattleExchangePosition").ToLocalChecked(),
+		Nan::New<v8::FunctionTemplate>(BattleExchangePosition)->GetFunction());
+	exports->Set(Nan::New("BattleChangePet").ToLocalChecked(),
+		Nan::New<v8::FunctionTemplate>(BattleChangePet)->GetFunction());
+	exports->Set(Nan::New("BattleUseItem").ToLocalChecked(),
+		Nan::New<v8::FunctionTemplate>(BattleUseItem)->GetFunction());
+	exports->Set(Nan::New("BattlePetSkillAttack").ToLocalChecked(),
+		Nan::New<v8::FunctionTemplate>(BattlePetSkillAttack)->GetFunction());
 }
 
 NODE_MODULE(node_cga, Init)

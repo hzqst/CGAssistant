@@ -3,6 +3,7 @@
 
 DWORD WINAPI CGAServerThread(LPVOID);
 LRESULT CALLBACK NewWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
+LONG WINAPI MinidumpCallback(EXCEPTION_POINTERS* pException);
 extern CGA::CGAService g_CGAService;
 
 int g_MainPort = 0;
@@ -94,14 +95,12 @@ LRESULT CALLBACK NewWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
 		return g_CGAService.WM_BattlePetSkillAttack(wParam, lParam) ? 1 : 0;
 	case WM_CGA_DROP_ITEM:
 		return g_CGAService.WM_DropItem(wParam) ? 1 : 0;
+	case WM_CGA_DROP_PET:
+		return g_CGAService.WM_DropPet(wParam) ? 1 : 0;
 	case WM_CGA_USE_ITEM:
 		return g_CGAService.WM_UseItem(wParam) ? 1 : 0;
 	case WM_CGA_MOVE_ITEM:
 		return g_CGAService.WM_MoveItem((CGA::cga_move_item_t *)wParam) ? 1 : 0;
-	//case WM_CGA_PLAYER_MENU_SELECT:
-	//	return g_CGAService.WM_PlayerMenuSelect(wParam) ? 1 : 0;
-	//case WM_CGA_UNIT_MENU_SELECT:
-	//	return g_CGAService.WM_UnitMenuSelect(wParam) ? 1 : 0;
 	case WM_CGA_LOG_BACK:
 		g_CGAService.WM_LogBack();
 		return 1;
@@ -110,6 +109,9 @@ LRESULT CALLBACK NewWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
 		return 1;
 	case WM_CGA_GET_MAP_UNITS:
 		g_CGAService.WM_GetMapUnits((CGA::cga_map_units_t *)wParam);
+		return 1;
+	case WM_CGA_GET_MAP_NAME:
+		g_CGAService.WM_GetMapName((std::string *)wParam);
 		return 1;
 	case WM_CGA_GET_PET_INFO:
 		g_CGAService.WM_GetPetInfo(wParam, (CGA::cga_pet_info_t *)lParam);
@@ -180,6 +182,38 @@ LRESULT CALLBACK NewWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
 		return g_CGAService.WM_ForceMoveTo(wParam & 0xFFFF, (wParam >> 16) & 0xFFFF, lParam ? true : false) ? 1 : 0;
 	case WM_CGA_ASSESS_ITEM:
 		return g_CGAService.WM_AssessItem(wParam, lParam);
+	case WM_CGA_DO_REQUEST:
+		return g_CGAService.WM_DoRequest((int)wParam) ? true : false;
+	case WM_CGA_TRADE_ADD_STUFFS:
+		g_CGAService.WM_TradeAddStuffs((CGA::cga_trade_stuff_t *)wParam);
+		return 1;
+	case WM_CGA_GET_TEAM_PLAYERS_INFO:
+		g_CGAService.WM_GetTeamPlayerInfo((CGA::cga_team_players_t *)wParam);
+		return 1;
+	case WM_CGA_FIX_WARP_STUCK:
+		g_CGAService.WM_FixMapWarpStuck((int)wParam);
+		return 1;
+	case WM_CGA_GET_MOVE_HISTORY:
+		g_CGAService.WM_GetMoveHistory((std::vector<DWORD> *)wParam);
+		return 1;
+	case WM_CGA_ENABLE_FLAGS:
+		return g_CGAService.WM_EnableFlags((int)wParam, lParam ? true : false) ? true : false;
+	case WM_CGA_PLAYER_MENU_SELECT:
+		return g_CGAService.WM_PlayerMenuSelect((int)wParam, (const char *)lParam) ? true : false;
+	case WM_CGA_UNIT_MENU_SELECT:
+		return g_CGAService.WM_UnitMenuSelect((int)wParam) ? true : false;
+	case WM_CGA_SET_WINDOW_RESOLUTION:
+		g_CGAService.WM_SetWindowResolution((int)wParam, (int)lParam);
+		return 1;
+	case WM_CGA_REQUEST_DOWNLOAD_MAP:
+		g_CGAService.WM_RequestDownloadMap((int)wParam & 0xffff, (int)lParam & 0xffff, (int)(wParam >> 16) & 0xffff, (int)(lParam >> 16) & 0xffff);
+		return 1;
+	case WM_CGA_GET_COLLISION_TABLE:
+		g_CGAService.WM_GetMapCollisionTable(wParam ? true : false, (CGA::cga_map_cells_t *)lParam);
+		return 1;
+	case WM_CGA_GET_OBJECT_TABLE:
+		g_CGAService.WM_GetMapObjectTable(wParam ? true : false, (CGA::cga_map_cells_t *)lParam);
+		return 1;
 	}
 
 	return CallWindowProcA(g_OldProc, hWnd, message, wParam, lParam);
@@ -189,6 +223,8 @@ void InitializeHooks(int ThreadId, HWND hWnd, CGA::game_type type)
 {
 	g_MainThreadId = ThreadId;
 	g_MainHwnd = hWnd;
+
+	SetUnhandledExceptionFilter(MinidumpCallback);
 
 	g_CGAService.Initialize(type);
 

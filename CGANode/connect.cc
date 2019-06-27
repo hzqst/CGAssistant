@@ -5,6 +5,10 @@ using namespace v8;
 
 extern CGA::CGAInterface *g_CGAInterface;
 
+void BattleActionNotify(int flags);
+void TradeStateNotify(int state);
+void TradeDialogNotify(CGA::cga_trade_dialog_t info);
+void TradeStuffsNotify(CGA::cga_trade_stuff_info_t info);
 void PlayerMenuNotify(CGA::cga_player_menu_items_t players);
 void UnitMenuNotify(CGA::cga_unit_menu_items_t units);
 void NPCDialogNotify(CGA::cga_npc_dialog_t dlg);
@@ -34,6 +38,10 @@ void ConnectWorker(uv_work_t* req)
 
 	if (data->m_result)
 	{
+		g_CGAInterface->RegisterBattleActionNotify(std::bind(&BattleActionNotify, std::placeholders::_1));
+		g_CGAInterface->RegisterTradeStateNotify(std::bind(&TradeStateNotify, std::placeholders::_1));
+		g_CGAInterface->RegisterTradeDialogNotify(std::bind(&TradeDialogNotify, std::placeholders::_1));
+		g_CGAInterface->RegisterTradeStuffsNotify(std::bind(&TradeStuffsNotify, std::placeholders::_1));
 		g_CGAInterface->RegisterPlayerMenuNotify(std::bind(&PlayerMenuNotify, std::placeholders::_1));
 		g_CGAInterface->RegisterUnitMenuNotify(std::bind(&UnitMenuNotify, std::placeholders::_1));
 		g_CGAInterface->RegisterNPCDialogNotify(std::bind(&NPCDialogNotify, std::placeholders::_1));

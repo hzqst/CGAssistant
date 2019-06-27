@@ -2,7 +2,7 @@
   "targets": [
     {
       "target_name": "node_cga",
-      "sources": [ "main.cc", "connect.cc", "item.cc", "info.cc", "map.cc", "npc.cc", "work.cc", "chat.cc" ],
+      "sources": [ "main.cc", "connect.cc", "item.cc", "info.cc", "map.cc", "npc.cc", "work.cc", "chat.cc", "battle.cc"  ],
       "include_dirs": [
         "<!(node -e \"require('nan')\")",
 		"../",
@@ -10,7 +10,7 @@
 		"../rest_rpc/spdlog/include/",
 		"../rest_rpc/iguana/",
 		"../rest_rpc/iguana/third_party/msgpack/include/",
-		"../boost/"
+		"../boost_1_63_0/"
       ],
 	  
 	  "conditions": [
@@ -42,7 +42,7 @@
                                         "LinkIncremental": 1,
                                         "AdditionalLibraryDirectories": [
 											"../../Debug/",
-                                            "../../boost/stage/lib"
+                                            "../../boost_1_63_0/stage/lib"
                                         ]
                                     }
                                 }
@@ -64,7 +64,7 @@
                                         "LinkTimeCodeGeneration": 1,
                                         "AdditionalLibraryDirectories": [
                                             "../../Release/",
-											"../../boost/stage/lib"
+											"../../boost_1_63_0/stage/lib"
                                         ]
                                     }
                                 }

@@ -8,7 +8,7 @@
 
 using server_t = timax::rpc::server<timax::rpc::msgpack_codec>;
 
-size_t pool_size = std::thread::hardware_concurrency();
+size_t pool_size = 8;
 std::shared_ptr<server_t> server;
 
 extern CGA::CGAService g_CGAService;
@@ -62,6 +62,27 @@ void CGA_NotifyChatMsg(const CGA::cga_chat_msg_t &msg)
 {
 	if (server && server.get()) {
 		server->pub("NotifyChatMsg", msg);
+	}
+}
+
+void CGA_NotifyTradeStuffs(const CGA::cga_trade_stuff_info_t &msg)
+{
+	if (server && server.get()) {
+		server->pub("NotifyTradeStuffs", msg);
+	}
+}
+
+void CGA_NotifyTradeDialog(const CGA::cga_trade_dialog_t &msg)
+{
+	if (server && server.get()) {
+		server->pub("NotifyTradeDialog", msg);
+	}
+}
+
+void CGA_NotifyTradeState(int state)
+{
+	if (server && server.get()) {
+		server->pub("NotifyTradeState", state);
 	}
 }
 
@@ -121,7 +142,7 @@ DWORD WINAPI CGAServerThread(LPVOID)
 
 	g_hQuitEvent = CreateEventW(NULL, TRUE, FALSE, NULL);
 
-	for (uint16_t port = CGA_PORT_BASE; port < CGA_PORT_BASE + 10; port++)
+	for (uint16_t port = CGA_PORT_BASE; port < CGA_PORT_BASE + 100; port++)
 	{
 		DWORD dwWait = WAIT_OBJECT_0;
 
@@ -131,7 +152,7 @@ DWORD WINAPI CGAServerThread(LPVOID)
 
 			try
 			{
-				server = std::make_shared<server_t>(port, pool_size, std::chrono::seconds{ 2 });
+				server = std::make_shared<server_t>(port, pool_size, std::chrono::seconds{ 10 });
 				server->register_handler("Initialize", timax::bind(&CGAService::InitializeGameData, &g_CGAService));
 				server->register_handler("Connect", timax::bind(&CGAService::Connect, &g_CGAService));
 				server->register_handler("IsInGame", timax::bind(&CGAService::IsInGame, &g_CGAService));
@@ -156,9 +177,12 @@ DWORD WINAPI CGAServerThread(LPVOID)
 				server->register_handler("GetPetSkillsInfo", timax::bind(&CGAService::GetPetSkillsInfo, &g_CGAService));
 
 				server->register_handler("GetMapName", timax::bind(&CGAService::GetMapName, &g_CGAService));
+				server->register_handler("GetMapIndex", timax::bind(&CGAService::GetMapIndex, &g_CGAService));
 				server->register_handler("GetMapXY", timax::bind(&CGAService::GetMapXY, &g_CGAService));
 				server->register_handler("GetMapXYFloat", timax::bind(&CGAService::GetMapXYFloat, &g_CGAService));
 				server->register_handler("GetMapUnits", timax::bind(&CGAService::GetMapUnits, &g_CGAService));
+				server->register_handler("GetMapCollisionTable", timax::bind(&CGAService::GetMapCollisionTable, &g_CGAService));
+				server->register_handler("GetMapObjectTable", timax::bind(&CGAService::GetMapObjectTable, &g_CGAService));
 				server->register_handler("GetMoveSpeed", timax::bind(&CGAService::GetMoveSpeed, &g_CGAService));
 
 				server->register_handler("WalkTo", timax::bind(&CGAService::WalkTo, &g_CGAService));
@@ -178,6 +202,7 @@ DWORD WINAPI CGAServerThread(LPVOID)
 				server->register_handler("DropItem", timax::bind(&CGAService::DropItem, &g_CGAService));
 				server->register_handler("UseItem", timax::bind(&CGAService::UseItem, &g_CGAService));
 				server->register_handler("MoveItem", timax::bind(&CGAService::MoveItem, &g_CGAService));
+				server->register_handler("DropPet", timax::bind(&CGAService::DropPet, &g_CGAService));
 
 				server->register_handler("ClickNPCDialog", timax::bind(&CGAService::ClickNPCDialog, &g_CGAService));
 				server->register_handler("SellNPCStore", timax::bind(&CGAService::SellNPCStore, &g_CGAService));
@@ -188,10 +213,7 @@ DWORD WINAPI CGAServerThread(LPVOID)
 				server->register_handler("IsBattleUnitValid", timax::bind(&CGAService::IsBattleUnitValid, &g_CGAService));
 				server->register_handler("GetBattleUnit", timax::bind(&CGAService::GetBattleUnit, &g_CGAService));
 				server->register_handler("GetBattleUnits", timax::bind(&CGAService::GetBattleUnits, &g_CGAService));
-				server->register_handler("GetBattleRoundCount", timax::bind(&CGAService::GetBattleRoundCount, &g_CGAService));
-				server->register_handler("GetBattlePlayerPosition", timax::bind(&CGAService::GetBattlePlayerPosition, &g_CGAService));
-				server->register_handler("GetBattlePlayerStatus", timax::bind(&CGAService::GetBattlePlayerStatus, &g_CGAService));
-				server->register_handler("GetBattlePetId", timax::bind(&CGAService::GetBattlePetId, &g_CGAService));
+				server->register_handler("GetBattleContext", timax::bind(&CGAService::GetBattleContext, &g_CGAService));
 				server->register_handler("BattleNormalAttack", timax::bind(&CGAService::BattleNormalAttack, &g_CGAService));
 				server->register_handler("BattleSkillAttack", timax::bind(&CGAService::BattleSkillAttack, &g_CGAService));
 				server->register_handler("BattleDefense", timax::bind(&CGAService::BattleDefense, &g_CGAService));
@@ -208,10 +230,21 @@ DWORD WINAPI CGAServerThread(LPVOID)
 				server->register_handler("SetWorkDelay", timax::bind(&CGAService::SetWorkDelay, &g_CGAService));
 				server->register_handler("StartWork", timax::bind(&CGAService::StartWork, &g_CGAService));
 				server->register_handler("SetWorkAcceleration", timax::bind(&CGAService::SetWorkAcceleration, &g_CGAService));
+				server->register_handler("SetImmediateDoneWork", timax::bind(&CGAService::SetImmediateDoneWork, &g_CGAService));
 				server->register_handler("CraftItem", timax::bind(&CGAService::CraftItem, &g_CGAService));
 				server->register_handler("AssessItem", timax::bind(&CGAService::AssessItem, &g_CGAService));
 				server->register_handler("GetCraftInfo", timax::bind(&CGAService::GetCraftInfo, &g_CGAService));
 				server->register_handler("GetCraftsInfo", timax::bind(&CGAService::GetCraftsInfo, &g_CGAService));
+				server->register_handler("AssessItem", timax::bind(&CGAService::AssessItem, &g_CGAService));
+				server->register_handler("DoRequest", timax::bind(&CGAService::DoRequest, &g_CGAService));
+				server->register_handler("TradeAddStuffs", timax::bind(&CGAService::TradeAddStuffs, &g_CGAService));
+				server->register_handler("GetTeamPlayerInfo", timax::bind(&CGAService::GetTeamPlayerInfo, &g_CGAService));
+				server->register_handler("FixMapWarpStuck", timax::bind(&CGAService::FixMapWarpStuck, &g_CGAService));
+				server->register_handler("SetNoSwitchAnim", timax::bind(&CGAService::SetNoSwitchAnim, &g_CGAService));
+				server->register_handler("GetMoveHistory", timax::bind(&CGAService::GetMoveHistory, &g_CGAService));
+				server->register_handler("EnableFlags", timax::bind(&CGAService::EnableFlags, &g_CGAService));
+				server->register_handler("SetWindowResolution", timax::bind(&CGAService::SetWindowResolution, &g_CGAService));
+				server->register_handler("RequestDownloadMap", timax::bind(&CGAService::RequestDownloadMap, &g_CGAService));
 				server->start();
 
 				dwWait = WaitForSingleObject(g_hQuitEvent, INFINITE);

@@ -16,41 +16,63 @@ class WorkingResultNotifyData : public CBaseNotifyData
 public:
 	WorkingResultNotifyData() : CBaseNotifyData(WorkingResultAsyncCallBack)
 	{
-		//m_permanent = false;
-		//m_sent = false;
-		//m_timeout = 0;
 	}
 
-	//int m_timeout;
-	//bool m_sent;
-	//bool m_permanent;
 	CGA::cga_working_result_t m_results;
 };
 
-boost::shared_mutex  g_WorkingResult_Lock;
-std::vector<WorkingResultNotifyData *> g_WorkingResult_Asyncs;
-/*
-static bool is_removable(WorkingResultNotifyData *data)
+class WorkingResultCacheData
 {
-	return (data->m_sent && !data->m_permanent);
+public:
+	WorkingResultCacheData(const CGA::cga_working_result_t &result, uint64_t time) : m_result(result), m_time(time)
+	{
+
+	}
+	CGA::cga_working_result_t m_result;
+	uint64_t m_time;
+};
+
+boost::shared_mutex g_WorkingResult_Lock;
+std::vector<WorkingResultNotifyData *> g_WorkingResult_Asyncs;
+std::vector<WorkingResultCacheData *> g_WorkingResult_Caches;
+
+void WorkingResultDoAsyncCall(const CGA::cga_working_result_t &results)
+{
+	if (g_WorkingResult_Asyncs.size())
+	{
+		for (size_t i = 0; i < g_WorkingResult_Asyncs.size(); ++i)
+		{
+			const auto data = g_WorkingResult_Asyncs[i];
+
+			data->m_results = results;
+			data->m_result = true;
+			uv_async_send(data->m_async);
+		}
+		g_WorkingResult_Asyncs.clear();
+	}
+	else
+	{
+		auto hrtime = uv_hrtime();
+		for (auto &p = g_WorkingResult_Caches.begin(); p != g_WorkingResult_Caches.end(); )
+		{
+			if (hrtime - (*p)->m_time > CGA_NOTIFY_MAX_CACHE_TIME)
+			{
+				delete *p;
+				p = g_WorkingResult_Caches.erase(p);
+			}
+			else
+			{
+				p++;
+			}
+		}
+		g_WorkingResult_Caches.emplace_back(new WorkingResultCacheData(results, uv_hrtime()));
+	}
 }
-*/
+
 void WorkingResultNotify(CGA::cga_working_result_t results)
 {
 	boost::unique_lock<boost::shared_mutex> lock(g_WorkingResult_Lock);
-	for (size_t i = 0; i < g_WorkingResult_Asyncs.size(); ++i)
-	{
-		const auto data = g_WorkingResult_Asyncs[i];
-		//if (!data->m_sent) 
-		//{
-			data->m_results = results;
-			data->m_result = true;
-			//data->m_sent = true;
-			uv_async_send(&data->m_async);
-		//}
-	}
-	g_WorkingResult_Asyncs.clear();
-	//g_WorkingResult_Asyncs.erase(std::remove_if(std::begin(g_WorkingResult_Asyncs), std::end(g_WorkingResult_Asyncs), is_removable), std::end(g_WorkingResult_Asyncs));
+	WorkingResultDoAsyncCall(results);
 }
 
 void WorkingResultAsyncCallBack(uv_async_t *handle)
@@ -96,19 +118,12 @@ void WorkingResultAsyncCallBack(uv_async_t *handle)
 
 	Local<Function>::New(isolate, data->m_callback)->Call(isolate->GetCurrentContext()->Global(), 1, argv);
 
-//	if (!data->m_permanent)
-//	{
-		data->m_callback.Reset();
+	data->m_callback.Reset();
 
-		uv_timer_stop(&data->m_timer);
-		uv_close((uv_handle_t*)handle, NULL);
-		uv_close((uv_handle_t*)&data->m_timer, NULL);
-		delete handle->data;
-/*	}
-	else
-	{
-		data->m_sent = false;
-	}*/
+	uv_timer_stop(data->m_timer);
+	uv_close((uv_handle_t*)handle, FreeUVHandleCallBack);
+	uv_close((uv_handle_t*)data->m_timer, FreeUVHandleCallBack);
+	delete handle->data;
 }
 
 void WorkingResultTimerCallBack(uv_timer_t *handle)
@@ -118,40 +133,35 @@ void WorkingResultTimerCallBack(uv_timer_t *handle)
 
 	auto data = (WorkingResultNotifyData *)handle->data;
 
-	Handle<Value> argv[1];
-	argv[0] = Nan::TypeError("Async callback timeout.");
+	bool asyncNotCalled = false;
 
-	Local<Function>::New(isolate, data->m_callback)->Call(isolate->GetCurrentContext()->Global(), 1, argv);
-
-	//if (!data->m_permanent)
-	//{
-		data->m_callback.Reset();
-
+	{
+		boost::unique_lock<boost::shared_mutex> lock(g_WorkingResult_Lock);
+		for (size_t i = 0; i < g_WorkingResult_Asyncs.size(); ++i)
 		{
-			boost::unique_lock<boost::shared_mutex> lock(g_WorkingResult_Lock);
-			for (size_t i = 0; i < g_WorkingResult_Asyncs.size(); ++i)
+			if (g_WorkingResult_Asyncs[i] == data)
 			{
-				if (g_WorkingResult_Asyncs[i] == data)
-				{
-					g_WorkingResult_Asyncs.erase(g_WorkingResult_Asyncs.begin() + i);
-					break;
-				}
+				asyncNotCalled = true;
+				g_WorkingResult_Asyncs.erase(g_WorkingResult_Asyncs.begin() + i);
+				break;
 			}
 		}
+	}
+
+	if (asyncNotCalled)
+	{
+		Handle<Value> argv[1];
+		argv[0] = Nan::TypeError("Async callback timeout.");
+
+		Local<Function>::New(isolate, data->m_callback)->Call(isolate->GetCurrentContext()->Global(), 1, argv);
+
+		data->m_callback.Reset();
 
 		uv_timer_stop(handle);
-		uv_close((uv_handle_t*)&data->m_async, NULL);		
-		uv_close((uv_handle_t*)handle, NULL);
+		uv_close((uv_handle_t*)data->m_async, FreeUVHandleCallBack);
+		uv_close((uv_handle_t*)handle, FreeUVHandleCallBack);
 		delete handle->data;
-/*	}
-	else
-	{
-		if (data->m_timeout > 0)
-		{
-			uv_timer_start(&data->m_timer, WorkingResultTimerCallBack, data->m_timeout, 0);
-			data->m_sent = false;
-		}
-	}*/
+	}
 }
 
 void AsyncWaitWorkingResult(const Nan::FunctionCallbackInfo<v8::Value>& info)
@@ -170,25 +180,38 @@ void AsyncWaitWorkingResult(const Nan::FunctionCallbackInfo<v8::Value>& info)
 		if (timeout < 0)
 			timeout = 0;
 	}
-	/*bool permanent = false;
-	if (info.Length() >= 3 && info[2]->IsBoolean())
-	{
-		permanent = info[2]->BooleanValue();
-	}*/
-
-	boost::unique_lock<boost::shared_mutex> lock(g_WorkingResult_Lock);
 
 	auto callback = Local<Function>::Cast(info[0]);
 	WorkingResultNotifyData *data = new WorkingResultNotifyData();
 	data->m_callback.Reset(isolate, callback);
-	data->m_async.data = data;
-	data->m_timer.data = data;
-	//data->m_timeout = timeout;
-	//data->m_permanent = permanent;
+	data->m_async->data = data;
+	data->m_timer->data = data;
 
-	g_WorkingResult_Asyncs.push_back(data);
+	{
+		boost::unique_lock<boost::shared_mutex> lock(g_WorkingResult_Lock);
+
+		g_WorkingResult_Asyncs.push_back(data);
+
+		auto hrtime = uv_hrtime();
+		for (auto &p = g_WorkingResult_Caches.begin(); p != g_WorkingResult_Caches.end(); )
+		{
+			if (hrtime - (*p)->m_time > CGA_NOTIFY_MAX_CACHE_TIME)
+			{
+				delete *p;
+				p = g_WorkingResult_Caches.erase(p);
+			}
+			else
+			{
+				WorkingResultDoAsyncCall((*p)->m_result);
+				delete *p;
+				g_WorkingResult_Caches.erase(p);
+				break;
+			}
+		}
+	}
+
 	if (timeout)
-		uv_timer_start(&data->m_timer, WorkingResultTimerCallBack, timeout, 0);
+		uv_timer_start(data->m_timer, WorkingResultTimerCallBack, timeout, 0);
 }
 
 void StartWork(const Nan::FunctionCallbackInfo<v8::Value>& info)
@@ -230,11 +253,11 @@ void CraftItem(const Nan::FunctionCallbackInfo<v8::Value>& info)
 		return;
 	}
 	if (info.Length() < 2 || info[1]->IsUndefined()) {
-		Nan::ThrowTypeError("Arg[1] must be sub_index.");
+		Nan::ThrowTypeError("Arg[1] must be subskill_index.");
 		return;
 	}
 	if (info.Length() < 3 || info[2]->IsUndefined()) {
-		Nan::ThrowTypeError("Arg[2] must be sub_index.");
+		Nan::ThrowTypeError("Arg[2] must be sub_type.");
 		return;
 	}
 	if (info.Length() < 4 || !info[3]->IsArray()) {
@@ -247,7 +270,7 @@ void CraftItem(const Nan::FunctionCallbackInfo<v8::Value>& info)
 	craft.sub_type = (int)info[2]->IntegerValue();
 	
 	Local<Array> arr = Local<Array>::Cast(info[3]);
-	for (uint32_t i = 0; i < arr->Length(); ++i)
+	for (uint32_t i = 0; i < min(arr->Length(), 6); ++i)
 	{
 		Local<Value> v_itempos = arr->Get(i);
 		craft.itempos[i] = (int)v_itempos->IntegerValue();
@@ -288,4 +311,23 @@ void AssessItem(const Nan::FunctionCallbackInfo<v8::Value>& info)
 	}
 
 	info.GetReturnValue().Set(result);
+}
+
+void SetImmediateDoneWork(const Nan::FunctionCallbackInfo<v8::Value>& info)
+{
+	Isolate* isolate = info.GetIsolate();
+	HandleScope handle_scope(isolate);
+
+	if (info.Length() < 1 || !info[0]->IsBoolean()) {
+		Nan::ThrowTypeError("Arg[0] must be boolean.");
+		return;
+	}
+	
+	bool enable = (int)info[0]->BooleanValue();
+
+	if (!g_CGAInterface->SetImmediateDoneWork(enable))
+	{
+		Nan::ThrowError("RPC Invocation failed.");
+		return;
+	}
 }

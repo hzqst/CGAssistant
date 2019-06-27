@@ -3,6 +3,8 @@
 #include "../CGALib/gameinterface.h"
 #include "../CGALib/packdata.h"
 
+#include <list>
+
 struct IDirectDraw;
 struct IDirectDrawSurface;
 
@@ -52,8 +54,7 @@ namespace CGA
 	{
 		short valid;
 		char name[46];
-		char attr[96];
-		char attr2[672];
+		char attrs[8][96];
 		char info[192];
 		char info2[576];
 		int flags;//2=right clickable
@@ -88,6 +89,26 @@ namespace CGA
 	}bank_item_info_t;
 	
 	static_assert(sizeof(bank_item_info_t) == 0x644, "Size check");
+
+	typedef struct npcdlg_item_info_s
+	{
+		char valid;//CD3198
+		char name[29];//CD3199
+		char attr[1538];//CD31B6
+		int image_id;//CD37B8
+		int cost;//CD37BC
+		int selected;//CD37C0
+		int itempos;//CD37C4
+		int unk;
+		int unk2;//init to 1
+		int unk3;
+		char unk4;
+		char padding[3];
+		int unk5;
+		char info[20];//CD37DC
+	}npcdlg_item_info_t;
+
+	static_assert(sizeof(npcdlg_item_info_t) == 0x658, "Size check");
 
 #define PLAYER_ENABLE_FLAGS_PK (1<<2)
 #define PLAYER_ENABLE_FLAGS_TEAMCHAT (1<<3)
@@ -124,11 +145,11 @@ namespace CGA
 		int value_agility;//+160
 		int value_spirit;//+164
 		int value_recovery;//+168
-		int value_enchantment;//+172
+		int value_charisma;//+172
 		int unk3;//+176
 		int resist_poison;//+180
-		int resist_hypnosis;//+184
-		int resist_petrify;//+188
+		int resist_sleep;//+184
+		int resist_medusa;//+188
 		int resist_drunk;//+192
 		int resist_chaos;//+196
 		int resist_forget;//+200
@@ -143,7 +164,7 @@ namespace CGA
 		int health;//+236
 		int souls;//+240
 		int gold;//+244
-		int special_nick;//+248
+		int special_nick;//+248 //使用第几个称号
 		int score;//+252
 		char name[17];//+256
 		char player_nick[17];//+273
@@ -152,8 +173,8 @@ namespace CGA
 		int skill_maxrows;//+356
 		int move_speed;//+360 int unk
 		int unk4;//+364
-		int unk5;//+368
-		int unk6;//+372
+		int image_id;//+368
+		int avatar_id;//+372
 		int unitid;//+376
 		int direction;//+380
 		short unk7;//+384
@@ -174,14 +195,14 @@ namespace CGA
 	//size = 148
 	typedef struct skill_sub_s
 	{
-		char name[25];
-		char info[99];
-		int cost;
-		int unk1;
-		int flags;
-		int unk3;
-		int available;
-		int level;
+		char name[25];//0
+		char info[99];//25
+		int cost;//124
+		int unk1;//128
+		int flags;//132
+		int unk3;//136
+		int available;//140
+		int level;//144
 	}skill_sub_t;
 
 	static_assert(sizeof(skill_sub_t) == 148, "Size check");
@@ -213,7 +234,7 @@ namespace CGA
 	typedef struct skill_s
 	{
 		char name[25];
-		char valid;
+		char slotsize;
 		char padding[2];
 		int level;
 		int maxlevel;
@@ -273,8 +294,8 @@ namespace CGA
 		int value_recovery;
 		int value_loyality;
 		int resist_poison;
-		int resist_hypnosis;
-		int resist_petrify;
+		int resist_sleep;
+		int resist_medusa;
 		int resist_drunk;
 		int resist_chaos;
 		int resist_forget;
@@ -349,6 +370,7 @@ namespace CGA
 		int maxhp;
 		int curmp;
 		int maxmp;
+		int flags;
 		int pos;
 	}battle_unit_t;
 
@@ -361,13 +383,13 @@ namespace CGA
 
 	typedef struct map_unit_s
 	{
-		short valid;// if 0 invalid
+		short valid;// if 0 invalid 640144
 		short type;//+2
 		int unit_id;//+4
 		int model_id;//+8
 		CXorValue xpos;//+12
 		CXorValue ypos;//+28
-		int unk1;//1 //+44
+		int level;//1 //+44
 		int unk2;//0 //+48
 		int unk3;//-1? //+52
 		int unk4;//0 //+56
@@ -383,18 +405,34 @@ namespace CGA
 		char nick_name[17];//+101
 		char unk13[33];//+118
 		char unk14[33];//+151
-		char unk15[17];//+184
+		char title_name[17];//+184
 		char item_name[67];//+201
-		int unk17;
-		int unk18;//0x1000
-		short unk19;//1
-		short padding2;
-		void *actor;
-		short unk20;
-		short padding3;
-		int unk21;//0x124
+		int unk17;//+268
+		int unk18;//+272 0x1000	//64118
+		short flags;//+276 1	//6411C
+		short padding2;//+278
+		int unk20;		//640120
+		void *actor;//+284 640124
+		int injury;//+288
 		char unk22[24];
 	}map_unit_t;
+
+	static_assert(sizeof(map_unit_t) == 0x13c, "Size check");
+
+	typedef struct team_player_s
+	{
+		short valid;
+		short padding;
+		int unit_id;
+		int maxhp;
+		int mp;
+		int hp;
+		int unk;
+		char name[20];
+		void *actor;
+	}team_player_t;
+
+	static_assert(sizeof(team_player_t) == 0x30, "Size check");
 
 #pragma pack()
 
@@ -435,7 +473,9 @@ namespace CGA
 		virtual bool DropItem(int itempos);
 		virtual bool UseItem(int itempos);
 		virtual bool MoveItem(int itempos, int dstpos, int count);
+		virtual bool DropPet(int petpos);
 
+		virtual std::tuple<int, int, int> GetMapIndex();
 		virtual std::tuple<int, int> GetMapXY();
 		virtual std::tuple<float, float> GetMapXYFloat();
 		virtual std::tuple<float, float> GetMoveSpeed();
@@ -444,22 +484,19 @@ namespace CGA
 		virtual void WalkTo(int x, int y);
 		virtual void TurnTo(int x, int y);
 		virtual void SetMoveSpeed(int speed);
+		virtual std::vector<DWORD> GetMoveHistory(void);
 		virtual void LogBack();
 		virtual void LogOut();
 		virtual bool ClickNPCDialog(int option, int flags);
 		virtual bool SellNPCStore(cga_sell_items_t items);
 		virtual bool BuyNPCStore(cga_buy_items_t items);
-		virtual bool PlayerMenuSelect(int menuindex);
+		virtual bool PlayerMenuSelect(int menuindex, const std::string &menustring);
 		virtual bool UnitMenuSelect(int menuindex);
 
 		virtual bool IsBattleUnitValid(int pos);
 		virtual cga_battle_unit_t GetBattleUnit(int pos);
 		virtual cga_battle_units_t GetBattleUnits();
-		virtual int GetBattleRoundCount();
-		virtual int GetBattlePlayerPosition();
-		virtual int GetBattlePlayerStatus();
-		virtual int GetBattleSkillPerformed();
-		virtual int GetBattlePetId();
+		virtual cga_battle_context_t GetBattleContext();
 		virtual int GetBattleEndTick();
 		virtual void SetBattleEndTick(int msec);
 		virtual bool BattleNormalAttack(int target);		
@@ -482,8 +519,19 @@ namespace CGA
 		virtual cga_craft_info_t GetCraftInfo(int skill_index, int subskill_index);
 		virtual cga_crafts_info_t GetCraftsInfo(int skill_index);
 		virtual bool IsMapCellPassable(int x, int y);
+		virtual cga_map_cells_t GetMapCollisionTable(bool loadall);
+		virtual cga_map_cells_t GetMapObjectTable(bool loadall);
 		virtual bool ForceMove(int dir, bool show);
 		virtual bool ForceMoveTo(int x, int y, bool show);
+		virtual bool DoRequest(int request_type);
+		virtual void TradeAddStuffs(cga_sell_items_t items, cga_sell_pets_t pets, int gold);
+		virtual cga_team_players_t GetTeamPlayerInfo(void);
+		virtual void FixMapWarpStuck(int type);
+		virtual void SetNoSwitchAnim(bool enable);
+		virtual void SetImmediateDoneWork(bool enable);
+		virtual bool EnableFlags(int type, bool enable);
+		virtual void SetWindowResolution(int w, int h);
+		virtual void RequestDownloadMap(int xbottom, int ybottom, int xsize, int ysize);
 	private:
 		int *g_world_status_cgitem;
 		int *g_game_status_cgitem;
@@ -495,7 +543,9 @@ namespace CGA
 		playerbase_t **g_playerBase;
 		playerbase_t *g_playerBase_cgitem;
 		bank_item_info_t *g_bank_item_base;
+		npcdlg_item_info_t *g_npcdlg_item_base;
 		char *g_player_name;
+		int *g_player_remain_points;
 		pet_t *g_pet_base;
 		int *g_pet_id;
 		char *g_job_name;
@@ -520,17 +570,25 @@ namespace CGA
 		int *g_mouse_states;
 		int *g_is_ingame;
 		int *g_work_basedelay;
+		short *g_disable_move;
+		int *g_is_moving;
+		int *g_do_switch_map;
+		int *g_switch_map_frames;
+		int *g_switch_map_type;
 
 		char *g_btl_buffers;
 		int *g_btl_buffer_index;
 		int *g_btl_round_count;
 		int *g_btl_player_pos;
 		int *g_btl_player_status;
+		int *g_btl_petskill_allowbit;
 		int *g_btl_skill_allowbit;
+		int *g_btl_weapon_allowbit;
 		int *g_btl_petid;
 		int *g_btl_action_done;
 		int *g_btl_skill_performed;
 		unsigned int *g_btl_round_endtick;
+		char *g_btl_unit_base;
 
 		char **g_net_buffer;
 		int *g_net_socket;
@@ -548,30 +606,27 @@ namespace CGA
 		//todo
 		item_t *g_item_base;
 		item_info_t *g_item_info_base;
+		item_t *g_trade_item_base;
 
 		void *g_pGameBase;
 
 		int *g_logback;
 		int *g_item_cur_using;
-		item_menu_player_t *g_item_menu_players;
-		int *g_item_menu_player_count;
-		item_menu_unit_t *g_item_menu_units;
-		int *g_item_menu_unit_count;
-		 
-		unit_menu_t **g_unit_menu_base;//D38E60
-		int *g_unit_menu_count;//CB4140
-		int *g_unit_menu_begin;//CE4C34
-		char ***g_player_menu_name;//D29734
-		char **g_player_menu_color;//CE4AA0
-		int *g_player_menu_count;//CE4C28
-		int *g_player_menu_begin;//CDBB24
-		char *g_player_menu_clickable;
-		char *g_unit_menu_clickable;
+		char *g_trade_item_array;
+		char *g_trade_pet_array;
+		int *g_trade_gold;
 
 		char *g_ui_craftdialog_additem_count;
 		char *g_work_accelerate;//63FFFE
 		char *g_work_accelerate_percent;//627E8C
 		int *g_craft_step;//CBF15E
+		int *g_craft_done_tick;
+		int *g_heal_player_menu_type;
+		int *g_heal_player_menu_select;
+		int *g_heal_menu_type;
+
+		short *g_item_player_menu_type;
+		int *g_item_player_select;
 		//int *g_ret_address;
 
 		int *g_unit_count;
@@ -587,23 +642,48 @@ namespace CGA
 		short *g_map_x_size;
 		short *g_map_y_size;
 		short *g_map_collision_table;
+		short *g_map_object_table;
+		int *g_map_index1;
+		int *g_map_index2;
+		int *g_map_index3;
 
 		int *g_healing_skill_index;
 		int *g_healing_subskill_index;
 
+		short *g_is_in_team;
+		short *g_team_flags;
+		team_player_t *g_team_player_base;
+		char *g_title_table;
+
+		short *g_enableflags;
+
 		HANDLE *g_mutex;
+		int *g_resolution_width;
+		int *g_resolution_height;
 	public:
 		char(__cdecl *Sys_CheckModify)(const char *a1);
 		void(__cdecl *COMMON_PlaySound)(int a1, int a2, int a3);
 		void(__cdecl *BATTLE_PlayerAction)();
+		void(__cdecl *NET_ParseTradeItemsPackets)(int a1, const char *buf);
+		void(__cdecl *NET_ParseTradePetPackets)(int a1, int index, const char *buf);
+		void(__cdecl *NET_ParseTradePetSkillPackets)(int a1, int index, const char *buf);
+		void(__cdecl *NET_ParseTradeGoldPackets)(int a1, int gold);
+		void(__cdecl *NET_ParseTradePlayers)(int a1, const char *src, char *src2);
+		void(__cdecl *NET_ParseHealPlayers)(int a1, const char *src);
+		void(__cdecl *NET_ParseHealUnits)(int a1, const char *src);
+		void(__cdecl *NET_ParseItemPlayers)(int a1, const char *src);
+		void(__cdecl *NET_ParseItemUnits)(int a1, const char *src);
 		void(__cdecl *NET_ParseBattlePackets)(int a1, const char *buf);
 		void(__cdecl *NET_ParseWorkingResult)(int a1, int success, int type, const char *buf);
 		void(__cdecl *NET_ParseChatMsg)(int a1, int unitid, const char *buf, int a4, int a5);
+		void(__cdecl *NET_ParseSysMsg)(int a1, const char *buf);
+		void(__cdecl *NET_ParseReadyTrade)();
+		void(__cdecl *NET_ParseConfirmTrade)(int a1, int a2);
+		void(__cdecl *NET_ParseMeetEnemy)(int a1, int a2, int a3);
 
 		void(_cdecl *R_DrawText)(int a1);
 		void(__cdecl *Move_Player)();
 		void(__cdecl *CL_MoveItemEx)(int);//C0EC0
-		void(__cdecl *UI_ClickLogout)(int a1, int a2);
 
 		void(__cdecl *NET_WritePacket)(void *net_buffer, int net_socket, const char *header, const char *buf);
 		void(__cdecl *NET_WritePacket1)(void *net_buffer, int net_socket, const char *header, int a4, int a5, int a6);
@@ -621,13 +701,19 @@ namespace CGA
 		void(__cdecl *NET_WriteMovePacket_cgitem)(int, int, const char *);
 		void(__cdecl *NET_WriteOpenHealDialog_cgitem)(int, int);
 		void (__cdecl *NET_WriteWorkPacket_cgitem)(int, int, int, int, const char *);
+		void(__cdecl *NET_WriteJoinTeamPacket_cgitem)(int, int, int, int);
+		void(__cdecl *NET_WriteTradePacket_cgitem)(int);
+		void(__cdecl *NET_WriteKickTeamPacket_cgitem)(int);
+		void(__cdecl *NET_WriteTraceAddItemPacket_cgitem)(int, const char *, const char *, int);
+		void(__cdecl *NET_WriteTradeConfirmPacket_cgitem)(int);
+		void(__cdecl *NET_WriteTradeRefusePacket_cgitem)(int);
+		void(__cdecl *NET_WriteExchangeCardPacket_cgitem)(int, int, int);
+		void(__cdecl *NET_WritePKPacket_cgitem)(int, int, int);
+		void(__cdecl *NET_WriteMoveItemPacket_cgitem)(int, int, int, int);
+		void (__cdecl *NET_WriteRequestDownloadMapPacket_cgitem)(int a1, int index1, int index3, int xbot, int ybot, int xsize, int ysize);
+		void(__cdecl *NET_WritePrepareCraftItemPacket_cgitem)(int, int);
+		void(__cdecl *NET_WriteDropPetPacket_cgitem)(int, int, int , int);
 
-		int(__cdecl **UI_PlayerMenuSelect)(int, int );
-		int(__cdecl **UI_UnitMenuSelect)(int, int );
-		int(__cdecl *UI_PlayerMenuShowup)(int);
-		int(__cdecl *UI_UnitMenuShowup)(int);
-		int(__cdecl *UI_PlayerMenuMouseEvent)(int, char);
-		int(__cdecl *UI_UnitMenuMouseEvent)(int, char);		
 		void(__cdecl *NPC_ShowDialogInternal)(int type, int options, int dlgid, int objid, const char *message);
 		int(__cdecl *NPC_ClickDialog)(int option, int index, int a3, char a4);
 		void(__cdecl *NPC_ClickExchangeDialog)(int option);
@@ -638,34 +724,66 @@ namespace CGA
 		int(__cdecl *UI_HandleMiniDialogMouseEvent)(int widget, char flags);
 		int(__cdecl *UI_IsMouseInRect)(int a1, int a2, int a3, int a4, int a5);
 		int(__cdecl *UI_HandleLearnSkillConfirmMouseEvent)(int index, char flags);
+		int(__cdecl *UI_HandleForgetSkillMouseEvent)(int index, char flags);
 		int(__cdecl *UI_HandleEnablePlayerFlagsMouseEvent)(int index, char flags);
 		int(__cdecl *UI_HandleCraftItemSlotMouseEvent)(int a1, char flags);
 		int( __cdecl *UI_HandleCraftItemButtonMouseEvent)(int a1, char flags);
+		int(__cdecl *UI_HandleLogbackMouseEvent)(int a1, char a2);
+		int(__cdecl *UI_HandleLogoutMouseEvent)(int a1, char a2);
+		int(__cdecl *IsMapObjectEntrance)(int xpos, int ypos);
+		int(__cdecl *UI_PlaySwitchAnim)(int ,char, float);
+		int(__cdecl *UI_HandleEnableFlags)(int a1, char a2);
+		int(__cdecl *UI_SelectHealPlayer)(int menuindex, const char *menustring);
+		int(__cdecl *UI_SelectItemPlayer)(int menuindex, const char *menustring);
+		int(__cdecl *UI_SelectTradePlayer)(int menuindex, const char *menustring);
+		int(__cdecl *UI_SelectHealUnit)(int menuindex);
+		int(__cdecl *UI_SelectItemUnit)(int menuindex);
+		int(__cdecl *UI_SelectTradeAddStuffs)(int a1, char a2);
+		void(__cdecl *UI_OpenTradeDialog)(const char *playerName, int playerLevel);
+		void(__cdecl *SYS_ResetWindow)();
+		void(__cdecl *format_mapname)(char *a1, int index1, int index2, int index3); 
+		void(__cdecl *BuildMapCollisionTable)(int xbase, int ybase, int xtop, int ytop, void *celldata, void *collisiondata, void *objectdata, void *collisiontable);
+		void(__cdecl *Actor_SetAnimation)(void *actor, int anim, int a3);
+		int(__cdecl *GetBattleUnitDistance)(void *a1, float a2, float a3);
 
 		void NewBATTLE_PlayerAction();
+		void NewNET_ParseTradeItemsPackets(int a1, const char *buf);
+		void NewNET_ParseTradePetPackets(int a1, int index, const char *buf);
+		void NewNET_ParseTradePetSkillPackets(int a1, int index, const char *buf);
+		void NewNET_ParseTradeGoldPackets(int a1, int gold);
+		void NewNET_ParseTradePlayers(int a1, const char *src, char *src2);
+		void NewNET_ParseHealPlayers(int a1, const char *src);
+		void NewNET_ParseHealUnits(int a1, const char *src);
+		void NewNET_ParseItemPlayers(int a1, const char *src);
+		void NewNET_ParseItemUnits(int a1, const char *src);
 		void NewNET_ParseBattlePackets(int a1, const char *buf);
 		void NewNET_ParseWorkingResult(int a1, int success, int type, const char *buf);
 		void NewNET_ParseChatMsg(int a1, int unitid, const char *buf, int color, int size);
+		void NewNET_ParseSysMsg(int a1, const char *buf);
+		void NewNET_ParseReadyTrade();
+		void NewNET_ParseConfirmTrade(int a1, int a2);
+
 		void NewMove_Player();
-		void NewUI_PlayerMenuShowup(int a1);
-		void NewUI_UnitMenuShowup(int a1);
-		int NewUI_PlayerMenuMouseEvent(int widget_index, char flags);
-		int NewUI_UnitMenuMouseEvent(int widget_index, char flags);
 		void NewNPC_ShowDialogInternal(int type, int options, int dlgid, int objid, const char *message);
 		int NewUI_IsMouseInRect(int a1, int a2, int a3, int a4, int a5);
 		int NewUI_HandleMiniDialogMouseEvent(int widget, char flags);
 		int NewUI_HandleEnablePlayerFlagsMouseEvent(int index, char flags);
 		int NewUI_HandleCraftItemSlotMouseEvent(int index, char flags);
 		int NewUI_HandleCraftItemButtonMouseEvent(int index, char flags);
+		void NewUI_OpenTradeDialog(const char *playerName, int playerLevel);
+		void NewNET_WritePrepareCraftItemPacket_cgitem(int a1, int a2);
+
 		void ParseGatheringResult(int success, const char *buf);
 		void ParseHealingResult(int success, const char *buf);
 		void ParseAssessingResult(int success, const char *buf);
 		void ParseCraftingResult(int success, const char *buf);
+		bool ParseIsKnockout(const char *buf);
+		bool ParseIsEscape(const char *buf);
 
 		IDirectDraw *GetDirectDraw();
 		IDirectDrawSurface *GetDirectDrawBackSurface();
 		void ParseBattleUnits(const char *buf, size_t len);
-		void DrawBattleInfo();
+		void DrawCustomText();
 		int IsItemTypeAssessable(int type);
 
 		bool WM_BattleNormalAttack(int target);
@@ -678,6 +796,7 @@ namespace CGA
 		bool WM_BattlePetSkillAttack(int skillpos, int target);
 		void WM_LogBack();
 		void WM_LogOut();
+		bool WM_DropPet(int petpos);
 		bool WM_DropItem(int itempos);
 		bool WM_UseItem(int itempos);
 		bool WM_MoveItem(cga_move_item_t *mov);
@@ -699,6 +818,7 @@ namespace CGA
 		void WM_GetBattleUnit(int pos, cga_battle_unit_t *u);
 		void WM_GetBattleUnits(cga_battle_units_t *u);
 		void WM_GetMapUnits(cga_map_units_t *units);
+		void WM_GetMapName(std::string *name);
 		void WM_SayWords(const char *str, int color, int range, int size);
 		bool WM_StartWork(int skill_index, int sub_index);
 		bool WM_CraftItem(cga_craft_item_t *craft);
@@ -708,29 +828,48 @@ namespace CGA
 		bool WM_ForceMoveTo(int x, int y, bool show);
 		void WM_GetCraftInfo(cga_craft_item_t *craft, cga_craft_info_t *info);
 		void WM_GetCraftsInfo(int skill_index, cga_crafts_info_t *info);
+		bool WM_DoRequest(int request_type);
+		void WM_TradeAddStuffs(cga_trade_stuff_t *stuffs);
+		void WM_GetTeamPlayerInfo(cga_team_players_t *info);
+		void WM_FixMapWarpStuck(int type);
+		void WM_GetMoveHistory(std::vector<DWORD> *v);
+		bool WM_EnableFlags(int type, bool enable);
+		bool WM_PlayerMenuSelect(int menuindex, const char *menustring);
+		bool WM_UnitMenuSelect(int menuindex);
+		void WM_SetWindowResolution(int w, int h);
+		void WM_RequestDownloadMap(int xbottom, int ybottom, int xsize, int ysize);
+		void WM_GetMapCollisionTable(bool loadall, cga_map_cells_t *cells);
+		void WM_GetMapObjectTable(bool loadall, cga_map_cells_t *cells);
+
 		bool m_initialized;
 		bool m_btl_highspeed_enable;
 		bool m_btl_showhpmp_enable;
 		bool m_btl_double_action;
+		int m_btl_effect_flags;
 		battle_unit_t m_battle_units[20];
 		int m_move_to;
 		int m_move_to_x, m_move_to_y;
-		int m_menu_item_selected;
-		int m_menu_item_select_index;
+		std::list<DWORD> m_move_history;
 		int m_move_speed;
+		bool m_move_checkwarp;
 		bool m_ui_minidialog_loop;
 		int m_ui_minidialog_loop_index;
 		int m_ui_minidialog_click_index;
 		int m_ui_learn_skill_confirm;
+		int m_ui_forget_skill_index;
 		int m_desired_player_enable_flags;
 		int m_change_player_enable_flags;
 		bool m_ui_craftdialog_click_begin;
 		bool m_ui_craftdialog_loop;
 		int m_ui_craftdialog_loop_index;
 		int m_ui_craftdialog_click_index;
-		int m_ui_craftdialog_additem[5];
+		int m_ui_craftdialog_additem[6];
 		int m_ui_craftdialog_additemcount;
 		int m_work_acceleration;
+		bool m_ui_noswitchanim;
+		int m_player_menu_type;
+		int m_unit_menu_type;
+		bool m_work_immediate;
 
 		game_type m_game_type;
 
@@ -780,5 +919,19 @@ namespace CGA
 #define WM_CGA_GET_CRAFTS_INFO WM_USER+10039
 #define WM_CGA_ASSESS_ITEM WM_USER+10040
 #define WM_CGA_GET_BANK_ITEMS_INFO WM_USER+10041
+#define WM_CGA_DO_REQUEST WM_USER+10042
+#define WM_CGA_TRADE_ADD_STUFFS WM_USER+10043
+#define WM_CGA_GET_TEAM_PLAYERS_INFO WM_USER+10044
+#define WM_CGA_FIX_WARP_STUCK WM_USER+10045
+#define WM_CGA_GET_MOVE_HISTORY WM_USER+10046
+#define WM_CGA_ENABLE_FLAGS WM_USER+10047
+#define WM_CGA_PLAYER_MENU_SELECT WM_USER+10048
+#define WM_CGA_UNIT_MENU_SELECT WM_USER+10049
+#define WM_CGA_SET_WINDOW_RESOLUTION WM_USER+10050
+#define WM_CGA_REQUEST_DOWNLOAD_MAP WM_USER+10051
+#define WM_CGA_GET_COLLISION_TABLE WM_USER+10052
+#define WM_CGA_GET_OBJECT_TABLE WM_USER+10053
+#define WM_CGA_GET_MAP_NAME WM_USER+10054
+#define WM_CGA_DROP_PET WM_USER+10055
 
 #define CGA_PORT_BASE 4396
