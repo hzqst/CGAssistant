@@ -5,10 +5,7 @@ CrossGate Cheating
 
 qq group: 300303705
 
-get latest binary from qq group
-目前处理测试阶段，最新版本二进制包暂时放在群共享
-
-最新脚本合集 https://github.com/hzqst/CGAssistantJS
+get full binary from https://github.com/hzqst/CGAssistantJS
 
 ## Build
 
