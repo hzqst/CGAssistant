@@ -12,6 +12,7 @@ namespace CGA
 		cg_se_3000,
 		cg_se_6000,
 		cg_item_6000,
+		polcn
 	};
 
 	typedef struct cga_playerpet_detail_info_s
@@ -100,10 +101,14 @@ namespace CGA
 			petid = -1;
 			punchclock = 0;
 			usingpunchclock = false;
+			manu_endurance = 0;
+			manu_skillful = 0;
+			manu_intelligence = 0;
+			value_charisma = 0;
 		}
 
-		cga_player_info_s(int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11, int a12, int a13, int a14, std::string &a15, std::string &a16, const cga_playerpet_detail_info_t &a17, int a18, int a19, int a20)
-			: hp(a1), maxhp(a2), mp(a3), maxmp(a4), xp(a5), maxxp(a6), health(a7), souls(a8), level(a9), gold(a10), unitid(a11), petid(a12), punchclock(a13), usingpunchclock(a14 ? true : false), name(a15), job(a16), detail(a17), manu_endurance(a18), manu_skillful(a19), manu_intelligence(a20)
+		cga_player_info_s(int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11, int a12, int a13, int a14, bool a15, std::string &a16, std::string &a17, const cga_playerpet_detail_info_t &a18, int a19, int a20, int a21, int a22)
+			: hp(a1), maxhp(a2), mp(a3), maxmp(a4), xp(a5), maxxp(a6), health(a7), souls(a8), level(a9), gold(a10), unitid(a11), petid(a12), direction(a13), punchclock(a14), usingpunchclock(a15), name(a16), job(a17), detail(a18), manu_endurance(a19), manu_skillful(a20), manu_intelligence(a21), value_charisma(a22)
 		{
 
 		}
@@ -120,6 +125,7 @@ namespace CGA
 		int gold;
 		int unitid;
 		int petid;
+		int direction;
 		int punchclock;
 		bool usingpunchclock;
 		std::string name;
@@ -129,6 +135,7 @@ namespace CGA
 		int manu_endurance;
 		int manu_skillful;
 		int manu_intelligence;
+		int value_charisma;
 	}cga_player_info_t;
 
 	typedef struct cga_pet_info_s
@@ -147,12 +154,13 @@ namespace CGA
 			race = 0;
 			loyality = 0;
 			battle_flags = 0;
+			state = 0;
 			index = 0;
 		}
 		cga_pet_info_s(int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, 
-			int a11, int a12, int a13, std::string &a14, std::string &a15, const cga_playerpet_detail_info_t &a16)
+			int a11, int a12, int a13, int a14, std::string &a15, std::string &a16, const cga_playerpet_detail_info_t &a17)
 			: hp(a1), maxhp(a2), mp(a3), maxmp(a4), xp(a5), maxxp(a6), health(a7), level(a8), flags(a9), race(a10), 
-			loyality(a11), battle_flags(a12), index(a13), name(a14), realname(a15), detail(a16)
+			loyality(a11), battle_flags(a12), state(a13), index(a14), name(a15), realname(a16), detail(a17)
 		{
 
 		}
@@ -168,6 +176,7 @@ namespace CGA
 		int race;
 		int loyality;
 		int battle_flags;
+		int state;
 		int index;
 		std::string name;
 		std::string realname;
@@ -585,8 +594,9 @@ namespace CGA
 			level = 0;
 			itemid = 0;
 			index = -1;
+			available = false;
 		}
-		cga_craft_info_s(int a1, int a2, int a3, int a4, int a5, std::string &a6, std::string &a7) : id(a1), cost(a2), level(a3), itemid(a4), index(a5), name(a6), info(a7)
+		cga_craft_info_s(int a1, int a2, int a3, int a4, int a5, std::string &a6, std::string &a7, bool a8) : id(a1), cost(a2), level(a3), itemid(a4), index(a5), name(a6), info(a7), available(a8)
 		{
 			
 		}
@@ -598,6 +608,7 @@ namespace CGA
 		std::string name;
 		std::string info;
 		cga_craft_material_t materials[5];
+		bool available;
 	}cga_craft_info_t;
 
 	typedef std::vector<cga_craft_info_t> cga_crafts_info_t;
@@ -657,17 +668,23 @@ namespace CGA
 		{
 			unit_id = 0;
 			hp = 0;
-			mp = 0;
 			maxhp = 0;
+			mp = 0;
+			maxmp = 0;
+			xpos = 0;
+			ypos = 0;
 		}
-		cga_team_player_s(int a1, int a2, int a3, int a4, const std::string &a5) : unit_id(a1), hp(a2), mp(a3), maxhp(a4), name(a5)
+		cga_team_player_s(int a1, int a2, int a3, int a4, int a5, int a6, int a7, const std::string &a8) : unit_id(a1), hp(a2), maxhp(a3), mp(a4), maxmp(a5), xpos(a6), ypos(a7), name(a8)
 		{
 
 		}
 		int unit_id;
 		int hp;
-		int mp;
 		int maxhp;
+		int mp;
+		int maxmp;
+		int xpos;
+		int ypos;
 		std::string name;
 	}cga_team_player_t;
 
@@ -730,12 +747,36 @@ namespace CGA
 		int effect_flags;
 	}cga_battle_context_t;
 
+	typedef struct cga_download_map_s
+	{
+		cga_download_map_s()
+		{
+			index1 = 0;
+			index3 = 0;
+			xbase = 0;
+			ybase = 0;
+			xtop = 0;
+			ytop = 0;
+		}
+		cga_download_map_s(int a1, int a2, int a3, int a4, int a5, int a6)
+			: index1(a1), index3(a2), xbase(a3), ybase(a4), xtop(a5), ytop(a6)
+		{
+		}
+		int index1;
+		int index3;
+		int xbase;
+		int ybase;
+		int xtop;
+		int ytop;
+	}cga_download_map_t;
+
 	typedef struct CGAShare_s
 	{
 		int ProcessId;
 		int ThreadId;
 		int hWnd;
 		int Port;
+		int GameType;
 	}CGAShare_t;
 
 	typedef struct cga_game_data_s 
@@ -757,6 +798,7 @@ namespace CGA
 #define FL_BATTLE_ACTION_ISDOUBLE 2
 #define FL_BATTLE_ACTION_ISSKILLPERFORMED 4
 #define FL_BATTLE_ACTION_END 8
+#define FL_BATTLE_ACTION_BEGIN 16
 
 #define FL_SKILL_SELECT_TARGET 0x1
 #define FL_SKILL_SELECT_DEAD 0x2
@@ -799,6 +841,8 @@ namespace CGA
 #define REQUEST_TYPE_TRADE_CONFIRM 13
 #define REQUEST_TYPE_TRADE_REFUSE 14
 #define REQUEST_TYPE_TEAM_CHAT 15
+#define REQUEST_TYPE_REBIRTH_ON 16
+#define REQUEST_TYPE_REBIRTH_OFF 17
 
 #define PLAYER_MENU_HEAL 1
 #define PLAYER_MENU_ITEM 2
@@ -806,6 +850,10 @@ namespace CGA
 
 #define UNIT_MENU_HEAL 1
 #define UNIT_MENU_ITEM 2
+
+#define MOVE_GOLD_TOBANK 1
+#define MOVE_GOLD_FROMBANK 2
+#define MOVE_GOLD_DROP 3
 
 	class CGAInterface
 	{
@@ -839,9 +887,12 @@ namespace CGA
 		virtual bool GetItemInfo(int itempos, cga_item_info_t &info) = 0;
 		virtual bool GetItemsInfo(cga_items_info_t &info) = 0;
 		virtual bool GetBankItemsInfo(cga_items_info_t &info) = 0;
-		virtual bool DropItem(int itempos, bool &result) = 0;
 		virtual bool MoveItem(int itempos, int dstpos, int count, bool &result) = 0;
+		virtual bool MovePet(int itempos, int dstpos, bool &result) = 0;
+		virtual bool MoveGold(int gold, int opt, bool &result) = 0;
+		virtual bool DropItem(int itempos, bool &result) = 0;
 		virtual bool DropPet(int petpos, bool &result) = 0;
+		virtual bool ChangePetState(int petpos, int state, bool &result) = 0;
 		virtual bool GetMapIndex(int &index1, int &index2, int &index3) = 0;
 		virtual bool GetMapXY(int &x, int &y) = 0;
 		virtual bool GetMapXYFloat(float &x, float &y) = 0;
@@ -849,7 +900,9 @@ namespace CGA
 		virtual bool GetMapName(std::string &name) = 0;
 		virtual bool GetMapUnits(cga_map_units_t &units) = 0;
 		virtual bool GetMapCollisionTable(bool loadall, cga_map_cells_t &cells) = 0;
+		virtual bool GetMapCollisionTableRaw(bool loadall, cga_map_cells_t &cells) = 0;
 		virtual bool GetMapObjectTable(bool loadall, cga_map_cells_t &cells) = 0;
+		virtual bool GetMapTileTable(bool loadall, cga_map_cells_t &cells) = 0;
 
 		virtual bool WalkTo(int x, int y) = 0;
 		virtual bool TurnTo(int x, int y) = 0;
@@ -874,13 +927,15 @@ namespace CGA
 		virtual bool GetBattleContext(cga_battle_context_t &ctx) = 0;
 
 		virtual bool BattleNormalAttack(int target, bool &result) = 0;
-		virtual bool BattleSkillAttack(int skillpos, int skilllv, int target, bool &result) = 0;
-		virtual bool BattleDefense(bool &result) = 0;
+		virtual bool BattleSkillAttack(int skillpos, int skilllv, int target, bool packetOnly, bool &result) = 0;
+		virtual bool BattleRebirth(bool &result) = 0;
+		virtual bool BattleGuard(bool &result) = 0;
 		virtual bool BattleEscape(bool &result) = 0;
 		virtual bool BattleExchangePosition(bool &result) = 0;
 		virtual bool BattleChangePet(int petid, bool &result) = 0;
 		virtual bool BattleUseItem(int itempos, int target, bool &result) = 0;
-		virtual bool BattlePetSkillAttack(int skillpos, int target, bool &result) = 0;
+		virtual bool BattlePetSkillAttack(int skillpos, int target, bool packetOnly, bool &result) = 0;
+		virtual bool BattleDoNothing(bool &result) = 0;
 		virtual bool BattleSetHighSpeedEnabled(bool enable) = 0;
 		virtual bool BattleSetShowHPMPEnabled(bool enable) = 0;
 		virtual bool GetBattleEndTick(int &msec) = 0;
@@ -888,12 +943,14 @@ namespace CGA
 		virtual bool SetWorkDelay(int delay) = 0;
 		virtual bool SetWorkAcceleration(int percent) = 0;
 		virtual bool SetImmediateDoneWork(bool enable) = 0;
+		virtual bool GetImmediateDoneWorkState(int &state) = 0;
 		virtual bool StartWork(int skill_index, int sub_index, bool &result) = 0;
 		virtual bool CraftItem(cga_craft_item_t &craft, bool &result) = 0;
 		virtual bool AssessItem(int skill_index, int itempos, bool &result) = 0;
 		virtual bool GetCraftInfo(int skill_index, int sub_index, cga_craft_info_t &info) = 0;
 		virtual bool GetCraftsInfo(int skill_index, cga_crafts_info_t &info) = 0;
 
+		virtual bool GetCraftStatus(int &status) = 0;
 		virtual bool DoRequest(int request_type, bool &result) = 0;
 		virtual bool EnableFlags(int type, bool enable, bool &result) = 0;
 		virtual bool TradeAddStuffs(cga_sell_items_t items, cga_sell_pets_t pets, int gold) = 0;
@@ -904,6 +961,8 @@ namespace CGA
         virtual bool GetMoveHistory(std::vector<unsigned long> &v) = 0;
 		virtual bool SetWindowResolution(int w, int h) = 0;
 		virtual bool RequestDownloadMap(int xbottom, int ybottom, int xsize, int ysize) = 0;
+		virtual bool GetNextAnimTickCount(double &next_anim_tick) = 0;
+		virtual bool LoginGameServer(const std::string &gid, const std::string &glt, int serverid, int bigServerIndex, int serverIndex, int character) = 0;
 
 		virtual bool RegisterServerShutdownNotify(const std::function<void(int)> &callback) = 0;
 		virtual bool RegisterBattleActionNotify(const std::function<void(int)> &callback) = 0;
@@ -915,6 +974,7 @@ namespace CGA
 		virtual bool RegisterTradeStuffsNotify(const std::function<void(cga_trade_stuff_info_t)> &callback) = 0;
 		virtual bool RegisterTradeDialogNotify(const std::function<void(cga_trade_dialog_t)> &callback) = 0;
 		virtual bool RegisterTradeStateNotify(const std::function<void(int)> &callback) = 0;
+		virtual bool RegisterDownloadMapNotify(const std::function<void(cga_download_map_t)> &callback) = 0;
 	};
 
 	extern "C" CGAInterface *CreateInterface();

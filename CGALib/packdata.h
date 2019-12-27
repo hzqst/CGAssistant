@@ -13,7 +13,7 @@ namespace msgpack {
 			struct convert<cga_player_info_t> {
 				msgpack::object const& operator()(msgpack::object const& o, cga_player_info_t& v) const {
 					if (o.type != msgpack::type::ARRAY) throw msgpack::type_error();
-					if (o.via.array.size != 21) throw msgpack::type_error();
+					if (o.via.array.size != 23) throw msgpack::type_error();
 					v.hp = o.via.array.ptr[0].as<int>();
 					v.maxhp = o.via.array.ptr[1].as<int>();
 					v.mp = o.via.array.ptr[2].as<int>();
@@ -26,15 +26,17 @@ namespace msgpack {
 					v.gold = o.via.array.ptr[9].as<int>();
 					v.unitid = o.via.array.ptr[10].as<int>();
 					v.petid = o.via.array.ptr[11].as<int>();
-					v.punchclock = o.via.array.ptr[12].as<int>();
-					v.usingpunchclock = o.via.array.ptr[13].as<bool>();
-					v.name = o.via.array.ptr[14].as<std::string>();
-					v.job = o.via.array.ptr[15].as<std::string>();
-					v.titles = o.via.array.ptr[16].as<std::vector<std::string>>();
-					v.detail = o.via.array.ptr[17].as<cga_playerpet_detail_info_t>();
-					v.manu_endurance = o.via.array.ptr[18].as<int>();
-					v.manu_skillful = o.via.array.ptr[19].as<int>();
-					v.manu_intelligence = o.via.array.ptr[20].as<int>();
+					v.direction = o.via.array.ptr[12].as<int>();
+					v.punchclock = o.via.array.ptr[13].as<int>();
+					v.usingpunchclock = o.via.array.ptr[14].as<bool>();
+					v.name = o.via.array.ptr[15].as<std::string>();
+					v.job = o.via.array.ptr[16].as<std::string>();
+					v.titles = o.via.array.ptr[17].as<std::vector<std::string>>();
+					v.detail = o.via.array.ptr[18].as<cga_playerpet_detail_info_t>();
+					v.manu_endurance = o.via.array.ptr[19].as<int>();
+					v.manu_skillful = o.via.array.ptr[20].as<int>();
+					v.manu_intelligence = o.via.array.ptr[21].as<int>();
+					v.value_charisma = o.via.array.ptr[22].as<int>();
 					return o;
 				}
 			};
@@ -44,7 +46,7 @@ namespace msgpack {
 				template <typename Stream>
 				packer<Stream>& operator()(msgpack::packer<Stream>& o, cga_player_info_t const& v) const {
 					// packing member variables as an array.
-					o.pack_array(21);
+					o.pack_array(23);
 					o.pack(v.hp);
 					o.pack(v.maxhp);
 					o.pack(v.mp);
@@ -57,6 +59,7 @@ namespace msgpack {
 					o.pack(v.gold);
 					o.pack(v.unitid);
 					o.pack(v.petid);
+					o.pack(v.direction);
 					o.pack(v.punchclock);
 					o.pack(v.usingpunchclock);
 					o.pack(v.name);
@@ -66,6 +69,7 @@ namespace msgpack {
 					o.pack(v.manu_endurance);
 					o.pack(v.manu_skillful);
 					o.pack(v.manu_intelligence);
+					o.pack(v.value_charisma);
 					return o;
 				}
 			};
@@ -74,7 +78,7 @@ namespace msgpack {
 			struct object_with_zone<cga_player_info_t> {
 				void operator()(msgpack::object::with_zone& o, cga_player_info_t const& v) const {
 					o.type = type::ARRAY;
-					o.via.array.size = 21;
+					o.via.array.size = 23;
 					o.via.array.ptr = static_cast<msgpack::object*>(o.zone.allocate_align(sizeof(msgpack::object) * o.via.array.size));
 					o.via.array.ptr[0] = msgpack::object(v.hp, o.zone);
 					o.via.array.ptr[1] = msgpack::object(v.maxhp, o.zone);
@@ -88,15 +92,17 @@ namespace msgpack {
 					o.via.array.ptr[9] = msgpack::object(v.gold, o.zone);
 					o.via.array.ptr[10] = msgpack::object(v.unitid, o.zone);
 					o.via.array.ptr[11] = msgpack::object(v.petid, o.zone);
-					o.via.array.ptr[12] = msgpack::object(v.punchclock, o.zone);
-					o.via.array.ptr[13] = msgpack::object(v.usingpunchclock, o.zone);
-					o.via.array.ptr[14] = msgpack::object(v.name, o.zone);
-					o.via.array.ptr[15] = msgpack::object(v.job, o.zone);
-					o.via.array.ptr[16] = msgpack::object(v.titles, o.zone);
-					o.via.array.ptr[17] = msgpack::object(v.detail, o.zone);
-					o.via.array.ptr[18] = msgpack::object(v.manu_endurance, o.zone);
-					o.via.array.ptr[19] = msgpack::object(v.manu_skillful, o.zone);
-					o.via.array.ptr[20] = msgpack::object(v.manu_intelligence, o.zone);
+					o.via.array.ptr[12] = msgpack::object(v.direction, o.zone);
+					o.via.array.ptr[13] = msgpack::object(v.punchclock, o.zone);
+					o.via.array.ptr[14] = msgpack::object(v.usingpunchclock, o.zone);
+					o.via.array.ptr[15] = msgpack::object(v.name, o.zone);
+					o.via.array.ptr[16] = msgpack::object(v.job, o.zone);
+					o.via.array.ptr[17] = msgpack::object(v.titles, o.zone);
+					o.via.array.ptr[18] = msgpack::object(v.detail, o.zone);
+					o.via.array.ptr[19] = msgpack::object(v.manu_endurance, o.zone);
+					o.via.array.ptr[20] = msgpack::object(v.manu_skillful, o.zone);
+					o.via.array.ptr[21] = msgpack::object(v.manu_intelligence, o.zone);
+					o.via.array.ptr[22] = msgpack::object(v.value_charisma, o.zone);
 				}
 			};
 
@@ -106,7 +112,7 @@ namespace msgpack {
 			struct convert<cga_pet_info_t> {
 				msgpack::object const& operator()(msgpack::object const& o, cga_pet_info_t& v) const {
 					if (o.type != msgpack::type::ARRAY) throw msgpack::type_error();
-					if (o.via.array.size != 16) throw msgpack::type_error();
+					if (o.via.array.size != 17) throw msgpack::type_error();
 					v.hp = o.via.array.ptr[0].as<int>();
 					v.maxhp = o.via.array.ptr[1].as<int>();
 					v.mp = o.via.array.ptr[2].as<int>();
@@ -119,10 +125,11 @@ namespace msgpack {
 					v.race = o.via.array.ptr[9].as<int>();
 					v.loyality = o.via.array.ptr[10].as<int>();
 					v.battle_flags = o.via.array.ptr[11].as<int>();
-					v.index = o.via.array.ptr[12].as<int>();
-					v.name = o.via.array.ptr[13].as<std::string>();
-					v.realname = o.via.array.ptr[14].as<std::string>();
-					v.detail = o.via.array.ptr[15].as<cga_playerpet_detail_info_t>();
+					v.state = o.via.array.ptr[12].as<int>();
+					v.index = o.via.array.ptr[13].as<int>();
+					v.name = o.via.array.ptr[14].as<std::string>();
+					v.realname = o.via.array.ptr[15].as<std::string>();
+					v.detail = o.via.array.ptr[16].as<cga_playerpet_detail_info_t>();
 					return o;
 				}
 			};
@@ -132,7 +139,7 @@ namespace msgpack {
 				template <typename Stream>
 				packer<Stream>& operator()(msgpack::packer<Stream>& o, cga_pet_info_t const& v) const {
 					// packing member variables as an array.
-					o.pack_array(16);
+					o.pack_array(17);
 					o.pack(v.hp);
 					o.pack(v.maxhp);
 					o.pack(v.mp);
@@ -145,6 +152,7 @@ namespace msgpack {
 					o.pack(v.race);
 					o.pack(v.loyality);
 					o.pack(v.battle_flags);
+					o.pack(v.state);
 					o.pack(v.index);
 					o.pack(v.name);
 					o.pack(v.realname);
@@ -157,7 +165,7 @@ namespace msgpack {
 			struct object_with_zone<cga_pet_info_t> {
 				void operator()(msgpack::object::with_zone& o, cga_pet_info_t const& v) const {
 					o.type = type::ARRAY;
-					o.via.array.size = 16;
+					o.via.array.size = 17;
 					o.via.array.ptr = static_cast<msgpack::object*>(o.zone.allocate_align(sizeof(msgpack::object) * o.via.array.size));
 					o.via.array.ptr[0] = msgpack::object(v.hp, o.zone);
 					o.via.array.ptr[1] = msgpack::object(v.maxhp, o.zone);
@@ -171,10 +179,11 @@ namespace msgpack {
 					o.via.array.ptr[9] = msgpack::object(v.race, o.zone);
 					o.via.array.ptr[10] = msgpack::object(v.loyality, o.zone);
 					o.via.array.ptr[11] = msgpack::object(v.battle_flags, o.zone);
-					o.via.array.ptr[12] = msgpack::object(v.index, o.zone);
-					o.via.array.ptr[13] = msgpack::object(v.name, o.zone);
-					o.via.array.ptr[14] = msgpack::object(v.realname, o.zone);
-					o.via.array.ptr[15] = msgpack::object(v.detail, o.zone);
+					o.via.array.ptr[12] = msgpack::object(v.state, o.zone);
+					o.via.array.ptr[13] = msgpack::object(v.index, o.zone);
+					o.via.array.ptr[14] = msgpack::object(v.name, o.zone);
+					o.via.array.ptr[15] = msgpack::object(v.realname, o.zone);
+					o.via.array.ptr[16] = msgpack::object(v.detail, o.zone);
 				}
 			};
 
@@ -974,7 +983,7 @@ namespace msgpack {
 			struct convert<cga_craft_info_t> {
 				msgpack::object const& operator()(msgpack::object const& o, cga_craft_info_t& v) const {
 					if (o.type != msgpack::type::ARRAY) throw msgpack::type_error();
-					if (o.via.array.size != 12) throw msgpack::type_error();
+					if (o.via.array.size != 13) throw msgpack::type_error();
 					v.id = o.via.array.ptr[0].as<int>();
 					v.cost = o.via.array.ptr[1].as<int>();
 					v.level = o.via.array.ptr[2].as<int>();
@@ -982,8 +991,9 @@ namespace msgpack {
 					v.index = o.via.array.ptr[4].as<int>();
 					v.name = o.via.array.ptr[5].as<std::string>();
 					v.info = o.via.array.ptr[6].as<std::string>();
+					v.available = o.via.array.ptr[7].as<bool>();
 					for (int i = 0; i < 5; ++i)
-						v.materials[i] = o.via.array.ptr[7 + i].as<cga_craft_material_t>();
+						v.materials[i] = o.via.array.ptr[8 + i].as<cga_craft_material_t>();
 					return o;
 				}
 			};
@@ -993,7 +1003,7 @@ namespace msgpack {
 				template <typename Stream>
 				packer<Stream>& operator()(msgpack::packer<Stream>& o, cga_craft_info_t const& v) const {
 					// packing member variables as an array.
-					o.pack_array(12);
+					o.pack_array(13);
 					o.pack(v.id);
 					o.pack(v.cost);
 					o.pack(v.level);
@@ -1001,6 +1011,7 @@ namespace msgpack {
 					o.pack(v.index);
 					o.pack(v.name);
 					o.pack(v.info);
+					o.pack(v.available);
 					for (int i = 0; i < 5; ++i)
 						o.pack(v.materials[i]);
 					return o;
@@ -1011,7 +1022,7 @@ namespace msgpack {
 			struct object_with_zone<cga_craft_info_t> {
 				void operator()(msgpack::object::with_zone& o, cga_craft_info_t const& v) const {
 					o.type = type::ARRAY;
-					o.via.array.size = 12;
+					o.via.array.size = 13;
 					o.via.array.ptr = static_cast<msgpack::object*>(o.zone.allocate_align(sizeof(msgpack::object) * o.via.array.size));
 					o.via.array.ptr[0] = msgpack::object(v.id, o.zone);
 					o.via.array.ptr[1] = msgpack::object(v.cost, o.zone);
@@ -1020,8 +1031,9 @@ namespace msgpack {
 					o.via.array.ptr[4] = msgpack::object(v.index, o.zone);
 					o.via.array.ptr[5] = msgpack::object(v.name, o.zone);
 					o.via.array.ptr[6] = msgpack::object(v.info, o.zone);
+					o.via.array.ptr[7] = msgpack::object(v.available, o.zone);
 					for (int i = 0; i < 5; ++i)
-						o.via.array.ptr[7 + i] = msgpack::object(v.materials[i], o.zone);
+						o.via.array.ptr[8 + i] = msgpack::object(v.materials[i], o.zone);
 				}
 			};
 
@@ -1206,12 +1218,15 @@ namespace msgpack {
 			struct convert<cga_team_player_t> {
 				msgpack::object const& operator()(msgpack::object const& o, cga_team_player_t& v) const {
 					if (o.type != msgpack::type::ARRAY) throw msgpack::type_error();
-					if (o.via.array.size != 5) throw msgpack::type_error();
+					if (o.via.array.size != 8) throw msgpack::type_error();
 					v.unit_id = o.via.array.ptr[0].as<int>();
 					v.hp = o.via.array.ptr[1].as<int>();
-					v.mp = o.via.array.ptr[2].as<int>();
-					v.maxhp = o.via.array.ptr[3].as<int>();
-					v.name = o.via.array.ptr[4].as<std::string>();
+					v.maxhp = o.via.array.ptr[2].as<int>();
+					v.mp = o.via.array.ptr[3].as<int>();
+					v.maxmp = o.via.array.ptr[4].as<int>();
+					v.xpos = o.via.array.ptr[5].as<int>();
+					v.ypos = o.via.array.ptr[6].as<int>();
+					v.name = o.via.array.ptr[7].as<std::string>();
 					return o;
 				}
 			};
@@ -1221,11 +1236,14 @@ namespace msgpack {
 				template <typename Stream>
 				packer<Stream>& operator()(msgpack::packer<Stream>& o, cga_team_player_t const& v) const {
 					// packing member variables as an array.
-					o.pack_array(5);
+					o.pack_array(8);
 					o.pack(v.unit_id);
 					o.pack(v.hp);
-					o.pack(v.mp);
 					o.pack(v.maxhp);
+					o.pack(v.mp);
+					o.pack(v.maxmp);
+					o.pack(v.xpos);
+					o.pack(v.ypos);
 					o.pack(v.name);
 					return o;
 				}
@@ -1235,13 +1253,16 @@ namespace msgpack {
 			struct object_with_zone<cga_team_player_t> {
 				void operator()(msgpack::object::with_zone& o, cga_team_player_t const& v) const {
 					o.type = type::ARRAY;
-					o.via.array.size = 5;
+					o.via.array.size = 8;
 					o.via.array.ptr = static_cast<msgpack::object*>(o.zone.allocate_align(sizeof(msgpack::object) * o.via.array.size));
 					o.via.array.ptr[0] = msgpack::object(v.unit_id, o.zone);
 					o.via.array.ptr[1] = msgpack::object(v.hp, o.zone);
-					o.via.array.ptr[2] = msgpack::object(v.mp, o.zone);
-					o.via.array.ptr[3] = msgpack::object(v.maxhp, o.zone);
-					o.via.array.ptr[4] = msgpack::object(v.name, o.zone);
+					o.via.array.ptr[2] = msgpack::object(v.maxhp, o.zone);
+					o.via.array.ptr[3] = msgpack::object(v.mp, o.zone);
+					o.via.array.ptr[4] = msgpack::object(v.maxmp, o.zone);
+					o.via.array.ptr[5] = msgpack::object(v.xpos, o.zone);
+					o.via.array.ptr[6] = msgpack::object(v.ypos, o.zone);
+					o.via.array.ptr[7] = msgpack::object(v.name, o.zone);
 				}
 			};
 
@@ -1438,6 +1459,55 @@ namespace msgpack {
 					o.via.array.ptr[23] = msgpack::object(v.element_fire, o.zone);
 					o.via.array.ptr[24] = msgpack::object(v.element_wind, o.zone);
 				}
+			};
+
+			//cga_download_map_t
+
+			template<>
+			struct convert<cga_download_map_t> {
+				msgpack::object const& operator()(msgpack::object const& o, cga_download_map_t& v) const {
+					if (o.type != msgpack::type::ARRAY) throw msgpack::type_error();
+					if (o.via.array.size != 6) throw msgpack::type_error();
+
+					v.index1 = o.via.array.ptr[0].as<int>();
+					v.index3 = o.via.array.ptr[1].as<int>();
+					v.xbase = o.via.array.ptr[2].as<int>();
+					v.ybase = o.via.array.ptr[3].as<int>();
+					v.xtop = o.via.array.ptr[4].as<int>();
+					v.ytop = o.via.array.ptr[5].as<int>();
+
+					return o;
+				}
+			};
+
+			template<>
+			struct pack<cga_download_map_t> {
+				template <typename Stream>
+				packer<Stream>& operator()(msgpack::packer<Stream>& o, cga_download_map_t const& v) const {
+					// packing member variables as an array.
+					o.pack_array(6);
+					o.pack(v.index1);
+					o.pack(v.index3);
+					o.pack(v.xbase);
+					o.pack(v.ybase);
+					o.pack(v.xtop);
+					o.pack(v.ytop);
+					return o;
+				}
+			};
+
+			template <>
+			struct object_with_zone<cga_download_map_t> {
+				void operator()(msgpack::object::with_zone& o, cga_download_map_t const& v) const {
+					o.type = type::ARRAY;
+					o.via.array.size = 6;
+					o.via.array.ptr = static_cast<msgpack::object*>(o.zone.allocate_align(sizeof(msgpack::object) * o.via.array.size));
+					o.via.array.ptr[0] = msgpack::object(v.index1, o.zone);
+					o.via.array.ptr[1] = msgpack::object(v.index3, o.zone);
+					o.via.array.ptr[2] = msgpack::object(v.xbase, o.zone);
+					o.via.array.ptr[3] = msgpack::object(v.ybase, o.zone);
+					o.via.array.ptr[4] = msgpack::object(v.xtop, o.zone);
+					o.via.array.ptr[5] = msgpack::object(v.ytop, o.zone);				}
 			};
 		} // namespace adaptor
 	} // MSGPACK_API_VERSION_NAMESPACE(MSGPACK_DEFAULT_API_NS)
