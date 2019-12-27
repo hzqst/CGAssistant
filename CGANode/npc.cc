@@ -81,7 +81,9 @@ void NPCDialogAsyncCallBack(uv_async_t *handle)
 
 	auto data = (NPCDialogNotifyData *)handle->data;
 
-	Handle<Value> argv[1];
+	Handle<Value> argv[2];
+	Local<Value> nullValue = Nan::Null();
+	argv[0] = data->m_result ? nullValue : Nan::TypeError("Unknown exception.");
 	if (data->m_result)
 	{
 		Local<Object> obj = Object::New(isolate);
@@ -90,14 +92,10 @@ void NPCDialogAsyncCallBack(uv_async_t *handle)
 		obj->Set(String::NewFromUtf8(isolate, "dialog_id"), Integer::New(isolate, data->m_dlg.dialog_id));
 		obj->Set(String::NewFromUtf8(isolate, "npc_id"), Integer::New(isolate, data->m_dlg.npc_id));
 		obj->Set(String::NewFromUtf8(isolate, "message"), Nan::New(data->m_dlg.message).ToLocalChecked());
-		argv[0] = obj;
-	}
-	else
-	{
-		argv[0] = Nan::New(false);
+		argv[1] = obj;
 	}
 
-	Local<Function>::New(isolate, data->m_callback)->Call(isolate->GetCurrentContext()->Global(), 1, argv);
+	Local<Function>::New(isolate, data->m_callback)->Call(isolate->GetCurrentContext()->Global(), (data->m_result) ? 2 : 1, argv);
 
 	data->m_callback.Reset();
 

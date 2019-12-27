@@ -28,3 +28,4 @@ void GetPetSkillsInfo(const Nan::FunctionCallbackInfo<v8::Value>& info);
 
 void GetCraftInfo(const Nan::FunctionCallbackInfo<v8::Value>& info);
 void GetCraftsInfo(const Nan::FunctionCallbackInfo<v8::Value>& info);
+void GetTeamPlayerInfo(const Nan::FunctionCallbackInfo<v8::Value>& info);

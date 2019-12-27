@@ -83,17 +83,13 @@ void BattleActionAsyncCallBack(uv_async_t *handle)
 
 	auto data = (BattleActionNotifyData *)handle->data;
 
-	Handle<Value> argv[1];
+	Local<Value> nullValue = Nan::Null();
+	Handle<Value> argv[2];
+	argv[0] = data->m_result ? nullValue : Nan::TypeError("Unknown exception.");
 	if (data->m_result)
-	{
-		argv[0] = Integer::New(isolate, data->m_flags);
-	}
-	else
-	{
-		argv[0] = Nan::New(false);
-	}
+		argv[1] = Integer::New(isolate, data->m_flags);
 
-	Local<Function>::New(isolate, data->m_callback)->Call(isolate->GetCurrentContext()->Global(), 1, argv);
+	Local<Function>::New(isolate, data->m_callback)->Call(isolate->GetCurrentContext()->Global(), (data->m_result) ? 2 : 1, argv);
 
 	data->m_callback.Reset();
 
@@ -291,9 +287,11 @@ void BattleSkillAttack(const Nan::FunctionCallbackInfo<v8::Value>& info)
 	int skillpos = (int)info[0]->IntegerValue();
 	int skilllevel = (int)info[1]->IntegerValue();
 	int target = (int)info[2]->IntegerValue();
-	
+
+	bool packetOnly = (info.Length() >= 4 && info[3]->IsBoolean()) ? (int)info[3]->BooleanValue() : false;
+
 	bool bResult = false;
-	if (!g_CGAInterface->BattleSkillAttack(skillpos, skilllevel, target, bResult))
+	if (!g_CGAInterface->BattleSkillAttack(skillpos, skilllevel, target, packetOnly, bResult))
 	{
 		Nan::ThrowError("RPC Invocation failed.");
 		return;
@@ -301,13 +299,27 @@ void BattleSkillAttack(const Nan::FunctionCallbackInfo<v8::Value>& info)
 	info.GetReturnValue().Set(bResult);
 }
 
-void BattleDefense(const Nan::FunctionCallbackInfo<v8::Value>& info)
+void BattleRebirth(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
 	Isolate* isolate = info.GetIsolate();
 	HandleScope handle_scope(isolate);
 
 	bool bResult = false;
-	if (!g_CGAInterface->BattleDefense(bResult))
+	if (!g_CGAInterface->BattleRebirth(bResult))
+	{
+		Nan::ThrowError("RPC Invocation failed.");
+		return;
+	}
+	info.GetReturnValue().Set(bResult);
+}
+
+void BattleGuard(const Nan::FunctionCallbackInfo<v8::Value>& info)
+{
+	Isolate* isolate = info.GetIsolate();
+	HandleScope handle_scope(isolate);
+
+	bool bResult = false;
+	if (!g_CGAInterface->BattleGuard(bResult))
 	{
 		Nan::ThrowError("RPC Invocation failed.");
 		return;
@@ -322,6 +334,20 @@ void BattleEscape(const Nan::FunctionCallbackInfo<v8::Value>& info)
 
 	bool bResult = false;
 	if (!g_CGAInterface->BattleEscape(bResult))
+	{
+		Nan::ThrowError("RPC Invocation failed.");
+		return;
+	}
+	info.GetReturnValue().Set(bResult);
+}
+
+void BattleDoNothing(const Nan::FunctionCallbackInfo<v8::Value>& info)
+{
+	Isolate* isolate = info.GetIsolate();
+	HandleScope handle_scope(isolate);
+
+	bool bResult = false;
+	if (!g_CGAInterface->BattleDoNothing(bResult))
 	{
 		Nan::ThrowError("RPC Invocation failed.");
 		return;
@@ -396,21 +422,22 @@ void BattlePetSkillAttack(const Nan::FunctionCallbackInfo<v8::Value>& info)
 	Isolate* isolate = info.GetIsolate();
 	HandleScope handle_scope(isolate);
 
-	if (info.Length() < 1) {
+	if (info.Length() < 1 || !info[0]->IsInt32()) {
 		Nan::ThrowTypeError("Arg[0] must be pet skill pos.");
 		return;
 	}
 	
-	if (info.Length() < 1) {
+	if (info.Length() < 2 || !info[1]->IsInt32()) {
 		Nan::ThrowTypeError("Arg[1] must be target.");
 		return;
 	}
-	
+
 	int skillpos = (int)info[0]->IntegerValue();
 	int target = (int)info[1]->IntegerValue();
+	bool packetOnly = (info.Length() >= 3 && info[2]->IsBoolean()) ?  (int)info[2]->BooleanValue() : false;
 
 	bool bResult = false;
-	if (!g_CGAInterface->BattlePetSkillAttack(skillpos, target, bResult))
+	if (!g_CGAInterface->BattlePetSkillAttack(skillpos, target, packetOnly, bResult))
 	{
 		Nan::ThrowError("RPC Invocation failed.");
 		return;

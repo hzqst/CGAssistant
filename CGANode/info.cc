@@ -75,6 +75,7 @@ void GetPlayerInfo(const Nan::FunctionCallbackInfo<v8::Value>& info)
 	obj->Set(String::NewFromUtf8(isolate, "gold"), Integer::New(isolate, myinfo.gold));
 	obj->Set(String::NewFromUtf8(isolate, "unitid"), Integer::New(isolate, myinfo.unitid));
 	obj->Set(String::NewFromUtf8(isolate, "petid"), Integer::New(isolate, myinfo.petid));
+	obj->Set(String::NewFromUtf8(isolate, "direction"), Integer::New(isolate, myinfo.direction));
 	obj->Set(String::NewFromUtf8(isolate, "punchclock"), Integer::New(isolate, myinfo.punchclock));
 	obj->Set(String::NewFromUtf8(isolate, "usingpunchclock"), Boolean::New(isolate, myinfo.usingpunchclock));
 	obj->Set(String::NewFromUtf8(isolate, "name"), Nan::New(myinfo.name).ToLocalChecked());
@@ -116,6 +117,7 @@ void GetPlayerInfo(const Nan::FunctionCallbackInfo<v8::Value>& info)
 	objd->Set(String::NewFromUtf8(isolate, "manu_endurance"), Integer::New(isolate, myinfo.manu_endurance));
 	objd->Set(String::NewFromUtf8(isolate, "manu_skillful"), Integer::New(isolate, myinfo.manu_skillful));
 	objd->Set(String::NewFromUtf8(isolate, "manu_intelligence"), Integer::New(isolate, myinfo.manu_intelligence));
+	objd->Set(String::NewFromUtf8(isolate, "value_charisma"), Integer::New(isolate, myinfo.value_charisma));
 
 	obj->Set(String::NewFromUtf8(isolate, "detail"), objd);
 
@@ -292,6 +294,7 @@ void GetCraftInfo(const Nan::FunctionCallbackInfo<v8::Value>& info)
 	obj->Set(String::NewFromUtf8(isolate, "cost"), Integer::New(isolate, myinfo.cost));
 	obj->Set(String::NewFromUtf8(isolate, "id"), Integer::New(isolate, myinfo.id));
 	obj->Set(String::NewFromUtf8(isolate, "index"), Integer::New(isolate, myinfo.index));
+	obj->Set(String::NewFromUtf8(isolate, "available"), Boolean::New(isolate, myinfo.available));
 
 	Local<Array> mat_arr = Array::New(isolate);
 	for (size_t i = 0; i < 5; ++i)
@@ -343,6 +346,7 @@ void GetCraftsInfo(const Nan::FunctionCallbackInfo<v8::Value>& info)
 		obj->Set(String::NewFromUtf8(isolate, "cost"), Integer::New(isolate, myinfo.cost));
 		obj->Set(String::NewFromUtf8(isolate, "id"), Integer::New(isolate, myinfo.id));
 		obj->Set(String::NewFromUtf8(isolate, "index"), Integer::New(isolate, myinfo.index));
+		obj->Set(String::NewFromUtf8(isolate, "available"), Boolean::New(isolate, myinfo.available));
 
 		Local<Array> mat_arr = Array::New(isolate);
 		for (size_t j = 0; j < 5; ++j)
@@ -605,6 +609,7 @@ void GetPetInfo(const Nan::FunctionCallbackInfo<v8::Value>& info)
 	obj->Set(String::NewFromUtf8(isolate, "maxxp"), Integer::New(isolate, myinfo.maxxp));
 	obj->Set(String::NewFromUtf8(isolate, "flags"), Integer::New(isolate, myinfo.flags));
 	obj->Set(String::NewFromUtf8(isolate, "battle_flags"), Integer::New(isolate, myinfo.battle_flags));
+	obj->Set(String::NewFromUtf8(isolate, "state"), Integer::New(isolate, myinfo.state));
 	obj->Set(String::NewFromUtf8(isolate, "index"), Integer::New(isolate, myinfo.index));
 
 	Local<Object> objd = Object::New(isolate);
@@ -668,6 +673,7 @@ void GetPetsInfo(const Nan::FunctionCallbackInfo<v8::Value>& info)
 		obj->Set(String::NewFromUtf8(isolate, "maxxp"), Integer::New(isolate, myinfo.maxxp));
 		obj->Set(String::NewFromUtf8(isolate, "flags"), Integer::New(isolate, myinfo.flags));
 		obj->Set(String::NewFromUtf8(isolate, "battle_flags"), Integer::New(isolate, myinfo.battle_flags));
+		obj->Set(String::NewFromUtf8(isolate, "state"), Integer::New(isolate, myinfo.state));
 		obj->Set(String::NewFromUtf8(isolate, "index"), Integer::New(isolate, myinfo.index));
 
 		Local<Object> objd = Object::New(isolate);
@@ -790,5 +796,35 @@ void GetPetSkillsInfo(const Nan::FunctionCallbackInfo<v8::Value>& info)
 		obj->Set(String::NewFromUtf8(isolate, "index"), Integer::New(isolate, myinfo.index));
 		arr->Set(i, obj);
 	}
+	info.GetReturnValue().Set(arr);
+}
+
+void GetTeamPlayerInfo(const Nan::FunctionCallbackInfo<v8::Value>& info)
+{
+	Isolate* isolate = info.GetIsolate();
+	HandleScope handle_scope(isolate);
+
+	CGA::cga_team_players_t plinfo;
+	if (!g_CGAInterface->GetTeamPlayerInfo(plinfo))
+	{
+		Nan::ThrowError("RPC Invocation failed.");
+		return;
+	}
+
+	Local<Array> arr = Array::New(isolate);
+	for (size_t i = 0; i < plinfo.size(); ++i)
+	{
+		Local<Object> obj = Object::New(isolate);
+		obj->Set(String::NewFromUtf8(isolate, "unit_id"), Integer::New(isolate, plinfo[i].unit_id));
+		obj->Set(String::NewFromUtf8(isolate, "hp"), Integer::New(isolate, plinfo[i].hp));
+		obj->Set(String::NewFromUtf8(isolate, "maxhp"), Integer::New(isolate, plinfo[i].maxhp));
+		obj->Set(String::NewFromUtf8(isolate, "mp"), Integer::New(isolate, plinfo[i].mp));
+		obj->Set(String::NewFromUtf8(isolate, "maxmp"), Integer::New(isolate, plinfo[i].maxmp));
+		obj->Set(String::NewFromUtf8(isolate, "xpos"), Integer::New(isolate, plinfo[i].xpos));
+		obj->Set(String::NewFromUtf8(isolate, "ypos"), Integer::New(isolate, plinfo[i].ypos));
+		obj->Set(String::NewFromUtf8(isolate, "name"), Nan::New(plinfo[i].name).ToLocalChecked());
+		arr->Set(i, obj);
+	}
+
 	info.GetReturnValue().Set(arr);
 }

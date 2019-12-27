@@ -1,10 +1,202 @@
 #include <time.h>
 #include <nan.h>
 #include "../CGALib/gameinterface.h"
+#include <boost/thread/thread.hpp>
+#include <boost/thread/mutex.hpp>
 
 using namespace v8;
 
+#include "async.h"
+
 extern CGA::CGAInterface *g_CGAInterface;
+
+bool g_PlayerSyncPosition = false;
+
+void DownloadMapAsyncCallBack(uv_async_t *handle);
+
+class DownloadMapNotifyData : public CBaseNotifyData
+{
+public:
+	DownloadMapNotifyData() : CBaseNotifyData(DownloadMapAsyncCallBack)
+	{
+
+	}
+
+	CGA::cga_download_map_t m_msg;
+};
+
+class DownloadMapCacheData
+{
+public:
+	DownloadMapCacheData(const CGA::cga_download_map_t &msg, uint64_t time) : m_msg(msg), m_time(time)
+	{
+
+	}
+	CGA::cga_download_map_t m_msg;
+	uint64_t m_time;
+};
+
+boost::shared_mutex g_DownloadMap_Lock;
+std::vector<DownloadMapNotifyData *> g_DownloadMap_Asyncs;
+std::vector<DownloadMapCacheData *> g_DownloadMap_Caches;
+
+void DownloadMapDoAsyncCall(const CGA::cga_download_map_t &msg)
+{
+	if (g_DownloadMap_Asyncs.size())
+	{
+		for (size_t i = 0; i < g_DownloadMap_Asyncs.size(); ++i)
+		{
+			const auto data = g_DownloadMap_Asyncs[i];
+
+			data->m_msg = msg;
+			data->m_result = true;
+			uv_async_send(data->m_async);
+		}
+		g_DownloadMap_Asyncs.clear();
+	}
+	else
+	{
+		auto hrtime = uv_hrtime();
+		for (auto &p = g_DownloadMap_Caches.begin(); p != g_DownloadMap_Caches.end(); )
+		{
+			if (hrtime - (*p)->m_time > CGA_NOTIFY_MAX_CACHE_TIME)
+			{
+				delete *p;
+				p = g_DownloadMap_Caches.erase(p);
+			}
+			else
+			{
+				p++;
+			}
+		}
+		g_DownloadMap_Caches.emplace_back(new DownloadMapCacheData(msg, uv_hrtime()));
+	}
+}
+
+void DownloadMapNotify(CGA::cga_download_map_t msg)
+{
+	boost::unique_lock<boost::shared_mutex> lock(g_DownloadMap_Lock);
+	DownloadMapDoAsyncCall(msg);
+}
+
+void DownloadMapAsyncCallBack(uv_async_t *handle)
+{
+	Isolate* isolate = Isolate::GetCurrent();
+	HandleScope handle_scope(isolate);
+
+	auto data = (DownloadMapNotifyData *)handle->data;
+
+	Local<Value> nullValue = Nan::Null();
+	Handle<Value> argv[2];
+	argv[0] = data->m_result ? nullValue : Nan::TypeError("Unknown exception.");
+	if (data->m_result)
+	{
+		Local<Object> obj = Object::New(isolate);
+		obj->Set(String::NewFromUtf8(isolate, "index1"), Integer::New(isolate, data->m_msg.index1));
+		obj->Set(String::NewFromUtf8(isolate, "index3"), Integer::New(isolate, data->m_msg.index3));
+		obj->Set(String::NewFromUtf8(isolate, "xbase"), Integer::New(isolate, data->m_msg.xbase));
+		obj->Set(String::NewFromUtf8(isolate, "ybase"), Integer::New(isolate, data->m_msg.ybase));
+		obj->Set(String::NewFromUtf8(isolate, "xtop"), Integer::New(isolate, data->m_msg.xtop));
+		obj->Set(String::NewFromUtf8(isolate, "ytop"), Integer::New(isolate, data->m_msg.ytop));
+		argv[1] = obj;
+	}
+
+	Local<Function>::New(isolate, data->m_callback)->Call(isolate->GetCurrentContext()->Global(), (data->m_result) ? 2 : 1, argv);
+
+	data->m_callback.Reset();
+
+	uv_timer_stop(data->m_timer);
+	uv_close((uv_handle_t*)handle, FreeUVHandleCallBack);
+	uv_close((uv_handle_t*)data->m_timer, FreeUVHandleCallBack);
+	delete handle->data;
+}
+
+void DownloadMapTimerCallBack(uv_timer_t *handle)
+{
+	Isolate* isolate = Isolate::GetCurrent();
+	HandleScope handle_scope(isolate);
+
+	auto data = (DownloadMapNotifyData *)handle->data;
+
+	bool asyncNotCalled = false;
+
+	{
+		boost::unique_lock<boost::shared_mutex> lock(g_DownloadMap_Lock);
+		for (size_t i = 0; i < g_DownloadMap_Asyncs.size(); ++i)
+		{
+			if (g_DownloadMap_Asyncs[i] == data)
+			{
+				asyncNotCalled = true;
+				g_DownloadMap_Asyncs.erase(g_DownloadMap_Asyncs.begin() + i);
+				break;
+			}
+		}
+	}
+
+	if (asyncNotCalled)
+	{
+		Handle<Value> argv[1];
+		argv[0] = Nan::TypeError("Async callback timeout.");
+
+		Local<Function>::New(isolate, data->m_callback)->Call(isolate->GetCurrentContext()->Global(), 1, argv);
+
+		data->m_callback.Reset();
+
+		uv_timer_stop(handle);
+		uv_close((uv_handle_t*)data->m_async, FreeUVHandleCallBack);
+		uv_close((uv_handle_t*)handle, FreeUVHandleCallBack);
+		delete handle->data;
+	}
+}
+
+void AsyncWaitDownloadMap(const Nan::FunctionCallbackInfo<v8::Value>& info)
+{
+	Isolate* isolate = info.GetIsolate();
+	HandleScope handle_scope(isolate);
+
+	int timeout = 3000;
+	if (info.Length() < 1 || !info[0]->IsFunction()) {
+		Nan::ThrowTypeError("Arg[0] must be a function.");
+		return;
+	}
+	if (info.Length() >= 2 && !info[1]->IsUndefined())
+	{
+		timeout = (int)info[1]->IntegerValue();
+		if (timeout < 0)
+			timeout = 0;
+	}
+
+	auto callback = Local<Function>::Cast(info[0]);
+	DownloadMapNotifyData *data = new DownloadMapNotifyData();
+	data->m_callback.Reset(isolate, callback);
+	data->m_async->data = data;
+	data->m_timer->data = data;
+
+	{
+		boost::unique_lock<boost::shared_mutex> lock(g_DownloadMap_Lock);
+		g_DownloadMap_Asyncs.push_back(data);
+
+		auto hrtime = uv_hrtime();
+		for (auto &p = g_DownloadMap_Caches.begin(); p != g_DownloadMap_Caches.end(); )
+		{
+			if (hrtime - (*p)->m_time > CGA_NOTIFY_MAX_CACHE_TIME)
+			{
+				delete *p;
+				p = g_DownloadMap_Caches.erase(p);
+			}
+			else
+			{
+				DownloadMapDoAsyncCall((*p)->m_msg);
+				delete *p;
+				g_DownloadMap_Caches.erase(p);
+				break;
+			}
+		}
+	}
+
+	if(timeout)
+		uv_timer_start(data->m_timer, DownloadMapTimerCallBack, timeout, 0);
+}
 
 void RequestDownloadMap(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
@@ -185,6 +377,39 @@ void GetMapUnits(const Nan::FunctionCallbackInfo<v8::Value>& info)
 	info.GetReturnValue().Set(arr);
 }
 
+void GetMapCollisionTableRaw(const Nan::FunctionCallbackInfo<v8::Value>& info)
+{
+	Isolate* isolate = info.GetIsolate();
+	HandleScope handle_scope(isolate);
+
+	if (info.Length() < 1) {
+		Nan::ThrowTypeError("Arg[0] must be boolean.");
+		return;
+	}
+	
+	bool loadall = info[0]->BooleanValue();
+
+	CGA::cga_map_cells_t cells;
+	if (!g_CGAInterface->GetMapCollisionTableRaw(loadall, cells))
+	{
+		Nan::ThrowError("RPC Invocation failed.");
+		return;
+	}
+	Local<Object> obj = Object::New(isolate);
+	obj->Set(String::NewFromUtf8(isolate, "x_bottom"), Integer::New(isolate, cells.x_bottom));
+	obj->Set(String::NewFromUtf8(isolate, "y_bottom"), Integer::New(isolate, cells.y_bottom));
+	obj->Set(String::NewFromUtf8(isolate, "x_size"), Integer::New(isolate, cells.x_size));
+	obj->Set(String::NewFromUtf8(isolate, "y_size"), Integer::New(isolate, cells.y_size));
+	Local<Array> arr = Array::New(isolate);
+	for (size_t i = 0; i < cells.cell.size(); ++i)
+	{
+		arr->Set(i, Integer::New(isolate, cells.cell[i]));
+	}
+	obj->Set(String::NewFromUtf8(isolate, "cell"), arr);
+
+	info.GetReturnValue().Set(obj);
+}
+
 void GetMapCollisionTable(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
 	Isolate* isolate = info.GetIsolate();
@@ -232,6 +457,39 @@ void GetMapObjectTable(const Nan::FunctionCallbackInfo<v8::Value>& info)
 
 	CGA::cga_map_cells_t cells;
 	if (!g_CGAInterface->GetMapObjectTable(loadall, cells))
+	{
+		Nan::ThrowError("RPC Invocation failed.");
+		return;
+	}
+	Local<Object> obj = Object::New(isolate);
+	obj->Set(String::NewFromUtf8(isolate, "x_bottom"), Integer::New(isolate, cells.x_bottom));
+	obj->Set(String::NewFromUtf8(isolate, "y_bottom"), Integer::New(isolate, cells.y_bottom));
+	obj->Set(String::NewFromUtf8(isolate, "x_size"), Integer::New(isolate, cells.x_size));
+	obj->Set(String::NewFromUtf8(isolate, "y_size"), Integer::New(isolate, cells.y_size));
+	Local<Array> arr = Array::New(isolate);
+	for (size_t i = 0; i < cells.cell.size(); ++i)
+	{
+		arr->Set(i, Integer::New(isolate, cells.cell[i]));
+	}
+	obj->Set(String::NewFromUtf8(isolate, "cell"), arr);
+
+	info.GetReturnValue().Set(obj);
+}
+
+void GetMapTileTable(const Nan::FunctionCallbackInfo<v8::Value>& info)
+{
+	Isolate* isolate = info.GetIsolate();
+	HandleScope handle_scope(isolate);
+
+	if (info.Length() < 1) {
+		Nan::ThrowTypeError("Arg[0] must be boolean.");
+		return;
+	}
+	
+	bool loadall = info[0]->BooleanValue();
+
+	CGA::cga_map_cells_t cells;
+	if (!g_CGAInterface->GetMapTileTable(loadall, cells))
 	{
 		Nan::ThrowError("RPC Invocation failed.");
 		return;
@@ -443,8 +701,8 @@ void WalkToWorker(uv_work_t* req)
 
 	std::string initmap, curmap;
 
-	__time64_t lastStay = 0;
-	__time64_t lastStay2 = 0;
+	uint64_t lastStay = 0;
+	uint64_t lastStay2 = 0;
 	bool prevEnableWarpState = true;
 	float lastX = 0, lastY = 0;
 	float fx = 0, fy = 0;
@@ -485,6 +743,13 @@ void WalkToWorker(uv_work_t* req)
 		//We are in battle status, quit and let script walk the last one
 		if (worldStatus == 10) {
 			data->m_reason = 2;
+			return;
+		}
+
+		//Position are syncronized by server
+		if (g_PlayerSyncPosition) {
+			g_PlayerSyncPosition = false;
+			data->m_reason = 5;
 			return;
 		}
 
@@ -573,7 +838,7 @@ void WalkToWorker(uv_work_t* req)
 				data->m_reason = -6;
 				return;
 			}
-			auto cur = _time64(NULL);
+			auto cur = uv_hrtime();
 			if(fx != lastX || fy != lastY)
 			{
 				lastX = fx;
@@ -581,12 +846,12 @@ void WalkToWorker(uv_work_t* req)
 				lastStay = cur;
 				lastStay2 = cur;
 			}
-			else if (lastStay2 > 0 && cur - lastStay2 > 30)
+			else if (lastStay2 > 0 && cur - lastStay2 > 30000 * NANO_SECONDS_TO_MS)
 			{
 				data->m_reason = 3;
 				return;
 			}
-			else if(lastStay > 0 && cur - lastStay > 5)
+			else if(lastStay > 0 && cur - lastStay > 5000 * NANO_SECONDS_TO_MS)
 			{
 				lastStay = cur;
 				if (!g_CGAInterface->FixMapWarpStuck(1)) {
@@ -610,8 +875,20 @@ void WalkToAfterWorker(uv_work_t* req, int status)
 
 	auto data = (WalkToWorkerData *)req->data;
 
+	auto reasonString = "Unknown exception.";
+
+	if (data->m_reason == 2)
+		reasonString = "Battle status.";
+	else if (data->m_reason == 3)
+		reasonString = "Stucked for over 30s.";
+	else if (data->m_reason == 4)
+		reasonString = "Unexcepted map changed.";
+	else if (data->m_reason == 5)
+		reasonString = "Position are syncronized by server.";
+
 	Handle<Value> argv[2];
-	argv[0] = Boolean::New(isolate, data->m_result);
+	Local<Value> nullValue = Nan::Null();
+	argv[0] = data->m_result ? nullValue : Nan::TypeError(reasonString);
 	argv[1] = Integer::New(isolate, data->m_reason);
 
 	Local<Function>::New(isolate, data->m_callback)->Call(isolate->GetCurrentContext()->Global(), 2, argv);
@@ -726,12 +1003,12 @@ public:
 		m_delay = ms;
 	}
 
-	bool m_result;
 	int m_reason;
+	bool m_result;
 	bool m_waitmapname;
 	bool m_waitmapindex;
 	bool m_waitxy;
-	__time64_t m_timestart;
+	uint64_t m_timestart;
 	int m_timeout, m_delay;
 	float m_fx, m_fy;
 	std::vector<std::string> m_mapnames;
@@ -748,7 +1025,7 @@ void WaitMoveWorker(uv_work_t* req)
 	std::string curmap;
 	int curmap_index1, curmap_index2, curmap_index3;
 
-	data->m_timestart = _time64(NULL);
+	data->m_timestart = uv_hrtime();
 
 	if(data->m_delay > 0)
 		Sleep(data->m_delay);
@@ -775,6 +1052,13 @@ void WaitMoveWorker(uv_work_t* req)
 
 		if (worldStatus == 10) {
 			data->m_reason = 2;
+			return;
+		}
+
+		//Position are syncronized by server
+		if (g_PlayerSyncPosition) {
+			g_PlayerSyncPosition = false;
+			data->m_reason = 5;
 			return;
 		}
 		
@@ -827,9 +1111,9 @@ void WaitMoveWorker(uv_work_t* req)
 			}
 		}
 
-		auto curtime = _time64(NULL);
+		auto curtime = uv_hrtime();
 
-		if (data->m_timeout > 0 && curtime > data->m_timestart + data->m_timeout) {
+		if (data->m_timeout > 0 && curtime > data->m_timestart + (data->m_timeout * NANO_SECONDS_TO_MS)) {
 			data->m_reason = 3;
 			return;
 		}
@@ -845,8 +1129,20 @@ void WaitMoveAfterWorker(uv_work_t* req, int status)
 
 	auto data = (WaitMoveWorkerData *)req->data;
 
+	auto reasonString = "Unknown exception.";
+
+	if (data->m_reason == 2)
+		reasonString = "Battle status.";
+	else if (data->m_reason == 3)
+		reasonString = "Stucked for over 30s.";
+	else if (data->m_reason == 4)
+		reasonString = "Unexcepted map changed.";
+	else if (data->m_reason == 5)
+		reasonString = "Position are syncronized by server.";
+
 	Handle<Value> argv[2];
-	argv[0] = Boolean::New(isolate, data->m_result);
+	Local<Value> nullValue = Nan::Null();
+	argv[0] = data->m_result ? nullValue : Nan::TypeError(reasonString);
 	argv[1] = Integer::New(isolate, data->m_reason);
 
 	Local<Function>::New(isolate, data->m_callback)->Call(isolate->GetCurrentContext()->Global(), 2, argv);
@@ -923,30 +1219,4 @@ void AsyncWaitMovement(const Nan::FunctionCallbackInfo<v8::Value>& info)
 		data->SetTimeout((int)v_timeout->IntegerValue());
 
 	uv_queue_work(uv_default_loop(), &data->m_worker, WaitMoveWorker, WaitMoveAfterWorker);
-}
-
-void GetTeamPlayerInfo(const Nan::FunctionCallbackInfo<v8::Value>& info)
-{
-	Isolate* isolate = info.GetIsolate();
-	HandleScope handle_scope(isolate);
-
-	CGA::cga_team_players_t plinfo;
-	if (!g_CGAInterface->GetTeamPlayerInfo(plinfo))
-	{
-		Nan::ThrowError("RPC Invocation failed.");
-		return;
-	}
-	
-	Local<Array> arr = Array::New(isolate);
-	for (size_t i = 0; i < plinfo.size(); ++i)
-	{
-		Local<Object> obj = Object::New(isolate);
-		obj->Set(String::NewFromUtf8(isolate, "unit_id"), Integer::New(isolate, plinfo[i].unit_id));
-		obj->Set(String::NewFromUtf8(isolate, "hp"), Integer::New(isolate, plinfo[i].hp));
-		obj->Set(String::NewFromUtf8(isolate, "mp"), Integer::New(isolate, plinfo[i].mp));
-		obj->Set(String::NewFromUtf8(isolate, "maxhp"), Integer::New(isolate, plinfo[i].maxhp));
-		arr->Set(i, obj);
-	}
-
-	info.GetReturnValue().Set(arr);
 }

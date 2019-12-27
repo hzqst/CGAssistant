@@ -141,10 +141,16 @@ void Init(v8::Local<v8::Object> exports) {
 		Nan::New<v8::FunctionTemplate>(GetMapName)->GetFunction());
 	exports->Set(Nan::New("GetMapUnits").ToLocalChecked(),
 		Nan::New<v8::FunctionTemplate>(GetMapUnits)->GetFunction());
+	exports->Set(Nan::New("GetMapCollisionTableRaw").ToLocalChecked(),
+		Nan::New<v8::FunctionTemplate>(GetMapCollisionTableRaw)->GetFunction());
 	exports->Set(Nan::New("GetMapCollisionTable").ToLocalChecked(),
 		Nan::New<v8::FunctionTemplate>(GetMapCollisionTable)->GetFunction());
 	exports->Set(Nan::New("GetMapObjectTable").ToLocalChecked(),
 		Nan::New<v8::FunctionTemplate>(GetMapObjectTable)->GetFunction());
+	exports->Set(Nan::New("GetMapTileTable").ToLocalChecked(),
+		Nan::New<v8::FunctionTemplate>(GetMapTileTable)->GetFunction());
+	exports->Set(Nan::New("AsyncWaitDownloadMap").ToLocalChecked(),
+		Nan::New<v8::FunctionTemplate>(AsyncWaitDownloadMap)->GetFunction());
 	exports->Set(Nan::New("WalkTo").ToLocalChecked(),
 		Nan::New<v8::FunctionTemplate>(WalkTo)->GetFunction());
 	exports->Set(Nan::New("TurnTo").ToLocalChecked(),
@@ -165,12 +171,18 @@ void Init(v8::Local<v8::Object> exports) {
 		Nan::New<v8::FunctionTemplate>(LogOut)->GetFunction());
 	exports->Set(Nan::New("DropPet").ToLocalChecked(),
 		Nan::New<v8::FunctionTemplate>(DropPet)->GetFunction());
+	exports->Set(Nan::New("ChangePetState").ToLocalChecked(),
+		Nan::New<v8::FunctionTemplate>(ChangePetState)->GetFunction());
 	exports->Set(Nan::New("DropItem").ToLocalChecked(),
 		Nan::New<v8::FunctionTemplate>(DropItem)->GetFunction());
 	exports->Set(Nan::New("UseItem").ToLocalChecked(),
 		Nan::New<v8::FunctionTemplate>(UseItem)->GetFunction());
 	exports->Set(Nan::New("MoveItem").ToLocalChecked(),
 		Nan::New<v8::FunctionTemplate>(MoveItem)->GetFunction());
+	exports->Set(Nan::New("MovePet").ToLocalChecked(),
+		Nan::New<v8::FunctionTemplate>(MovePet)->GetFunction());
+	exports->Set(Nan::New("MoveGold").ToLocalChecked(),
+		Nan::New<v8::FunctionTemplate>(MoveGold)->GetFunction());
 	exports->Set(Nan::New("AsyncWaitPlayerMenu").ToLocalChecked(),
 		Nan::New<v8::FunctionTemplate>(AsyncWaitPlayerMenu)->GetFunction());
 	exports->Set(Nan::New("AsyncWaitUnitMenu").ToLocalChecked(),
@@ -203,6 +215,10 @@ void Init(v8::Local<v8::Object> exports) {
 		Nan::New<v8::FunctionTemplate>(GetCraftInfo)->GetFunction());
 	exports->Set(Nan::New("GetCraftsInfo").ToLocalChecked(),
 		Nan::New<v8::FunctionTemplate>(GetCraftsInfo)->GetFunction());
+	exports->Set(Nan::New("GetCraftStatus").ToLocalChecked(),
+		Nan::New<v8::FunctionTemplate>(GetCraftStatus)->GetFunction());
+	exports->Set(Nan::New("GetImmediateDoneWorkState").ToLocalChecked(),
+		Nan::New<v8::FunctionTemplate>(GetImmediateDoneWorkState)->GetFunction());
 	exports->Set(Nan::New("AsyncWaitChatMsg").ToLocalChecked(),
 		Nan::New<v8::FunctionTemplate>(AsyncWaitChatMsg)->GetFunction());
 	exports->Set(Nan::New("DoRequest").ToLocalChecked(),
@@ -235,8 +251,10 @@ void Init(v8::Local<v8::Object> exports) {
 		Nan::New<v8::FunctionTemplate>(BattleNormalAttack)->GetFunction());
 	exports->Set(Nan::New("BattleSkillAttack").ToLocalChecked(),
 		Nan::New<v8::FunctionTemplate>(BattleSkillAttack)->GetFunction());
-	exports->Set(Nan::New("BattleDefense").ToLocalChecked(),
-		Nan::New<v8::FunctionTemplate>(BattleDefense)->GetFunction());
+	exports->Set(Nan::New("BattleRebirth").ToLocalChecked(),
+		Nan::New<v8::FunctionTemplate>(BattleRebirth)->GetFunction());
+	exports->Set(Nan::New("BattleGuard").ToLocalChecked(),
+		Nan::New<v8::FunctionTemplate>(BattleGuard)->GetFunction());
 	exports->Set(Nan::New("BattleEscape").ToLocalChecked(),
 		Nan::New<v8::FunctionTemplate>(BattleEscape)->GetFunction());
 	exports->Set(Nan::New("BattleExchangePosition").ToLocalChecked(),
@@ -247,6 +265,8 @@ void Init(v8::Local<v8::Object> exports) {
 		Nan::New<v8::FunctionTemplate>(BattleUseItem)->GetFunction());
 	exports->Set(Nan::New("BattlePetSkillAttack").ToLocalChecked(),
 		Nan::New<v8::FunctionTemplate>(BattlePetSkillAttack)->GetFunction());
+	exports->Set(Nan::New("BattleDoNothing").ToLocalChecked(),
+		Nan::New<v8::FunctionTemplate>(BattleDoNothing)->GetFunction());
 }
 
 NODE_MODULE(node_cga, Init)

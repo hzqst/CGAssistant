@@ -82,7 +82,9 @@ void WorkingResultAsyncCallBack(uv_async_t *handle)
 
 	auto data = (WorkingResultNotifyData *)handle->data;
 
-	Handle<Value> argv[1];
+	Handle<Value> argv[2];
+	Local<Value> nullValue = Nan::Null();
+	argv[0] = data->m_result ? nullValue : Nan::TypeError("Unknown exception.");
 	if (data->m_result)
 	{
 		Local<Object> obj = Object::New(isolate);
@@ -109,14 +111,10 @@ void WorkingResultAsyncCallBack(uv_async_t *handle)
 			obj->Set(String::NewFromUtf8(isolate, "imgid"), Integer::New(isolate, data->m_results.imgid));
 			break;
 		}
-		argv[0] = obj;
-	}
-	else
-	{
-		argv[0] = Nan::New(false);
+		argv[1] = obj;
 	}
 
-	Local<Function>::New(isolate, data->m_callback)->Call(isolate->GetCurrentContext()->Global(), 1, argv);
+	Local<Function>::New(isolate, data->m_callback)->Call(isolate->GetCurrentContext()->Global(), (data->m_result) ? 2 : 1, argv);
 
 	data->m_callback.Reset();
 
@@ -241,6 +239,36 @@ void StartWork(const Nan::FunctionCallbackInfo<v8::Value>& info)
 	}
 
 	info.GetReturnValue().Set(result);
+}
+
+void GetCraftStatus(const Nan::FunctionCallbackInfo<v8::Value>& info)
+{
+	Isolate* isolate = info.GetIsolate();
+	HandleScope handle_scope(isolate);
+
+	int status = 0;
+	if (!g_CGAInterface->GetCraftStatus(status))
+	{
+		Nan::ThrowError("RPC Invocation failed.");
+		return;
+	}
+
+	info.GetReturnValue().Set(status);
+}
+
+void GetImmediateDoneWorkState(const Nan::FunctionCallbackInfo<v8::Value>& info)
+{
+	Isolate* isolate = info.GetIsolate();
+	HandleScope handle_scope(isolate);
+
+	int state = 0;
+	if (!g_CGAInterface->GetImmediateDoneWorkState(state))
+	{
+		Nan::ThrowError("RPC Invocation failed.");
+		return;
+	}
+
+	info.GetReturnValue().Set(state);
 }
 
 void CraftItem(const Nan::FunctionCallbackInfo<v8::Value>& info)

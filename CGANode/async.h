@@ -20,4 +20,7 @@ public:
 
 void FreeUVHandleCallBack(uv_handle_t *handle);
 
-#define CGA_NOTIFY_MAX_CACHE_TIME 3000
+//3000ms
+#define NANO_SECONDS_TO_MS (1000000ull)
+
+#define CGA_NOTIFY_MAX_CACHE_TIME (3000ull * NANO_SECONDS_TO_MS)

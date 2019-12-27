@@ -140,6 +140,34 @@ boost::shared_mutex g_UnitMenu_Lock;
 std::vector<UnitMenuNotifyData *> g_UnitMenu_Asyncs;
 std::vector<UnitMenuCacheData *> g_UnitMenu_Caches;
 
+void ChangePetState(const Nan::FunctionCallbackInfo<v8::Value>& info)
+{
+	Isolate* isolate = info.GetIsolate();
+	HandleScope handle_scope(isolate);
+
+	if (info.Length() < 1) {
+		Nan::ThrowTypeError("Arg[0] must be petpos.");
+		return;
+	}
+
+	if (info.Length() < 2) {
+		Nan::ThrowTypeError("Arg[1] must be state.");
+		return;
+	}
+
+	int petpos = (int)info[0]->IntegerValue();
+	int state = (int)info[1]->IntegerValue();
+
+	bool result = false;
+	if (!g_CGAInterface->ChangePetState(petpos, state, result))
+	{
+		Nan::ThrowError("RPC Invocation failed.");
+		return;
+	}
+
+	info.GetReturnValue().Set(result);
+}
+
 void DropPet(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
 	Isolate* isolate = info.GetIsolate();
@@ -227,17 +255,13 @@ void TradeStateAsyncCallBack(uv_async_t *handle)
 
 	auto data = (TradeStateNotifyData *)handle->data;
 
-	Handle<Value> argv[1];
+	Handle<Value> argv[2];
+	Local<Value> nullValue = Nan::Null();
+	argv[0] = data->m_result ? nullValue : Nan::TypeError("Unknown exception.");
 	if (data->m_result)
-	{
-		argv[0] = Integer::New(isolate, data->m_info);
-	}
-	else
-	{
-		argv[0] = Nan::New(false);
-	}
+		argv[1] = Integer::New(isolate, data->m_info);
 
-	Local<Function>::New(isolate, data->m_callback)->Call(isolate->GetCurrentContext()->Global(), 1, argv);
+	Local<Function>::New(isolate, data->m_callback)->Call(isolate->GetCurrentContext()->Global(), (data->m_result) ? 2 : 1, argv);
 
 	data->m_callback.Reset();
 
@@ -330,18 +354,16 @@ void TradeDialogAsyncCallBack(uv_async_t *handle)
 
 	auto data = (TradeDialogNotifyData *)handle->data;
 
-	Handle<Value> argv[2];
+	Handle<Value> argv[3];
+	Local<Value> nullValue = Nan::Null();
+	argv[0] = data->m_result ? nullValue : Nan::TypeError("Unknown exception.");
 	if (data->m_result)
 	{
-		argv[0] = Nan::New(data->m_info.name).ToLocalChecked();
-		argv[1] = Integer::New(isolate, data->m_info.level);
-		Local<Function>::New(isolate, data->m_callback)->Call(isolate->GetCurrentContext()->Global(), 2, argv);
+		argv[1] = Nan::New(data->m_info.name).ToLocalChecked();
+		argv[2] = Integer::New(isolate, data->m_info.level);
 	}
-	else
-	{
-		argv[0] = Nan::New(false);
-		Local<Function>::New(isolate, data->m_callback)->Call(isolate->GetCurrentContext()->Global(), 1, argv);
-	}
+
+	Local<Function>::New(isolate, data->m_callback)->Call(isolate->GetCurrentContext()->Global(), (data->m_result) ? 3 : 1, argv);
 
 	data->m_callback.Reset();
 
@@ -434,12 +456,14 @@ void TradeStuffsAsyncCallBack(uv_async_t *handle)
 
 	auto data = (TradeStuffsNotifyData *)handle->data;
 
-	Handle<Value> argv[2];
 	if (data->m_result)
 	{
 		if(data->m_info.type == TRADE_STUFFS_ITEM)
 		{
-			argv[0] = Nan::New(TRADE_STUFFS_ITEM);
+			Handle<Value> argv[3];
+			Local<Value> nullValue = Nan::Null();
+			argv[0] = nullValue;
+			argv[1] = Nan::New(TRADE_STUFFS_ITEM);
 			Local<Array> arr = Array::New(isolate);
 			for (size_t i = 0; i < data->m_info.items.size(); ++i)
 			{
@@ -453,12 +477,15 @@ void TradeStuffsAsyncCallBack(uv_async_t *handle)
 				obj->Set(String::NewFromUtf8(isolate, "type"), Integer::New(isolate, data->m_info.items[i].type));
 				arr->Set(i, obj);
 			}
-			argv[1] = arr;
-			Local<Function>::New(isolate, data->m_callback)->Call(isolate->GetCurrentContext()->Global(), 2, argv);
+			argv[2] = arr;
+			Local<Function>::New(isolate, data->m_callback)->Call(isolate->GetCurrentContext()->Global(), 3, argv);
 		}
 		else if(data->m_info.type == TRADE_STUFFS_PET)
 		{
-			argv[0] = Nan::New(TRADE_STUFFS_PET);
+			Handle<Value> argv[2];
+			Local<Value> nullValue = Nan::Null();
+			argv[0] = nullValue;
+			argv[1] = Nan::New(TRADE_STUFFS_PET);
 			Local<Object> obj = Object::New(isolate);
 			obj->Set(String::NewFromUtf8(isolate, "index"), Integer::New(isolate, data->m_info.pet.index));
 			obj->Set(String::NewFromUtf8(isolate, "name"), Nan::New(data->m_info.pet.name).ToLocalChecked());
@@ -500,12 +527,16 @@ void TradeStuffsAsyncCallBack(uv_async_t *handle)
 			
 			obj->Set(String::NewFromUtf8(isolate, "detail"), objd);
 
-			argv[1] = obj;
-			Local<Function>::New(isolate, data->m_callback)->Call(isolate->GetCurrentContext()->Global(), 2, argv);
+			argv[2] = obj;
+
+			Local<Function>::New(isolate, data->m_callback)->Call(isolate->GetCurrentContext()->Global(), 3, argv);
 		}
 		else if (data->m_info.type == TRADE_STUFFS_PETSKILL) 
 		{
-			argv[0] = Nan::New(TRADE_STUFFS_PETSKILL);
+			Handle<Value> argv[3];
+			Local<Value> nullValue = Nan::Null();
+			argv[0] = nullValue;
+			argv[1] = Nan::New(TRADE_STUFFS_PETSKILL);
 
 			Local<Object> obj = Object::New(isolate);
 			obj->Set(String::NewFromUtf8(isolate, "index"), Integer::New(isolate, data->m_info.petskills.index));
@@ -515,26 +546,32 @@ void TradeStuffsAsyncCallBack(uv_async_t *handle)
 				arr->Set(i, Nan::New(data->m_info.petskills.skills[i]).ToLocalChecked());
 			}
 			obj->Set(String::NewFromUtf8(isolate, "skills"), arr);
+			argv[2] = obj;
 
-			argv[1] = obj;
-
-			Local<Function>::New(isolate, data->m_callback)->Call(isolate->GetCurrentContext()->Global(), 2, argv);
+			Local<Function>::New(isolate, data->m_callback)->Call(isolate->GetCurrentContext()->Global(), 3, argv);
 		}
 		else if(data->m_info.type == TRADE_STUFFS_GOLD)
 		{
-			argv[0] = Nan::New(TRADE_STUFFS_GOLD);
-			argv[1] = Integer::New(isolate, data->m_info.gold);
-			Local<Function>::New(isolate, data->m_callback)->Call(isolate->GetCurrentContext()->Global(), 2, argv);
+			Handle<Value> argv[3];
+			Local<Value> nullValue = Nan::Null();
+
+			argv[0] = nullValue;
+			argv[1] = Nan::New(TRADE_STUFFS_GOLD);
+			argv[2] = Integer::New(isolate, data->m_info.gold);
+			Local<Function>::New(isolate, data->m_callback)->Call(isolate->GetCurrentContext()->Global(), 3, argv);
 		} else {
-			argv[0] = Nan::New(false);
+			Handle<Value> argv[1];
+			argv[0] = Nan::TypeError("Unknown exception.");
 			Local<Function>::New(isolate, data->m_callback)->Call(isolate->GetCurrentContext()->Global(), 1, argv);
 		}
 	}
 	else
 	{
-		argv[0] = Nan::New(false);
-		Local<Function>::New(isolate, data->m_callback)->Call(isolate->GetCurrentContext()->Global(), 2, argv);
+		Handle<Value> argv[1];
+		argv[0] = Nan::TypeError("Unknown exception.");
+		Local<Function>::New(isolate, data->m_callback)->Call(isolate->GetCurrentContext()->Global(), 1, argv);
 	}
+
 	data->m_callback.Reset();
 
 	uv_timer_stop(data->m_timer);
@@ -626,7 +663,9 @@ void PlayerMenuAsyncCallBack(uv_async_t *handle)
 
 	auto data = (PlayerMenuNotifyData *)handle->data;
 
-	Handle<Value> argv[1];
+	Handle<Value> argv[2];
+	Local<Value> nullValue = Nan::Null();
+	argv[0] = data->m_result ? nullValue : Nan::TypeError("Unknown exception.");
 	if (data->m_result)
 	{
 		Local<Array> arr = Array::New(isolate);
@@ -638,14 +677,10 @@ void PlayerMenuAsyncCallBack(uv_async_t *handle)
 			obj->Set(String::NewFromUtf8(isolate, "index"), Integer::New(isolate, data->m_players[i].index));
 			arr->Set(i, obj);
 		}
-		argv[0] = arr;
-	}
-	else
-	{
-		argv[0] = Nan::New(false);
+		argv[1] = arr;
 	}
 
-	Local<Function>::New(isolate, data->m_callback)->Call(isolate->GetCurrentContext()->Global(), 1, argv);
+	Local<Function>::New(isolate, data->m_callback)->Call(isolate->GetCurrentContext()->Global(), (data->m_result) ? 2 : 1, argv);
 
 	data->m_callback.Reset();
 
@@ -738,7 +773,9 @@ void UnitMenuAsyncCallBack(uv_async_t *handle)
 
 	auto data = (UnitMenuNotifyData *)handle->data;
 
-	Handle<Value> argv[1];
+	Handle<Value> argv[2];
+	Local<Value> nullValue = Nan::Null();
+	argv[0] = data->m_result ? nullValue : Nan::TypeError("Unknown exception.");
 	if (data->m_result)
 	{
 		Local<Array> arr = Array::New(isolate);
@@ -756,14 +793,10 @@ void UnitMenuAsyncCallBack(uv_async_t *handle)
 			obj->Set(String::NewFromUtf8(isolate, "index"), Integer::New(isolate, data->m_units[i].index));
 			arr->Set(i, obj);
 		}
-		argv[0] = arr;
-	}
-	else
-	{
-		argv[0] = Nan::New(false);
+		argv[1] = arr;
 	}
 
-	Local<Function>::New(isolate, data->m_callback)->Call(isolate->GetCurrentContext()->Global(), 1, argv);
+	Local<Function>::New(isolate, data->m_callback)->Call(isolate->GetCurrentContext()->Global(), (data->m_result) ? 2 : 1, argv);
 
 	data->m_callback.Reset();
 
@@ -836,17 +869,17 @@ void MoveItem(const Nan::FunctionCallbackInfo<v8::Value>& info)
 	Isolate* isolate = info.GetIsolate();
 	HandleScope handle_scope(isolate);
 
-	if (info.Length() < 1) {
-		Nan::ThrowTypeError("Arg[0] must be itempos.");
+	if (info.Length() < 1 || !info[0]->IsInt32()) {
+		Nan::ThrowTypeError("Arg[0] must be srcpos.");
 		return;
 	}
 	
-	if (info.Length() < 2) {
+	if (info.Length() < 2 || !info[1]->IsInt32()) {
 		Nan::ThrowTypeError("Arg[1] must be dstpos.");
 		return;
 	}
 	
-	if (info.Length() < 3) {
+	if (info.Length() < 3 || !info[2]->IsInt32()) {
 		Nan::ThrowTypeError("Arg[2] must be count.");
 		return;
 	}
@@ -857,6 +890,60 @@ void MoveItem(const Nan::FunctionCallbackInfo<v8::Value>& info)
 	
 	bool bResult = false;
 	if (!g_CGAInterface->MoveItem(itempos, dstpos, count, bResult))
+	{
+		Nan::ThrowError("RPC Invocation failed.");
+		return;
+	}
+	info.GetReturnValue().Set(bResult);
+}
+
+void MovePet(const Nan::FunctionCallbackInfo<v8::Value>& info)
+{
+	Isolate* isolate = info.GetIsolate();
+	HandleScope handle_scope(isolate);
+
+	if (info.Length() < 1 || !info[0]->IsInt32()) {
+		Nan::ThrowTypeError("Arg[0] must be srcpos.");
+		return;
+	}
+
+	if (info.Length() < 2 || !info[1]->IsInt32()) {
+		Nan::ThrowTypeError("Arg[1] must be dstpos.");
+		return;
+	}
+
+	int srcpos = (int)info[0]->IntegerValue();
+	int dstpos = (int)info[1]->IntegerValue();
+
+	bool bResult = false;
+	if (!g_CGAInterface->MovePet(srcpos, dstpos, bResult))
+	{
+		Nan::ThrowError("RPC Invocation failed.");
+		return;
+	}
+	info.GetReturnValue().Set(bResult);
+}
+
+void MoveGold(const Nan::FunctionCallbackInfo<v8::Value>& info)
+{
+	Isolate* isolate = info.GetIsolate();
+	HandleScope handle_scope(isolate);
+
+	if (info.Length() < 1 || !info[0]->IsInt32()) {
+		Nan::ThrowTypeError("Arg[0] must be gold.");
+		return;
+	}
+
+	if (info.Length() < 2 || !info[1]->IsInt32()) {
+		Nan::ThrowTypeError("Arg[1] must be opt.");
+		return;
+	}
+
+	int gold = (int)info[0]->IntegerValue();
+	int opt = (int)info[1]->IntegerValue();
+
+	bool bResult = false;
+	if (!g_CGAInterface->MoveGold(gold, opt, bResult))
 	{
 		Nan::ThrowError("RPC Invocation failed.");
 		return;

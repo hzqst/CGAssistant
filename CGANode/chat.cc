@@ -7,6 +7,8 @@ using namespace v8;
 
 extern CGA::CGAInterface *g_CGAInterface;
 
+extern bool g_PlayerSyncPosition;
+
 #include "async.h"
 
 void ChatMsgAsyncCallBack(uv_async_t *handle);
@@ -74,6 +76,11 @@ void ChatMsgNotify(CGA::cga_chat_msg_t msg)
 {
 	boost::unique_lock<boost::shared_mutex> lock(g_ChatMsg_Lock);
 	ChatMsgDoAsyncCall(msg);
+
+	if (msg.unitid == -1 && msg.msg.find("\xe9\xad\x94\xe6\x97\x8f\xe7\x9a\x84\xe6\xb0\x94\xe6\x81\xaf") != std::string::npos)
+	{
+		g_PlayerSyncPosition = true;
+	}
 }
 
 void ChatMsgAsyncCallBack(uv_async_t *handle)
@@ -83,7 +90,9 @@ void ChatMsgAsyncCallBack(uv_async_t *handle)
 
 	auto data = (ChatMsgNotifyData *)handle->data;
 
-	Handle<Value> argv[1];
+	Local<Value> nullValue = Nan::Null();
+	Handle<Value> argv[2];
+	argv[0] = data->m_result ? nullValue : Nan::TypeError("Unknown exception.");
 	if (data->m_result)
 	{
 		Local<Object> obj = Object::New(isolate);
@@ -91,14 +100,10 @@ void ChatMsgAsyncCallBack(uv_async_t *handle)
 		obj->Set(String::NewFromUtf8(isolate, "msg"), Nan::New(data->m_msg.msg).ToLocalChecked());
 		obj->Set(String::NewFromUtf8(isolate, "color"), Integer::New(isolate, data->m_msg.color));
 		obj->Set(String::NewFromUtf8(isolate, "size"), Integer::New(isolate, data->m_msg.size));
-		argv[0] = obj;
-	}
-	else
-	{
-		argv[0] = Nan::New(false);
+		argv[1] = obj;
 	}
 
-	Local<Function>::New(isolate, data->m_callback)->Call(isolate->GetCurrentContext()->Global(), 1, argv);
+	Local<Function>::New(isolate, data->m_callback)->Call(isolate->GetCurrentContext()->Global(), (data->m_result) ? 2 : 1, argv);
 
 	data->m_callback.Reset();
 
