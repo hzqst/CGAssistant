@@ -1,4 +1,5 @@
 #include <Windows.h>
+#include <stdlib.h>
 #include "gameservice.h"
 
 DWORD WINAPI CGAServerThread(LPVOID);
@@ -81,8 +82,10 @@ LRESULT CALLBACK NewWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
 		return g_CGAService.WM_BattleNormalAttack(wParam) ? 1 : 0;
 	case WM_CGA_BATTLE_SKILLATTACK:
 		return g_CGAService.WM_BattleSkillAttack((wParam & 0xFF), (wParam >> 8), lParam) ? 1 : 0;
-	case WM_CGA_BATTLE_DEFENSE:
-		return g_CGAService.WM_BattleDefense() ? 1 : 0;
+	case WM_CGA_BATTLE_GUARD:
+		return g_CGAService.WM_BattleGuard() ? 1 : 0;
+	case WM_CGA_BATTLE_REBIRTH:
+		return g_CGAService.WM_BattleRebirth() ? 1 : 0;
 	case WM_CGA_BATTLE_ESCAPE:
 		return g_CGAService.WM_BattleEscape() ? 1 : 0;
 	case WM_CGA_BATTLE_EXCHANGE_POSITION:
@@ -93,14 +96,22 @@ LRESULT CALLBACK NewWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
 		return g_CGAService.WM_BattleUseItem(wParam, lParam) ? 1 : 0;
 	case WM_CGA_BATTLE_PETSKILLATTACK:
 		return g_CGAService.WM_BattlePetSkillAttack(wParam, lParam) ? 1 : 0;
+	case WM_CGA_BATTLE_DONOTHING:
+		return g_CGAService.WM_BattleDoNothing() ? 1 : 0;
 	case WM_CGA_DROP_ITEM:
 		return g_CGAService.WM_DropItem(wParam) ? 1 : 0;
 	case WM_CGA_DROP_PET:
 		return g_CGAService.WM_DropPet(wParam) ? 1 : 0;
+	case WM_CGA_CHANGE_PET_STATE:
+		return g_CGAService.WM_ChangePetState(wParam, lParam) ? 1 : 0;
 	case WM_CGA_USE_ITEM:
 		return g_CGAService.WM_UseItem(wParam) ? 1 : 0;
 	case WM_CGA_MOVE_ITEM:
-		return g_CGAService.WM_MoveItem((CGA::cga_move_item_t *)wParam) ? 1 : 0;
+		return g_CGAService.WM_MoveItem((CGA::move_xxx_t *)wParam) ? 1 : 0;
+	case WM_CGA_MOVE_PET:
+		return g_CGAService.WM_MovePet((CGA::move_xxx_t *)wParam) ? 1 : 0;
+	case WM_CGA_MOVE_GOLD:
+		return g_CGAService.WM_MoveGold(wParam, lParam) ? 1 : 0;
 	case WM_CGA_LOG_BACK:
 		g_CGAService.WM_LogBack();
 		return 1;
@@ -208,11 +219,78 @@ LRESULT CALLBACK NewWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
 	case WM_CGA_REQUEST_DOWNLOAD_MAP:
 		g_CGAService.WM_RequestDownloadMap((int)wParam & 0xffff, (int)lParam & 0xffff, (int)(wParam >> 16) & 0xffff, (int)(lParam >> 16) & 0xffff);
 		return 1;
+	case WM_CGA_GET_COLLISION_TABLE_RAW:
+		g_CGAService.WM_GetMapCollisionTableRaw(wParam ? true : false, (CGA::cga_map_cells_t *)lParam);
+		return 1;
 	case WM_CGA_GET_COLLISION_TABLE:
 		g_CGAService.WM_GetMapCollisionTable(wParam ? true : false, (CGA::cga_map_cells_t *)lParam);
 		return 1;
 	case WM_CGA_GET_OBJECT_TABLE:
 		g_CGAService.WM_GetMapObjectTable(wParam ? true : false, (CGA::cga_map_cells_t *)lParam);
+		return 1;
+	case WM_CGA_GET_TILE_TABLE:
+		g_CGAService.WM_GetMapTileTable(wParam ? true : false, (CGA::cga_map_cells_t *)lParam);
+		return 1;
+	case WM_KEYDOWN:
+		switch (wParam)
+		{
+		case VK_F1:
+			g_CGAService.WM_LogBack();
+			return 1;
+		case VK_F2:
+			g_CGAService.WM_LogOut();
+			return 1;
+		case VK_F3:
+			g_CGAService.WM_ForceMove(g_CGAService.GetMouseOrientation(), true);
+			return 1;
+		case VK_F4:
+			g_CGAService.AddAllTradeItems();
+			return 1;
+		}
+	}
+
+	return CallWindowProcA(g_OldProc, hWnd, message, wParam, lParam);
+}
+
+LRESULT CALLBACK NewWndProcPOLCN(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
+{
+	switch (message)
+	{
+	case WM_CLOSE:
+	{
+		if (g_hQuitEvent)
+			SetEvent(g_hQuitEvent);
+		if (g_hServreThread)
+		{
+			WaitForSingleObject(g_hServreThread, INFINITE);
+			CloseHandle(g_hServreThread);
+			g_hServreThread = NULL;
+		}
+		g_CGAService.Uninitialize();
+		if (g_hDataLock)
+		{
+			g_hDataLock = NULL;
+			CloseHandle(g_hDataLock);
+		}
+		if (g_hFileMapping)
+		{
+			CloseHandle(g_hFileMapping);
+			g_hFileMapping = NULL;
+		}
+		if (g_hQuitEvent)
+		{
+			CloseHandle(g_hQuitEvent);
+			g_hQuitEvent = NULL;
+		}
+		if (g_hPortMutex)
+		{
+			CloseHandle(g_hPortMutex);
+			g_hPortMutex = NULL;
+		}
+		break;
+	}
+	case WM_CGA_LOGIN_GAME_SERVER:
+		g_CGAService.WM_SendClientLogin((const char *)wParam, (const char *)lParam, 4);
 		return 1;
 	}
 
@@ -228,10 +306,13 @@ void InitializeHooks(int ThreadId, HWND hWnd, CGA::game_type type)
 
 	g_CGAService.Initialize(type);
 
-	g_OldProc = (WNDPROC)GetWindowLongPtrA(hWnd, GWL_WNDPROC);
-	SetWindowLongPtrA(hWnd, GWL_WNDPROC, (LONG_PTR)NewWndProc);
+	if (hWnd)
+	{
+		g_OldProc = (WNDPROC)GetWindowLongPtrA(hWnd, GWL_WNDPROC);
+		SetWindowLongPtrA(hWnd, GWL_WNDPROC, (LONG_PTR)(type == CGA::game_type::polcn ? NewWndProcPOLCN : NewWndProc));
 
-	g_hServreThread = CreateThread(NULL, 0, CGAServerThread, NULL, 0, NULL);
+		g_hServreThread = CreateThread(NULL, 0, CGAServerThread, NULL, 0, NULL);
+	}
 }
 
 extern "C"
@@ -242,19 +323,23 @@ extern "C"
 		if (Code == HC_ACTION && pMsg->hwnd != NULL && !g_MainHwnd)
 		{
 			WCHAR szClass[256];
-			if (GetClassNameW(pMsg->hwnd, szClass, 256) && !wcscmp(szClass, L"魔力宝贝"))
+			if (GetClassNameW(pMsg->hwnd, szClass, 256))
 			{
 				WCHAR szModulePath[MAX_PATH];
 				GetModuleFileNameW(NULL, szModulePath, MAX_PATH);
 				LPCWSTR pModuleName = ExtractFileName(szModulePath);
-				if (!_wcsicmp(pModuleName, L"cg_se_3000.exe"))
+				if (!_wcsicmp(pModuleName, L"cg_se_3000.exe") && !wcscmp(szClass, L"魔力宝贝"))
 				{
 					InitializeHooks(GetCurrentThreadId(), pMsg->hwnd, CGA::cg_se_3000);
 				}
-				else if (!_wcsicmp(pModuleName, L"cg_item_6000.exe"))
+				else if (!_wcsicmp(pModuleName, L"cg_item_6000.exe") && !wcscmp(szClass, L"魔力宝贝"))
 				{
 					InitializeHooks(GetCurrentThreadId(), pMsg->hwnd, CGA::cg_item_6000);
 				}
+				else if (!_wcsicmp(pModuleName, L"POLCN_Launcher.exe"))
+				{
+					InitializeHooks(GetCurrentThreadId(), pMsg->hwnd, CGA::polcn);
+				}				
 			}
 		}
 		return CallNextHookEx(NULL, Code, wParam, lParam);
@@ -265,7 +350,22 @@ int WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpReserved)
 {
 	if (fdwReason == DLL_PROCESS_ATTACH)
 	{
+		WCHAR szModulePath[MAX_PATH];
+		GetModuleFileNameW(NULL, szModulePath, MAX_PATH);
+		LPCWSTR pModuleName = ExtractFileName(szModulePath);
 
+		if (!_wcsicmp(pModuleName, L"POLCN_Launcher.exe"))
+		{
+			auto hWnd = FindWindowA(NULL, "“易玩通”娱乐平台");
+			if (hWnd)
+			{
+				DWORD pid;
+				if (GetWindowThreadProcessId(hWnd, &pid) && pid == GetCurrentProcessId())
+					return TRUE;
+			}
+
+			InitializeHooks(GetCurrentThreadId(), NULL, CGA::polcn);
+		}
 	}
 	return TRUE;
 }
