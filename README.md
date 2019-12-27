@@ -1,19 +1,21 @@
 # CGAssistant
-CrossGate Cheating
+CGAssistant is a helper for you to play CrossGate with highly automated game experience.
 
-(only cg_item_6000 for now)
+Only cg_item_6000 supported for now
 
-qq group: 300303705
+QQ Group: 300303705
 
-get full binary from https://github.com/hzqst/CGAssistantJS
+The latest package can be cloned or downloaded from repo https://github.com/hzqst/CGAssistantJS
 
 ## Build
 
 ### Requirement
 
-VS2017
+Visual Studio 2017 (or higher)
 
-QT 5.12 for msvc2017
+QT 5.12 for msvc2017 (or higher)
+
+Boost 1.69 (from "git submodules" command)
 
 ### Snapshots
 
