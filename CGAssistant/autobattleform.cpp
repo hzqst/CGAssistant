@@ -14,7 +14,7 @@ QString s_BattlePetActionString[BattlePetAction_Max];
 
 Q_DECLARE_METATYPE(CBattleSettingList)
 
-AutoBattleForm::AutoBattleForm(CBattleWorker *worker, QWidget *parent) :
+AutoBattleForm::AutoBattleForm(CBattleWorker *worker, CPlayerWorker *pworker, QWidget *parent) :
     QWidget(parent), m_worker(worker),
     ui(new Ui::AutoBattleForm)
 {
@@ -60,12 +60,14 @@ AutoBattleForm::AutoBattleForm(CBattleWorker *worker, QWidget *parent) :
 
     s_BattlePlayerActionString[BattlePlayerAction_Ignore] = tr("Ignore");
     s_BattlePlayerActionString[BattlePlayerAction_Attack] = tr("Attack");
-    s_BattlePlayerActionString[BattlePlayerAction_Defense] = tr("Defense");
+    s_BattlePlayerActionString[BattlePlayerAction_Guard] = tr("Guard");
     s_BattlePlayerActionString[BattlePlayerAction_Escape] = tr("Escape");
     s_BattlePlayerActionString[BattlePlayerAction_ExchangePosition] = tr("Position");
     s_BattlePlayerActionString[BattlePlayerAction_ChangePet] = tr("Pet");
     s_BattlePlayerActionString[BattlePlayerAction_UseItem] = tr("UseItem");
     s_BattlePlayerActionString[BattlePlayerAction_LogBack] = tr("LogBack");
+    s_BattlePlayerActionString[BattlePlayerAction_Rebirth] = tr("Rebirth");
+    s_BattlePlayerActionString[BattlePlayerAction_DoNothing] = tr("Do Nothing");
 
     s_BattleTargetString[BattleTarget_Enemy] = tr("Enemy");
     s_BattleTargetString[BattleTarget_Teammate] = tr("Teammate");
@@ -90,6 +92,7 @@ AutoBattleForm::AutoBattleForm(CBattleWorker *worker, QWidget *parent) :
     s_BattleTargetSelectString[BattleTarget_Select_MultiMagic] = tr("Multi Magic");
 
     s_BattlePetActionString[BattlePetAction_Ignore] = tr("Ignore");
+    s_BattlePetActionString[BattlePetAction_DoNothing] = tr("Do Nothing");
 
     for(int i = 0;i < BattleCond_Type_Max; ++i){
         ui->comboBox_condition_type->addItem(s_BattleCondType[i]);
@@ -99,14 +102,26 @@ AutoBattleForm::AutoBattleForm(CBattleWorker *worker, QWidget *parent) :
     for(int i = 0;i < BattlePlayerAction_Max; ++i)
         ui->comboBox_playerAction->addItem(s_BattlePlayerActionString[i]);
 
+    for(int i = 0;i < BattleTarget_Max; ++i)
+        ui->comboBox_playerTarget->addItem(s_BattleTargetString[i]);
+
     for(int i = 0;i < BattlePetAction_Max; ++i)
         ui->comboBox_petAction->addItem(s_BattlePetActionString[i]);
 
     for(int i = 0;i < BattleTarget_Max; ++i)
-        ui->comboBox_playerTarget->addItem(s_BattleTargetString[i]);
+        ui->comboBox_petTarget->addItem(s_BattleTargetString[i]);
+
+   /* for(int i = 0;i < BattlePetAction_Max; ++i)
+        ui->comboBox_petAction_2->addItem(s_BattlePetActionString[i]);
 
     for(int i = 0;i < BattleTarget_Max; ++i)
-        ui->comboBox_petTarget->addItem(s_BattleTargetString[i]);
+        ui->comboBox_petTarget_2->addItem(s_BattleTargetString[i]);*/
+
+    ui->label_andPet_2->hide();
+    ui->label_playerTarget_3->hide();
+    ui->comboBox_petAction_2->hide();
+    ui->comboBox_petTarget_2->hide();
+    ui->comboBox_petTargetSelect_2->hide();
 
     m_model = new CBattleSettingModel(ui->tableView_settings);
     ui->tableView_settings->setModel(m_model);
@@ -116,6 +131,18 @@ AutoBattleForm::AutoBattleForm(CBattleWorker *worker, QWidget *parent) :
     ui->tableView_settings->horizontalHeader()->setSectionResizeMode(3, QHeaderView::ResizeMode::Stretch);
     ui->tableView_settings->horizontalHeader()->setSectionResizeMode(4, QHeaderView::ResizeMode::Stretch);
     ui->tableView_settings->horizontalHeader()->setSectionResizeMode(5, QHeaderView::ResizeMode::Stretch);
+
+    connect(ui->checkBox_autoBattle, SIGNAL(stateChanged(int)), m_worker, SLOT(OnSetAutoBattle(int)), Qt::ConnectionType::QueuedConnection);
+    connect(ui->checkBox_highSpeed, SIGNAL(stateChanged(int)), m_worker, SLOT(OnSetHighSpeed(int)), Qt::ConnectionType::QueuedConnection);
+    connect(ui->checkBox_firstRoundNoDelay, SIGNAL(stateChanged(int)), m_worker, SLOT(OnSetFRND(int)), Qt::ConnectionType::QueuedConnection);
+    connect(ui->checkBox_levelOneProtect, SIGNAL(stateChanged(int)), m_worker, SLOT(OnSetLv1Protect(int)), Qt::ConnectionType::QueuedConnection);
+    connect(ui->checkBox_lockCountdown, SIGNAL(stateChanged(int)), m_worker, SLOT(OnSetLockCountdown(int)), Qt::ConnectionType::QueuedConnection);
+    connect(ui->checkBox_showHPMP, SIGNAL(stateChanged(int)), pworker, SLOT(OnSetShowHPMP(int)), Qt::ConnectionType::QueuedConnection);
+    connect(ui->checkBox_petDoubleAction, SIGNAL(stateChanged(int)), m_worker, SLOT(OnSetPetDoubleAction(int)), Qt::ConnectionType::QueuedConnection);
+    connect(ui->checkBox_playerForceAction, SIGNAL(stateChanged(int)), m_worker, SLOT(OnSetPlayerForceAction(int)), Qt::ConnectionType::QueuedConnection);
+    connect(ui->horizontalSlider_delayFrom, SIGNAL(valueChanged(int)), m_worker, SLOT(OnSetDelayFrom(int)), Qt::ConnectionType::QueuedConnection);
+    connect(ui->horizontalSlider_delayTo, SIGNAL(valueChanged(int)), m_worker, SLOT(OnSetDelayTo(int)), Qt::ConnectionType::QueuedConnection);
+    connect(m_model, SIGNAL(syncList(CBattleSettingList)), m_worker, SLOT(OnSyncList(CBattleSettingList)), Qt::ConnectionType::QueuedConnection);
 }
 
 AutoBattleForm::~AutoBattleForm()
@@ -132,16 +159,8 @@ void AutoBattleForm::SyncAutoBattleWorker()
     m_worker->m_bLockCountdown = ui->checkBox_lockCountdown->isChecked();
     m_worker->m_iDelayFrom = ui->horizontalSlider_delayFrom->value();
     m_worker->m_iDelayTo = ui->horizontalSlider_delayTo->value();
-
-    connect(ui->checkBox_autoBattle, SIGNAL(stateChanged(int)), m_worker, SLOT(OnSetAutoBattle(int)), Qt::ConnectionType::QueuedConnection);
-    connect(ui->checkBox_highSpeed, SIGNAL(stateChanged(int)), m_worker, SLOT(OnSetHighSpeed(int)), Qt::ConnectionType::QueuedConnection);
-    connect(ui->checkBox_firstRoundNoDelay, SIGNAL(stateChanged(int)), m_worker, SLOT(OnSetFRND(int)), Qt::ConnectionType::QueuedConnection);
-    connect(ui->checkBox_levelOneProtect, SIGNAL(stateChanged(int)), m_worker, SLOT(OnSetLv1Protect(int)), Qt::ConnectionType::QueuedConnection);
-    connect(ui->checkBox_lockCountdown, SIGNAL(stateChanged(int)), m_worker, SLOT(OnSetLockCountdown(int)), Qt::ConnectionType::QueuedConnection);
-    connect(ui->checkBox_showHPMP, SIGNAL(stateChanged(int)), m_worker, SLOT(OnSetShowHPMP(int)), Qt::ConnectionType::QueuedConnection);
-    connect(ui->horizontalSlider_delayFrom, SIGNAL(valueChanged(int)), m_worker, SLOT(OnSetDelayFrom(int)), Qt::ConnectionType::QueuedConnection);
-    connect(ui->horizontalSlider_delayTo, SIGNAL(valueChanged(int)), m_worker, SLOT(OnSetDelayTo(int)), Qt::ConnectionType::QueuedConnection);
-    connect(m_model, SIGNAL(syncList(CBattleSettingList)), m_worker, SLOT(OnSyncList(CBattleSettingList)), Qt::ConnectionType::QueuedConnection);
+    m_worker->m_bShowHPMP = ui->checkBox_showHPMP->isChecked();
+    m_worker->m_bPetDoubleAction = ui->checkBox_petDoubleAction->isChecked();
 }
 
 void AutoBattleForm::OnNotifyGetSkillsInfo(QSharedPointer<CGA_SkillList_t> skills)
@@ -177,27 +196,40 @@ void AutoBattleForm::OnNotifyGetPetsInfo(QSharedPointer<CGA_PetList_t> pets)
                 if(BattlePetAction_Max + j < ui->comboBox_petAction->count())
                 {
                     ui->comboBox_petAction->setItemText(BattlePetAction_Max + j, skills.at(j).name);
+                    ui->comboBox_petAction_2->setItemText(BattlePetAction_Max + j, skills.at(j).name);
                 }
                 else
                 {
                     ui->comboBox_petAction->addItem(skills.at(j).name);
+                    ui->comboBox_petAction_2->addItem(skills.at(j).name);
                 }
             }
+
             for(int j = skills.size() + BattlePetAction_Max; j < ui->comboBox_petAction->count(); ++j)
             {
                 ui->comboBox_petAction->removeItem(j);
+                ui->comboBox_petAction_2->removeItem(j);
             }
+
             QString str = tr("from %1").arg(pets->at(i).showname);
-            if(str != ui->label_petSkillsFrom->text())
+            if(str != ui->label_petSkillsFrom->text()){
                 ui->label_petSkillsFrom->setText(str);
+            }
 
             return;
         }
     }
+
     for(int j = BattlePetAction_Max; j < ui->comboBox_petAction->count(); ++j)
     {
         ui->comboBox_petAction->removeItem(j);
     }
+
+    for(int j = BattlePetAction_Max; j < ui->comboBox_petAction_2->count(); ++j)
+    {
+        ui->comboBox_petAction_2->removeItem(j);
+    }
+
     QString str = tr("No pet");
     if(str != ui->label_petSkillsFrom->text())
         ui->label_petSkillsFrom->setText(str);
@@ -389,7 +421,7 @@ void AutoBattleForm::on_comboBox_playerAction_currentIndexChanged(int index)
         ui->comboBox_playerActionValue->setEnabled(false);
         break;
     }
-    case BattlePlayerAction_Defense:
+    case BattlePlayerAction_Guard:
     {
         //NO TARGET
         ui->comboBox_playerTarget->setEnabled(false);
@@ -442,7 +474,7 @@ void AutoBattleForm::on_comboBox_playerAction_currentIndexChanged(int index)
         }
         break;
     }
-    case BattlePlayerAction_LogBack:
+    case BattlePlayerAction_LogBack: case BattlePlayerAction_Rebirth: case BattlePlayerAction_DoNothing:
     {
         //NO TARGET
         ui->comboBox_playerTarget->setEnabled(false);
@@ -462,25 +494,6 @@ void AutoBattleForm::on_comboBox_playerAction_currentIndexChanged(int index)
             for(int i = 1; i <= level; ++i)
                 ui->comboBox_playerActionValue->addItem(tr("Lv %1").arg(i), QVariant(i));
         }
-        break;
-    }
-    }
-}
-
-void AutoBattleForm::on_comboBox_petAction_currentIndexChanged(int index)
-{
-    switch(index)
-    {
-    case BattlePetAction_Ignore:
-    {
-        ui->comboBox_petTarget->setEnabled(false);
-        ui->comboBox_petTargetSelect->setEnabled(false);
-        break;
-    }
-    default://Custom skills...
-    {
-        ui->comboBox_petTarget->setEnabled(true);
-        ui->comboBox_petTargetSelect->setEnabled(true);
         break;
     }
     }
@@ -519,6 +532,47 @@ void AutoBattleForm::on_comboBox_playerTarget_currentIndexChanged(int index)
     }
 }
 
+void AutoBattleForm::on_comboBox_petAction_currentIndexChanged(int index)
+{
+    switch(index)
+    {
+    case BattlePetAction_Ignore: case BattlePetAction_DoNothing:
+    {
+        ui->comboBox_petTarget->setEnabled(false);
+        ui->comboBox_petTargetSelect->setEnabled(false);
+        break;
+    }
+
+    default://Custom skills...
+    {
+        ui->comboBox_petTarget->setEnabled(true);
+        ui->comboBox_petTargetSelect->setEnabled(true);
+        break;
+    }
+    }
+}
+
+
+void AutoBattleForm::on_comboBox_petAction_2_currentIndexChanged(int index)
+{
+    switch(index)
+    {
+    case BattlePetAction_Ignore: case BattlePetAction_DoNothing:
+    {
+        ui->comboBox_petTarget_2->setEnabled(false);
+        ui->comboBox_petTargetSelect_2->setEnabled(false);
+        break;
+    }
+
+    default://Custom skills...
+    {
+        ui->comboBox_petTarget_2->setEnabled(true);
+        ui->comboBox_petTargetSelect_2->setEnabled(true);
+        break;
+    }
+    }
+}
+
 void AutoBattleForm::on_comboBox_petTarget_currentIndexChanged(int index)
 {
     ui->comboBox_petTargetSelect->clear();
@@ -552,6 +606,39 @@ void AutoBattleForm::on_comboBox_petTarget_currentIndexChanged(int index)
     }
 }
 
+
+void AutoBattleForm::on_comboBox_petTarget_2_currentIndexChanged(int index)
+{
+    ui->comboBox_petTargetSelect_2->clear();
+    switch(index)
+    {
+    case BattleTarget_Enemy:
+    {
+        for(int i = 0;i < BattleTarget_Select_Max; ++i)
+            ui->comboBox_petTargetSelect_2->addItem(s_BattleTargetSelectString[i]);
+
+        break;
+    }
+    case BattleTarget_Teammate:
+    {
+        for(int i = 0;i < BattleTarget_Select_EnemyOnly; ++i)
+            ui->comboBox_petTargetSelect_2->addItem(s_BattleTargetSelectString[i]);
+        break;
+    }
+    case BattleTarget_Self:
+    {
+        break;
+    }
+    case BattleTarget_Pet:
+    {
+        break;
+    }
+    case BattleTarget_Condition:
+    {
+        break;
+    }
+    }
+}
 
 void AutoBattleForm::on_pushButton_add_clicked()
 {
@@ -876,9 +963,9 @@ void AutoBattleForm::on_pushButton_add_clicked()
         pPlayerAction = new CBattleAction_PlayerAttack();
         break;
     }
-    case BattlePlayerAction_Defense:
+    case BattlePlayerAction_Guard:
     {
-        pPlayerAction = new CBattleAction_PlayerDefense();
+        pPlayerAction = new CBattleAction_PlayerGuard();
         break;
     }
     case BattlePlayerAction_Escape:
@@ -928,6 +1015,16 @@ void AutoBattleForm::on_pushButton_add_clicked()
         pPlayerAction = new CBattleAction_PlayerLogBack();
         break;
     }
+    case BattlePlayerAction_Rebirth:
+    {
+        pPlayerAction = new CBattleAction_PlayerRebirth();
+        break;
+    }
+    case BattlePlayerAction_DoNothing:
+    {
+        pPlayerAction = new CBattleAction_PlayerDoNothing();
+        break;
+    }
     default:
     {
         if(!playerActionStr.isEmpty())
@@ -936,32 +1033,6 @@ void AutoBattleForm::on_pushButton_add_clicked()
             int skillLevel = ui->comboBox_playerActionValue->currentData().toInt(&bValue);
             if(bValue && skillLevel >= 0)
                 pPlayerAction = new CBattleAction_PlayerSkillAttack(playerActionStr, skillLevel);
-        }
-        break;
-    }
-    }
-
-    CBattleAction *pPetAction = NULL;
-
-    int petActionIndex = ui->comboBox_petAction->currentIndex();
-    QString petActionStr = ui->comboBox_petAction->currentText();
-    bool bHasPetTarget = ui->comboBox_petTarget->isEnabled();
-
-    if(ui->comboBox_petAction->itemText(petActionIndex) != petActionStr)
-        petActionIndex = -1;
-
-    switch(petActionIndex)
-    {
-    case BattlePetAction_Ignore:
-    {
-        pPetAction = NULL;
-        break;
-    }
-    default:
-    {
-        if(!petActionStr.isEmpty())
-        {
-            pPetAction = new CBattleAction_PetSkillAttack(petActionStr);
         }
         break;
     }
@@ -1005,8 +1076,40 @@ void AutoBattleForm::on_pushButton_add_clicked()
         }
     }
 
+    CBattleAction *pPetAction = NULL;
+
+    int petActionIndex = ui->comboBox_petAction->currentIndex();
+    QString petActionStr = ui->comboBox_petAction->currentText();
+    bool bHasPetTarget = ui->comboBox_petTarget->isEnabled();
+
+    if(ui->comboBox_petAction->itemText(petActionIndex) != petActionStr)
+        petActionIndex = -1;
+
+    switch(petActionIndex)
+    {
+    case BattlePetAction_Ignore:
+    {
+        pPetAction = NULL;
+        break;
+    }
+    case BattlePetAction_DoNothing:
+    {
+        QString str = QObject::tr("Do Nothing");
+        pPetAction = new CBattleAction_PetSkillAttack(str);
+        break;
+    }
+    default:
+    {
+        if(!petActionStr.isEmpty())
+        {
+            pPetAction = new CBattleAction_PetSkillAttack(petActionStr);
+        }
+        break;
+    }
+    }
+
     CBattleTarget *pPetTarget = NULL;
-    if(bHasPetTarget)
+    if(pPetAction && bHasPetTarget)
     {
         int petTargetIndex = ui->comboBox_petTarget->currentIndex();
         switch(petTargetIndex)
@@ -1043,7 +1146,81 @@ void AutoBattleForm::on_pushButton_add_clicked()
         }
     }
 
-    CBattleSettingPtr ptr(new CBattleSetting(pCondition, pCondition2, pPlayerAction, pPlayerTarget, pPetAction, pPetTarget));
+    /*CBattleAction *pPetAction2 = NULL;
+
+    int petAction2Index = ui->comboBox_petAction_2->currentIndex();
+    QString petAction2Str = ui->comboBox_petAction_2->currentText();
+    bool bHasPetTarget2 = ui->comboBox_petTarget_2->isEnabled();
+
+    if(ui->comboBox_petAction_2->itemText(petAction2Index) != petAction2Str)
+        petAction2Index = -1;
+
+    switch(petAction2Index)
+    {
+    case BattlePetAction_Ignore:
+    {
+        pPetAction2 = NULL;
+        break;
+    }
+    case BattlePetAction_DoNothing:
+    {
+        QString str = QObject::tr("Do Nothing");
+        pPetAction2 = new CBattleAction_PetSkillAttack(str);
+        break;
+    }
+    default:
+    {
+        if(!petActionStr.isEmpty())
+        {
+            pPetAction2 = new CBattleAction_PetSkillAttack(petAction2Str);
+        }
+        break;
+    }
+    }
+
+    CBattleTarget *pPetTarget2 = NULL;
+    if(pPetAction2 && bHasPetTarget2)
+    {
+        int petTarget2Index = ui->comboBox_petTarget_2->currentIndex();
+        switch(petTarget2Index)
+        {
+        case BattleTarget_Enemy:
+        {
+            int petTarget2SelectIndex = ui->comboBox_petTargetSelect_2->currentIndex();
+            if(petTarget2SelectIndex >= 0 && petTarget2SelectIndex < BattleTarget_Select_Max)
+                pPetTarget2 = new CBattleTarget_Enemy(petTarget2SelectIndex);
+            break;
+        }
+        case BattleTarget_Teammate:
+        {
+            int petTarget2SelectIndex = ui->comboBox_petTargetSelect_2->currentIndex();
+            if(petTarget2SelectIndex >= 0 && petTarget2SelectIndex < BattleTarget_Select_EnemyOnly)
+                pPetTarget2 = new CBattleTarget_Teammate(petTarget2SelectIndex);
+            break;
+        }
+        case BattleTarget_Self:
+        {
+            pPetTarget2 = new CBattleTarget_Self();
+            break;
+        }
+        case BattleTarget_Pet:
+        {
+            pPetTarget2 = new CBattleTarget_Pet();
+            break;
+        }
+        case BattleTarget_Condition:
+        {
+            pPetTarget2 = new CBattleTarget_Condition();
+            break;
+        }
+        }
+    }*/
+
+    CBattleSettingPtr ptr(new CBattleSetting(
+                              pCondition, pCondition2,
+                              pPlayerAction, pPlayerTarget,
+                              pPetAction, pPetTarget/*,
+                              pPetAction2, pPetTarget2*/));
     if( (pCondition || pCondition2) && ( pPlayerAction || pPetAction ) )
     {
         m_model->appendRow(ptr);
@@ -1098,6 +1275,8 @@ bool AutoBattleForm::ParseBattleSettings(const QJsonValue &val)
     ui->checkBox_lockCountdown->setChecked(obj.take("lockcd").toBool());
     ui->checkBox_levelOneProtect->setChecked(obj.take("lv1prot").toBool());
     ui->checkBox_firstRoundNoDelay->setChecked(obj.take("r1nodelay").toBool());
+    ui->checkBox_petDoubleAction->setChecked(obj.take("pet2action").toBool());
+    ui->checkBox_playerForceAction->setChecked(obj.take("playerforceaction").toBool());
     ui->horizontalSlider_delayFrom->setValue(obj.take("delayfrom").toInt());
     ui->horizontalSlider_delayTo->setValue(obj.take("delayto").toInt());
 
@@ -1211,6 +1390,26 @@ bool AutoBattleForm::ParseBattleSettings(const QJsonValue &val)
             ui->comboBox_petTarget->setCurrentIndex(petTargetId);
             on_comboBox_petTarget_currentIndexChanged(ui->comboBox_petTarget->currentIndex());
             ui->comboBox_petTargetSelect->setCurrentIndex(petTargetSel);
+
+            /*auto petAction2Id = setting.take("petaction2").toInt();
+
+            if(petAction2Id == BattlePetAction_Skill){
+                auto petSkill2Name = setting.take("petskill2name").toString();
+                ui->comboBox_petAction_2->setCurrentText(petSkill2Name);
+                on_comboBox_petAction_2_currentIndexChanged(BattlePetAction_Skill);
+            }
+            else
+            {
+                ui->comboBox_petAction_2->setCurrentIndex(petAction2Id);
+                on_comboBox_petAction_2_currentIndexChanged(ui->comboBox_petAction_2->currentIndex());
+            }
+
+            auto petTarget2Id = setting.take("pettarget2").toInt();
+            auto petTarget2Sel = setting.take("pettarget2sel").toInt();
+            ui->comboBox_petTarget_2->setCurrentIndex(petTarget2Id);
+            on_comboBox_petTarget_2_currentIndexChanged(ui->comboBox_petTarget_2->currentIndex());
+            ui->comboBox_petTargetSelect_2->setCurrentIndex(petTarget2Sel);*/
+
             ui->pushButton_add->click();
         }
     }
@@ -1227,6 +1426,8 @@ void AutoBattleForm::SaveBattleSettings(QJsonObject &obj)
     obj.insert("lockcd", ui->checkBox_lockCountdown->isChecked());
     obj.insert("lv1prot", ui->checkBox_levelOneProtect->isChecked());
     obj.insert("r1nodelay", ui->checkBox_firstRoundNoDelay->isChecked());
+    obj.insert("pet2action", ui->checkBox_petDoubleAction->isChecked());
+    obj.insert("playerforceaction", ui->checkBox_playerForceAction->isChecked());
     obj.insert("delayfrom", ui->horizontalSlider_delayFrom->value());
     obj.insert("delayto", ui->horizontalSlider_delayTo->value());
 
@@ -1268,6 +1469,13 @@ void AutoBattleForm::SaveBattleSettings(QJsonObject &obj)
         }
         row.insert("pettarget", setting->GetPetTargetTypeId());
         row.insert("pettargetsel", setting->GetPetTargetSelectId());
+
+        /*row.insert("petaction2", setting->GetPetAction2TypeId());
+        if(setting->GetPetAction2TypeId() == BattlePetAction_Skill){
+            row.insert("petskill2name", setting->GetPetSkill2Name());
+        }
+        row.insert("pettarget2", setting->GetPetTarget2TypeId());
+        row.insert("pettarget2sel", setting->GetPetTarget2SelectId());*/
 
         list.insert(i, row);
     }

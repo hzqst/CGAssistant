@@ -6,7 +6,7 @@
 #include <QJsonObject>
 #include <QJsonArray>
 
-PlayerForm::PlayerForm(CPlayerWorker *worker, QWidget *parent) :
+PlayerForm::PlayerForm(CPlayerWorker *worker, CBattleWorker *bworker, QWidget *parent) :
     QWidget(parent),
     ui(new Ui::PlayerForm), m_worker(worker)
 {
@@ -22,6 +22,7 @@ PlayerForm::PlayerForm(CPlayerWorker *worker, QWidget *parent) :
     ui->label_workdelayval->setText(tr("%1 ms").arg(ui->horizontalSlider_workdelay->value()));
     ui->label_workaccval->setText(tr("%1 %").arg(ui->horizontalSlider_workacc->value()));
 
+    connect(ui->checkBox_SwitchAnim, SIGNAL(stateChanged(int)), bworker, SLOT(OnSetNoSwitchAnim(int)), Qt::QueuedConnection);
     connect(ui->checkBox_SwitchAnim, SIGNAL(stateChanged(int)), m_worker, SLOT(OnSetNoSwitchAnim(int)), Qt::QueuedConnection);
     connect(ui->checkBox_autoSupply, SIGNAL(stateChanged(int)), m_worker, SLOT(OnSetAutoSupply(int)), Qt::QueuedConnection);
     connect(ui->checkBox_freqMove, SIGNAL(stateChanged(int)), m_worker, SLOT(OnSetFreqMove(int)), Qt::QueuedConnection);
@@ -447,5 +448,28 @@ void PlayerForm::on_pushButton_load_clicked()
             QMessageBox::critical(this, tr("Error"), tr("Failed to load item settings from file."), QMessageBox::Ok, 0);
         else if(!bSuccess)
             QMessageBox::critical(this, tr("Error"), tr("Failed to load item settings with invalid format."), QMessageBox::Ok, 0);
+    }
+}
+
+void PlayerForm::OnNotifyFillLoadSettings(QString path)
+{
+    //qDebug("OnNotifyFillLoadSettings");
+    if(!path.isEmpty())
+    {
+        //qDebug("OnNotifyFillLoadSettings 2");
+        qDebug(path.toLocal8Bit().data());
+        bool bSuccess = false;
+        QFile file(path);
+        if(file.exists())
+        {
+            QJsonDocument doc;
+            bool bSuccess = false;
+            if(file.open(QFile::ReadOnly | QFile::Text))
+            {
+                //qDebug("OnNotifyFillLoadSettings ok2");
+                bSuccess = ParseSettings(file.readAll(), doc);
+                file.close();
+            }
+        }
     }
 }

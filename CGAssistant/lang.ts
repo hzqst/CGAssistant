@@ -2,6 +2,93 @@
 <!DOCTYPE TS>
 <TS version="2.1" language="zh_CN">
 <context>
+    <name>AccountForm</name>
+    <message>
+        <source>Form</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>GID</source>
+        <translation>子账号</translation>
+    </message>
+    <message>
+        <source>Game Type</source>
+        <translation>游戏类型</translation>
+    </message>
+    <message>
+        <source>Server</source>
+        <translation>线</translation>
+    </message>
+    <message>
+        <source>Login Game</source>
+        <translation>登录游戏</translation>
+    </message>
+    <message>
+        <source>Character</source>
+        <translation>人物</translation>
+    </message>
+    <message>
+        <source>Get GID List</source>
+        <translation>获取子账号列表</translation>
+    </message>
+    <message>
+        <source>Auto Login</source>
+        <translation>自动登录</translation>
+    </message>
+    <message>
+        <source>Big Server</source>
+        <translation>服务器</translation>
+    </message>
+    <message>
+        <source>Account</source>
+        <translation>通行证</translation>
+    </message>
+    <message>
+        <source>Password</source>
+        <translation>密码</translation>
+    </message>
+    <message>
+        <source>Not Ready</source>
+        <translation>准备就绪</translation>
+    </message>
+    <message>
+        <source>POLCN_Launcher running with pid %1...</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>Get GID ok.
+</source>
+        <translation>获取子账号成功。</translation>
+    </message>
+    <message>
+        <source>Login refused by server.
+</source>
+        <translation>登录被服务器拒绝。</translation>
+    </message>
+    <message>
+        <source>Fail to parse POLCN_Launcher output, missing &quot;result&quot;.
+</source>
+        <translation>解析登录器返回结果失败，缺少result字段。</translation>
+    </message>
+    <message>
+        <source>Fail to parse POLCN_Launcher output.
+</source>
+        <translation>解析登录器返回结果失败。</translation>
+    </message>
+    <message>
+        <source>POLCN_Launcher finished with exitCode %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Querying GID list...</source>
+        <translation>正在请求子账号列表...</translation>
+    </message>
+    <message>
+        <source>Disable POLCN Updater</source>
+        <translation type="unfinished">禁用登录器更新</translation>
+    </message>
+</context>
+<context>
     <name>AutoBattleForm</name>
     <message>
         <source>Form</source>
@@ -159,7 +246,7 @@ meet Lv1 enemy</source>
     </message>
     <message>
         <source>Defense</source>
-        <translation>防御</translation>
+        <translation type="vanished">防御</translation>
     </message>
     <message>
         <source>Escape</source>
@@ -369,6 +456,36 @@ meet Lv1 enemy</source>
         <source>Teammate MP</source>
         <translation>队友蓝量</translation>
     </message>
+    <message>
+        <source>Guard</source>
+        <translation>防御</translation>
+    </message>
+    <message>
+        <source>Rebirth</source>
+        <translation>精灵变身</translation>
+    </message>
+    <message>
+        <source>Do Nothing</source>
+        <translation>什么都不做</translation>
+    </message>
+    <message>
+        <source>Pet Double
+Action</source>
+        <translation>宠物二动</translation>
+    </message>
+    <message>
+        <source>TO2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>PET2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Player Force
+Action</source>
+        <translation>人物强制行动</translation>
+    </message>
 </context>
 <context>
     <name>CBattleSettingModel</name>
@@ -432,15 +549,15 @@ meet Lv1 enemy</source>
     </message>
     <message>
         <source>Timeout for reading shared data.</source>
-        <translation type="unfinished"></translation>
+        <translation>读取共享内存失败。</translation>
     </message>
     <message>
         <source>Could not connect to local RPC server.</source>
-        <translation type="unfinished"></translation>
+        <translation>无法连接到本地RPC服务。</translation>
     </message>
     <message>
         <source>Game already attached by other instance of CGAssistant.</source>
-        <translation>游戏已经被另一个CGAssistant附加</translation>
+        <translation>游戏已经被另一个CGAssistant附加。</translation>
     </message>
 </context>
 <context>
@@ -563,6 +680,36 @@ meet Lv1 enemy</source>
     <message>
         <source>Map</source>
         <translation>地图</translation>
+    </message>
+    <message>
+        <source>Account</source>
+        <translation>账号</translation>
+    </message>
+    <message>
+        <source>CGAssistant %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:&apos;SimSun&apos;; font-size:9pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;唯一Q群 300303705&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;2019-12-20&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;修复刷十年戒指脚本的问题。&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;2019-12-14&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;快捷键F4取出所有物品修复会卡物品栏的问题。&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;采集和双百脚本的配置格式有修改，之前的老配置文件需要手动删除后重新生成。&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;修复某些练级脚本无限回补的问题。&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;采集插件增加狩猎。&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;2019-12-01&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;游戏内增加快捷键：&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;F1登出回城 F2登出服务器 F3穿墙(向鼠标指向方向) F4交易时一键取出所有物品&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -788,7 +935,7 @@ error: %1</source>
     </message>
     <message>
         <source>Defense</source>
-        <translation>防御</translation>
+        <translation type="vanished">防御</translation>
     </message>
     <message>
         <source>Escape</source>
@@ -892,7 +1039,7 @@ error: %1</source>
     </message>
     <message>
         <source>Loyalty: %1</source>
-        <translation>忠诚: %1</translation>
+        <translation type="vanished">忠诚: %1</translation>
     </message>
     <message>
         <source>Ignore</source>
@@ -929,6 +1076,62 @@ error: %1</source>
     <message>
         <source>TeammateMP %1%2</source>
         <translation>队友蓝量 %1%2</translation>
+    </message>
+    <message>
+        <source>cg_item_6000</source>
+        <translation type="vanished">cg_item_6000 (道具)</translation>
+    </message>
+    <message>
+        <source>cg_se_6000</source>
+        <translation>cg_se_6000 (时长)</translation>
+    </message>
+    <message>
+        <source>cg_se_3000</source>
+        <translation>cg_se_3000 (怀旧)</translation>
+    </message>
+    <message>
+        <source>Aries</source>
+        <translation>牧羊</translation>
+    </message>
+    <message>
+        <source>Gemini</source>
+        <translation>金牛</translation>
+    </message>
+    <message>
+        <source>#%1</source>
+        <translation>%1线</translation>
+    </message>
+    <message>
+        <source>Left</source>
+        <translation>左边人物</translation>
+    </message>
+    <message>
+        <source>Right</source>
+        <translation>右边人物</translation>
+    </message>
+    <message>
+        <source>Loyality: %1</source>
+        <translation>忠诚: %1</translation>
+    </message>
+    <message>
+        <source>Guard</source>
+        <translation>防御</translation>
+    </message>
+    <message>
+        <source>Rebirth</source>
+        <translation>精灵变身</translation>
+    </message>
+    <message>
+        <source>Do Nothing</source>
+        <translation>什么都不做</translation>
+    </message>
+    <message>
+        <source>cg_item_6000 (HN)</source>
+        <translation>道具 (电信)</translation>
+    </message>
+    <message>
+        <source>cg_item_6000 (WT)</source>
+        <translation>道具 (网通)</translation>
     </message>
 </context>
 <context>
@@ -1005,6 +1208,22 @@ error: %1</source>
     <message>
         <source>Console / Debugger</source>
         <translation>控制台 / 调试器</translation>
+    </message>
+    <message>
+        <source>Auto Restart</source>
+        <translation>自动重启脚本</translation>
+    </message>
+    <message>
+        <source>Starting node in debug mode...</source>
+        <translation>以调试模式开启node进程...</translation>
+    </message>
+    <message>
+        <source>Injury Protect</source>
+        <translation>受伤停止脚本</translation>
+    </message>
+    <message>
+        <source>Soul Protect</source>
+        <translation>掉魂停止脚本</translation>
     </message>
 </context>
 </TS>

@@ -9,6 +9,8 @@ CBattleSettingModel::CBattleSettingModel(QObject *parent) : QAbstractTableModel(
     m_HeaderString.append(tr("Player Target"));
     m_HeaderString.append(tr("Pet Action"));
     m_HeaderString.append(tr("Pet Target"));
+    //m_HeaderString.append(tr("Pet Action 2"));
+    //m_HeaderString.append(tr("Pet Target 2"));
 }
 
 bool CBattleSettingModel::swapRow(int position, int destination)
@@ -160,6 +162,18 @@ QVariant CBattleSettingModel::data(const QModelIndex &index, int role) const
                 item->GetPetTargetName(str);
                 return str;
             }
+           /* case 6:
+            {
+                QString str;
+                item->GetPetAction2Name(str);
+                return str;
+            }
+            case 7:
+            {
+                QString str;
+                item->GetPetTarget2Name(str);
+                return str;
+            }*/
             }
         }
         else if (role == Qt::DecorationRole)

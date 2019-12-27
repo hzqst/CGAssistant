@@ -5,6 +5,7 @@
 #include <QThread>
 #include <QStandardItemModel>
 #include "player.h"
+#include "battle.h"
 
 namespace Ui {
 class PlayerForm;
@@ -15,7 +16,7 @@ class PlayerForm : public QWidget
     Q_OBJECT
 
 public:
-    explicit PlayerForm(CPlayerWorker *worker, QWidget *parent = 0);
+    explicit PlayerForm(CPlayerWorker *worker,CBattleWorker *bworker, QWidget *parent = 0);
     ~PlayerForm();
 private:
     void ClearPlayerInfo();
@@ -38,6 +39,7 @@ public slots:
     void OnNotifyGetPetsInfo(QSharedPointer<CGA_PetList_t> pets);
     void OnNotifyGetSkillsInfo(QSharedPointer<CGA_SkillList_t> pets);
     void OnNotifyGetMapInfo(QString name, int index1, int index2, int index3, int x, int y, int worldStatus, int gameStatus);
+    void OnNotifyFillLoadSettings(QString path);
 signals:
     bool ParseItemIdMap(const QJsonValue &val);
     bool ParseItemDropper(const QJsonValue &val);

@@ -10,8 +10,8 @@
 #include <QJsonParseError>
 
 ItemForm::ItemForm(CPlayerWorker *worker, QWidget *parent) :
-    QWidget(parent), m_worker(worker),
-    ui(new Ui::ItemForm)
+    QWidget(parent),
+    ui(new Ui::ItemForm),  m_worker(worker)
 {
     ui->setupUi(this);
 
@@ -185,7 +185,7 @@ public:
 
     virtual bool ShouldTweak(const CGA_ItemInfo_t &item)
     {
-        if(0 == item.name.compare(m_name, Qt::CaseInsensitive) && item.count < m_maxcount)
+        if(0 == item.name.compare(m_name, Qt::CaseInsensitive) && item.assessed && item.count < m_maxcount)
             return true;
         return false;
     }
@@ -210,8 +210,9 @@ public:
 
     virtual bool ShouldTweak(const CGA_ItemInfo_t &item)
     {
-        if(item.itemid == m_itemid && item.count < m_maxcount)
+        if(item.itemid == m_itemid && item.assessed && item.count < m_maxcount)
             return true;
+
         return false;
     }
 

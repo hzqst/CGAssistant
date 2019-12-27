@@ -1,12 +1,12 @@
 #define _WIN32_WINNT 0x0501
 
 #include <string>
-#include <rest_rpc/server.hpp>
+#include <rpc_server.h>
 #include <memory>
 #include <Windows.h>
 #include "gameservice.h"
 
-using server_t = timax::rpc::server<timax::rpc::msgpack_codec>;
+using server_t = rest_rpc::rpc_service::rpc_server;
 
 size_t pool_size = 8;
 std::shared_ptr<server_t> server;
@@ -26,7 +26,7 @@ void WriteLog(LPCSTR fmt, ...);
 void CGA_NotifyBattleAction(int flags)
 {
 	if (server && server.get()) {
-		server->pub("NotifyBattleAction", flags);
+		server->("NotifyBattleAction", flags);
 	}
 }
 

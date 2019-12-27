@@ -1,6 +1,4 @@
 [submodule "boost"]
-	path = boost
+	path = boost_1_63_0
 	url = https://github.com/boostorg/boost.git
-[submodule "rest_rpc"]
-	path = rest_rpc
-	url = https://github.com/hzqst/rest_rpc
+	tag = boost-1.69.0

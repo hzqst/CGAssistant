@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>727</width>
-    <height>464</height>
+    <height>486</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -577,14 +577,18 @@
        </layout>
       </item>
       <item>
-       <widget class="QCheckBox" name="checkBox_SwitchAnim">
-        <property name="text">
-         <string>SwitchAnim off</string>
-        </property>
-        <property name="tristate">
-         <bool>false</bool>
-        </property>
-       </widget>
+       <layout class="QHBoxLayout" name="horizontalLayout_14">
+        <item>
+         <widget class="QCheckBox" name="checkBox_SwitchAnim">
+          <property name="text">
+           <string>SwitchAnim off</string>
+          </property>
+          <property name="tristate">
+           <bool>false</bool>
+          </property>
+         </widget>
+        </item>
+       </layout>
       </item>
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout_12">

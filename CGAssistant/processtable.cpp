@@ -3,9 +3,10 @@
 
 CProcessTableModel::CProcessTableModel(QObject *parent) : QAbstractTableModel(parent)
 {
-    m_HeaderString.append(tr("PID"));\
-    m_HeaderString.append(tr("Window Title"));\
-    m_HeaderString.append(tr("Attached"));\
+    m_HeaderString.append(tr("PID"));
+    m_HeaderString.append(tr("Window Title"));
+    m_HeaderString.append(tr("Attached"));
+    m_AttachHwnd = 0;
 }
 
 void CProcessTableModel::appendRow(const CProcessItemPtr &item)
@@ -100,8 +101,12 @@ QVariant CProcessTableModel::data(const QModelIndex &index, int role) const
             {
             case 0: return QString::number(process->m_ProcessId);
             case 1: return process->m_Title;
-            case 2: if(process->m_bAttached)
+            case 2: {
+                if(process->m_bAttached && process->m_hWnd == m_AttachHwnd)
+                    return QString("yes(*)");
+                if(process->m_bAttached)
                     return QString("yes");
+            }
             }
         }
         else if (role == Qt::DecorationRole)

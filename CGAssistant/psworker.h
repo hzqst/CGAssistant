@@ -43,6 +43,9 @@ public:
 public slots:
     void OnQueueAttachProcess(quint32 ProcessId, quint32 ThreadId, quint32 hWnd, QString dllPath);
     void OnQueueQueryProcess();
+    void OnCheckFreezeProcess();
+    void OnAutoAttachProcess(quint32 ProcessId, quint32 ThreadId);
+    void OnNotifyFillMaxFreezeTime(int freezetime);
 private slots:
     void OnRetryAttachProcess();
 
@@ -60,6 +63,13 @@ private:
     void Disconnect();
 private:
     HANDLE m_AttachMutex;
+    HWND m_AttachHwnd;
+
+    quint32 m_AutoAttachPID;
+    quint32 m_AutoAttachTID;
+    double m_LastGameAnimTick;
+    int m_AnimTickFreezeTime;
+    int m_MaxFreezeTime;
 };
 
 #endif // PSWORKER_H

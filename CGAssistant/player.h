@@ -123,10 +123,12 @@ typedef struct CGA_ItemInfo_s
         itemid = -1;
         count = -1;
         pos = -1;
+        assessed = false;
     }
     int itemid;
     int count;
     int pos;
+    bool assessed;
     QString name;
 }CGA_ItemInfo_t;
 
@@ -251,6 +253,7 @@ public slots:
     void OnSetFreqMove(int state);
     void OnSetWorkAcc(int value);
     void OnSetNoSwitchAnim(int state);
+    void OnSetShowHPMP(int state);
     void OnDownloadMap(int xsize, int ysize);
     void OnTabChanged(int tabindex);
 signals:
@@ -276,6 +279,7 @@ private:
     int m_WorkAcc;
     bool m_bNoSwitchAnim;
     bool m_bHighSpeedBattle;
+    bool m_bShowHPMP;
 
     int m_DownloadMapX;
     int m_DownloadMapY;

@@ -1,5 +1,6 @@
 #include "player.h"
 #include <QTimer>
+
 extern CGA::CGAInterface *g_CGAInterface;
 
 Q_DECLARE_METATYPE(QSharedPointer<CGA_PlayerInfo_t>)
@@ -52,6 +53,7 @@ CPlayerWorker::CPlayerWorker(QObject *parent) : QObject(parent)
     m_WorkDelay = 6500;
     m_bNoSwitchAnim = false;
     m_IsDownloadingMap = false;
+    m_bShowHPMP = false;
     m_tabindex = 0;
 
     const ushort nurse_message[] = {35201,22238,22797,21527,65311,0};
@@ -105,7 +107,7 @@ void CPlayerWorker::OnTweakDropItem(QSharedPointer<CGA_ItemList_t> items)
             {
                  for(int k = 0; k < items->size(); ++k)
                 {
-                    if(k != i && items->at(k).itemid == item.itemid && items->at(k).count < m_ItemTweakers[j]->GetMaxCount())
+                    if(k != i && items->at(k).itemid == item.itemid && items->at(k).assessed && items->at(k).count < m_ItemTweakers[j]->GetMaxCount())
                     {
                         //tweak it now
                         //qDebug("tweak now %d %d", items->at(k).pos, item.pos);
@@ -182,6 +184,9 @@ void CPlayerWorker::OnQueueGetMapInfo()
     bool connected = g_CGAInterface->IsConnected();
     if(!connected || !g_CGAInterface->IsInGame(ingame) || !ingame)
     {
+        if(connected)
+            g_CGAInterface->SetImmediateDoneWork(false);
+
         NotifyGetInfoFailed(connected, ingame ? true : false);
         return;
     }
@@ -218,12 +223,17 @@ void CPlayerWorker::OnQueueGetItemInfo()
                 item.itemid = iteminfo.itemid;
                 item.count = iteminfo.count;
                 item.pos = iteminfo.pos;
+                item.assessed = iteminfo.assessed;
                 items->append(item);
             }
         }
 
         if(!items->empty())
-            OnTweakDropItem(items);
+        {
+            //int worldStatus = 0, gameStatus = 0;
+            //if(g_CGAInterface->GetWorldStatus(worldStatus) && g_CGAInterface->GetGameStatus(gameStatus) && worldStatus == 9 && gameStatus == 3)
+                OnTweakDropItem(items);
+        }
 
         NotifyGetItemsInfo(items);
     }
@@ -246,7 +256,8 @@ void CPlayerWorker::OnQueueGetPlayerInfo()
         g_CGAInterface->SetMoveSpeed(m_MoveSpeed);
         g_CGAInterface->SetWorkDelay(m_WorkDelay);
         g_CGAInterface->SetWorkAcceleration(m_WorkAcc);
-        g_CGAInterface->SetNoSwitchAnim(m_bNoSwitchAnim);
+        g_CGAInterface->SetNoSwitchAnim(m_bNoSwitchAnim);        
+        g_CGAInterface->BattleSetShowHPMPEnabled(m_bShowHPMP);
 
         CGA::cga_player_info_t info;
         if(g_CGAInterface->GetPlayerInfo(info))
@@ -515,6 +526,11 @@ void CPlayerWorker::OnSetWorkDelay(int value)
 void CPlayerWorker::OnSetWorkAcc(int value)
 {
     m_WorkAcc = value;
+}
+
+void CPlayerWorker::OnSetShowHPMP(int state)
+{
+    m_bShowHPMP = state ? true : false;
 }
 
 void CPlayerWorker::OnNotifyAttachProcessOk(quint32 ProcessId, quint32 port, quint32 hWnd)

@@ -1,20 +1,6 @@
 <RCC>
     <qresource prefix="/">
         <file>PUK3.ico</file>
-        <file>devtools/bundled/components_lazy/components_lazy_module.js</file>
-        <file>devtools/bundled/console/console_module.js</file>
-        <file>devtools/bundled/diff/diff_module.js</file>
-        <file>devtools/bundled/Images/breakpoint.png</file>
-        <file>devtools/bundled/Images/smallIcons.png</file>
-        <file>devtools/bundled/Images/toolbarButtonGlyphs.png</file>
-        <file>devtools/bundled/snippets/snippets_module.js</file>
-        <file>devtools/bundled/source_frame/source_frame_module.js</file>
-        <file>devtools/bundled/sources/sources_module.js</file>
-        <file>devtools/bundled/text_editor/text_editor_module.js</file>
-        <file>devtools/bundled/ui_lazy/ui_lazy_module.js</file>
-        <file>devtools/bundled/devtools_compatibility.js</file>
-        <file>devtools/bundled/inspector.html</file>
-        <file>devtools/bundled/inspector.js</file>
         <file>lang.qm</file>
         <file>logo.png</file>
     </qresource>

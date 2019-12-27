@@ -54,6 +54,7 @@ void ProcessForm::OnCloseWindow()
 void ProcessForm::OnNotifyAttachProcessOk(quint32 ProcessId, quint32 port, quint32 hwnd)
 {
     m_hwnd = (HWND)hwnd;
+    m_model->m_AttachHwnd = hwnd;
 }
 
 void ProcessForm::OnNotifyAttachProcessFailed(quint32 ProcessId, int errorCode, QString errorString)
@@ -95,6 +96,7 @@ void ProcessForm::on_pushButton_attach_clicked()
     CProcessItem *item = m_model->ItemFromIndex(ui->tableView_process->currentIndex());
     if(!item)
         return;
+
     QueueAttachProcess( (quint32)item->m_ProcessId, (quint32)item->m_ThreadId, (quint32)item->m_hWnd, QString("cgahook.dll") );
 }
 

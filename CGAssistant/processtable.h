@@ -30,6 +30,8 @@ public:
 private:
     CProcessItemList m_List;
     QStringList m_HeaderString;
+public:
+    quint32 m_AttachHwnd;
 };
 
 #endif // PROCESSTABLE_H

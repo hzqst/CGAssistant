@@ -18,7 +18,7 @@ class AutoBattleForm : public QWidget
     Q_OBJECT
 
 public:
-    explicit AutoBattleForm(CBattleWorker *worker, QWidget *parent = 0);
+    explicit AutoBattleForm(CBattleWorker *worker, CPlayerWorker *pworker, QWidget *parent = 0);
     ~AutoBattleForm();
     void SyncAutoBattleWorker();
 private slots:
@@ -35,6 +35,10 @@ private slots:
     void on_pushButton_del_clicked();
     void on_pushButton_moveUp_clicked();
     void on_pushButton_moveDown_clicked();
+
+    void on_comboBox_petAction_2_currentIndexChanged(int index);
+
+    void on_comboBox_petTarget_2_currentIndexChanged(int index);
 
 public slots:
     void OnNotifyGetSkillsInfo(QSharedPointer<CGA_SkillList_t> skills);

@@ -2,6 +2,8 @@
 #include "psworker.h"
 #include "../CGALib/gameinterface.h"
 
+#include "MINT.h"
+
 extern CGA::CGAInterface *g_CGAInterface;
 
 Q_DECLARE_METATYPE(CProcessItemList)
@@ -19,8 +21,16 @@ CProcessWorker::CProcessWorker(QObject *parent) : QObject(parent)
     QTimer *timer = new QTimer(this);
     connect(timer, SIGNAL(timeout()), this, SLOT(OnQueueQueryProcess()));
     timer->start(500);
+    connect(timer, SIGNAL(timeout()), this, SLOT(OnCheckFreezeProcess()));
+    timer->start(1000);
 
     m_AttachMutex = NULL;
+    m_AttachHwnd = 0;
+    m_AutoAttachPID = 0;
+    m_AutoAttachTID = 0;
+    m_LastGameAnimTick = 0;
+    m_AnimTickFreezeTime = 0;
+    m_MaxFreezeTime = 15;
 }
 
 bool CProcessWorker::IsProcessAttached(quint32 ProcessId)
@@ -101,8 +111,7 @@ bool CProcessWorker::ReadSharedData(quint32 ProcessId, int &port, quint32 &hWnd)
                     CGA::CGAShare_t *data = (CGA::CGAShare_t *)pViewOfFile;
 
                     port = data->Port;
-                    hWnd=data->hWnd;
-
+                    hWnd = (quint32)data->hWnd;
                     bSuccess = true;
                     UnmapViewOfFile(pViewOfFile);
                 }
@@ -119,6 +128,7 @@ bool CProcessWorker::ReadSharedData(quint32 ProcessId, int &port, quint32 &hWnd)
 void CProcessWorker::OnRetryAttachProcess()
 {
     auto timer = (CRetryAttachProcessTimer *)sender();
+
     int port = 0;
     quint32 hwnd = 0;
     if(!ReadSharedData(timer->m_ProcessId, port, hwnd))
@@ -148,9 +158,11 @@ void CProcessWorker::ConnectToServer(quint32 ProcessId, int port, quint32 hwnd)
 
     if(g_CGAInterface->Connect(port))
     {
+        g_CGAInterface->GetNextAnimTickCount(m_LastGameAnimTick);
         g_CGAInterface->RegisterServerShutdownNotify(std::bind(&CProcessWorker::NotifyServerShutdown, this, std::placeholders::_1));
         NotifyAttachProcessOk(ProcessId, port, hwnd);
         QTimer::singleShot(100, this, SLOT(OnQueueQueryProcess()));
+        m_AttachHwnd = (HWND)hwnd;
     }
     else
     {
@@ -170,11 +182,14 @@ void CProcessWorker::Disconnect()
     }
 }
 
+void CProcessWorker::OnAutoAttachProcess(quint32 ProcessId, quint32 ThreadId)
+{
+    m_AutoAttachPID = ProcessId;
+    m_AutoAttachTID = ThreadId;
+}
+
 void CProcessWorker::OnQueueAttachProcess(quint32 ProcessId, quint32 ThreadId, quint32 hWnd, QString dllPath)
 {
-    //Already attached to game
-    Disconnect();
-
     int port = 0;
     quint32 hwnd = 0;
     if(!ReadSharedData(ProcessId, port, hwnd))
@@ -192,6 +207,9 @@ void CProcessWorker::OnQueueAttachProcess(quint32 ProcessId, quint32 ThreadId, q
     }
     else
     {
+        //Already attached to game
+        Disconnect();
+
         ConnectToServer(ProcessId, port, hwnd);
     }
 }
@@ -213,22 +231,104 @@ void CProcessWorker::OnQueueQueryProcess()
 {
     CProcessItemList list;
 
-    const wchar_t szFindClass[] = { 39764, 21147, 23453, 36125, 0 };
+    const wchar_t szFindGameClass[] = { 39764, 21147, 23453, 36125, 0 };
+
     HWND hWnd = NULL;
     DWORD pid, tid;
     WCHAR szText[256];
 
-    while ((hWnd = FindWindowExW(NULL, hWnd, szFindClass, NULL)) != NULL)
+    while ((hWnd = FindWindowExW(NULL, hWnd, szFindGameClass, NULL)) != NULL)
     {
         if((tid = GetWindowThreadProcessId(hWnd, (LPDWORD)&pid)) != 0 && pid != GetCurrentProcessId())
         {
             if(GetWindowTextW(hWnd, szText, 256))
             {
-                CProcessItemPtr item(new CProcessItem((quint32)pid, (quint32)tid,(quint32)hWnd, szText, IsProcessAttached(pid)));
+                bool attached = IsProcessAttached(pid);
+                CProcessItemPtr item(new CProcessItem((quint32)pid, (quint32)tid, (quint32)hWnd, szText, attached));
                 list.append(item);
+
+                if(!attached && m_AutoAttachPID == pid && m_AutoAttachTID == tid){
+                    OnQueueAttachProcess( (quint32)pid, (quint32)tid, (quint32)hWnd, QString("cgahook.dll") );
+                    m_AutoAttachPID = 0;
+                    m_AutoAttachTID = 0;
+                }
             }
         }
     }
 
+
     NotifyQueryProcess(list);
+}
+
+void CProcessWorker::OnNotifyFillMaxFreezeTime(int freezetime)
+{
+    m_MaxFreezeTime = freezetime;
+}
+
+void CProcessWorker::OnCheckFreezeProcess()
+{
+    if(!IsWindow(m_AttachHwnd))
+        return;
+
+    DWORD pid, tid;
+    tid = GetWindowThreadProcessId(m_AttachHwnd, &pid);
+    if(!pid || !tid){
+        m_AttachHwnd = NULL;
+        return;
+    }
+
+    bool freeze = false;
+    double tick;
+    if(g_CGAInterface->IsConnected() && g_CGAInterface->GetNextAnimTickCount(tick))
+    {
+        if(m_LastGameAnimTick == tick)
+        {
+            m_AnimTickFreezeTime ++;
+            if(m_AnimTickFreezeTime >= m_MaxFreezeTime)
+                freeze = true;
+        }
+        else
+        {
+            m_AnimTickFreezeTime = 0;
+            m_LastGameAnimTick = tick;
+        }
+    }
+    else
+    {
+        m_AnimTickFreezeTime ++;
+        if(m_AnimTickFreezeTime >= m_MaxFreezeTime)
+            freeze = true;
+    }
+
+    //the game is freezed somehow, kill it
+    if(freeze)
+    {
+        HANDLE ProcessHandle = OpenProcess(PROCESS_TERMINATE, FALSE, pid);
+        if(ProcessHandle)
+        {
+            if(STATUS_SUCCESS == NtTerminateProcess(ProcessHandle, 0))
+            {
+                m_AttachHwnd = NULL;
+            }
+            CloseHandle(ProcessHandle);
+        }
+    }
+}
+
+bool IsProcessThreadPresent(quint32 ProcessId, quint32 ThreadId)
+{
+    bool bPresent = false;
+    HANDLE ThreadHandle = OpenThread(THREAD_QUERY_LIMITED_INFORMATION, FALSE, ThreadId);
+    if(ThreadHandle)
+    {
+        THREAD_BASIC_INFORMATION tbi;
+        if(STATUS_SUCCESS == NtQueryInformationThread(ThreadHandle, ThreadBasicInformation, &tbi, sizeof(tbi), NULL))
+        {
+             if(tbi.ClientId.UniqueProcess == (HANDLE)ProcessId && tbi.ExitStatus == STATUS_PENDING){
+                bPresent = true;
+             }
+        }
+        CloseHandle(ThreadHandle);
+    }
+    return bPresent;
 }

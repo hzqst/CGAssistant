@@ -42,14 +42,16 @@
 
 #define BattlePlayerAction_Ignore 0
 #define BattlePlayerAction_Attack 1
-#define BattlePlayerAction_Defense 2
+#define BattlePlayerAction_Guard 2
 #define BattlePlayerAction_Escape 3
 #define BattlePlayerAction_ExchangePosition 4
 #define BattlePlayerAction_ChangePet 5
 #define BattlePlayerAction_UseItem 6
 #define BattlePlayerAction_LogBack 7
+#define BattlePlayerAction_Rebirth 8
+#define BattlePlayerAction_DoNothing 9
 #define BattlePlayerAction_Skill 100
-#define BattlePlayerAction_Max 8
+#define BattlePlayerAction_Max 10
 
 #define BattleTarget_Enemy 0
 #define BattleTarget_Teammate 1
@@ -78,8 +80,9 @@
 #define BattleTarget_Select_Max 15
 
 #define BattlePetAction_Ignore 0
+#define BattlePetAction_DoNothing 1
 #define BattlePetAction_Skill 100
-#define BattlePetAction_Max 1
+#define BattlePetAction_Max 2
 
 typedef struct CGA_BattleContext_s CGA_BattleContext_t;
 
@@ -448,13 +451,12 @@ public:
     virtual int GetTargetFlags(CGA_BattleContext_t &context){
         return FL_SKILL_SINGLE | FL_SKILL_TO_PET | FL_SKILL_TO_TEAMMATE | FL_SKILL_TO_ENEMY | FL_SKILL_FRONT_ONLY | FL_SKILL_SELECT_TARGET;
     }
-
 };
 
-class CBattleAction_PlayerDefense : public CBattleAction
+class CBattleAction_PlayerGuard : public CBattleAction
 {
 public:
-    virtual int GetActionTypeId() {return BattlePlayerAction_Defense;}
+    virtual int GetActionTypeId() {return BattlePlayerAction_Guard;}
     virtual void GetActionName(QString &str);
     virtual bool DoAction(int target, int defaultTarget, CGA_BattleContext_t &context);
     virtual int GetTargetFlags(CGA_BattleContext_t &context){
@@ -548,6 +550,30 @@ public:
     }
 };
 
+class CBattleAction_PlayerRebirth : public CBattleAction
+{
+public:
+    CBattleAction_PlayerRebirth();
+    virtual int GetActionTypeId() {return BattlePlayerAction_Rebirth;}
+    virtual void GetActionName(QString &str);
+    virtual bool DoAction(int target, int defaultTarget, CGA_BattleContext_t &context);
+    virtual int GetTargetFlags(CGA_BattleContext_t &context){
+        return 0;
+    }
+};
+
+class CBattleAction_PlayerDoNothing : public CBattleAction
+{
+public:
+    CBattleAction_PlayerDoNothing();
+    virtual int GetActionTypeId() {return BattlePlayerAction_DoNothing;}
+    virtual void GetActionName(QString &str);
+    virtual bool DoAction(int target, int defaultTarget, CGA_BattleContext_t &context);
+    virtual int GetTargetFlags(CGA_BattleContext_t &context){
+        return 0;
+    }
+};
+
 class CBattleAction_PetSkillAttack : public CBattleAction
 {
 public:
@@ -619,7 +645,10 @@ public:
 class CBattleSetting
 {
 public:
-    CBattleSetting(CBattleCondition *cond, CBattleCondition *cond2, CBattleAction *playerAction, CBattleTarget *playerTarget, CBattleAction *petAction, CBattleTarget *petTarget);
+    CBattleSetting(CBattleCondition *cond, CBattleCondition *cond2,
+                   CBattleAction *playerAction, CBattleTarget *playerTarget,
+                   CBattleAction *petAction, CBattleTarget *petTarget/*,
+                  CBattleAction *petAction2, CBattleTarget *petTarget2*/);
     ~CBattleSetting();
 
     virtual bool DoAction(CGA_BattleContext_t &context);
@@ -635,18 +664,29 @@ public:
 
     virtual void GetPlayerActionName(QString &str);
     virtual void GetPlayerTargetName(QString &str);
+
     virtual void GetPetActionName(QString &str);
     virtual void GetPetTargetName(QString &str);
+
+    //virtual void GetPetAction2Name(QString &str);
+    //virtual void GetPetTarget2Name(QString &str);
 
     virtual int GetPlayerActionTypeId();
     virtual QString GetPlayerSkillName();
     virtual int GetPlayerSkillLevel();
     virtual int GetPlayerTargetTypeId();
     virtual int GetPlayerTargetSelectId();
+
     virtual int GetPetActionTypeId();
     virtual QString GetPetSkillName();
     virtual int GetPetTargetTypeId();
-     virtual int GetPetTargetSelectId();
+    virtual int GetPetTargetSelectId();
+
+    /*virtual int GetPetAction2TypeId();
+    virtual QString GetPetSkill2Name();
+    virtual int GetPetTarget2TypeId();
+    virtual int GetPetTarget2SelectId();*/
+
     virtual bool HasPlayerAction();
     virtual bool HasPetAction();
 private:
@@ -654,7 +694,9 @@ private:
     CBattleAction *m_playerAction;
     CBattleTarget *m_playerTarget;
     CBattleAction *m_petAction;
+    //CBattleAction *m_petAction2;
     CBattleTarget *m_petTarget;
+    //CBattleTarget *m_petTarget2;
     CBattleTarget *m_defaultTarget;
 };
 
@@ -700,6 +742,11 @@ typedef struct CGA_BattleContext_s
 {
     CGA_BattleContext_s()
     {
+        m_bRoundZeroNotified = false;
+        m_bIsPetDoubleAction = false;
+        m_bIsPlayerForceAction = false;
+        m_bIsPlayerActionPerformed = false;
+        m_bIsPlayerEscaped = false;
         m_iPlayerStatus = 0;
         m_iPlayerPosition = 0;
         m_iRoundCount = 0;
@@ -718,6 +765,11 @@ typedef struct CGA_BattleContext_s
     bool m_bIsPlayer;
     bool m_bIsDouble;
     bool m_bIsSkillPerformed;
+    bool m_bRoundZeroNotified;
+    bool m_bIsPetDoubleAction;
+    bool m_bIsPlayerForceAction;
+    bool m_bIsPlayerActionPerformed;
+    bool m_bIsPlayerEscaped;
     int m_iPlayerStatus;
     int m_iPlayerPosition;
     int m_iRoundCount;
@@ -760,10 +812,12 @@ public slots:
     void OnSetFRND(int state);
     void OnSetLv1Protect(int state);
     void OnSetLockCountdown(int state);
-    void OnSetShowHPMP(int state);
+    void OnSetNoSwitchAnim(int state);
     void OnSetDelayFrom(int val);
     void OnSetDelayTo(int val);
     void OnSetHighSpeed(int val);
+    void OnSetPetDoubleAction(int state);
+    void OnSetPlayerForceAction(int state);
     void OnSyncList(CBattleSettingList list);
 signals:
     void NotifyBattleAction(int flags);
@@ -774,6 +828,9 @@ public:
     bool m_bLevelOneProtect;
     bool m_bLockCountdown;
     bool m_bShowHPMP;
+    bool m_bPetDoubleAction;
+    bool m_bPlayerForceAction;
+    bool m_bNoSwitchAnim;
     int m_iDelayFrom;
     int m_iDelayTo;
     uint64_t m_LastWarpMap202;

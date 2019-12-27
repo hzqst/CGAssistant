@@ -143,7 +143,7 @@ bool CBattleCondition_PlayerHp::Check(CGA_BattleContext_t &context, int &conditi
     int curv = context.m_UnitGroup[context.m_iPlayerPosition].curhp;
     int maxv = context.m_UnitGroup[context.m_iPlayerPosition].maxhp;
 
-    if(m_percentage){
+    if(m_percentage && maxv > 0){
         switch (m_relation)
         {
         case BattleCond_NumRel_EGT:
@@ -258,7 +258,7 @@ bool CBattleCondition_PlayerMp::Check(CGA_BattleContext_t &context, int &conditi
         return false;
     int curv = context.m_UnitGroup[context.m_iPlayerPosition].curmp;
     int maxv = context.m_UnitGroup[context.m_iPlayerPosition].maxmp;
-    if(m_percentage){
+    if(m_percentage && maxv > 0){
         switch (m_relation)
         {
         case BattleCond_NumRel_EGT:
@@ -374,7 +374,7 @@ bool CBattleCondition_PetHp::Check(CGA_BattleContext_t &context, int &conditionT
         return false;
     int curv = context.m_UnitGroup[context.m_iPetPosition].curhp;
     int maxv = context.m_UnitGroup[context.m_iPetPosition].maxhp;
-    if(m_percentage){
+    if(m_percentage && maxv > 0){
         switch (m_relation)
         {
         case BattleCond_NumRel_EGT:
@@ -488,7 +488,7 @@ bool CBattleCondition_PetMp::Check(CGA_BattleContext_t &context, int &conditionT
         return false;
     int curv = context.m_UnitGroup[context.m_iPetPosition].curmp;
     int maxv = context.m_UnitGroup[context.m_iPetPosition].maxmp;
-    if(m_percentage){
+    if(m_percentage && maxv > 0){
         switch (m_relation)
         {
         case BattleCond_NumRel_EGT:
@@ -607,7 +607,7 @@ bool CBattleCondition_TeammateHp::Check(CGA_BattleContext_t &context, int &condi
         int curv = context.m_UnitGroup[i].curhp;
         int maxv = context.m_UnitGroup[i].maxhp;
         //qDebug("curhp%d maxhp%d v%d r%d p%d", curv, maxv, m_value, m_relation, m_percentage?1:0);
-        if(m_percentage){
+        if(m_percentage && maxv > 0){
             switch (m_relation)
             {
             case BattleCond_NumRel_EGT:
@@ -717,7 +717,7 @@ bool CBattleCondition_TeammateMp::Check(CGA_BattleContext_t &context, int &condi
         int curv = context.m_UnitGroup[i].curmp;
         int maxv = context.m_UnitGroup[i].maxmp;
         //qDebug("curhp%d maxhp%d v%d r%d p%d", curv, maxv, m_value, m_relation, m_percentage?1:0);
-        if(m_percentage){
+        if(m_percentage && maxv > 0){
             switch (m_relation)
             {
             case BattleCond_NumRel_EGT:
@@ -826,7 +826,7 @@ bool CBattleCondition_EnemyMultiTargetHp::Check(CGA_BattleContext_t &context, in
         int curv = context.m_UnitGroup[i].curhp;
         int maxv = context.m_UnitGroup[i].maxhp;
         //qDebug("curhp%d maxhp%d v%d r%d p%d", curv, maxv, m_value, m_relation, m_percentage?1:0);
-        if(m_percentage){
+        if(m_percentage && maxv > 0){
             switch (m_relation)
             {
             case BattleCond_NumRel_EGT:
@@ -936,7 +936,7 @@ bool CBattleCondition_TeammateMultiTargetHp::Check(CGA_BattleContext_t &context,
         int curv = context.m_UnitGroup[i].multi_hp;
         int maxv = context.m_UnitGroup[i].multi_maxhp;
         qDebug("CBattleCondition_TeammateMultiTargetHp curhp%d maxhp%d v%d r%d p%d", curv, maxv, m_value, m_relation, m_percentage?1:0);
-        if(m_percentage){
+        if(m_percentage && maxv > 0){
             switch (m_relation)
             {
             case BattleCond_NumRel_EGT:
@@ -1038,7 +1038,7 @@ void CBattleCondition_EnemyAllHp::GetConditionName(QString &str)
 bool CBattleCondition_EnemyAllHp::Check(CGA_BattleContext_t &context, int &conditionTarget)
 {
     int curv = 0, maxv = 0;
-    for(int i = 0xA;i < 20; ++i)
+    for(int i = 0xA; i < 20; ++i)
     {
         if(!context.m_UnitGroup[i].exist)
             continue;
@@ -1046,7 +1046,7 @@ bool CBattleCondition_EnemyAllHp::Check(CGA_BattleContext_t &context, int &condi
         maxv += context.m_UnitGroup[i].maxhp;
     }
 
-    if(m_percentage){
+    if(m_percentage && maxv > 0){
         switch (m_relation)
         {
         case BattleCond_NumRel_EGT:
@@ -1146,7 +1146,7 @@ bool CBattleCondition_TeammateAllHp::Check(CGA_BattleContext_t &context, int &co
         maxv += context.m_UnitGroup[i].maxhp;
     }
 
-    if(m_percentage){
+    if(m_percentage && maxv > 0){
         switch (m_relation)
         {
         case BattleCond_NumRel_EGT:
@@ -1263,17 +1263,17 @@ bool CBattleCondition_Round::Check(CGA_BattleContext_t &context, int &conditionT
     switch (m_relation)
     {
     case BattleCond_NumRel_EGT:
-        return context.m_iRoundCount >= m_value;
+        return context.m_iRoundCount + 1 >= m_value;
     case BattleCond_NumRel_GT:
-        return context.m_iRoundCount > m_value;
+        return context.m_iRoundCount + 1 > m_value;
     case BattleCond_NumRel_ELT:
-        return context.m_iRoundCount <= m_value;
+        return context.m_iRoundCount + 1 <= m_value;
     case BattleCond_NumRel_LT:
-        return context.m_iRoundCount < m_value;
+        return context.m_iRoundCount + 1 < m_value;
     case BattleCond_NumRel_EQ:
-        return context.m_iRoundCount == m_value;
+        return context.m_iRoundCount + 1 == m_value;
     case BattleCond_NumRel_NEQ:
-        return context.m_iRoundCount != m_value;
+        return context.m_iRoundCount + 1 != m_value;
     }
 
     return false;
@@ -1512,15 +1512,15 @@ bool CBattleAction_PlayerAttack::DoAction(int target, int defaultTarget, CGA_Bat
     return result;
 }
 
-void CBattleAction_PlayerDefense::GetActionName(QString &str)
+void CBattleAction_PlayerGuard::GetActionName(QString &str)
 {
-    str = QObject::tr("Defense");
+    str = QObject::tr("Guard");
 }
 
-bool CBattleAction_PlayerDefense::DoAction(int target, int defaultTarget, CGA_BattleContext_t &context)
+bool CBattleAction_PlayerGuard::DoAction(int target, int defaultTarget, CGA_BattleContext_t &context)
 {
     bool result = false;
-    g_CGAInterface->BattleDefense(result);
+    g_CGAInterface->BattleGuard(result);
     return result;
 }
 
@@ -1533,6 +1533,7 @@ bool CBattleAction_PlayerEscape::DoAction(int target, int defaultTarget, CGA_Bat
 {
     bool result = false;
     g_CGAInterface->BattleEscape(result);
+    context.m_bIsPlayerEscaped = true;
     return result;
 }
 
@@ -1700,7 +1701,7 @@ bool CBattleAction_PlayerSkillAttack::DoAction(int target, int defaultTarget, CG
     if(context.m_bIsSkillPerformed == false && GetSkill(context, skill_pos, skill_level)){
         qDebug("BattleSkillAttack %d %d %d", skill_pos, skill_level, target);
         FixTarget(context, skill_pos, skill_level, target);
-        g_CGAInterface->BattleSkillAttack(skill_pos, skill_level, target, result);
+        g_CGAInterface->BattleSkillAttack(skill_pos, skill_level, target, context.m_bIsPlayerForceAction ? true : false, result);
     }
 
     if(!result){
@@ -1772,7 +1773,7 @@ void CBattleAction_PlayerSkillAttack::FixTarget(CGA_BattleContext_t &context, in
                 target = 42;
                 return;
             }
-            target = -1;
+            target = 255;
             return;
         }
     }
@@ -1843,6 +1844,44 @@ bool CBattleAction_PlayerLogBack::DoAction(int target, int defaultTarget, CGA_Ba
     return g_CGAInterface->LogBack();
 }
 
+CBattleAction_PlayerRebirth::CBattleAction_PlayerRebirth()
+{
+
+}
+
+void CBattleAction_PlayerRebirth::GetActionName(QString &str)
+{
+    str = QObject::tr("Rebirth");
+}
+
+bool CBattleAction_PlayerRebirth::DoAction(int target, int defaultTarget, CGA_BattleContext_t &context)
+{
+    bool result = false;
+    if(g_CGAInterface->BattleRebirth(result))
+        return result;
+
+    return false;
+}
+
+CBattleAction_PlayerDoNothing::CBattleAction_PlayerDoNothing()
+{
+
+}
+
+void CBattleAction_PlayerDoNothing::GetActionName(QString &str)
+{
+    str = QObject::tr("Do Nothing");
+}
+
+bool CBattleAction_PlayerDoNothing::DoAction(int target, int defaultTarget, CGA_BattleContext_t &context)
+{
+    bool result = false;
+    if(g_CGAInterface->BattleDoNothing(result))
+        return result;
+
+    return false;
+}
+
 CBattleAction_PetSkillAttack::CBattleAction_PetSkillAttack(QString &skillName)
 {
     m_SkillName = skillName;
@@ -1885,6 +1924,14 @@ bool CBattleAction_PetSkillAttack::DoAction(int target, int defaultTarget, CGA_B
 
     bool result = false;
     bool bUseDefaultTarget = false;
+
+    auto donothing = QObject::tr("Do Nothing");
+    if(donothing == m_SkillName)
+    {
+        g_CGAInterface->BattleDoNothing(result);
+        return result;
+    }
+
     if(GetSkill(context, skillpos, bUseDefaultTarget))
     {
         //qDebug("target1=%d", target);
@@ -1892,9 +1939,15 @@ bool CBattleAction_PetSkillAttack::DoAction(int target, int defaultTarget, CGA_B
         //qDebug("target2=%d", target);
         FixTarget(context, skillpos, target);
         //qDebug("target3=%d", target);
-        result = g_CGAInterface->BattlePetSkillAttack(skillpos, target, result);
+        if(context.m_bIsPetDoubleAction && !context.m_bIsPlayerEscaped){
+            g_CGAInterface->BattlePetSkillAttack(skillpos, target, true, result);
+            g_CGAInterface->BattlePetSkillAttack(skillpos, target, true, result);
+        } else {
+            g_CGAInterface->BattlePetSkillAttack(skillpos, target, false, result);
+        }
     }
-    qDebug("BattlePetSkillAttack %d %d\n", skillpos, target);
+
+    qDebug("BattlePetSkillAttack %d %d", skillpos, target);
 
     return result;
 }
@@ -2250,7 +2303,10 @@ int CBattleTarget_Teammate::GetTarget(int unitpos, int flags, CGA_BattleContext_
     return newGroup[0].pos;
 }
 
-CBattleSetting::CBattleSetting(CBattleCondition *cond, CBattleCondition *cond2, CBattleAction *playerAction, CBattleTarget *playerTarget, CBattleAction *petAction, CBattleTarget *petTarget)
+CBattleSetting::CBattleSetting(CBattleCondition *cond, CBattleCondition *cond2,
+                               CBattleAction *playerAction, CBattleTarget *playerTarget,
+                               CBattleAction *petAction, CBattleTarget *petTarget/*,
+                               CBattleAction *petAction2, CBattleTarget *petTarget2*/)
 {
     m_condition = cond;
     m_condition2 = cond2;
@@ -2258,6 +2314,8 @@ CBattleSetting::CBattleSetting(CBattleCondition *cond, CBattleCondition *cond2, 
     m_playerTarget = playerTarget;
     m_petAction = petAction;
     m_petTarget = petTarget;
+    /*m_petAction2 = petAction2;
+    m_petTarget2 = petTarget2;*/
     m_defaultTarget = new CBattleTarget_Enemy(BattleTarget_Select_Random);
 }
 
@@ -2283,7 +2341,7 @@ bool CBattleSetting::DoAction(CGA_BattleContext_t &context)
 {
     int conditionTarget = -1, condition2Target = -1;
 
-    qDebug("checking condition %d %d", GetConditionTypeId(), GetCondition2TypeId());
+    //qDebug("checking condition %d %d", GetConditionTypeId(), GetCondition2TypeId());
 
     if(!m_condition && !m_condition2)
         return false;
@@ -2291,12 +2349,12 @@ bool CBattleSetting::DoAction(CGA_BattleContext_t &context)
     if(m_condition && !m_condition->Check(context, conditionTarget))
         return false;
 
-    qDebug("checking condition 1 pass");
+    //qDebug("checking condition 1 pass");
 
     if(m_condition2 && !m_condition2->Check(context, condition2Target))
         return false;
 
-    qDebug("checking condition 2 pass");
+    //qDebug("checking condition 2 pass");
 
     if(conditionTarget != -1){
         context.m_iConditionTarget = conditionTarget;
@@ -2308,14 +2366,63 @@ bool CBattleSetting::DoAction(CGA_BattleContext_t &context)
         context.m_iConditionTarget = -1;
     }
 
-    bool bIsPet = (context.m_iPlayerStatus == 4 && context.m_iPetPosition >= 0 && context.m_iPetId != -1) ? true : false;
+    bool bHasPet = context.m_iPetPosition >= 0 && context.m_iPetId != -1;
+    bool bIsPetAction = (context.m_iPlayerStatus == 4) ? true : false;
 
-    int flags = 0;
-    int target = -1;
-    int defaultTarget = -1;
-    int defaultFlags = FL_SKILL_SINGLE | FL_SKILL_TO_PET | FL_SKILL_TO_TEAMMATE | FL_SKILL_TO_ENEMY | FL_SKILL_FRONT_ONLY | FL_SKILL_SELECT_TARGET;
-    if(!bIsPet && m_playerAction)
+    if(!bIsPetAction && m_playerAction)
     {
+        if(context.m_bIsPetDoubleAction && bHasPet)
+        {
+            if(m_petAction)
+            {
+                int flags = 0;
+                int target = -1;
+                int defaultTarget = -1;
+                int defaultFlags = FL_SKILL_SINGLE | FL_SKILL_TO_PET | FL_SKILL_TO_TEAMMATE | FL_SKILL_TO_ENEMY | FL_SKILL_FRONT_ONLY | FL_SKILL_SELECT_TARGET;
+
+                qDebug("m_petAction");
+
+                flags = m_petAction->GetTargetFlags(context);
+
+                if(m_petTarget)
+                    target = m_petTarget->GetTarget(context.m_iPetPosition, flags, context);
+
+                if(m_defaultTarget)
+                    defaultTarget = m_defaultTarget->GetTarget(context.m_iPetPosition, defaultFlags, context);
+
+                if(m_petAction->DoAction(target, defaultTarget, context)){
+                    qDebug("m_petAction ok");
+                }
+            }
+            /*{
+                int flags = 0;
+                int target = -1;
+                int defaultTarget = -1;
+                int defaultFlags = FL_SKILL_SINGLE | FL_SKILL_TO_PET | FL_SKILL_TO_TEAMMATE | FL_SKILL_TO_ENEMY | FL_SKILL_FRONT_ONLY | FL_SKILL_SELECT_TARGET;
+
+                qDebug("m_petAction2");
+
+                context.m_bIsPetDoubleAction = true;
+
+                flags = m_petAction2->GetTargetFlags(context);
+
+                if(m_petTarget2)
+                    target = m_petTarget2->GetTarget(context.m_iPetPosition, flags, context);
+
+                if(m_defaultTarget)
+                    defaultTarget = m_defaultTarget->GetTarget(context.m_iPetPosition, defaultFlags, context);
+
+                if(m_petAction2->DoAction(target, defaultTarget, context)){
+                    qDebug("m_petAction2 ok");
+                }
+            }*/
+        }
+
+        int flags = 0;
+        int target = -1;
+        int defaultTarget = -1;
+        int defaultFlags = FL_SKILL_SINGLE | FL_SKILL_TO_PET | FL_SKILL_TO_TEAMMATE | FL_SKILL_TO_ENEMY | FL_SKILL_FRONT_ONLY | FL_SKILL_SELECT_TARGET;
+
         flags = m_playerAction->GetTargetFlags(context);
 
         if(m_playerTarget)
@@ -2326,26 +2433,78 @@ bool CBattleSetting::DoAction(CGA_BattleContext_t &context)
 
         //qDebug("m_playerAction DoAction");
 
-        if(m_playerAction->DoAction(target, defaultTarget, context))
+        if(m_playerAction->DoAction(target, defaultTarget, context)){
+            context.m_bIsPlayerActionPerformed = true;
             return true;
-
+        } else {
+            bool result = false;
+            if(g_CGAInterface->BattleDoNothing(result) && result)
+            {
+                context.m_bIsPlayerActionPerformed = true;
+                return true;
+            }
+        }
         qDebug("m_playerAction failed to DoAction");
     }
 
-    if(bIsPet && m_petAction)
+    if(bIsPetAction && m_petAction)
     {
+        if(context.m_bIsPlayerForceAction && m_playerAction && !context.m_bIsPlayerActionPerformed)
+        {
+            int flags = 0;
+            int target = -1;
+            int defaultTarget = -1;
+            int defaultFlags = FL_SKILL_SINGLE | FL_SKILL_TO_PET | FL_SKILL_TO_TEAMMATE | FL_SKILL_TO_ENEMY | FL_SKILL_FRONT_ONLY | FL_SKILL_SELECT_TARGET;
+
+            flags = m_playerAction->GetTargetFlags(context);
+
+            if(m_playerTarget)
+                target = m_playerTarget->GetTarget(context.m_iPlayerPosition, flags, context);
+
+            if(m_defaultTarget)
+                defaultTarget = m_defaultTarget->GetTarget(context.m_iPlayerPosition, defaultFlags, context);
+
+            //qDebug("m_playerAction DoAction");
+
+            if(m_playerAction->DoAction(target, defaultTarget, context)){
+                context.m_bIsPlayerActionPerformed = true;
+            } else {
+                bool result = false;
+                if(g_CGAInterface->BattleDoNothing(result) && result)
+                {
+                    context.m_bIsPlayerActionPerformed = true;
+                }
+            }
+        }
+
+        int flags = 0;
+        int target = -1;
+        int defaultTarget = -1;
+        int defaultFlags = FL_SKILL_SINGLE | FL_SKILL_TO_PET | FL_SKILL_TO_TEAMMATE | FL_SKILL_TO_ENEMY | FL_SKILL_FRONT_ONLY | FL_SKILL_SELECT_TARGET;
+
+        qDebug("m_petAction");
+
+        context.m_bIsPetDoubleAction = false;
+
         flags = m_petAction->GetTargetFlags(context);
 
         if(m_petTarget)
             target = m_petTarget->GetTarget(context.m_iPetPosition, flags, context);
 
         if(m_defaultTarget)
-            defaultTarget = m_defaultTarget->GetTarget(context.m_iPetPosition, flags, context);
+            defaultTarget = m_defaultTarget->GetTarget(context.m_iPetPosition, defaultFlags, context);
 
-        if(m_petAction->DoAction(target, defaultTarget, context))
+        if(m_petAction->DoAction(target, defaultTarget, context)){
+            qDebug("m_petAction ok");
             return true;
+        } else {
+            bool result = false;
+            if(g_CGAInterface->BattleDoNothing(result) && result)
+                return true;
+        }
     }
 
+     qDebug("action failed");
     return false;
 }
 
@@ -2372,6 +2531,18 @@ void CBattleSetting::GetPetTargetName(QString &str)
     if(m_petTarget)
         m_petTarget->GetTargetName(str);
 }
+
+/*void CBattleSetting::GetPetAction2Name(QString &str)
+{
+    if(m_petAction2)
+        m_petAction2->GetActionName(str);
+}
+
+void CBattleSetting::GetPetTarget2Name(QString &str)
+{
+    if(m_petTarget2)
+        m_petTarget2->GetTargetName(str);
+}*/
 
 void CBattleSetting::GetConditionName(QString &str)
 {
@@ -2501,6 +2672,37 @@ int CBattleSetting::GetPetTargetSelectId()
     return -1;
 }
 
+/*int CBattleSetting::GetPetAction2TypeId()
+{
+    if(m_petAction2)
+        return m_petAction2->GetActionTypeId();
+    return -1;
+}
+
+QString CBattleSetting::GetPetSkill2Name()
+{
+    if(m_petAction && m_petAction->GetActionTypeId() == BattlePetAction_Skill)
+    {
+        auto sk = dynamic_cast<CBattleAction_PetSkillAttack *>(m_petAction2);
+        return sk->GetSkillName();
+    }
+    return QString();
+}
+
+int CBattleSetting::GetPetTarget2TypeId()
+{
+    if(m_petTarget2)
+        return m_petTarget2->GetTargetTypeId();
+    return -1;
+}
+
+int CBattleSetting::GetPetTarget2SelectId()
+{
+    if(m_petTarget2)
+        return m_petTarget2->GetTargetSelectId();
+    return -1;
+}*/
+
 bool CBattleSetting::HasPlayerAction()
 {
     return (m_playerAction) ? true : false;
@@ -2517,7 +2719,9 @@ CBattleWorker::CBattleWorker()
     m_bHighSpeed = false;
     m_bFirstRoundNoDelay = false;
     m_bLevelOneProtect = false;
-    m_bShowHPMP = false;
+    m_bNoSwitchAnim = false;
+    m_bPetDoubleAction = false;
+    m_bPlayerForceAction = false;
     m_iDelayFrom = 0;
     m_iDelayTo = 0;
     m_LastWarpMap202 = 0;
@@ -2557,6 +2761,9 @@ void CBattleWorker::OnLockCountdown()
     if (g_CGAInterface->GetWorldStatus(worldStatus) && worldStatus != 10)
 	{
 		m_BattleContext.m_iLastRound = -1;
+        m_BattleContext.m_bRoundZeroNotified = false;
+        m_BattleContext.m_bIsPlayerActionPerformed = false;
+        m_BattleContext.m_bIsPlayerEscaped = false;
 		return;
 	}
 
@@ -3084,12 +3291,17 @@ void CBattleWorker::OnNotifyBattleAction(int flags)
 {
     int ingame = 0;
 
+    //qDebug("OnNotifyBattleAction.");
+
     if(!g_CGAInterface->IsConnected() || !g_CGAInterface->IsInGame(ingame) || !ingame)
         return;
 
-    if(flags & FL_BATTLE_ACTION_END)
+    if((flags & FL_BATTLE_ACTION_END) || (flags & FL_BATTLE_ACTION_BEGIN))
     {
         m_BattleContext.m_iLastRound = -1;
+        m_BattleContext.m_bRoundZeroNotified = false;
+        m_BattleContext.m_bIsPlayerActionPerformed = false;
+        m_BattleContext.m_bIsPlayerEscaped = false;
         return;
     }
 
@@ -3111,30 +3323,52 @@ void CBattleWorker::OnNotifyBattleAction(int flags)
     m_BattleContext.m_iPetSkillAllowBit = ctx.petskill_allowbit;
 
     if(m_BattleContext.m_iPlayerStatus != 1 && m_BattleContext.m_iPlayerStatus != 4)
+     {
+        //qDebug("m_iPlayerStatus =%d", m_BattleContext.m_iPlayerStatus);
         return;
+    }
 
     m_BattleContext.m_bIsPlayer = (flags & FL_BATTLE_ACTION_ISPLAYER) ? true : false;
     m_BattleContext.m_bIsDouble = (flags & FL_BATTLE_ACTION_ISDOUBLE) ? true : false;
     m_BattleContext.m_bIsSkillPerformed = (flags & FL_BATTLE_ACTION_ISSKILLPERFORMED) ? true : false;
 
-    //qDebug("petid = %d m_bIsSkillPerformed = %d\n", m_BattleContext.m_iPetId, m_BattleContext.m_bIsSkillPerformed ? 1 : 0);
+    if(m_BattleContext.m_iRoundCount == 0 && m_BattleContext.m_iLastRound != m_BattleContext.m_iRoundCount)
+        m_BattleContext.m_bRoundZeroNotified = true;
 
+    m_BattleContext.m_bIsPetDoubleAction = m_bPetDoubleAction;
+    m_BattleContext.m_bIsPlayerForceAction = m_bPlayerForceAction;
     GetBattleUnits();
 
     if(m_bAutoBattle)
     {
+        //qDebug("petid = %d m_bIsSkillPerformed = %d\n", m_BattleContext.m_iPetId, m_BattleContext.m_bIsSkillPerformed ? 1 : 0);
+
         if(CheckLevelOneProtect()){
             //qDebug("Found Lv1 enemy, stopped.");
             return;
         }
 
-        if(((m_BattleContext.m_iRoundCount == 0 && !m_bFirstRoundNoDelay) || m_BattleContext.m_iRoundCount > 0) && m_BattleContext.m_iLastRound != m_BattleContext.m_iRoundCount)
+        if(m_bNoSwitchAnim && m_BattleContext.m_iLastRound != m_BattleContext.m_iRoundCount )
         {
             int randDelay = qrand() * (m_iDelayTo - m_iDelayFrom) / RAND_MAX + m_iDelayFrom;
             if(randDelay < 1)
                 randDelay = 1;
             if(randDelay > 10000)
                 randDelay = 10000;
+
+            if(!m_BattleContext.m_bRoundZeroNotified && m_BattleContext.m_iRoundCount == 1)
+                randDelay += 4000;
+
+            QTimer::singleShot( randDelay, this, SLOT(OnPerformanceBattle()) );
+        }
+        else if(((m_BattleContext.m_iRoundCount == 0 && !m_bFirstRoundNoDelay) || m_BattleContext.m_iRoundCount > 0) && m_BattleContext.m_iLastRound != m_BattleContext.m_iRoundCount)
+        {
+            int randDelay = qrand() * (m_iDelayTo - m_iDelayFrom) / RAND_MAX + m_iDelayFrom;
+            if(randDelay < 1)
+                randDelay = 1;
+            if(randDelay > 10000)
+                randDelay = 10000;
+
             QTimer::singleShot( randDelay, this, SLOT(OnPerformanceBattle()) );
         }
         else
@@ -3142,9 +3376,14 @@ void CBattleWorker::OnNotifyBattleAction(int flags)
             OnPerformanceBattle();
         }
 
-        qDebug("m_iRoundCount %d m_iLastRound %d", m_BattleContext.m_iRoundCount, m_BattleContext.m_iLastRound);
+        //qDebug("m_iRoundCount %d m_iLastRound %d", m_BattleContext.m_iRoundCount, m_BattleContext.m_iLastRound);
+    }
 
-		m_BattleContext.m_iLastRound = m_BattleContext.m_iRoundCount;
+    if(m_BattleContext.m_iRoundCount != m_BattleContext.m_iLastRound)
+    {
+        m_BattleContext.m_iLastRound = m_BattleContext.m_iRoundCount;
+        m_BattleContext.m_bIsPlayerActionPerformed = false;
+        m_BattleContext.m_bIsPlayerEscaped = false;
     }
 }
 
@@ -3178,11 +3417,19 @@ void CBattleWorker::OnSetLockCountdown(int state)
     m_bLockCountdown = state ? true : false;
 }
 
-
-void CBattleWorker::OnSetShowHPMP(int state)
+void CBattleWorker::OnSetNoSwitchAnim(int state)
 {
-    m_bShowHPMP = state ? true : false;
-    g_CGAInterface->BattleSetShowHPMPEnabled(m_bShowHPMP);
+    m_bNoSwitchAnim = state ? true : false;
+}
+
+void CBattleWorker::OnSetPetDoubleAction(int state)
+{
+    m_bPetDoubleAction = state ? true : false;
+}
+
+void CBattleWorker::OnSetPlayerForceAction(int state)
+{
+    m_bPlayerForceAction = state ? true : false;
 }
 
 void CBattleWorker::OnSetDelayFrom(int val)

@@ -2,7 +2,6 @@
 #define MYWEBVIEW_H
 
 #include <QString>
-#include <QWebEngineView>
 
 class MyWebView : public QWebEngineView {
     Q_OBJECT
