@@ -1,5 +1,7 @@
 # CGAssistant
 
+![](https://github.com/hzqst/CGAssistant/raw/master/img/logo.png)
+
 CGAssistant is a helper for you to play CrossGate with highly automated game experience.
 
 Only cg_item_6000 supported for now
