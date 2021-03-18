@@ -32,7 +32,7 @@ Let's assume that you have all requirements installed correctly.
 
 ![](img/1.png)
 
-2. If your msvc2017 is not installed in default directory, edit every "build-*.bat", change "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars32.bat" to where your "vcvars32.bat" is located, just like what is mentioned in the snapshot below.
+2. If your MSVC2017 is not installed in default directory, edit every "build-*.bat", change "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars32.bat" to where your "vcvars32.bat" is located, just like what is mentioned in the snapshot below.
 
 ![](img/2.png)
 
