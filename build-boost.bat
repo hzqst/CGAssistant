@@ -1,7 +1,5 @@
 cd boost
 
-git submodule update --init --recursive
-
 if exist bjam.exe goto bjam
 
 bootstrap.bat
