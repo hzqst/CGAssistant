@@ -1,6 +1,6 @@
 # CGAssistant
 
-![](https://github.com/hzqst/CGAssistant/raw/master/img/logo.png)
+![](hzqst/CGAssistant/raw/master/img/logo.png)
 
 CGAssistant is a helper for you to play CrossGate with highly automated game experience.
 
@@ -26,11 +26,11 @@ Let's assume that you have all requirements installed correctly.
 
 1. Add "Qt5.xxx\Tools\QtCreator\bin\" and "Qt5.xxx\5.xxx\msvc2017\bin\" to your system environment variable "PATH" just like what is mentioned in the snapshot below.
 
-![](https://github.com/hzqst/CGAssistant/raw/master/img/1.png)
+![](hzqst/CGAssistant/raw/master/img/1.png)
 
 2. If your msvc2017 is not installed in default directory, edit every "build-*.bat", change "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars32.bat" to where your "vcvars32.bat" is located, just like what is mentioned in the snapshot below.
 
-![](https://github.com/hzqst/CGAssistant/raw/master/img/2.png)
+![](hzqst/CGAssistant/raw/master/img/2.png)
 
 3. Run "init-dependencies.bat", wait until all required submodules / dependencies are pulled. (this may takes couple of minutes, depending on your network connection and download speed)
 
