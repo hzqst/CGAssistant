@@ -2,15 +2,19 @@
 
 ![](img/logo.png)
 
+[中文README](READMECN.md)
+
 CGAssistant is a helper for you to play CrossGate with highly automated game experience.
 
 Only cg_item_6000 supported for now
 
 QQ Group: 300303705
 
-The latest package can be cloned or downloaded from https://github.com/hzqst/CGAssistantJS or https://gitee.com/hzqst/CGAssistantJS
+The latest package could be cloned or downloaded from https://github.com/hzqst/CGAssistantJS 
 
-### Requirement
+Wiki: https://github.com/hzqst/CGAssistantJS/wiki
+
+## Requirement
 
 Visual Studio 2017 with C++
 
