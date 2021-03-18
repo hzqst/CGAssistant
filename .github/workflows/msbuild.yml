@@ -24,7 +24,7 @@ jobs:
       uses: git-for-windows/setup-git-for-windows-sdk@v0.0.9
       with:
         # The subset (if any) of the SDK: minimal, makepkg-git, build-installers, or full
-        flavor: minimal
+        flavor: full
 
         architecture: i686
 
