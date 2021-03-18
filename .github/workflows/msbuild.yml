@@ -17,14 +17,46 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+
+    - name: Setup Git for Windows SDK
+      # You may pin to the exact commit or the version.
+      # uses: git-for-windows/setup-git-for-windows-sdk@cd2fc65085a5ceb095576ff6f5accbfbe693ed23
+      uses: git-for-windows/setup-git-for-windows-sdk@v0.0.9
+      with:
+        # The subset (if any) of the SDK: minimal, makepkg-git, build-installers, or full
+        flavor: # optional, default is minimal
+        # The architecture of the SDK: x86_64 or i686
+        architecture: i686 # optional, default is x86_64
+        # Where to write the SDK files
+        path: # optional, default is 
+        # Whether to log files as they are extracted
+        verbose: # optional, default is 250
+        # Use @actions/cache to accelerate this Action
+        cache: # optional, default is auto
     
     - name: Add MSBuild to PATH
       uses: microsoft/setup-msbuild@v1
       
+    - name: Cache
+      uses: actions/cache@v2.1.4
+      with:
+        # A list of files, directories, and wildcard patterns to cache and restore
+        path: ./boost/
+        # An explicit key for restoring and saving the cache
+        key: ${{ runner.OS }}-boost-${{ hashFiles('**/bootstrap.bat') }}
+        restore-keys: |
+          ${{ runner.OS }}-boost-
+        # The chunk size used to split up large files during upload, in bytes
+        upload-chunk-size: # optional
+
     - name: init-dep
       working-directory: ${{env.GITHUB_WORKSPACE}}
       run: git submodule update --init --recursive
       
+    - name: build-boost
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      run: call "${{env.GITHUB_WORKSPACE}}/build-boost.bat"
+
     - name: Build
       working-directory: ${{env.GITHUB_WORKSPACE}}
       run: MSBuild.exe CGAssistant.sln /t:CGAHook /p:Configuration=Release /p:Platform="x86" /p:PlatformToolset=v141
