@@ -80,6 +80,133 @@ void SayWords(const Nan::FunctionCallbackInfo<v8::Value>& info)
 	info.GetReturnValue().Set(true);
 }
 
+void ChangeNickName(const Nan::FunctionCallbackInfo<v8::Value>& info)
+{
+	Isolate* isolate = info.GetIsolate();
+	HandleScope handle_scope(isolate);
+
+	if (info.Length() < 1 || !info[0]->IsString()) {
+		Nan::ThrowTypeError("Arg[0] must be string.");
+		return;
+	}
+
+	v8::String::Utf8Value str(info[0]->ToString());
+
+	std::string sstr(*str);
+
+	bool bResult = false;
+
+	if (!g_CGAInterface->ChangeNickName(sstr, bResult))
+	{
+		Nan::ThrowError("RPC Invocation failed.");
+		return;
+	}
+
+	info.GetReturnValue().Set(bResult);
+}
+
+void ChangeTitleName(const Nan::FunctionCallbackInfo<v8::Value>& info)
+{
+	Isolate* isolate = info.GetIsolate();
+	HandleScope handle_scope(isolate);
+
+	if (info.Length() < 1 || !info[0]->IsInt32()) {
+		Nan::ThrowTypeError("Arg[0] must be integer.");
+		return;
+	}
+
+	bool bResult = false;
+	int titleId = (int)info[0]->IntegerValue();
+
+	if (!g_CGAInterface->ChangeTitleName(titleId, bResult))
+	{
+		Nan::ThrowError("RPC Invocation failed.");
+		return;
+	}
+
+	info.GetReturnValue().Set(bResult);
+}
+
+void ChangePersDesc(const Nan::FunctionCallbackInfo<v8::Value>& info)
+{
+	Isolate* isolate = info.GetIsolate();
+	HandleScope handle_scope(isolate);
+
+	if (info.Length() < 1 || !info[0]->IsObject()) {
+		Nan::ThrowTypeError("Arg[0] must be object.");
+		return;
+	}
+
+	CGA::cga_pers_desc_t desc ;
+
+	Local<Object> obj = Local<Object>::Cast(info[0]);
+
+	auto v_sellIcon = obj->Get(String::NewFromUtf8(isolate, "sell_icon"));
+	if (v_sellIcon->IsInt32())
+	{
+		desc.changeBits |= 1;
+		desc.sellIcon = (int)v_sellIcon->IntegerValue();
+	}
+
+	auto v_sellString = obj->Get(String::NewFromUtf8(isolate, "sell_string"));
+	if (v_sellString->IsString())
+	{
+		desc.changeBits |= 2;
+		v8::String::Utf8Value str(v_sellString->ToString());
+		std::string sellString(*str);
+		desc.sellString = sellString;
+	}
+
+	auto v_buyIcon = obj->Get(String::NewFromUtf8(isolate, "buy_icon"));
+	if (v_buyIcon->IsInt32())
+	{
+		desc.changeBits |= 4;
+		desc.buyIcon = (int)v_buyIcon->IntegerValue();
+	}
+
+	auto v_buyString = obj->Get(String::NewFromUtf8(isolate, "buy_string"));
+	if (v_buyString->IsString())
+	{
+		desc.changeBits |= 8;
+		v8::String::Utf8Value str(v_buyString->ToString());
+		std::string buyString(*str);
+		desc.buyString = buyString;
+	}
+
+	auto v_wantIcon = obj->Get(String::NewFromUtf8(isolate, "want_icon"));
+	if (v_wantIcon->IsInt32())
+	{
+		desc.changeBits |= 0x10;
+		desc.wantIcon = (int)v_wantIcon->IntegerValue();
+	}
+
+	auto v_wantString = obj->Get(String::NewFromUtf8(isolate, "want_string"));
+	if (v_wantString->IsString())
+	{
+		desc.changeBits |= 0x20;
+		v8::String::Utf8Value str(v_wantString->ToString());
+		std::string wantString(*str);
+		desc.wantString = wantString;
+	}
+
+	auto v_descString = obj->Get(String::NewFromUtf8(isolate, "desc_string"));
+	if (v_descString->IsString())
+	{
+		desc.changeBits |= 0x40;
+		v8::String::Utf8Value str(v_descString->ToString());
+		std::string descString(*str);
+		desc.descString = descString;
+	}
+
+	if (!g_CGAInterface->ChangePersDesc(desc))
+	{
+		Nan::ThrowError("RPC Invocation failed.");
+		return;
+	}
+
+	info.GetReturnValue().Set(true);
+}
+
 void Init(v8::Local<v8::Object> exports) {
 	g_CGAInterface = CGA::CreateInterface();
 
@@ -93,6 +220,10 @@ void Init(v8::Local<v8::Object> exports) {
 		Nan::New<v8::FunctionTemplate>(GetWorldStatus)->GetFunction());
 	exports->Set(Nan::New("GetGameStatus").ToLocalChecked(),
 		Nan::New<v8::FunctionTemplate>(GetGameStatus)->GetFunction());
+	exports->Set(Nan::New("GetBGMIndex").ToLocalChecked(),
+		Nan::New<v8::FunctionTemplate>(GetBGMIndex)->GetFunction());
+	exports->Set(Nan::New("GetSysTime").ToLocalChecked(),
+		Nan::New<v8::FunctionTemplate>(GetSysTime)->GetFunction());
 	exports->Set(Nan::New("GetPlayerInfo").ToLocalChecked(),
 		Nan::New<v8::FunctionTemplate>(GetPlayerInfo)->GetFunction());
 	exports->Set(Nan::New("SetPlayerFlagEnabled").ToLocalChecked(),
@@ -117,12 +248,16 @@ void Init(v8::Local<v8::Object> exports) {
 		Nan::New<v8::FunctionTemplate>(GetItemsInfo)->GetFunction());
 	exports->Set(Nan::New("GetBankItemsInfo").ToLocalChecked(),
 		Nan::New<v8::FunctionTemplate>(GetBankItemsInfo)->GetFunction());
+	exports->Set(Nan::New("GetBankGold").ToLocalChecked(),
+		Nan::New<v8::FunctionTemplate>(GetBankGold)->GetFunction());
 	exports->Set(Nan::New("IsPetValid").ToLocalChecked(),
 		Nan::New<v8::FunctionTemplate>(IsPetValid)->GetFunction());
 	exports->Set(Nan::New("GetPetInfo").ToLocalChecked(),
 		Nan::New<v8::FunctionTemplate>(GetPetInfo)->GetFunction());
 	exports->Set(Nan::New("GetPetsInfo").ToLocalChecked(),
 		Nan::New<v8::FunctionTemplate>(GetPetsInfo)->GetFunction());
+	exports->Set(Nan::New("GetBankPetsInfo").ToLocalChecked(),
+		Nan::New<v8::FunctionTemplate>(GetBankPetsInfo)->GetFunction());
 	exports->Set(Nan::New("IsPetSkillValid").ToLocalChecked(),
 		Nan::New<v8::FunctionTemplate>(IsPetSkillValid)->GetFunction());
 	exports->Set(Nan::New("GetPetSkillInfo").ToLocalChecked(),
@@ -191,6 +326,10 @@ void Init(v8::Local<v8::Object> exports) {
 		Nan::New<v8::FunctionTemplate>(PlayerMenuSelect)->GetFunction());
 	exports->Set(Nan::New("UnitMenuSelect").ToLocalChecked(),
 		Nan::New<v8::FunctionTemplate>(UnitMenuSelect)->GetFunction());
+	exports->Set(Nan::New("UpgradePlayer").ToLocalChecked(),
+		Nan::New<v8::FunctionTemplate>(UpgradePlayer)->GetFunction());
+	exports->Set(Nan::New("UpgradePet").ToLocalChecked(),
+		Nan::New<v8::FunctionTemplate>(UpgradePet)->GetFunction());
 	exports->Set(Nan::New("AsyncWaitNPCDialog").ToLocalChecked(),
 		Nan::New<v8::FunctionTemplate>(AsyncWaitNPCDialog)->GetFunction());	
 	exports->Set(Nan::New("ClickNPCDialog").ToLocalChecked(),
@@ -201,6 +340,12 @@ void Init(v8::Local<v8::Object> exports) {
 		Nan::New<v8::FunctionTemplate>(BuyNPCStore)->GetFunction());
 	exports->Set(Nan::New("SayWords").ToLocalChecked(),
 		Nan::New<v8::FunctionTemplate>(SayWords)->GetFunction());
+	exports->Set(Nan::New("ChangeNickName").ToLocalChecked(),
+		Nan::New<v8::FunctionTemplate>(ChangeNickName)->GetFunction());
+	exports->Set(Nan::New("ChangeTitleName").ToLocalChecked(),
+		Nan::New<v8::FunctionTemplate>(ChangeTitleName)->GetFunction());
+	exports->Set(Nan::New("ChangePersDesc").ToLocalChecked(),
+		Nan::New<v8::FunctionTemplate>(ChangePersDesc)->GetFunction());
 	exports->Set(Nan::New("AsyncWaitWorkingResult").ToLocalChecked(),
 		Nan::New<v8::FunctionTemplate>(AsyncWaitWorkingResult)->GetFunction());
 	exports->Set(Nan::New("SetImmediateDoneWork").ToLocalChecked(),
@@ -239,6 +384,8 @@ void Init(v8::Local<v8::Object> exports) {
 		Nan::New<v8::FunctionTemplate>(FixMapWarpStuck)->GetFunction());
 	exports->Set(Nan::New("GetMoveHistory").ToLocalChecked(),
 		Nan::New<v8::FunctionTemplate>(GetMoveHistory)->GetFunction());
+	exports->Set(Nan::New("IsUIDialogPresent").ToLocalChecked(),
+		Nan::New<v8::FunctionTemplate>(IsUIDialogPresent)->GetFunction());
 	exports->Set(Nan::New("RequestDownloadMap").ToLocalChecked(),
 		Nan::New<v8::FunctionTemplate>(RequestDownloadMap)->GetFunction());
 	exports->Set(Nan::New("AsyncWaitBattleAction").ToLocalChecked(),
@@ -267,6 +414,8 @@ void Init(v8::Local<v8::Object> exports) {
 		Nan::New<v8::FunctionTemplate>(BattlePetSkillAttack)->GetFunction());
 	exports->Set(Nan::New("BattleDoNothing").ToLocalChecked(),
 		Nan::New<v8::FunctionTemplate>(BattleDoNothing)->GetFunction());
+	exports->Set(Nan::New("AsyncWaitConnectionState").ToLocalChecked(),
+		Nan::New<v8::FunctionTemplate>(AsyncWaitConnectionState)->GetFunction());
 }
 
 NODE_MODULE(node_cga, Init)

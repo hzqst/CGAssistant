@@ -18,5 +18,3 @@ jom
 jom clean
 
 copy "xbin\qhttp.dll" "..\build\"
-
-pause

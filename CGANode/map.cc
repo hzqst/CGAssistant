@@ -88,7 +88,7 @@ void DownloadMapAsyncCallBack(uv_async_t *handle)
 
 	Local<Value> nullValue = Nan::Null();
 	Handle<Value> argv[2];
-	argv[0] = data->m_result ? nullValue : Nan::TypeError("Unknown exception.");
+	argv[0] = data->m_result ? nullValue : Nan::Error("Unknown exception.");
 	if (data->m_result)
 	{
 		Local<Object> obj = Object::New(isolate);
@@ -136,7 +136,7 @@ void DownloadMapTimerCallBack(uv_timer_t *handle)
 	if (asyncNotCalled)
 	{
 		Handle<Value> argv[1];
-		argv[0] = Nan::TypeError("Async callback timeout.");
+		argv[0] = Nan::Error("Async callback timeout.");
 
 		Local<Function>::New(isolate, data->m_callback)->Call(isolate->GetCurrentContext()->Global(), 1, argv);
 
@@ -365,6 +365,7 @@ void GetMapUnits(const Nan::FunctionCallbackInfo<v8::Value>& info)
 		obj->Set(String::NewFromUtf8(isolate, "ypos"), Integer::New(isolate, units[i].ypos));
 		obj->Set(String::NewFromUtf8(isolate, "item_count"), Integer::New(isolate, units[i].item_count));
 		obj->Set(String::NewFromUtf8(isolate, "injury"), Integer::New(isolate, units[i].injury));
+		obj->Set(String::NewFromUtf8(isolate, "icon"), Integer::New(isolate, units[i].icon));
 		obj->Set(String::NewFromUtf8(isolate, "level"), Integer::New(isolate, units[i].level));
 		obj->Set(String::NewFromUtf8(isolate, "flags"), Integer::New(isolate, units[i].flags));
 		obj->Set(String::NewFromUtf8(isolate, "unit_name"), Nan::New(units[i].unit_name).ToLocalChecked());
@@ -641,11 +642,11 @@ void ForceMoveTo(const Nan::FunctionCallbackInfo<v8::Value>& info)
 		return;
 	}
 	if (info.Length() < 2 || info[1]->IsUndefined()) {
-		Nan::ThrowTypeError("Arg[0] must be y.");
+		Nan::ThrowTypeError("Arg[1] must be y.");
 		return;
 	}
 	if (info.Length() < 3 || !info[2]->IsBoolean()) {
-		Nan::ThrowTypeError("Arg[1] must be boolean.");
+		Nan::ThrowTypeError("Arg[2] must be boolean.");
 		return;
 	}
 
@@ -888,7 +889,7 @@ void WalkToAfterWorker(uv_work_t* req, int status)
 
 	Handle<Value> argv[2];
 	Local<Value> nullValue = Nan::Null();
-	argv[0] = data->m_result ? nullValue : Nan::TypeError(reasonString);
+	argv[0] = data->m_result ? nullValue : Nan::Error(reasonString);
 	argv[1] = Integer::New(isolate, data->m_reason);
 
 	Local<Function>::New(isolate, data->m_callback)->Call(isolate->GetCurrentContext()->Global(), 2, argv);
@@ -1134,7 +1135,7 @@ void WaitMoveAfterWorker(uv_work_t* req, int status)
 	if (data->m_reason == 2)
 		reasonString = "Battle status.";
 	else if (data->m_reason == 3)
-		reasonString = "Stucked for over 30s.";
+		reasonString = "Async callback timeout.";
 	else if (data->m_reason == 4)
 		reasonString = "Unexcepted map changed.";
 	else if (data->m_reason == 5)
@@ -1142,7 +1143,7 @@ void WaitMoveAfterWorker(uv_work_t* req, int status)
 
 	Handle<Value> argv[2];
 	Local<Value> nullValue = Nan::Null();
-	argv[0] = data->m_result ? nullValue : Nan::TypeError(reasonString);
+	argv[0] = data->m_result ? nullValue : Nan::Error(reasonString);
 	argv[1] = Integer::New(isolate, data->m_reason);
 
 	Local<Function>::New(isolate, data->m_callback)->Call(isolate->GetCurrentContext()->Global(), 2, argv);

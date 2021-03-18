@@ -15,6 +15,7 @@ void NPCDialogNotify(CGA::cga_npc_dialog_t dlg);
 void WorkingResultNotify(CGA::cga_working_result_t results);
 void ChatMsgNotify(CGA::cga_chat_msg_t msg);
 void DownloadMapNotify(CGA::cga_download_map_t msg);
+void ConnectionStateNotify(CGA::cga_conn_state_t msg);
 
 class ConnectWorkerData
 {
@@ -49,6 +50,7 @@ void ConnectWorker(uv_work_t* req)
 		g_CGAInterface->RegisterWorkingResultNotify(std::bind(&WorkingResultNotify, std::placeholders::_1));
 		g_CGAInterface->RegisterChatMsgNotify(std::bind(&ChatMsgNotify, std::placeholders::_1));
 		g_CGAInterface->RegisterDownloadMapNotify(std::bind(&DownloadMapNotify, std::placeholders::_1));
+		g_CGAInterface->RegisterConnectionStateNotify(std::bind(&ConnectionStateNotify, std::placeholders::_1));
 	}
 }
 
@@ -61,7 +63,7 @@ void ConnectAfterWorker(uv_work_t* req, int status)
 
 	Local<Value> nullValue = Nan::Null();
 	Handle<Value> argv[1];
-	argv[0] = data->m_result ? nullValue : Nan::TypeError("Unknown exception.");
+	argv[0] = data->m_result ? nullValue : Nan::Error("Unknown exception.");
 
 	Local<Function>::New(isolate, data->m_callback)->Call(isolate->GetCurrentContext()->Global(), 1, argv);
 	data->m_callback.Reset();

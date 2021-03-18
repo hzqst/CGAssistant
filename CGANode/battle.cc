@@ -85,7 +85,7 @@ void BattleActionAsyncCallBack(uv_async_t *handle)
 
 	Local<Value> nullValue = Nan::Null();
 	Handle<Value> argv[2];
-	argv[0] = data->m_result ? nullValue : Nan::TypeError("Unknown exception.");
+	argv[0] = data->m_result ? nullValue : Nan::Error("Unknown exception.");
 	if (data->m_result)
 		argv[1] = Integer::New(isolate, data->m_flags);
 
@@ -124,7 +124,7 @@ void BattleActionTimerCallBack(uv_timer_t *handle)
 	if (asyncNotCalled)
 	{
 		Handle<Value> argv[1];
-		argv[0] = Nan::TypeError("Async callback timeout.");
+		argv[0] = Nan::Error("Async callback timeout.");
 
 		Local<Function>::New(isolate, data->m_callback)->Call(isolate->GetCurrentContext()->Global(), 1, argv);
 

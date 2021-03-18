@@ -50,6 +50,46 @@ void GetGameStatus(const Nan::FunctionCallbackInfo<v8::Value>& info)
 	info.GetReturnValue().Set(status);
 }
 
+void GetBGMIndex(const Nan::FunctionCallbackInfo<v8::Value>& info)
+{
+	Isolate* isolate = info.GetIsolate();
+	HandleScope handle_scope(isolate);
+
+	int status = 0;
+	if (!g_CGAInterface->GetBGMIndex(status))
+	{
+		Nan::ThrowError("RPC Invocation failed.");
+		return;
+	}
+
+	info.GetReturnValue().Set(status);
+}
+
+void GetSysTime(const Nan::FunctionCallbackInfo<v8::Value>& info)
+{
+	Isolate* isolate = info.GetIsolate();
+	HandleScope handle_scope(isolate);
+
+	CGA::cga_sys_time_t myinfo;
+	if (!g_CGAInterface->GetSysTime(myinfo))
+	{
+		Nan::ThrowError("RPC Invocation failed.");
+		return;
+	}
+
+	Local<Object> obj = Object::New(isolate);
+	obj->Set(String::NewFromUtf8(isolate, "years"), Integer::New(isolate, myinfo.years));
+	obj->Set(String::NewFromUtf8(isolate, "month"), Integer::New(isolate, myinfo.month));
+	obj->Set(String::NewFromUtf8(isolate, "days"), Integer::New(isolate, myinfo.days));
+	obj->Set(String::NewFromUtf8(isolate, "hours"), Integer::New(isolate, myinfo.hours));
+	obj->Set(String::NewFromUtf8(isolate, "mins"), Integer::New(isolate, myinfo.mins));
+	obj->Set(String::NewFromUtf8(isolate, "secs"), Integer::New(isolate, myinfo.secs));
+	obj->Set(String::NewFromUtf8(isolate, "local_time"), Integer::New(isolate, myinfo.local_time));
+	obj->Set(String::NewFromUtf8(isolate, "server_time"), Integer::New(isolate, myinfo.server_time));
+
+	info.GetReturnValue().Set(obj);
+}
+
 void GetPlayerInfo(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
 	Isolate* isolate = info.GetIsolate();
@@ -76,8 +116,10 @@ void GetPlayerInfo(const Nan::FunctionCallbackInfo<v8::Value>& info)
 	obj->Set(String::NewFromUtf8(isolate, "unitid"), Integer::New(isolate, myinfo.unitid));
 	obj->Set(String::NewFromUtf8(isolate, "petid"), Integer::New(isolate, myinfo.petid));
 	obj->Set(String::NewFromUtf8(isolate, "direction"), Integer::New(isolate, myinfo.direction));
+	obj->Set(String::NewFromUtf8(isolate, "battle_position"), Integer::New(isolate, myinfo.battle_position));
 	obj->Set(String::NewFromUtf8(isolate, "punchclock"), Integer::New(isolate, myinfo.punchclock));
 	obj->Set(String::NewFromUtf8(isolate, "usingpunchclock"), Boolean::New(isolate, myinfo.usingpunchclock));
+	obj->Set(String::NewFromUtf8(isolate, "petriding"), Boolean::New(isolate, myinfo.petriding));
 	obj->Set(String::NewFromUtf8(isolate, "name"), Nan::New(myinfo.name).ToLocalChecked());
 	obj->Set(String::NewFromUtf8(isolate, "job"), Nan::New(myinfo.job).ToLocalChecked());
 	Local<Array> arr = Array::New(isolate);
@@ -121,6 +163,17 @@ void GetPlayerInfo(const Nan::FunctionCallbackInfo<v8::Value>& info)
 
 	obj->Set(String::NewFromUtf8(isolate, "detail"), objd);
 
+	Local<Object> objp = Object::New(isolate);
+	objp->Set(String::NewFromUtf8(isolate, "sell_icon"), Integer::New(isolate, myinfo.persdesc.sellIcon));
+	objp->Set(String::NewFromUtf8(isolate, "sell_string"), Nan::New(myinfo.persdesc.sellString).ToLocalChecked());
+	objp->Set(String::NewFromUtf8(isolate, "buy_icon"), Integer::New(isolate, myinfo.persdesc.buyIcon));
+	objp->Set(String::NewFromUtf8(isolate, "buy_string"), Nan::New(myinfo.persdesc.buyString).ToLocalChecked());
+	objp->Set(String::NewFromUtf8(isolate, "want_icon"), Integer::New(isolate, myinfo.persdesc.wantIcon));
+	objp->Set(String::NewFromUtf8(isolate, "want_string"), Nan::New(myinfo.persdesc.wantString).ToLocalChecked());
+	objp->Set(String::NewFromUtf8(isolate, "desc_string"), Nan::New(myinfo.persdesc.descString).ToLocalChecked());
+
+	obj->Set(String::NewFromUtf8(isolate, "persdesc"), objp);
+
 	info.GetReturnValue().Set(obj);
 }
 
@@ -134,7 +187,7 @@ void SetPlayerFlagEnabled(const Nan::FunctionCallbackInfo<v8::Value>& info)
 		return;
 	}
 
-	if (info.Length() < 2 || info[1]->IsBoolean()) {
+	if (info.Length() < 2 || !info[1]->IsBoolean()) {
 		Nan::ThrowTypeError("Arg[1] must be boolean.");
 		return;
 	}
@@ -160,13 +213,10 @@ void IsPlayerFlagEnabled(const Nan::FunctionCallbackInfo<v8::Value>& info)
 		return;
 	}
 
-	if (info.Length() < 2 || info[1]->IsBoolean()) {
-		Nan::ThrowTypeError("Arg[1] must be boolean.");
-		return;
-	}
-
 	int index = (int)info[0]->IntegerValue();
+
 	bool enable = false;
+
 	if (!g_CGAInterface->IsPlayerFlagEnabled(index, enable))
 	{
 		Nan::ThrowError("RPC Invocation failed.");
@@ -174,6 +224,27 @@ void IsPlayerFlagEnabled(const Nan::FunctionCallbackInfo<v8::Value>& info)
 	}
 
 	info.GetReturnValue().Set(enable);
+}
+
+void IsUIDialogPresent(const Nan::FunctionCallbackInfo<v8::Value>& info)
+{
+	Isolate* isolate = info.GetIsolate();
+	HandleScope handle_scope(isolate);
+
+	if (info.Length() < 1 || info[0]->IsUndefined()) {
+		Nan::ThrowTypeError("Arg[0] must be dialog.");
+		return;
+	}
+
+	int index = (int)info[0]->IntegerValue();
+	bool present = false;
+	if (!g_CGAInterface->IsUIDialogPresent(index, present))
+	{
+		Nan::ThrowError("RPC Invocation failed.");
+		return;
+	}
+
+	info.GetReturnValue().Set(present);
 }
 
 void IsSkillValid(const Nan::FunctionCallbackInfo<v8::Value>& info)
@@ -479,9 +550,7 @@ void GetItemInfo(const Nan::FunctionCallbackInfo<v8::Value>& info)
 	Local<Object> obj = Object::New(isolate);
 	obj->Set(String::NewFromUtf8(isolate, "name"), Nan::New(myinfo.name).ToLocalChecked());
 	obj->Set(String::NewFromUtf8(isolate, "info"), Nan::New(myinfo.info).ToLocalChecked());
-	obj->Set(String::NewFromUtf8(isolate, "info2"), Nan::New(myinfo.info2).ToLocalChecked());
 	obj->Set(String::NewFromUtf8(isolate, "attr"), Nan::New(myinfo.attr).ToLocalChecked());
-	obj->Set(String::NewFromUtf8(isolate, "attr2"), Nan::New(myinfo.attr2).ToLocalChecked());
 	obj->Set(String::NewFromUtf8(isolate, "count"), Integer::New(isolate, myinfo.count));
 	obj->Set(String::NewFromUtf8(isolate, "itemid"), Integer::New(isolate, myinfo.itemid));
 	obj->Set(String::NewFromUtf8(isolate, "pos"), Integer::New(isolate, myinfo.pos));
@@ -509,9 +578,7 @@ void GetItemsInfo(const Nan::FunctionCallbackInfo<v8::Value>& info)
 		Local<Object> obj = Object::New(isolate);
 		obj->Set(String::NewFromUtf8(isolate, "name"), Nan::New(myinfo.name).ToLocalChecked());
 		obj->Set(String::NewFromUtf8(isolate, "info"), Nan::New(myinfo.info).ToLocalChecked());
-		obj->Set(String::NewFromUtf8(isolate, "info2"), Nan::New(myinfo.info2).ToLocalChecked());
 		obj->Set(String::NewFromUtf8(isolate, "attr"), Nan::New(myinfo.attr).ToLocalChecked());
-		obj->Set(String::NewFromUtf8(isolate, "attr2"), Nan::New(myinfo.attr2).ToLocalChecked());
 		obj->Set(String::NewFromUtf8(isolate, "count"), Integer::New(isolate, myinfo.count));
 		obj->Set(String::NewFromUtf8(isolate, "itemid"), Integer::New(isolate, myinfo.itemid));
 		obj->Set(String::NewFromUtf8(isolate, "pos"), Integer::New(isolate, myinfo.pos));
@@ -541,9 +608,7 @@ void GetBankItemsInfo(const Nan::FunctionCallbackInfo<v8::Value>& info)
 		Local<Object> obj = Object::New(isolate);
 		obj->Set(String::NewFromUtf8(isolate, "name"), Nan::New(myinfo.name).ToLocalChecked());
 		obj->Set(String::NewFromUtf8(isolate, "info"), Nan::New(myinfo.info).ToLocalChecked());
-		obj->Set(String::NewFromUtf8(isolate, "info2"), Nan::New(myinfo.info2).ToLocalChecked());
 		obj->Set(String::NewFromUtf8(isolate, "attr"), Nan::New(myinfo.attr).ToLocalChecked());
-		obj->Set(String::NewFromUtf8(isolate, "attr2"), Nan::New(myinfo.attr2).ToLocalChecked());
 		obj->Set(String::NewFromUtf8(isolate, "count"), Integer::New(isolate, myinfo.count));
 		obj->Set(String::NewFromUtf8(isolate, "itemid"), Integer::New(isolate, myinfo.itemid));
 		obj->Set(String::NewFromUtf8(isolate, "pos"), Integer::New(isolate, myinfo.pos));
@@ -553,6 +618,23 @@ void GetBankItemsInfo(const Nan::FunctionCallbackInfo<v8::Value>& info)
 		arr->Set(i, obj);
 	}
 	info.GetReturnValue().Set(arr);
+}
+
+
+void GetBankGold(const Nan::FunctionCallbackInfo<v8::Value>& info)
+{
+	Isolate* isolate = info.GetIsolate();
+	HandleScope handle_scope(isolate);
+
+	int gold = 0;
+
+	if (!g_CGAInterface->GetBankGold(gold))
+	{
+		Nan::ThrowError("RPC Invocation failed.");
+		return;
+	}
+
+	info.GetReturnValue().Set(gold);
 }
 
 void IsPetValid(const Nan::FunctionCallbackInfo<v8::Value>& info)
@@ -698,6 +780,72 @@ void GetPetsInfo(const Nan::FunctionCallbackInfo<v8::Value>& info)
 		objd->Set(String::NewFromUtf8(isolate, "fix_strikeback"), Integer::New(isolate, myinfo.detail.fix_strikeback));
 		objd->Set(String::NewFromUtf8(isolate, "fix_accurancy"), Integer::New(isolate, myinfo.detail.fix_accurancy));
 		objd->Set(String::NewFromUtf8(isolate, "fix_dodge"), Integer::New(isolate, myinfo.detail.fix_dodge));
+		objd->Set(String::NewFromUtf8(isolate, "element_earth"), Integer::New(isolate, myinfo.detail.element_earth));
+		objd->Set(String::NewFromUtf8(isolate, "element_water"), Integer::New(isolate, myinfo.detail.element_water));
+		objd->Set(String::NewFromUtf8(isolate, "element_fire"), Integer::New(isolate, myinfo.detail.element_fire));
+		objd->Set(String::NewFromUtf8(isolate, "element_wind"), Integer::New(isolate, myinfo.detail.element_wind));
+		obj->Set(String::NewFromUtf8(isolate, "detail"), objd);
+
+		arr->Set(i, obj);
+	}
+	info.GetReturnValue().Set(arr);
+}
+
+void GetBankPetsInfo(const Nan::FunctionCallbackInfo<v8::Value>& info)
+{
+	Isolate* isolate = info.GetIsolate();
+	HandleScope handle_scope(isolate);
+
+	CGA::cga_pets_info_t myinfos;
+	if (!g_CGAInterface->GetBankPetsInfo(myinfos))
+	{
+		Nan::ThrowError("RPC Invocation failed.");
+		return;
+	}
+	Local<Array> arr = Array::New(isolate);
+	for (size_t i = 0; i < myinfos.size(); ++i)
+	{
+		Local<Object> obj = Object::New(isolate);
+		const CGA::cga_pet_info_t &myinfo = myinfos.at(i);
+		obj->Set(String::NewFromUtf8(isolate, "name"), Nan::New(myinfo.name).ToLocalChecked());
+		obj->Set(String::NewFromUtf8(isolate, "realname"), Nan::New(myinfo.realname).ToLocalChecked());
+		obj->Set(String::NewFromUtf8(isolate, "level"), Integer::New(isolate, myinfo.level));
+		obj->Set(String::NewFromUtf8(isolate, "race"), Integer::New(isolate, myinfo.race));
+		obj->Set(String::NewFromUtf8(isolate, "loyality"), Integer::New(isolate, myinfo.loyality));
+		//obj->Set(String::NewFromUtf8(isolate, "health"), Integer::New(isolate, myinfo.health));
+		//obj->Set(String::NewFromUtf8(isolate, "hp"), Integer::New(isolate, myinfo.hp));
+		obj->Set(String::NewFromUtf8(isolate, "maxhp"), Integer::New(isolate, myinfo.maxhp));
+		//obj->Set(String::NewFromUtf8(isolate, "mp"), Integer::New(isolate, myinfo.mp));
+		obj->Set(String::NewFromUtf8(isolate, "maxmp"), Integer::New(isolate, myinfo.maxmp));
+		//obj->Set(String::NewFromUtf8(isolate, "xp"), Integer::New(isolate, myinfo.xp));
+		//obj->Set(String::NewFromUtf8(isolate, "maxxp"), Integer::New(isolate, myinfo.maxxp));
+		//obj->Set(String::NewFromUtf8(isolate, "flags"), Integer::New(isolate, myinfo.flags));
+		//obj->Set(String::NewFromUtf8(isolate, "battle_flags"), Integer::New(isolate, myinfo.battle_flags));
+		//obj->Set(String::NewFromUtf8(isolate, "state"), Integer::New(isolate, myinfo.state));
+		obj->Set(String::NewFromUtf8(isolate, "index"), Integer::New(isolate, myinfo.index));
+
+		Local<Object> objd = Object::New(isolate);
+		//objd->Set(String::NewFromUtf8(isolate, "points_remain"), Integer::New(isolate, myinfo.detail.points_remain));
+		objd->Set(String::NewFromUtf8(isolate, "points_endurance"), Integer::New(isolate, myinfo.detail.points_endurance));
+		objd->Set(String::NewFromUtf8(isolate, "points_strength"), Integer::New(isolate, myinfo.detail.points_strength));
+		objd->Set(String::NewFromUtf8(isolate, "points_defense"), Integer::New(isolate, myinfo.detail.points_defense));
+		objd->Set(String::NewFromUtf8(isolate, "points_agility"), Integer::New(isolate, myinfo.detail.points_agility));
+		objd->Set(String::NewFromUtf8(isolate, "points_magical"), Integer::New(isolate, myinfo.detail.points_magical));
+		objd->Set(String::NewFromUtf8(isolate, "value_attack"), Integer::New(isolate, myinfo.detail.value_attack));
+		objd->Set(String::NewFromUtf8(isolate, "value_defensive"), Integer::New(isolate, myinfo.detail.value_defensive));
+		objd->Set(String::NewFromUtf8(isolate, "value_agility"), Integer::New(isolate, myinfo.detail.value_agility));
+		objd->Set(String::NewFromUtf8(isolate, "value_spirit"), Integer::New(isolate, myinfo.detail.value_spirit));
+		objd->Set(String::NewFromUtf8(isolate, "value_recovery"), Integer::New(isolate, myinfo.detail.value_recovery));
+		//objd->Set(String::NewFromUtf8(isolate, "resist_poison"), Integer::New(isolate, myinfo.detail.resist_poison));
+		//objd->Set(String::NewFromUtf8(isolate, "resist_sleep"), Integer::New(isolate, myinfo.detail.resist_sleep));
+		//objd->Set(String::NewFromUtf8(isolate, "resist_medusa"), Integer::New(isolate, myinfo.detail.resist_medusa));
+		//objd->Set(String::NewFromUtf8(isolate, "resist_drunk"), Integer::New(isolate, myinfo.detail.resist_drunk));
+		//objd->Set(String::NewFromUtf8(isolate, "resist_chaos"), Integer::New(isolate, myinfo.detail.resist_chaos));
+		//objd->Set(String::NewFromUtf8(isolate, "resist_forget"), Integer::New(isolate, myinfo.detail.resist_forget));
+		//objd->Set(String::NewFromUtf8(isolate, "fix_critical"), Integer::New(isolate, myinfo.detail.fix_critical));
+		//objd->Set(String::NewFromUtf8(isolate, "fix_strikeback"), Integer::New(isolate, myinfo.detail.fix_strikeback));
+		//objd->Set(String::NewFromUtf8(isolate, "fix_accurancy"), Integer::New(isolate, myinfo.detail.fix_accurancy));
+		//objd->Set(String::NewFromUtf8(isolate, "fix_dodge"), Integer::New(isolate, myinfo.detail.fix_dodge));
 		objd->Set(String::NewFromUtf8(isolate, "element_earth"), Integer::New(isolate, myinfo.detail.element_earth));
 		objd->Set(String::NewFromUtf8(isolate, "element_water"), Integer::New(isolate, myinfo.detail.element_water));
 		objd->Set(String::NewFromUtf8(isolate, "element_fire"), Integer::New(isolate, myinfo.detail.element_fire));

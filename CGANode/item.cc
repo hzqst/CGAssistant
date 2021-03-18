@@ -257,7 +257,7 @@ void TradeStateAsyncCallBack(uv_async_t *handle)
 
 	Handle<Value> argv[2];
 	Local<Value> nullValue = Nan::Null();
-	argv[0] = data->m_result ? nullValue : Nan::TypeError("Unknown exception.");
+	argv[0] = data->m_result ? nullValue : Nan::Error("Unknown exception.");
 	if (data->m_result)
 		argv[1] = Integer::New(isolate, data->m_info);
 
@@ -296,7 +296,7 @@ void TradeStateTimerCallBack(uv_timer_t *handle)
 	if (asyncNotCalled)
 	{
 		Handle<Value> argv[1];
-		argv[0] = Nan::TypeError("Async callback timeout.");
+		argv[0] = Nan::Error("Async callback timeout.");
 
 		Local<Function>::New(isolate, data->m_callback)->Call(isolate->GetCurrentContext()->Global(), 1, argv);
 
@@ -356,7 +356,7 @@ void TradeDialogAsyncCallBack(uv_async_t *handle)
 
 	Handle<Value> argv[3];
 	Local<Value> nullValue = Nan::Null();
-	argv[0] = data->m_result ? nullValue : Nan::TypeError("Unknown exception.");
+	argv[0] = data->m_result ? nullValue : Nan::Error("Unknown exception.");
 	if (data->m_result)
 	{
 		argv[1] = Nan::New(data->m_info.name).ToLocalChecked();
@@ -398,7 +398,7 @@ void TradeDialogTimerCallBack(uv_timer_t *handle)
 	if (asyncNotCalled)
 	{
 		Handle<Value> argv[1];
-		argv[0] = Nan::TypeError("Async callback timeout.");
+		argv[0] = Nan::Error("Async callback timeout.");
 
 		Local<Function>::New(isolate, data->m_callback)->Call(isolate->GetCurrentContext()->Global(), 1, argv);
 
@@ -561,14 +561,14 @@ void TradeStuffsAsyncCallBack(uv_async_t *handle)
 			Local<Function>::New(isolate, data->m_callback)->Call(isolate->GetCurrentContext()->Global(), 3, argv);
 		} else {
 			Handle<Value> argv[1];
-			argv[0] = Nan::TypeError("Unknown exception.");
+			argv[0] = Nan::Error("Unknown exception.");
 			Local<Function>::New(isolate, data->m_callback)->Call(isolate->GetCurrentContext()->Global(), 1, argv);
 		}
 	}
 	else
 	{
 		Handle<Value> argv[1];
-		argv[0] = Nan::TypeError("Unknown exception.");
+		argv[0] = Nan::Error("Unknown exception.");
 		Local<Function>::New(isolate, data->m_callback)->Call(isolate->GetCurrentContext()->Global(), 1, argv);
 	}
 
@@ -605,7 +605,7 @@ void TradeStuffsTimerCallBack(uv_timer_t *handle)
 	if (asyncNotCalled)
 	{
 		Handle<Value> argv[1];
-		argv[0] = Nan::TypeError("Async callback timeout.");
+		argv[0] = Nan::Error("Async callback timeout.");
 
 		Local<Function>::New(isolate, data->m_callback)->Call(isolate->GetCurrentContext()->Global(), 1, argv);
 
@@ -665,7 +665,7 @@ void PlayerMenuAsyncCallBack(uv_async_t *handle)
 
 	Handle<Value> argv[2];
 	Local<Value> nullValue = Nan::Null();
-	argv[0] = data->m_result ? nullValue : Nan::TypeError("Unknown exception.");
+	argv[0] = data->m_result ? nullValue : Nan::Error("Unknown exception.");
 	if (data->m_result)
 	{
 		Local<Array> arr = Array::New(isolate);
@@ -715,7 +715,7 @@ void PlayerMenuTimerCallBack(uv_timer_t *handle)
 	if (asyncNotCalled)
 	{
 		Handle<Value> argv[1];
-		argv[0] = Nan::TypeError("Async callback timeout.");
+		argv[0] = Nan::Error("Async callback timeout.");
 
 		Local<Function>::New(isolate, data->m_callback)->Call(isolate->GetCurrentContext()->Global(), 1, argv);
 
@@ -775,7 +775,7 @@ void UnitMenuAsyncCallBack(uv_async_t *handle)
 
 	Handle<Value> argv[2];
 	Local<Value> nullValue = Nan::Null();
-	argv[0] = data->m_result ? nullValue : Nan::TypeError("Unknown exception.");
+	argv[0] = data->m_result ? nullValue : Nan::Error("Unknown exception.");
 	if (data->m_result)
 	{
 		Local<Array> arr = Array::New(isolate);
@@ -831,7 +831,7 @@ void UnitMenuTimerCallBack(uv_timer_t *handle)
 	if (asyncNotCalled)
 	{
 		Handle<Value> argv[1];
-		argv[0] = Nan::TypeError("Async callback timeout.");
+		argv[0] = Nan::Error("Async callback timeout.");
 
 		Local<Function>::New(isolate, data->m_callback)->Call(isolate->GetCurrentContext()->Global(), 1, argv);
 
@@ -1017,7 +1017,7 @@ void PlayerMenuSelect(const Nan::FunctionCallbackInfo<v8::Value>& info)
 	if (info.Length() >= 2) {
 		if (info[1]->IsString())
 		{
-			v8::String::Utf8Value str(info[0]->ToString());
+			v8::String::Utf8Value str(info[1]->ToString());
 			menustring.assign(*str);
 		}
 	}
@@ -1102,6 +1102,52 @@ void UnitMenuSelect(const Nan::FunctionCallbackInfo<v8::Value>& info)
 	info.GetReturnValue().Set(bResult);
 }
 
+void UpgradePlayer(const Nan::FunctionCallbackInfo<v8::Value>& info)
+{
+	Isolate* isolate = info.GetIsolate();
+	HandleScope handle_scope(isolate);
+
+	if (info.Length() < 1) {
+		Nan::ThrowTypeError("Arg[0] must be attr index.");
+		return;
+	}
+
+	int attr = (int)info[0]->IntegerValue();
+	if (!g_CGAInterface->UpgradePlayer(attr))
+	{
+		Nan::ThrowError("RPC Invocation failed.");
+		return;
+	}
+
+	info.GetReturnValue().Set(true);
+}
+
+void UpgradePet(const Nan::FunctionCallbackInfo<v8::Value>& info)
+{
+	Isolate* isolate = info.GetIsolate();
+	HandleScope handle_scope(isolate);
+
+	if (info.Length() < 1) {
+		Nan::ThrowTypeError("Arg[0] must be petid.");
+		return;
+	}
+
+	if (info.Length() < 2) {
+		Nan::ThrowTypeError("Arg[1] must be attr index.");
+		return;
+	}
+
+	int petid = (int)info[0]->IntegerValue();
+	int attr = (int)info[1]->IntegerValue();
+	if (!g_CGAInterface->UpgradePet(petid, attr))
+	{
+		Nan::ThrowError("RPC Invocation failed.");
+		return;
+	}
+
+	info.GetReturnValue().Set(true);
+}
+
 void DoRequest(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
 	Isolate* isolate = info.GetIsolate();
@@ -1139,8 +1185,11 @@ void EnableFlags(const Nan::FunctionCallbackInfo<v8::Value>& info)
 	}
 
 	int type = (int)info[0]->IntegerValue();
+
 	bool enable = info[1]->BooleanValue();
+
 	bool result = false;
+
 	if (!g_CGAInterface->EnableFlags(type, enable, result))
 	{
 		Nan::ThrowError("RPC Invocation failed.");

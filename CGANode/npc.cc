@@ -83,7 +83,7 @@ void NPCDialogAsyncCallBack(uv_async_t *handle)
 
 	Handle<Value> argv[2];
 	Local<Value> nullValue = Nan::Null();
-	argv[0] = data->m_result ? nullValue : Nan::TypeError("Unknown exception.");
+	argv[0] = data->m_result ? nullValue : Nan::Error("Unknown exception.");
 	if (data->m_result)
 	{
 		Local<Object> obj = Object::New(isolate);
@@ -130,7 +130,7 @@ void NPCDialogTimerCallBack(uv_timer_t *handle)
 	if (asyncNotCalled)
 	{
 		Handle<Value> argv[1];
-		argv[0] = Nan::TypeError("Async callback timeout.");
+		argv[0] = Nan::Error("Async callback timeout.");
 
 		Local<Function>::New(isolate, data->m_callback)->Call(isolate->GetCurrentContext()->Global(), 1, argv);
 

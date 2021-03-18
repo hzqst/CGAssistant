@@ -9,5 +9,3 @@ jom -f MakeFile qmake_all
 jom
 
 jom clean
-
-pause
