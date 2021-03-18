@@ -5,8 +5,8 @@
 #include <ddraw.h>
 #include <boost/locale.hpp>
 
-#include <document.h>
-#include <writer.h>
+#include <rapidjson/document.h>
+#include <rapidjson/writer.h>
 
 #include <intrin.h>
 

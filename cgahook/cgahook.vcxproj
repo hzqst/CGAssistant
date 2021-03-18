@@ -75,7 +75,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;DETOURS_32BIT;DETOURS_X86;WIN32;NDEBUG;_WINDOWS;_USRDLL;CGAHOOK_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>../boost;../rest_rpc/;../rest_rpc/spdlog/include;../rest_rpc/iguana;../rest_rpc/iguana/third_party/msgpack/include;../Detours/;../rapidjson/</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../boost;../rest_rpc/;../rest_rpc/spdlog/include;../rest_rpc/iguana;../rest_rpc/iguana/third_party/msgpack/include;../Detours/;../rapidjson/include</AdditionalIncludeDirectories>
       <AdditionalOptions>-D_SCL_SECURE_NO_WARNINGS %(AdditionalOptions)</AdditionalOptions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <DisableSpecificWarnings>4091</DisableSpecificWarnings>
