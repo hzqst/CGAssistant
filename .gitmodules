@@ -1,8 +1,14 @@
 [submodule "boost"]
 	path = boost
-	url = https://github.com/boostorg/boost.git
+	url = https://github.com/boostorg/boost
 	tag = boost-1.69.0
+	branch = boost-1.69.0
 
 [submodule "qhttp"]
 	path = qhttp
-	url = https://github.com/azadkuh/qhttp.git
+	url = https://github.com/azadkuh/qhttp
+	branch = master
+[submodule "rapidjson"]
+	path = rapidjson
+	url = https://github.com/Tencent/rapidjson/
+	branch = master
