@@ -24,15 +24,15 @@ jobs:
       uses: git-for-windows/setup-git-for-windows-sdk@v0.0.9
       with:
         # The subset (if any) of the SDK: minimal, makepkg-git, build-installers, or full
-        flavor: # optional, default is minimal
-        # The architecture of the SDK: x86_64 or i686
-        architecture: i686 # optional, default is x86_64
-        # Where to write the SDK files
-        path: # optional, default is 
-        # Whether to log files as they are extracted
-        verbose: # optional, default is 250
-        # Use @actions/cache to accelerate this Action
-        cache: # optional, default is auto
+        flavor: minimal
+
+        architecture: i686
+
+        path:
+
+        verbose:
+
+        cache: auto
     
     - name: Add MSBuild to PATH
       uses: microsoft/setup-msbuild@v1
