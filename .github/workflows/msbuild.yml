@@ -23,7 +23,7 @@ jobs:
       
     - name: init-dep
       working-directory: ${{env.GITHUB_WORKSPACE}}
-      run: init-dependencies.bat
+      run: git submodule update --init --recursive
       
     - name: Build
       working-directory: ${{env.GITHUB_WORKSPACE}}
