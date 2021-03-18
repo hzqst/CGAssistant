@@ -1,5 +1,6 @@
 #define _WIN32_WINNT 0x0501
 #include <rest_rpc/client.hpp>
+#include <rest_rpc/server.hpp>
 #include "gameinterface.h"
 #include "packdata.h"
 
@@ -11,12 +12,15 @@ namespace CGAServiceProtocol
 	TIMAX_DEFINE_PROTOCOL(IsInGame, int());
 	TIMAX_DEFINE_PROTOCOL(GetWorldStatus, int());
 	TIMAX_DEFINE_PROTOCOL(GetGameStatus, int());
+	TIMAX_DEFINE_PROTOCOL(GetBGMIndex, int());
+	TIMAX_DEFINE_PROTOCOL(GetSysTime, cga_sys_time_t());
 	TIMAX_DEFINE_PROTOCOL(GetPlayerInfo, cga_player_info_t());
 	TIMAX_DEFINE_PROTOCOL(SetPlayerFlagEnabled, void(int, bool));
 	TIMAX_DEFINE_PROTOCOL(IsPlayerFlagEnabled, bool(int));
 	TIMAX_DEFINE_PROTOCOL(IsPetValid, bool(int));
 	TIMAX_DEFINE_PROTOCOL(GetPetInfo, cga_pet_info_t(int));
 	TIMAX_DEFINE_PROTOCOL(GetPetsInfo, cga_pets_info_t());
+	TIMAX_DEFINE_PROTOCOL(GetBankPetsInfo, cga_pets_info_t());
 	TIMAX_DEFINE_PROTOCOL(IsPetSkillValid, bool(int,int));
 	TIMAX_DEFINE_PROTOCOL(GetPetSkillInfo, cga_pet_skill_info_t(int, int));
 	TIMAX_DEFINE_PROTOCOL(GetPetSkillsInfo, cga_pet_skills_info_t(int));
@@ -29,6 +33,7 @@ namespace CGAServiceProtocol
 	TIMAX_DEFINE_PROTOCOL(GetItemInfo, cga_item_info_t(int));
 	TIMAX_DEFINE_PROTOCOL(GetItemsInfo, cga_items_info_t());
 	TIMAX_DEFINE_PROTOCOL(GetBankItemsInfo, cga_items_info_t());
+	TIMAX_DEFINE_PROTOCOL(GetBankGold, int());
 	TIMAX_DEFINE_PROTOCOL(UseItem, bool(int));
 	TIMAX_DEFINE_PROTOCOL(MoveItem, bool(int, int, int));
 	TIMAX_DEFINE_PROTOCOL(MovePet, bool(int, int));
@@ -55,11 +60,16 @@ namespace CGAServiceProtocol
 	TIMAX_DEFINE_PROTOCOL(LogBack, void());
 	TIMAX_DEFINE_PROTOCOL(LogOut, void());
 	TIMAX_DEFINE_PROTOCOL(SayWords, void(std::string, int, int, int));
+	TIMAX_DEFINE_PROTOCOL(ChangeNickName, bool(std::string));
+	TIMAX_DEFINE_PROTOCOL(ChangeTitleName, bool(int));
+	TIMAX_DEFINE_PROTOCOL(ChangePersDesc, void(cga_pers_desc_t));
 	TIMAX_DEFINE_PROTOCOL(ClickNPCDialog, bool(int, int));
 	TIMAX_DEFINE_PROTOCOL(SellNPCStore, bool(cga_sell_items_t));
 	TIMAX_DEFINE_PROTOCOL(BuyNPCStore, bool(cga_buy_items_t));
 	TIMAX_DEFINE_PROTOCOL(PlayerMenuSelect, bool(int, std::string));
 	TIMAX_DEFINE_PROTOCOL(UnitMenuSelect, bool(int));
+	TIMAX_DEFINE_PROTOCOL(UpgradePlayer, void(int));
+	TIMAX_DEFINE_PROTOCOL(UpgradePet, void(int,int));
 	TIMAX_DEFINE_PROTOCOL(IsBattleUnitValid, bool(int));
 	TIMAX_DEFINE_PROTOCOL(GetBattleUnit, cga_battle_unit_t(int));
 	TIMAX_DEFINE_PROTOCOL(GetBattleUnits, cga_battle_units_t());
@@ -98,6 +108,7 @@ namespace CGAServiceProtocol
 	TIMAX_DEFINE_PROTOCOL(SetWindowResolution, void(int, int));
 	TIMAX_DEFINE_PROTOCOL(RequestDownloadMap, void(int, int, int, int));
 	TIMAX_DEFINE_PROTOCOL(GetNextAnimTickCount, double());
+	TIMAX_DEFINE_PROTOCOL(IsUIDialogPresent, bool(int));
 	TIMAX_DEFINE_PROTOCOL(LoginGameServer, void(std::string, std::string, int, int, int, int));
 	TIMAX_DEFINE_FORWARD(NotifyServerShutdown, int);
 	TIMAX_DEFINE_FORWARD(NotifyBattleAction, int);
@@ -110,6 +121,7 @@ namespace CGAServiceProtocol
 	TIMAX_DEFINE_FORWARD(NotifyTradeDialog, cga_trade_dialog_t);
 	TIMAX_DEFINE_FORWARD(NotifyTradeState, int);
 	TIMAX_DEFINE_FORWARD(NotifyDownloadMap, cga_download_map_t);
+	TIMAX_DEFINE_FORWARD(NotifyConnectionState, cga_conn_state_t);
 }
 
 namespace CGA
@@ -193,6 +205,28 @@ namespace CGA
 			}
 			return false;
 		}
+		virtual bool GetBGMIndex(int &status) {
+			if (m_connected) {
+				try {
+					status = m_client.call(std::chrono::milliseconds(10000), m_endpoint, CGAServiceProtocol::GetBGMIndex);
+					return true;
+				}
+				catch (timax::rpc::exception const &e) { if (e.get_error_code() != timax::rpc::error_code::TIMEOUT) m_connected = false; OutputDebugStringA("rpc exception from " __FUNCTION__); OutputDebugStringA(e.get_error_message().c_str()); }
+				catch (msgpack::parse_error &e) { OutputDebugStringA("parse exception from " __FUNCTION__); OutputDebugStringA(e.what()); }
+			}
+			return false;
+		}
+		virtual bool GetSysTime(cga_sys_time_t &t) {
+			if (m_connected) {
+				try {
+					t = m_client.call(std::chrono::milliseconds(10000), m_endpoint, CGAServiceProtocol::GetSysTime);
+					return true;
+				}
+				catch (timax::rpc::exception const &e) { if (e.get_error_code() != timax::rpc::error_code::TIMEOUT) m_connected = false; OutputDebugStringA("rpc exception from " __FUNCTION__); OutputDebugStringA(e.get_error_message().c_str()); }
+				catch (msgpack::parse_error &e) { OutputDebugStringA("parse exception from " __FUNCTION__); OutputDebugStringA(e.what()); }
+			}
+			return false;
+		}
 		virtual bool GetPlayerInfo(cga_player_info_t &info){
 			if (m_connected) {
 				try {
@@ -252,6 +286,17 @@ namespace CGA
 			if (m_connected) {
 				try {
 					info = m_client.call(std::chrono::milliseconds(10000), m_endpoint, CGAServiceProtocol::GetPetsInfo);
+					return true;
+				}
+				catch (timax::rpc::exception const &e) { if (e.get_error_code() != timax::rpc::error_code::TIMEOUT) m_connected = false; OutputDebugStringA("rpc exception from " __FUNCTION__); OutputDebugStringA(e.get_error_message().c_str()); }
+				catch (msgpack::parse_error &e) { OutputDebugStringA("parse exception from " __FUNCTION__); OutputDebugStringA(e.what()); }
+			}
+			return false;
+		}
+		virtual bool GetBankPetsInfo(cga_pets_info_t &info) {
+			if (m_connected) {
+				try {
+					info = m_client.call(std::chrono::milliseconds(10000), m_endpoint, CGAServiceProtocol::GetBankPetsInfo);
 					return true;
 				}
 				catch (timax::rpc::exception const &e) { if (e.get_error_code() != timax::rpc::error_code::TIMEOUT) m_connected = false; OutputDebugStringA("rpc exception from " __FUNCTION__); OutputDebugStringA(e.get_error_message().c_str()); }
@@ -384,6 +429,17 @@ namespace CGA
 			if (m_connected) {
 				try {
 					info = m_client.call(std::chrono::milliseconds(10000), m_endpoint, CGAServiceProtocol::GetBankItemsInfo);
+					return true;
+				}
+				catch (timax::rpc::exception const &e) { if (e.get_error_code() != timax::rpc::error_code::TIMEOUT) m_connected = false; OutputDebugStringA("rpc exception from " __FUNCTION__); OutputDebugStringA(e.get_error_message().c_str()); }
+				catch (msgpack::parse_error &e) { OutputDebugStringA("parse exception from " __FUNCTION__); OutputDebugStringA(e.what()); }
+			}
+			return false;
+		}
+		virtual bool GetBankGold(int &gold) {
+			if (m_connected) {
+				try {
+					gold = m_client.call(std::chrono::milliseconds(10000), m_endpoint, CGAServiceProtocol::GetBankGold);
 					return true;
 				}
 				catch (timax::rpc::exception const &e) { if (e.get_error_code() != timax::rpc::error_code::TIMEOUT) m_connected = false; OutputDebugStringA("rpc exception from " __FUNCTION__); OutputDebugStringA(e.get_error_message().c_str()); }
@@ -686,6 +742,39 @@ namespace CGA
 			}
 			return false;
 		}
+		virtual bool ChangeNickName(std::string &str, bool &bresult) {
+			if (m_connected) {
+				try {
+					bresult = m_client.call(std::chrono::milliseconds(10000), m_endpoint, CGAServiceProtocol::ChangeNickName, str);
+					return true;
+				}
+				catch (timax::rpc::exception const &e) { if (e.get_error_code() != timax::rpc::error_code::TIMEOUT) m_connected = false; OutputDebugStringA("rpc exception from " __FUNCTION__); OutputDebugStringA(e.get_error_message().c_str()); }
+				catch (msgpack::parse_error &e) { OutputDebugStringA("parse exception from " __FUNCTION__); OutputDebugStringA(e.what()); }
+			}
+			return false;
+		}
+		virtual bool ChangeTitleName(int titleId, bool &result) {
+			if (m_connected) {
+				try {
+					result = m_client.call(std::chrono::milliseconds(10000), m_endpoint, CGAServiceProtocol::ChangeTitleName, titleId);
+					return true;
+				}
+				catch (timax::rpc::exception const &e) { if (e.get_error_code() != timax::rpc::error_code::TIMEOUT) m_connected = false; OutputDebugStringA("rpc exception from " __FUNCTION__); OutputDebugStringA(e.get_error_message().c_str()); }
+				catch (msgpack::parse_error &e) { OutputDebugStringA("parse exception from " __FUNCTION__); OutputDebugStringA(e.what()); }
+			}
+			return false;
+		}
+		virtual bool ChangePersDesc(CGA::cga_pers_desc_t &desc) {
+			if (m_connected) {
+				try {
+					m_client.call(std::chrono::milliseconds(10000), m_endpoint, CGAServiceProtocol::ChangePersDesc, desc);
+					return true;
+				}
+				catch (timax::rpc::exception const &e) { if (e.get_error_code() != timax::rpc::error_code::TIMEOUT) m_connected = false; OutputDebugStringA("rpc exception from " __FUNCTION__); OutputDebugStringA(e.get_error_message().c_str()); }
+				catch (msgpack::parse_error &e) { OutputDebugStringA("parse exception from " __FUNCTION__); OutputDebugStringA(e.what()); }
+			}
+			return false;
+		}
 		virtual bool ClickNPCDialog(int option, int index, bool &result) {
 			if (m_connected) {
 				try {
@@ -734,6 +823,28 @@ namespace CGA
 			if (m_connected) {
 				try {
 					result = m_client.call(std::chrono::milliseconds(10000), m_endpoint, CGAServiceProtocol::UnitMenuSelect, menuindex);
+					return true;
+				}
+				catch (timax::rpc::exception const &e) { if (e.get_error_code() != timax::rpc::error_code::TIMEOUT) m_connected = false; OutputDebugStringA("rpc exception from " __FUNCTION__); OutputDebugStringA(e.get_error_message().c_str()); }
+				catch (msgpack::parse_error &e) { OutputDebugStringA("parse exception from " __FUNCTION__); OutputDebugStringA(e.what()); }
+			}
+			return false;
+		}
+		virtual bool UpgradePlayer(int attr) {
+			if (m_connected) {
+				try {
+					m_client.call(std::chrono::milliseconds(10000), m_endpoint, CGAServiceProtocol::UpgradePlayer, attr);
+					return true;
+				}
+				catch (timax::rpc::exception const &e) { if (e.get_error_code() != timax::rpc::error_code::TIMEOUT) m_connected = false; OutputDebugStringA("rpc exception from " __FUNCTION__); OutputDebugStringA(e.get_error_message().c_str()); }
+				catch (msgpack::parse_error &e) { OutputDebugStringA("parse exception from " __FUNCTION__); OutputDebugStringA(e.what()); }
+			}
+			return false;
+		}
+		virtual bool UpgradePet(int petid, int attr) {
+			if (m_connected) {
+				try {
+					m_client.call(std::chrono::milliseconds(10000), m_endpoint, CGAServiceProtocol::UpgradePet, petid, attr);
 					return true;
 				}
 				catch (timax::rpc::exception const &e) { if (e.get_error_code() != timax::rpc::error_code::TIMEOUT) m_connected = false; OutputDebugStringA("rpc exception from " __FUNCTION__); OutputDebugStringA(e.get_error_message().c_str()); }
@@ -1195,6 +1306,18 @@ namespace CGA
 			}
 			return false;
 		}
+		virtual bool IsUIDialogPresent(int dialog, bool &result)
+		{
+			if (m_connected) {
+				try {
+					result = m_client.call(std::chrono::milliseconds(10000), m_endpoint, CGAServiceProtocol::IsUIDialogPresent, dialog);
+					return true;
+				}
+				catch (timax::rpc::exception const &e) { if (e.get_error_code() != timax::rpc::error_code::TIMEOUT) m_connected = false; OutputDebugStringA("rpc exception from " __FUNCTION__); OutputDebugStringA(e.get_error_message().c_str()); }
+				catch (msgpack::parse_error &e) { OutputDebugStringA("parse exception from " __FUNCTION__); OutputDebugStringA(e.what()); }
+			}
+			return false;
+		}
 		virtual bool RegisterServerShutdownNotify(const std::function<void(int)> &callback)
 		{
 			if (m_connected)
@@ -1416,6 +1539,29 @@ namespace CGA
 						[callback](cga_download_map_t rs) {
 						if (callback)
 							callback(rs);
+					},
+						[](auto const& e) {
+						OutputDebugStringA(e.get_error_message().c_str());
+					}
+					);
+					return true;
+				}
+				catch (timax::rpc::exception const& e) {
+					OutputDebugStringA(e.get_error_message().c_str());
+				}
+			}
+			return false;
+		}
+		virtual bool RegisterConnectionStateNotify(const std::function<void(cga_conn_state_t)> &callback)
+		{
+			if (m_connected)
+			{
+				try
+				{
+					m_async_client.sub(m_endpoint, CGAServiceProtocol::NotifyConnectionState,
+						[callback](cga_conn_state_t msg) {
+						if (callback)
+							callback(msg);
 					},
 						[](auto const& e) {
 						OutputDebugStringA(e.get_error_message().c_str());

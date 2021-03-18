@@ -1,4 +1,8 @@
 [submodule "boost"]
-	path = boost_1_63_0
+	path = boost
 	url = https://github.com/boostorg/boost.git
 	tag = boost-1.69.0
+
+[submodule "qhttp"]
+	path = qhttp
+	url = https://github.com/azadkuh/qhttp.git

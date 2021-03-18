@@ -7,11 +7,13 @@
 #include "accountform.h"
 #include "itemform.h"
 #include "mapform.h"
+#include "chatform.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
+
     ui->setupUi(this);
 
     auto playerWorker = new CPlayerWorker();
@@ -53,16 +55,25 @@ MainWindow::MainWindow(QWidget *parent) :
     AccountForm *accountForm = new AccountForm(this);
     ui->tabWidget->addTab(accountForm, QIcon(), tr("Account"));
 
+    ChatForm *chatForm = new ChatForm(this);
+    ui->tabWidget->addTab(chatForm, QIcon(), tr("Chat"));
+
     autoBattleForm->SyncAutoBattleWorker();
 
+    connect(mapForm, &MapForm::runNavigatorScript, scriptForm, &ScriptForm::RunNavigatorScript);
+    connect(mapForm, &MapForm::stopNavigatorScript, scriptForm, &ScriptForm::StopNavigatorScript);
+    connect(scriptForm, &ScriptForm::ReportNavigatorPath, mapForm, &MapForm::OnReportNavigatorPath);
+    connect(scriptForm, &ScriptForm::ReportNavigatorFinish, mapForm, &MapForm::OnReportNavigatorFinish);
     connect(playerFrom, &PlayerForm::ParseItemTweaker, itemForm, &ItemForm::ParseItemTweaker);
     connect(playerFrom, &PlayerForm::ParseItemDropper, itemForm, &ItemForm::ParseItemDropper);
     connect(playerFrom, &PlayerForm::ParseItemIdMap, itemForm, &ItemForm::ParseItemIdMap);
     connect(playerFrom, &PlayerForm::ParseBattleSettings, autoBattleForm, &AutoBattleForm::ParseBattleSettings);
+    connect(playerFrom, &PlayerForm::ParseChatSettings, chatForm, &ChatForm::ParseChatSettings);
     connect(playerFrom, &PlayerForm::SaveItemIdMap, itemForm, &ItemForm::SaveItemIdMap);
     connect(playerFrom, &PlayerForm::SaveItemDropper, itemForm, &ItemForm::SaveItemDropper);
     connect(playerFrom, &PlayerForm::SaveItemTweaker, itemForm, &ItemForm::SaveItemTweaker);
     connect(playerFrom, &PlayerForm::SaveBattleSettings, autoBattleForm, &AutoBattleForm::SaveBattleSettings);
+    connect(playerFrom, &PlayerForm::SaveChatSettings, chatForm, &ChatForm::SaveChatSettings);
     connect(this, &MainWindow::NotifyChangeWindow, processFrom, &ProcessForm::OnNotifyChangeWindow);
 
     connect(this, &MainWindow::NotifyFillAutoLogin, accountForm, &AccountForm::OnNotifyFillAutoLogin);
@@ -78,16 +89,25 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(playerWorker, &CPlayerWorker::NotifyGetItemsInfo, battleWorker, &CBattleWorker::OnNotifyGetItemsInfo, Qt::ConnectionType::QueuedConnection);
     connect(playerWorker, &CPlayerWorker::NotifyGetMapCellInfo, mapForm, &MapForm::OnNotifyGetMapCellInfo, Qt::ConnectionType::QueuedConnection);
     connect(playerWorker, &CPlayerWorker::NotifyGetMapInfo, mapForm, &MapForm::OnNotifyGetMapInfo, Qt::ConnectionType::QueuedConnection);
+    connect(playerWorker, &CPlayerWorker::NotifyRefreshMapRegion, mapForm, &MapForm::OnNotifyRefreshMapRegion, Qt::ConnectionType::QueuedConnection);
     connect(mapForm, &MapForm::RequestDownloadMap, playerWorker, &CPlayerWorker::OnDownloadMap, Qt::ConnectionType::QueuedConnection);
-    connect(playerWorker, &CPlayerWorker::NotifyGetInfoFailed, scriptForm, &ScriptForm::on_pushButton_kill_clicked, Qt::ConnectionType::QueuedConnection);
     connect(processWorker, &CProcessWorker::NotifyAttachProcessOk, battleWorker, &CBattleWorker::OnNotifyAttachProcessOk, Qt::QueuedConnection);
     connect(processWorker, &CProcessWorker::NotifyAttachProcessOk, scriptForm, &ScriptForm::OnNotifyAttachProcessOk, Qt::QueuedConnection);
     connect(processWorker, &CProcessWorker::NotifyAttachProcessOk, playerWorker, &CPlayerWorker::OnNotifyAttachProcessOk, Qt::QueuedConnection);
     connect(ui->tabWidget, &QTabWidget::currentChanged, playerWorker, &CPlayerWorker::OnTabChanged, Qt::QueuedConnection);
     connect(playerWorker, &CPlayerWorker::NotifyGetInfoFailed, this, &MainWindow::OnNotifyGetInfoFailed, Qt::ConnectionType::QueuedConnection);
     connect(playerWorker, &CPlayerWorker::NotifyGetPlayerInfo, this, &MainWindow::OnNotifyGetPlayerInfo, Qt::ConnectionType::QueuedConnection);
-
+    connect(playerWorker, &CPlayerWorker::NotifyGetPlayerInfo, chatForm, &ChatForm::OnNotifyGetPlayerInfo, Qt::ConnectionType::QueuedConnection);
+    connect(playerWorker, &CPlayerWorker::NotifyChatMsg, chatForm, &ChatForm::OnNotifyChatMsg, Qt::ConnectionType::QueuedConnection);
+    connect(playerWorker, &CPlayerWorker::NotifyConnectionState, accountForm, &AccountForm::OnNotifyConnectionState, Qt::ConnectionType::QueuedConnection);
+    connect(accountForm, &AccountForm::NotifyKillProcess, processWorker, &CProcessWorker::OnKillProcess);
     connect(accountForm, &AccountForm::NotifyAutoAttachProcess, processWorker, &CProcessWorker::OnAutoAttachProcess, Qt::QueuedConnection);
+
+    connect(this, &MainWindow::HttpGetGameProcInfo, processWorker, &CProcessWorker::OnHttpGetGameProcInfo, Qt::DirectConnection);
+    connect(this, &MainWindow::HttpGetSettings, playerFrom, &PlayerForm::OnHttpGetSettings);
+    connect(this, &MainWindow::HttpLoadSettings, playerFrom, &PlayerForm::OnHttpLoadSettings);
+    connect(this, &MainWindow::HttpLoadScript, scriptForm, &ScriptForm::OnHttpLoadScript);
+    connect(this, &MainWindow::HttpLoadAccount, accountForm, &AccountForm::OnHttpLoadAccount);
 
     m_playerWorkerThread.start();
     m_processWorkerThread.start();
@@ -128,7 +148,8 @@ void MainWindow::on_tabWidget_currentChanged(int index)
 
 void MainWindow::OnNotifyGetPlayerInfo(QSharedPointer<CGA_PlayerInfo_t> player)
 {
-    setWindowTitle(tr("CGAssistant %1").arg(player->name));
+    if(player->serverindex != -1 && !player->name.isEmpty())
+        setWindowTitle(tr("CGAssistant [%1] (server %2)").arg(player->name).arg(player->serverindex));
 }
 
 void MainWindow::OnNotifyGetInfoFailed(bool bIsConnected, bool bIsInGame)

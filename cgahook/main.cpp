@@ -16,6 +16,7 @@ HANDLE g_hFileMapping = NULL;
 HANDLE g_hPortMutex;
 HANDLE g_hDataLock = NULL;
 HANDLE g_hServreThread = NULL;
+char g_BasicWindowTitle[256] = {0};
 
 LPCWSTR ExtractFileName(LPCWSTR szPath)
 {
@@ -29,6 +30,16 @@ LPCWSTR ExtractFileName(LPCWSTR szPath)
 			return &szPath[i + 1];
 	}
 	return szPath;
+}
+
+LRESULT UpdateGameWindowTitle(VOID)
+{
+	char szNewTitle[256] = { 0 };
+	if (g_CGAService.IsInGame() && g_CGAService.GetPlayerName() && g_CGAService.GetPlayerName()[0])
+		_snprintf(szNewTitle, 256, "%s CGA [%s] (%dœﬂ) #%d", g_BasicWindowTitle, g_CGAService.GetPlayerName(), g_CGAService.GetServerIndex(), g_MainPort - CGA_PORT_BASE + 1);
+	else
+		_snprintf(szNewTitle, 256, "%s CGA #%d", g_BasicWindowTitle, g_MainPort - CGA_PORT_BASE + 1);
+	return DefWindowProcA(g_MainHwnd, WM_SETTEXT, NULL, (LPARAM)szNewTitle);
 }
 
 LRESULT CALLBACK NewWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
@@ -72,9 +83,8 @@ LRESULT CALLBACK NewWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
 	{
 		if (g_MainPort)
 		{
-			char szTitle[64] = { 0 };
-			_snprintf(szTitle, 64, "%s CGA #%d", (const char *)lParam, g_MainPort - CGA_PORT_BASE + 1);
-			return DefWindowProcA(g_MainHwnd, message, NULL, (LPARAM)szTitle);
+			strcpy(g_BasicWindowTitle, (const char *)lParam);
+			return UpdateGameWindowTitle();
 		}
 		break;
 	}
@@ -129,6 +139,9 @@ LRESULT CALLBACK NewWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
 		return 1;
 	case WM_CGA_GET_PETS_INFO:
 		g_CGAService.WM_GetPetsInfo((CGA::cga_pets_info_t *)wParam);
+		return 1;
+	case WM_CGA_GET_BANK_PETS_INFO:
+		g_CGAService.WM_GetBankPetsInfo((CGA::cga_pets_info_t *)wParam);
 		return 1;
 	case WM_CGA_GET_SKILL_INFO:
 		g_CGAService.WM_GetSkillInfo(wParam, (CGA::cga_skill_info_t *)lParam);
@@ -231,21 +244,37 @@ LRESULT CALLBACK NewWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
 	case WM_CGA_GET_TILE_TABLE:
 		g_CGAService.WM_GetMapTileTable(wParam ? true : false, (CGA::cga_map_cells_t *)lParam);
 		return 1;
+	case WM_CGA_UPGRADE_PLAYER:
+		g_CGAService.WM_UpgradePlayer((int)wParam);
+		return 1;
+	case WM_CGA_UPGRADE_PET:
+		g_CGAService.WM_UpgradePet((int)wParam, (int)lParam);
+		return 1;
+	case WM_CGA_CHANGE_NICK_NAME:
+		return g_CGAService.WM_ChangeNickName((const char *)wParam);
+	case WM_CGA_CHANGE_TITLE_NAME:
+		return g_CGAService.WM_ChangeTitleName((int)wParam);
+	case WM_CGA_CHANGE_PERS_DESC:
+		g_CGAService.WM_ChangePersDesc((CGA::cga_pers_desc_t *)wParam);
+		return 1;
 	case WM_KEYDOWN:
-		switch (wParam)
+		if (GetForegroundWindow() == g_MainHwnd)
 		{
-		case VK_F1:
-			g_CGAService.WM_LogBack();
-			return 1;
-		case VK_F2:
-			g_CGAService.WM_LogOut();
-			return 1;
-		case VK_F3:
-			g_CGAService.WM_ForceMove(g_CGAService.GetMouseOrientation(), true);
-			return 1;
-		case VK_F4:
-			g_CGAService.AddAllTradeItems();
-			return 1;
+			switch (wParam)
+			{
+			case VK_F1:
+				g_CGAService.WM_LogBack();
+				return 1;
+			case VK_F2:
+				g_CGAService.WM_LogOut();
+				return 1;
+			case VK_F3:
+				g_CGAService.WM_ForceMove(g_CGAService.GetMouseOrientation(), true);
+				return 1;
+			case VK_F4:
+				g_CGAService.AddAllTradeItems();
+				return 1;
+			}
 		}
 	}
 

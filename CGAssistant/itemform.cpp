@@ -110,9 +110,9 @@ void ItemForm::OnNotifyGetItemsInfo(QSharedPointer<CGA_ItemList_t> items)
         {
             QString str, tips;
             if(item.count > 0)
-                str = QString("%1 x %2\n#%3").arg(item.name, QString::number(item.count), QString::number(item.itemid));
+                str = QString("%1 x %2\n#%3 @%4").arg(item.name, QString::number(item.count), QString::number(item.itemid), QString::number(item.type));
             else
-                str = QString("%1\n#%2").arg(item.name, QString::number(item.itemid));
+                str = QString("%1\n#%2 @%3").arg(item.name, QString::number(item.itemid), QString::number(item.type));
 
             if(GetItemTips(item.itemid, tips) && !tips.isEmpty())
                 str += QString("\n(%1)").arg(tips);

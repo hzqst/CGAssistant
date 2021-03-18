@@ -80,9 +80,8 @@ namespace CGA
 	{
 		short valid;
 		char name[46];
-		char attrs[8][96];
-		char info[192];
-		char info2[576];
+		char attr[8][96];
+		char info[8][96];
 		int flags;//2=right clickable
 		int unk;
 		int image_id;
@@ -107,14 +106,50 @@ namespace CGA
 		int image_id;
 		int count;
 		char name[29];
-		char attr[96];
-		char info[672];
-		char info2[787];
+		char attr[8][96];
+		char info[8][96];
+		char padding2[19];
 		int flags;//2=right clickable
 		int unk;
 	}bank_item_info_t;
 	
 	static_assert(sizeof(bank_item_info_t) == 0x644, "Size check");
+
+	typedef struct bank_pet_info_s
+	{
+		short valid; //0x0000 
+		short race; //0x0002 
+		int imageid; //0x0004 
+		int level; //0x0008 
+		int padding1; //0x000C 
+		int maxhp; //0x0010 
+		int padding2; //0x0014 
+		int maxmp; //0x0018 
+		int points_endurance; //0x001C 
+		int points_strength; //0x0020 
+		int points_defense; //0x0024 
+		int points_agility; //0x0028 
+		int points_magical; //0x002C 
+		int value_attack; //0x0030 
+		int value_defensive; //0x0034 
+		int value_agility; //0x0038 
+		int value_spirit; //0x003C 
+		int value_recovery; //0x0040 
+		int value_loyality; //0x0044 
+		int element_earth; //0x0048 
+		int element_water; //0x004C 
+		int element_fire; //0x0050 
+		int element_wind; //0x0054 
+		int skill_slots; //0x0058 
+		int padding3; //0x005C 
+		int padding4; //0x0060 
+		char skills[9][0x8C]; //0x105CE0C 
+		char skill_last[0x84];
+		char nickname[17]; //0x105CE0C 
+		char originalname[19]; //0x105CE0C 
+	}bank_pet_info_t;
+
+	static_assert(sizeof(bank_pet_info_t) == 0x5F8, "Size check");
 
 	typedef struct npcdlg_item_info_s
 	{
@@ -135,6 +170,24 @@ namespace CGA
 	}npcdlg_item_info_t;
 
 	static_assert(sizeof(npcdlg_item_info_t) == 0x658, "Size check");
+
+	//12AB3E0
+	typedef struct player_pers_desc_s
+	{
+		int sellIcon;
+		int sellUnk;
+		char sellString[256];
+		int buyIcon;
+		int buyUnk;
+		char buyString[256];
+		int wantIcon;
+		int wantUnk;
+		char wantString[256];
+		char descString[256];
+		char unk[0x410];
+	}player_pers_desc_t;
+
+	static_assert(sizeof(player_pers_desc_t) == 0x828, "Size check");
 
 #define PLAYER_ENABLE_FLAGS_PK (1<<2)
 #define PLAYER_ENABLE_FLAGS_TEAMCHAT (1<<3)
@@ -217,7 +270,7 @@ namespace CGA
 		int enable_flags;//+396
 		int unk11;//+400
 		int unk12;//+404
-		int unk13;//+408
+		int battle_position;//+408
 		item_info_t iteminfos[40];//+412 = itembase
 	}playerbase_t;
 
@@ -454,7 +507,8 @@ namespace CGA
 		int unk20;		//640120
 		void *actor;//+284 640124
 		int injury;//+288
-		char unk22[24];
+		int icon;
+		char unk22[20];
 	}map_unit_t;
 
 	static_assert(sizeof(map_unit_t) == 0x13c, "Size check");
@@ -474,6 +528,18 @@ namespace CGA
 
 	static_assert(sizeof(team_player_t) == 0x30, "Size check");
 
+	typedef struct sys_time_s
+	{
+		int years;
+		int month;
+		int days;
+		int hours;
+		int mins;
+		int secs;
+	}sys_time_t;
+
+	static_assert(sizeof(sys_time_t) == 24, "Size check");
+
 #pragma pack()
 
 	class CGAService
@@ -482,6 +548,8 @@ namespace CGA
 		CGAService();
 		void Initialize(game_type type);
 		void Uninitialize();
+		char *GetPlayerName();
+		int GetServerIndex();
 	public:
 		virtual void InitializeGameData(cga_game_data_t);
 		virtual bool Connect();
@@ -489,6 +557,8 @@ namespace CGA
 		virtual int IsInGame();
 		virtual int GetWorldStatus();
 		virtual int GetGameStatus();
+		virtual int GetBGMIndex();
+		virtual cga_sys_time_t GetSysTime();
 
 		virtual cga_player_info_t GetPlayerInfo();
 		virtual void SetPlayerFlagEnabled(int index, bool enable);
@@ -502,6 +572,7 @@ namespace CGA
 		virtual bool IsPetValid(int petid);
 		virtual cga_pet_info_t GetPetInfo(int index);
 		virtual cga_pets_info_t GetPetsInfo();
+		virtual cga_pets_info_t GetBankPetsInfo();
 		virtual bool IsPetSkillValid(int petid, int skillid);
 		virtual cga_pet_skill_info_t GetPetSkillInfo(int petid, int skillid);
 		virtual cga_pet_skills_info_t GetPetSkillsInfo(int petid);
@@ -510,6 +581,7 @@ namespace CGA
 		virtual cga_item_info_t GetItemInfo(int itempos);
 		virtual cga_items_info_t GetItemsInfo();
 		virtual cga_items_info_t GetBankItemsInfo();
+		virtual int GetBankGold();
 		virtual bool DropItem(int itempos);
 		virtual bool UseItem(int itempos);
 		virtual bool MoveItem(int itempos, int dstpos, int count);
@@ -537,6 +609,8 @@ namespace CGA
 		virtual bool BuyNPCStore(cga_buy_items_t items);
 		virtual bool PlayerMenuSelect(int menuindex, const std::string &menustring);
 		virtual bool UnitMenuSelect(int menuindex);
+		virtual void UpgradePlayer(int attr);
+		virtual void UpgradePet(int petindex, int attr);
 
 		virtual bool IsBattleUnitValid(int pos);
 		virtual cga_battle_unit_t GetBattleUnit(int pos);
@@ -556,7 +630,9 @@ namespace CGA
 		virtual bool BattleDoNothing();
 		virtual void BattleSetHighSpeedEnabled(bool enable);
 		virtual void BattleSetShowHPMPEnabled(bool enable);
-
+		virtual void ChangePersDesc(cga_pers_desc_t desc);
+		virtual bool ChangeNickName(std::string str);
+		virtual bool ChangeTitleName(int titleId);
 		virtual void SayWords(std::string str, int color, int range, int size);
 		virtual void SetWorkDelay(int delay);
 		virtual void SetWorkAcceleration(int percent);
@@ -584,19 +660,27 @@ namespace CGA
 		virtual void RequestDownloadMap(int xbottom, int ybottom, int xsize, int ysize);
 		virtual double GetNextAnimTickCount();
 		virtual int GetCraftStatus();
+		virtual bool IsUIDialogPresent(int dialog);
 
 		virtual void LoginGameServer(std::string gid, std::string glt, int serverid, int bigServerIndex, int serverIndex,int character);
-	private:
+	public:
+		int *g_server_time;
+		int *g_local_time;
+		sys_time_t *g_sys_time;
+		int *g_new_world_status_cgitem;
 		int *g_world_status_cgitem;
 		int *g_game_status_cgitem;
 		CXorValue *g_world_status;
 		CXorValue *g_game_status;
-
+		int *g_bgm_index;
+		void **g_pet_riding_stru;
 		CXorValue *g_player_xpos;
 		CXorValue *g_player_ypos;
 		playerbase_t **g_playerBase;
 		playerbase_t *g_playerBase_cgitem;
 		bank_item_info_t *g_bank_item_base;
+		bank_pet_info_t *g_bank_pet_base;
+		int *g_bank_gold;
 		npcdlg_item_info_t *g_npcdlg_item_base;
 		char *g_player_name;
 		int *g_player_remain_points;
@@ -705,6 +789,7 @@ namespace CGA
 		int *g_petskilldialog_select_index;
 		int *g_petskilldialog_select_pet;
 		void *g_ui_manager;
+		void *g_ui_trade_dialog;
 
 		short *g_map_x_bottom;
 		short *g_map_y_bottom;
@@ -736,6 +821,12 @@ namespace CGA
 		btn_rect_t *g_select_server_btn;
 		int *g_last_login_tick;
 		double *g_next_anim_tick;
+		int *g_create_character_status;
+
+		player_pers_desc_t *g_player_pers_desc;
+		player_pers_desc_t *g_pers_desc;
+		int *g_avatar_public_state;
+		short *g_local_player_index;
 	public:
 		char(__cdecl *Sys_CheckModify)(const char *a1);
 		void(__cdecl *COMMON_PlaySound)(int a1, int a2, int a3);
@@ -761,6 +852,9 @@ namespace CGA
 		void(__cdecl *NET_ParseWarp)(int a1, int index1, int index3, int xsize, int ysize, int xpos, int ypos, int a8, int a9, int a10, int a11, int a12, int warpTimes);
 		void(__cdecl *NET_ParseTeamInfo)(int a1, int a2, const char *a3);
 		void(__cdecl *NET_ParseTeamState)(int a1, int a2, int a3);
+		void(__cdecl *NET_ParseServerBasicInfo)(int a1, int a2, int server_time, int serverIndex, int a5);
+		void(__cdecl *NET_ParseLoginResult)(int a1, int a2, const char *a3);
+		void(__cdecl *NET_ParseLoginResult2)(int a1, const char *a2, const char *a3);
 
 		void(_cdecl *R_DrawText)(int a1);
 		void(__cdecl *Move_Player)();
@@ -785,7 +879,7 @@ namespace CGA
 		void(__cdecl *NET_WriteJoinTeamPacket_cgitem)(int, int, int, int);
 		void(__cdecl *NET_WriteTradePacket_cgitem)(int);
 		void(__cdecl *NET_WriteKickTeamPacket_cgitem)(int);
-		void(__cdecl *NET_WriteTraceAddItemPacket_cgitem)(int, const char *, const char *, int);
+		void(__cdecl *NET_WriteTradeAddItemPacket_cgitem)(int, const char *, const char *, int);
 		void(__cdecl *NET_WriteTradeConfirmPacket_cgitem)(int);
 		void(__cdecl *NET_WriteTradeRefusePacket_cgitem)(int);
 		void(__cdecl *NET_WriteExchangeCardPacket_cgitem)(int, int, int);
@@ -798,6 +892,13 @@ namespace CGA
 		void(__cdecl *NET_WriteWorkMiscPacket_cgitem)(int, int, int, int);
 		void(__cdecl *NET_WriteEndBattlePacket_cgitem)(int, int);
 		void(__cdecl *NET_WriteChangePetStatePacket_cgitem)(int, int, int, int, int, int);
+		void(__cdecl *NET_WriteUpgradePlayerPacket)(int a1, int a2);
+		void(__cdecl *NET_WriteUpgradePetPacket)(int a1, int a2, int a3);
+		void(__cdecl *NET_WriteChangeNickNamePacket_cgitem)(int a1, const char *a2);
+		void(__cdecl *NET_WriteChangePersDescPacket_cgitem)(int a1, int sellIcon, const char *sellString, int buyIcon, const char *buyString, int wantIcon, const char *wantString, const char *descString);
+		void(__cdecl *NET_WriteChangeAvatarPublicStatePacket_cgitem)(int a1, int isPublic);
+		void(__cdecl *NET_WriteChangeBattlePositionPacket_cgitem)(int a1);
+		void(__cdecl *NET_WriteChangeTitleNamePacket_cgitem)(int a1, int titleId);
 
 		void(__cdecl *NPC_ShowDialogInternal)(int type, int options, int dlgid, int objid, const char *message);
 		int(__cdecl *NPC_ClickDialog)(int option, int index, int a3, char a4);
@@ -848,6 +949,7 @@ namespace CGA
 		int(__cdecl *UI_BattleOpenPetSkillDialog)(int index, char flags);
 		int(__cdecl *UI_DisplayAnimFrame)(int index);
 		void (__cdecl *UI_DialogShowupFrame)(int dialog);
+		void(__cdecl *UI_UpdatePersDesc)(int);
 		void(__cdecl *UI_GatherNextWork)(int uicore);
 		void(__cdecl *SYS_ResetWindow)();
 		void(__cdecl *format_mapname)(char *a1, int index1, int index2, int index3); 
@@ -855,6 +957,7 @@ namespace CGA
 		void(__cdecl *Actor_SetAnimation)(void *actor, int anim, int a3);
 		void(__cdecl *Actor_Render)(void *actor, int a2);
 		int(__cdecl *GetBattleUnitDistance)(void *a1, float a2, float a3);
+		void(__cdecl *SetWorldStatus)(int a1);
 		char *(__cdecl *V_strstr)(char *a1, const char *a2);
 
 		//POLCN
@@ -1005,6 +1108,7 @@ namespace CGA
 		void WM_GetSubSkillsInfo(int index, cga_subskills_info_t *info);
 		void WM_GetPetInfo(int index, cga_pet_info_t *info);
 		void WM_GetPetsInfo(cga_pets_info_t *info);
+		void WM_GetBankPetsInfo(cga_pets_info_t *info);
 		void WM_GetPetSkillInfo(int petid, int skillid, cga_pet_skill_info_t *info);
 		void WM_GetPetSkillsInfo(int petid, cga_pet_skills_info_t *info);
 		void WM_GetItemInfo(int itempos, cga_item_info_t *info);
@@ -1038,6 +1142,11 @@ namespace CGA
 		void WM_GetMapObjectTable(bool loadall, cga_map_cells_t *cells);
 		void WM_GetMapTileTable(bool loadall, cga_map_cells_t *cells);
 		void WM_SendClientLogin(const char *acc, const char *pwd, int gametype);
+		void WM_UpgradePlayer(int attr);
+		void WM_UpgradePet(int petid, int attr);
+		bool WM_ChangeNickName(const char *name);
+		void WM_ChangePersDesc(cga_pers_desc_t *input);
+		bool WM_ChangeTitleName(int titleId);
 
 		bool m_initialized;
 		bool m_btl_highspeed_enable;
@@ -1108,8 +1217,6 @@ namespace CGA
 		ULONG m_ImageSize;
 
 		char m_fakeCGSharedMem[1024];
-
-		ULONG64 m_POLCNLoginTick;
 	};
 }
 
@@ -1175,5 +1282,11 @@ namespace CGA
 #define WM_CGA_LOGIN_GAME_SERVER WM_USER+10059
 #define WM_CGA_BATTLE_DONOTHING WM_USER+10060
 #define WM_CGA_BATTLE_REBIRTH WM_USER+10061
+#define WM_CGA_UPGRADE_PLAYER WM_USER+10062
+#define WM_CGA_UPGRADE_PET WM_USER+10063
+#define WM_CGA_GET_BANK_PETS_INFO WM_USER+10064
+#define WM_CGA_CHANGE_NICK_NAME WM_USER+10065
+#define WM_CGA_CHANGE_TITLE_NAME WM_USER+10066
+#define WM_CGA_CHANGE_PERS_DESC WM_USER+10067
 
 #define CGA_PORT_BASE 4396
