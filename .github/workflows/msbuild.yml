@@ -73,16 +73,21 @@ jobs:
         cached: false # ${{ steps.cache-qt.outputs.cache-hit }}
         tools : 'tools_qtcreator,4.14.1-0,qt.tools.qtcreator'
 
+    - name: init-dep
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      run: git submodule update --init --recursive
+
     - name: build-qhttp
       working-directory: ${{env.GITHUB_WORKSPACE}}
       run: |
         cd qhttp
-        git submodule update --init --recursive
         mkdir 3rdparty
         cd 3rdparty
         git clone https://github.com/nodejs/http-parser.git
         cd ${{env.GITHUB_WORKSPACE}}
+        cd qhttp        
         call qmake qhttp.pro -spec win32-msvc "CONFIG+=qtquickcompiler"
+        dir
         call "${{env.IQTA_TOOLS}}\QtCreator\bin\jom.exe" -f MakeFile qmake_all
         call "${{env.IQTA_TOOLS}}\QtCreator\bin\jom.exe"
         copy "${{env.GITHUB_WORKSPACE}}\qhttp\xbin\qhttp.dll" "${{env.GITHUB_WORKSPACE}}\build\"
