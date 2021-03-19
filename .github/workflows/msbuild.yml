@@ -24,7 +24,7 @@ jobs:
         # Name or path to vswhere.exr
         vswhere: # optional, default is vswhere.exe
         # Target build architecture
-        arch: # optional, default is amd64
+        arch: x86 # optional, default is amd64
         # Host architecture (x86, x86_amd64, or amd64)
         host_arch: # optional, default is 
         # Overrides the default WinSDK version
@@ -90,7 +90,7 @@ jobs:
         qmake qhttp.pro -spec win32-msvc "CONFIG+=qtquickcompiler"
         "${{env.IQTA_TOOLS}}\QtCreator\bin\jom.exe" -f MakeFile qmake_all
         "${{env.IQTA_TOOLS}}\QtCreator\bin\jom.exe"
-        "${{env.GITHUB_WORKSPACE}}\qhttp\xbin\qhttp.dll" "${{env.GITHUB_WORKSPACE}}\build\"
+        copy "${{env.GITHUB_WORKSPACE}}\qhttp\xbin\qhttp.dll" "${{env.GITHUB_WORKSPACE}}\build\"
       shell: cmd
 
     - name: build-boost
