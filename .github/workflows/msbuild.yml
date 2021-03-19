@@ -71,11 +71,13 @@ jobs:
         modules: # optional
         # Whether or not to actually download Qt
         cached: false # ${{ steps.cache-qt.outputs.cache-hit }}
-        tools : 'tools_qtcreator,4.14.1-0-202102230956,qt.tools.qtcreator'
+        tools : 'tools_qtcreator,4.14.1-0,qt.tools.qtcreator'
 
     - name: build-qhttp
       working-directory: ${{env.GITHUB_WORKSPACE}}
-      run: | 
+      run: |
+        cd qhttp
+        git submodule update --init --recursive
         mkdir 3rdparty
         cd 3rdparty
         git clone https://github.com/nodejs/http-parser.git
