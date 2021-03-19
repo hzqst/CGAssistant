@@ -8,7 +8,7 @@ if exist "%InstallDir%\Common7\Tools\vsdevcmd.bat" (
 
     cd CGAssistant
 
-    qmake CGAssistant.pro -spec win32-msvc "CONFIG+=qtquickcompiler"
+    qmake CGAssistant.pro -spec win32-msvc "CONFIG+=32bit" "CONFIG+=qtquickcompiler"
 
     jom -f MakeFile qmake_all
 
