@@ -86,11 +86,17 @@ jobs:
     - name: build-qhttp
       working-directory: ${{env.GITHUB_WORKSPACE}}
       run: |
-        cd qhttp
-        qmake qhttp.pro -spec win32-msvc "CONFIG+=32bit" "CONFIG+=qtquickcompiler"
-        "${{env.IQTA_TOOLS}}\QtCreator\bin\jom.exe" -f MakeFile qmake_all
-        "${{env.IQTA_TOOLS}}\QtCreator\bin\jom.exe"
-        copy "${{env.GITHUB_WORKSPACE}}\qhttp\xbin\qhttp.dll" "${{env.GITHUB_WORKSPACE}}\build\"
+        for /f "usebackq tokens=*" %%i in (`vswhere -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath`) do (
+          set InstallDir=%%i
+        )
+        if exist "%InstallDir%\Common7\Tools\vsdevcmd.bat" (          
+          "%InstallDir%\Common7\Tools\vsdevcmd.bat" -arch=x86
+          cd qhttp
+          qmake qhttp.pro -spec win32-msvc "CONFIG+=qtquickcompiler"
+          "${{env.IQTA_TOOLS}}\QtCreator\bin\jom.exe" -f MakeFile qmake_all
+          "${{env.IQTA_TOOLS}}\QtCreator\bin\jom.exe"
+          copy "${{env.GITHUB_WORKSPACE}}\qhttp\xbin\qhttp.dll" "${{env.GITHUB_WORKSPACE}}\build\"
+        )
       shell: cmd
 
     - name: build-boost
@@ -101,10 +107,17 @@ jobs:
     - name: build-CGAssistant
       working-directory: ${{env.GITHUB_WORKSPACE}}
       run: |
-        cd CGAssistant
-        qmake qhttp.pro -spec win32-msvc "CONFIG+=32bit qtquickcompiler"
-        "${{env.IQTA_TOOLS}}\QtCreator\bin\jom.exe" -f MakeFile qmake_all
-        "${{env.IQTA_TOOLS}}\QtCreator\bin\jom.exe"
+        for /f "usebackq tokens=*" %%i in (`vswhere -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath`) do (
+          set InstallDir=%%i
+        )
+        if exist "%InstallDir%\Common7\Tools\vsdevcmd.bat" (          
+          "%InstallDir%\Common7\Tools\vsdevcmd.bat" -arch=x86
+          cd qhttp
+          cd CGAssistant
+          qmake qhttp.pro -spec win32-msvc "CONFIG+=qtquickcompiler"
+          "${{env.IQTA_TOOLS}}\QtCreator\bin\jom.exe" -f MakeFile qmake_all
+          "${{env.IQTA_TOOLS}}\QtCreator\bin\jom.exe"
+        )
       shell: cmd
 
     - name: build-CGAHook
