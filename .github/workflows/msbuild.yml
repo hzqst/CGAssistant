@@ -87,11 +87,18 @@ jobs:
     - name: build-qhttp
       working-directory: ${{env.GITHUB_WORKSPACE}}
       run: |
-        cd qhttp
-        qmake qhttp.pro -spec win32-msvc "CONFIG+=32bit" "INCLUDEPATH+={{$env.WindowsSdkDir}}/Include/10.0.17134.0/ucrt"
-        "${{env.IQTA_TOOLS}}\QtCreator\bin\jom.exe" -f MakeFile qmake_all
-        "${{env.IQTA_TOOLS}}\QtCreator\bin\jom.exe"
-        copy "${{env.GITHUB_WORKSPACE}}\qhttp\xbin\qhttp.dll" "${{env.GITHUB_WORKSPACE}}\build\"
+        for /f "usebackq tokens=*" %%i in (`vswhere -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath`) do (
+          set InstallDir=%%i
+        )
+        if exist "%InstallDir%\Common7\Tools\vsdevcmd.bat" (   
+          set VSCMD_DEBUG=3       
+          "%InstallDir%\Common7\Tools\vsdevcmd.bat" -arch=x86
+          cd qhttp
+          qmake qhttp.pro -spec win32-msvc "CONFIG+=32bit" "INCLUDEPATH+={{$env.WindowsSdkDir}}/Include/10.0.17134.0/ucrt"
+          "${{env.IQTA_TOOLS}}\QtCreator\bin\jom.exe" -f MakeFile qmake_all
+          "${{env.IQTA_TOOLS}}\QtCreator\bin\jom.exe"
+          copy "${{env.GITHUB_WORKSPACE}}\qhttp\xbin\qhttp.dll" "${{env.GITHUB_WORKSPACE}}\build\"
+        )
       shell: cmd
 
     - name: build-boost
