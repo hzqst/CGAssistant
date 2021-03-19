@@ -4,9 +4,4 @@
 *.VC.opendb
 *.sdf
 *.lg.txt
-x64
-Debug
-Release
 *.user
-/build
-/client_proxy/build
