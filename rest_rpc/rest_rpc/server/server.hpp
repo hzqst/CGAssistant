@@ -15,7 +15,7 @@ namespace timax { namespace rpc
 	public:
 		server(uint16_t port, size_t pool_size, duration_t time_out = duration_t::max())
 			: ios_pool_(pool_size)
-			, acceptor_(ios_pool_.get_io_service(), tcp::endpoint{tcp::v4(), port})
+			, acceptor_(ios_pool_.get_io_service(), tcp::endpoint{ boost::asio::ip::address::from_string("127.0.0.1"), port})
 			, time_out_(time_out)
 		{
 			init_callback_functions();
