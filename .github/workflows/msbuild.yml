@@ -17,21 +17,11 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-
-    - name: Setup Git for Windows SDK
-      # You may pin to the exact commit or the version.
-      # uses: git-for-windows/setup-git-for-windows-sdk@cd2fc65085a5ceb095576ff6f5accbfbe693ed23
-      uses: git-for-windows/setup-git-for-windows-sdk@v0.0.9
-      with:
-        # The subset (if any) of the SDK: minimal, makepkg-git, build-installers, or full
-        flavor: full
-        architecture: i686
-        cache: auto
     
     - name: Add MSBuild to PATH
       uses: microsoft/setup-msbuild@v1
       with:
-        vs-version: '[14.1,14.2)'
+        vs-version: '[15.9,16.0)'
         # Version of Visual Studio to search; defaults to latest if not specified
 
     - name: Cache Qt
@@ -48,7 +38,7 @@ jobs:
       with:
         # optional
         # Version of Qt to install
-        version: 5.12.9
+        version: 5.12.1
         # optional, default is 5.15.2
         # Host platform
         host: windows
