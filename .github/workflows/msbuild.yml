@@ -77,7 +77,7 @@ jobs:
     - name: Link Windows SDK
       working-directory: ${{env.GITHUB_WORKSPACE}}
       run: |
-        mklink /d "${{env.GITHUB_WORKSPACE}}/winsdk" "${{env.WindowsSdkDir}}"
+        mklink /d "${{env.GITHUB_WORKSPACE}}/winsdk" "${{env.WindowsSdkDir}}"        
       shell: cmd
 
     - name: init-dep
@@ -100,6 +100,7 @@ jobs:
         if exist "%InstallDir%\Common7\Tools\vsdevcmd.bat" (  
           "%InstallDir%\Common7\Tools\vsdevcmd.bat" -arch=x86
           cd qhttp
+          set PATH=%PATH%;${{env.GITHUB_WORKSPACE}}\winsdk\bin\10.0.17763.0\x86\
           qmake qhttp.pro -spec win32-msvc "CONFIG+=32bit" "INCLUDEPATH+=${{env.GITHUB_WORKSPACE}}\winsdk\Include\10.0.17134.0\ucrt" "LIBS += -L${{env.GITHUB_WORKSPACE}}\winsdk\Lib\10.0.17134.0\um\x86" "LIBS += -L${{env.GITHUB_WORKSPACE}}\winsdk\Lib\10.0.17134.0\ucrt\x86"
           "${{env.IQTA_TOOLS}}\QtCreator\bin\jom.exe" -f MakeFile qmake_all
           "${{env.IQTA_TOOLS}}\QtCreator\bin\jom.exe"
