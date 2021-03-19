@@ -77,7 +77,7 @@ jobs:
     - name: test
       working-directory: ${{env.GITHUB_WORKSPACE}}
       run: |
-        cd ${{env.WindowsSdkDir}}/Include/10.0.17134.0/ucrt
+        cd /d "${{env.WindowsSdkDir}}/Include/10.0.17134.0/ucrt"
         dir
       shell: cmd
 
@@ -101,7 +101,7 @@ jobs:
           set VSCMD_DEBUG=3       
           "%InstallDir%\Common7\Tools\vsdevcmd.bat" -arch=x86
           cd qhttp
-          qmake qhttp.pro -spec win32-msvc "CONFIG+=32bit" INCLUDEPATH+="${{env.WindowsSdkDir}}/Include/10.0.17134.0/ucrt"
+          qmake qhttp.pro -spec win32-msvc "CONFIG+=32bit" "INCLUDEPATH+=$$quote(${{env.WindowsSdkDir}}/Include/10.0.17134.0/ucrt)"
           "${{env.IQTA_TOOLS}}\QtCreator\bin\jom.exe" -f MakeFile qmake_all
           "${{env.IQTA_TOOLS}}\QtCreator\bin\jom.exe"
           copy "${{env.GITHUB_WORKSPACE}}\qhttp\xbin\qhttp.dll" "${{env.GITHUB_WORKSPACE}}\build\"
@@ -121,9 +121,8 @@ jobs:
         )
         if exist "%InstallDir%\Common7\Tools\vsdevcmd.bat" (          
           "%InstallDir%\Common7\Tools\vsdevcmd.bat" -arch=x86
-          cd qhttp
           cd CGAssistant
-          qmake qhttp.pro -spec win32-msvc "CONFIG+=qtquickcompiler"
+          qmake CGAssistant.pro -spec win32-msvc "CONFIG+=32bit" "CONFIG+=qtquickcompiler"
           "${{env.IQTA_TOOLS}}\QtCreator\bin\jom.exe" -f MakeFile qmake_all
           "${{env.IQTA_TOOLS}}\QtCreator\bin\jom.exe"
         )
