@@ -21,7 +21,7 @@ jobs:
     - name: Add MSBuild to PATH
       uses: microsoft/setup-msbuild@v1
       with:
-        vs-version: '[15.9,16.0)'
+        vs-version: 
         # Version of Visual Studio to search; defaults to latest if not specified
 
     - name: Cache Qt
@@ -67,7 +67,7 @@ jobs:
 
     - name: build-CGAHook
       working-directory: ${{env.GITHUB_WORKSPACE}}
-      run: MSBuild.exe CGAssistant.sln /t:CGAHook /p:Configuration=Release /p:Platform="x86" /p:PlatformToolset=v141
+      run: MSBuild.exe CGAssistant.sln /t:CGAHook /p:Configuration=Release /p:Platform="x86" /p:PlatformToolset=v142
 
     - name: build-qhttp
       working-directory: ${{env.GITHUB_WORKSPACE}}
