@@ -77,10 +77,11 @@ jobs:
       working-directory: ${{env.GITHUB_WORKSPACE}}
       run: |
         git submodule update --init --recursive
-        cd "${{env.GITHUB_WORKSPACE}}\qhttp"        
+        cd qhttp
         mkdir 3rdparty
         cd 3rdparty
         git clone https://github.com/nodejs/http-parser.git
+      shell: cmd
 
     - name: build-qhttp
       working-directory: ${{env.GITHUB_WORKSPACE}}
@@ -99,7 +100,12 @@ jobs:
 
     - name: build-CGAssistant
       working-directory: ${{env.GITHUB_WORKSPACE}}
-      run: MSBuild.exe CGAssistant.sln /t:CGAHook /p:Configuration=Release /p:Platform="x86" /p:PlatformToolset=v141
+      run: |
+        cd CGAssistant
+        qmake qhttp.pro -spec win32-msvc "CONFIG+=qtquickcompiler"
+        "${{env.IQTA_TOOLS}}\QtCreator\bin\jom.exe" -f MakeFile qmake_all
+        "${{env.IQTA_TOOLS}}\QtCreator\bin\jom.exe"
+      shell: cmd
 
     - name: build-CGAHook
       working-directory: ${{env.GITHUB_WORKSPACE}}
