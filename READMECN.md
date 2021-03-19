@@ -16,7 +16,11 @@ Wiki（国内镜像）： https://gitee.com/hzqst/CGAssistantJS/wikis
 
 ## 编译前置需求
 
-Visual Studio 2017 with C++
+Visual Studio 2017 或 2019
+
+Windows SDK 10
+
+VC141 工具集
 
 QT 5.12 for msvc2017, win32 (x86)
 
@@ -32,21 +36,17 @@ node-gyp (建议跟随 https://www.npmjs.com/package/node-gyp 的指示来安装
 
 ![](img/1.png)
 
-2. 如果你的MSVC2017没有安装到默认路径，请修改每一个 "build-*.bat" 批处理文件, 把其中的 "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars32.bat" 改成你的 "vcvars32.bat" 所在的位置，就如下图所示的那样。不知道vcvars32.bat在哪建议直接全盘搜索或者重新以默认路径安装MSVC2017。
+2. 运行 "init-dependencies.bat", 等待所有子模块下载完成。 (这一步可能需要花费几分钟时间, 具体取决于你的网速，如果速度很慢或者下载出错建议尝试使用proxy)
 
-![](img/2.png)
+3. 运行 "build-boost.bat", 等待boost的所有静态库编译完成。 (这一步可能需要花费十几分钟时间，具体取决于你的CPU性能)
 
-3. 运行 "init-dependencies.bat", 等待所有子模块下载完成。 (这一步可能需要花费几分钟时间, 具体取决于你的网速，如果速度很慢或者下载出错建议尝试使用proxy)
+4. 运行 "build-CGAHook.bat", 等待 "CGAHook.dll" 生成成功后会自动复制到 "build" 目录下。
 
-4. 运行 "build-boost.bat", 等待boost的所有静态库编译完成。 (这一步可能需要花费十几分钟时间，具体取决于你的CPU性能)
+5. 运行 "build-qhttp.bat", 等待 "qhttp.dll" 生成成功后会自动复制到 "build" 目录下。
 
-5. 运行 "build-CGAHook.bat", 等待 "CGAHook.dll" 生成成功后会自动复制到 "build" 目录下。
+6. 运行 "build-CGAssiatant.bat", 等待 "CGAssistant.exe" 生成成功后会自动复制到 "build" 目录下。
 
-5. 运行 "build-nodegyp.bat", 等待 "node_cga.node" 生成成功后会自动复制到 "build/Release" 目录下。
-
-6. 运行 "build-qhttp.bat", 等待 "qhttp.dll" 生成成功后会自动复制到 "build" 目录下。
-
-7. 运行 "build-CGAssiatant.bat", 等待 "CGAssistant.exe" 生成成功后会自动复制到 "build" 目录下。
+7. 运行 "build-nodegyp.bat", 等待 "node_cga.node" 生成成功后会自动复制到 "build/Release" 目录下。
 
 8. 运行 "windeploy.bat"
 

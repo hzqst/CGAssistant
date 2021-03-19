@@ -1,20 +1,28 @@
-call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars32.bat"
+for /f "usebackq tokens=*" %%i in (`vswhere -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath`) do (
+  set InstallDir=%%i
+)
 
-cd qhttp
+if exist "%InstallDir%\Common7\Tools\vsdevcmd.bat" (
+    
+    "%InstallDir%\Common7\Tools\vsdevcmd.bat" -arch=x86
 
-mkdir 3rdparty
-cd 3rdparty
+    cd qhttp
 
-git clone https://github.com/nodejs/http-parser.git
+    mkdir 3rdparty
+    
+    cd 3rdparty
 
-cd ..
+    git clone https://github.com/nodejs/http-parser.git
 
-qmake qhttp.pro -spec win32-msvc "CONFIG+=qtquickcompiler"
+    cd ..
 
-jom -f MakeFile qmake_all
+    qmake qhttp.pro -spec win32-msvc "CONFIG+=qtquickcompiler"
 
-jom
+    jom -f MakeFile qmake_all
 
-jom clean
+    jom
 
-copy "xbin\qhttp.dll" "..\build\"
+    jom clean
+
+    copy "xbin\qhttp.dll" "..\build\"
+)

@@ -1,3 +1,11 @@
-call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars32.bat"
+for /f "usebackq tokens=*" %%i in (`vswhere -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath`) do (
+  set InstallDir=%%i
+)
 
-MSBuild.exe CGAssistant.sln /t:CGAHook /p:Configuration=Release /p:Platform="x86" /p:PlatformToolset=v141
+if exist "%InstallDir%\Common7\Tools\vsdevcmd.bat" (
+
+    "%InstallDir%\Common7\Tools\vsdevcmd.bat" -arch=x86
+    
+    MSBuild.exe CGAssistant.sln /t:CGAHook /p:Configuration=Release /p:Platform="x86" /p:PlatformToolset=v141
+
+)
