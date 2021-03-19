@@ -19,14 +19,12 @@ jobs:
     - uses: actions/checkout@v2
     
     - name: Setup VS Dev Environment
-      # You may pin to the exact commit or the version.
-      # uses: seanmiddleditch/gha-setup-vsdevenv@8c6bbf80998779f2bba87b1452832e561b65fd57
       uses: seanmiddleditch/gha-setup-vsdevenv@v3
       with:
         # Name or path to vswhere.exr
         vswhere: # optional, default is vswhere.exe
         # Target build architecture
-        arch: x86 # optional, default is amd64
+        arch: # optional, default is amd64
         # Host architecture (x86, x86_amd64, or amd64)
         host_arch: # optional, default is 
         # Overrides the default WinSDK version
@@ -35,7 +33,6 @@ jobs:
         toolset_version: vc141 # optional, default is 
         # List of components required in the selected VS installation (semi-colon separated)
         components: # optional, default is Microsoft.VisualStudio.Component.VC.Tools.x86.x64
-
 
     - name: Add MSBuild to PATH
       uses: microsoft/setup-msbuild@v1
