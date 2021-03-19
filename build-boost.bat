@@ -2,7 +2,7 @@ cd boost
 
 if exist b2.exe goto bjam
 
-bootstrap.bat
+call bootstrap.bat
 
 :bjam
 
