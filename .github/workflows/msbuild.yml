@@ -71,7 +71,7 @@ jobs:
         # Additional Qt modules to install
         modules: # optional
         # Whether or not to actually download Qt
-        cached: false # ${{ steps.cache-qt.outputs.cache-hit }}
+        cached: ${{ steps.cache-qt.outputs.cache-hit }}
         tools : 'tools_qtcreator,4.14.1-0,qt.tools.qtcreator'
 
     - name: init-dep
@@ -87,17 +87,11 @@ jobs:
     - name: build-qhttp
       working-directory: ${{env.GITHUB_WORKSPACE}}
       run: |
-        for /f "usebackq tokens=*" %%i in (`vswhere -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath`) do (
-          set InstallDir=%%i
-        )
-        if exist "%InstallDir%\Common7\Tools\vsdevcmd.bat" (          
-          "%InstallDir%\Common7\Tools\vsdevcmd.bat" -arch=x86
-          cd qhttp
-          qmake qhttp.pro -spec win32-msvc "CONFIG+=qtquickcompiler" "INCLUDEPATH+={{$env.WindowsSdkDir}}/Include/10.0.17134.0/ucrt"
-          "${{env.IQTA_TOOLS}}\QtCreator\bin\jom.exe" -f MakeFile qmake_all
-          "${{env.IQTA_TOOLS}}\QtCreator\bin\jom.exe"
-          copy "${{env.GITHUB_WORKSPACE}}\qhttp\xbin\qhttp.dll" "${{env.GITHUB_WORKSPACE}}\build\"
-        )
+        cd qhttp
+        qmake qhttp.pro -spec win32-msvc "CONFIG+=32bit" "INCLUDEPATH+={{$env.WindowsSdkDir}}/Include/10.0.17134.0/ucrt"
+        "${{env.IQTA_TOOLS}}\QtCreator\bin\jom.exe" -f MakeFile qmake_all
+        "${{env.IQTA_TOOLS}}\QtCreator\bin\jom.exe"
+        copy "${{env.GITHUB_WORKSPACE}}\qhttp\xbin\qhttp.dll" "${{env.GITHUB_WORKSPACE}}\build\"
       shell: cmd
 
     - name: build-boost
