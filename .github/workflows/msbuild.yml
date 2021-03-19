@@ -31,7 +31,7 @@ jobs:
     - name: Add MSBuild to PATH
       uses: microsoft/setup-msbuild@v1
       with:
-        vs-version:
+        vs-version: '[14.1,14.2)'
         # Version of Visual Studio to search; defaults to latest if not specified
 
     - name: Cache Qt
@@ -57,7 +57,7 @@ jobs:
         target: desktop
         # optional, default is desktop
         # Architecture for Windows/Android
-        arch: win32_msvc2019
+        arch: win32_msvc2017
         # optional
         # Whether or not to install Qt dependencies on Linux
         install-deps: # optional, default is true
@@ -77,7 +77,7 @@ jobs:
 
     - name: build-CGAHook
       working-directory: ${{env.GITHUB_WORKSPACE}}
-      run: MSBuild.exe CGAssistant.sln /t:CGAHook /p:Configuration=Release /p:Platform="x86" /p:PlatformToolset=v142
+      run: MSBuild.exe CGAssistant.sln /t:CGAHook /p:Configuration=Release /p:Platform="x86" /p:PlatformToolset=v141
 
     - name: build-qhttp
       working-directory: ${{env.GITHUB_WORKSPACE}}
