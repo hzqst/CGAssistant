@@ -76,5 +76,5 @@ jobs:
     - name: test
       working-directory: ${{env.GITHUB_WORKSPACE}}
       run: |
-        cd "${{env.IQTA_TOOLS}}"
+        cd "${{env.IQTA_TOOLS}}\QtCreator\bin\"
         dir
