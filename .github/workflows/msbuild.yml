@@ -28,7 +28,8 @@ jobs:
         # Host architecture (x86, x86_amd64, or amd64)
         host_arch: # optional, default is 
         # Overrides the default WinSDK version
-        winsdk: # optional, default is 
+        winsdk: '10.0.17134.0'
+         # optional, default is 
         # Overrides the default toolset version
         toolset_version: vc141 # optional, default is 
         # List of components required in the selected VS installation (semi-colon separated)

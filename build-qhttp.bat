@@ -16,7 +16,7 @@ if exist "%InstallDir%\Common7\Tools\vsdevcmd.bat" (
 
     cd ..
 
-    qmake qhttp.pro -spec win32-msvc "CONFIG+=32bit" "CONFIG+=qtquickcompiler"
+    qmake qhttp.pro -spec win32-msvc "CONFIG+=qtquickcompiler"
 
     jom -f MakeFile qmake_all
 
