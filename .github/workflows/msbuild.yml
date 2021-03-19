@@ -94,7 +94,7 @@ jobs:
     - name: build-qhttp
       working-directory: ${{env.GITHUB_WORKSPACE}}
       run: |
-        set PATH=${{env.GITHUB_WORKSPACE}}/winsdk;%PATH%
+        set PATH=%GITHUB_WORKSPACE%\winsdk;%PATH%
         for /f "usebackq tokens=*" %%i in (`vswhere -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath`) do (
           set InstallDir=%%i
         )
