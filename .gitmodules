@@ -7,3 +7,7 @@
 	path = rapidjson
 	url = https://github.com/Tencent/rapidjson/
 	branch = master
+[submodule "boost"]
+	path = boost
+	url = https://github.com/boostorg/boost
+	branch = boost-1.75.0
