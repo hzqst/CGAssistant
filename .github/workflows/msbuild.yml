@@ -119,6 +119,7 @@ jobs:
  
     - name: checkout-CGAssistantJS
       uses: actions/checkout@v2 
+      with:
         repository: 'hzqst/CGAssistantJS'
 
     - name: merge-CGAssistantJS
