@@ -14,6 +14,7 @@ env:
 jobs:
   build:
     runs-on: windows-latest
+    if: github.repository == 'hzqst/CGAssistant'
 
     steps:
     - uses: actions/checkout@v2
@@ -115,16 +116,18 @@ jobs:
       working-directory: ${{env.GITHUB_WORKSPACE}}
       run: build-nodegyp.bat
       shell: cmd
+ 
+    - name: checkout-CGAssistantJS
+      uses: actions/checkout@v2 
+      repository: 'hzqst/CGAssistantJS'
 
-    - name: Archive Release
-      uses: thedoctor0/zip-release@master
-      with:
-        filename: 'CGAssistant-release.zip'
-        path : 'build'
-
-    - name: Release Action
-      uses: ncipollo/release-action@v1
-      with:
-        artifacts: 'CGAssistant-release.zip'
-        body: 'test'
-        token: ${{ secrets.GITHUB_TOKEN }}
+    - name: merge-CGAssistantJS
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      run: |
+        dir
+        xcopy "build\" "CGAssistantJS\" /y /e
+        cd CGAssistantJS
+        git add -A
+        git commit -m "Update binaries from commit %GITHUB_SHA% by %GITHUB_ACTOR%"
+        git push
+      shell: cmd
