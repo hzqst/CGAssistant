@@ -85,25 +85,26 @@ void ChatMsgNotify(CGA::cga_chat_msg_t msg)
 
 void ChatMsgAsyncCallBack(uv_async_t *handle)
 {
-	Isolate* isolate = Isolate::GetCurrent();
+	auto isolate = Isolate::GetCurrent();
+	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
 
 	auto data = (ChatMsgNotifyData *)handle->data;
 
 	Local<Value> nullValue = Nan::Null();
-	Handle<Value> argv[2];
+	Local<Value> argv[2];
 	argv[0] = data->m_result ? nullValue : Nan::Error("Unknown exception.");
 	if (data->m_result)
 	{
 		Local<Object> obj = Object::New(isolate);
-		obj->Set(String::NewFromUtf8(isolate, "unitid"), Integer::New(isolate, data->m_msg.unitid));
-		obj->Set(String::NewFromUtf8(isolate, "msg"), Nan::New(data->m_msg.msg).ToLocalChecked());
-		obj->Set(String::NewFromUtf8(isolate, "color"), Integer::New(isolate, data->m_msg.color));
-		obj->Set(String::NewFromUtf8(isolate, "size"), Integer::New(isolate, data->m_msg.size));
+		obj->Set(context, String::NewFromUtf8(isolate, "unitid").ToLocalChecked(), Integer::New(isolate, data->m_msg.unitid));
+		obj->Set(context, String::NewFromUtf8(isolate, "msg").ToLocalChecked(), Nan::New(data->m_msg.msg).ToLocalChecked());
+		obj->Set(context, String::NewFromUtf8(isolate, "color").ToLocalChecked(), Integer::New(isolate, data->m_msg.color));
+		obj->Set(context, String::NewFromUtf8(isolate, "size").ToLocalChecked(), Integer::New(isolate, data->m_msg.size));
 		argv[1] = obj;
 	}
 
-	Local<Function>::New(isolate, data->m_callback)->Call(isolate->GetCurrentContext()->Global(), (data->m_result) ? 2 : 1, argv);
+	Local<Function>::New(isolate, data->m_callback)->Call(context, Null(isolate), (data->m_result) ? 2 : 1, argv);
 
 	data->m_callback.Reset();
 
@@ -115,7 +116,8 @@ void ChatMsgAsyncCallBack(uv_async_t *handle)
 
 void ChatMsgTimerCallBack(uv_timer_t *handle)
 {
-	Isolate* isolate = Isolate::GetCurrent();
+	auto isolate = Isolate::GetCurrent();
+	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
 
 	auto data = (ChatMsgNotifyData *)handle->data;
@@ -137,10 +139,10 @@ void ChatMsgTimerCallBack(uv_timer_t *handle)
 
 	if (asyncNotCalled)
 	{
-		Handle<Value> argv[1];
+		Local<Value> argv[1];
 		argv[0] = Nan::Error("Async callback timeout.");
 
-		Local<Function>::New(isolate, data->m_callback)->Call(isolate->GetCurrentContext()->Global(), 1, argv);
+		Local<Function>::New(isolate, data->m_callback)->Call(context, Null(isolate), 1, argv);
 
 		data->m_callback.Reset();
 
@@ -153,7 +155,8 @@ void ChatMsgTimerCallBack(uv_timer_t *handle)
 
 void AsyncWaitChatMsg(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
-	Isolate* isolate = info.GetIsolate();
+	auto isolate = info.GetIsolate();
+	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
 
 	int timeout = 3000;
@@ -163,7 +166,7 @@ void AsyncWaitChatMsg(const Nan::FunctionCallbackInfo<v8::Value>& info)
 	}
 	if (info.Length() >= 2 && !info[1]->IsUndefined())
 	{
-		timeout = (int)info[1]->IntegerValue();
+		timeout = info[1]->Int32Value(context).ToChecked();
 		if (timeout < 0)
 			timeout = 0;
 	}
@@ -271,23 +274,24 @@ void ConnectionStateNotify(CGA::cga_conn_state_t msg)
 
 void ConnectionStateAsyncCallBack(uv_async_t *handle)
 {
-	Isolate* isolate = Isolate::GetCurrent();
+	auto isolate = Isolate::GetCurrent();
+	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
 
 	auto data = (ConnectionStateNotifyData *)handle->data;
 
 	Local<Value> nullValue = Nan::Null();
-	Handle<Value> argv[2];
+	Local<Value> argv[2];
 	argv[0] = data->m_result ? nullValue : Nan::Error("Unknown exception.");
 	if (data->m_result)
 	{
 		Local<Object> obj = Object::New(isolate);
-		obj->Set(String::NewFromUtf8(isolate, "state"), Integer::New(isolate, data->m_msg.state));
-		obj->Set(String::NewFromUtf8(isolate, "msg"), Nan::New(data->m_msg.msg).ToLocalChecked());
+		obj->Set(context, String::NewFromUtf8(isolate, "state").ToLocalChecked(), Integer::New(isolate, data->m_msg.state));
+		obj->Set(context, String::NewFromUtf8(isolate, "msg").ToLocalChecked(), Nan::New(data->m_msg.msg).ToLocalChecked());
 		argv[1] = obj;
 	}
 
-	Local<Function>::New(isolate, data->m_callback)->Call(isolate->GetCurrentContext()->Global(), (data->m_result) ? 2 : 1, argv);
+	Local<Function>::New(isolate, data->m_callback)->Call(context, Null(isolate), (data->m_result) ? 2 : 1, argv);
 
 	data->m_callback.Reset();
 
@@ -299,7 +303,8 @@ void ConnectionStateAsyncCallBack(uv_async_t *handle)
 
 void ConnectionStateTimerCallBack(uv_timer_t *handle)
 {
-	Isolate* isolate = Isolate::GetCurrent();
+	auto isolate = Isolate::GetCurrent();
+	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
 
 	auto data = (ConnectionStateNotifyData *)handle->data;
@@ -321,10 +326,10 @@ void ConnectionStateTimerCallBack(uv_timer_t *handle)
 
 	if (asyncNotCalled)
 	{
-		Handle<Value> argv[1];
+		Local<Value> argv[1];
 		argv[0] = Nan::Error("Async callback timeout.");
 
-		Local<Function>::New(isolate, data->m_callback)->Call(isolate->GetCurrentContext()->Global(), 1, argv);
+		Local<Function>::New(isolate, data->m_callback)->Call(context, Null(isolate), 1, argv);
 
 		data->m_callback.Reset();
 
@@ -337,7 +342,8 @@ void ConnectionStateTimerCallBack(uv_timer_t *handle)
 
 void AsyncWaitConnectionState(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
-	Isolate* isolate = info.GetIsolate();
+	auto isolate = info.GetIsolate();
+	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
 
 	int timeout = 3000;
@@ -347,7 +353,7 @@ void AsyncWaitConnectionState(const Nan::FunctionCallbackInfo<v8::Value>& info)
 	}
 	if (info.Length() >= 2 && !info[1]->IsUndefined())
 	{
-		timeout = (int)info[1]->IntegerValue();
+		timeout = info[1]->Int32Value(context).ToChecked();
 		if (timeout < 0)
 			timeout = 0;
 	}
@@ -455,22 +461,23 @@ void MessageBoxNotify(std::string msg)
 
 void MessageBoxAsyncCallBack(uv_async_t *handle)
 {
-	Isolate* isolate = Isolate::GetCurrent();
+	auto isolate = Isolate::GetCurrent();
+	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
 
 	auto data = (MessageBoxNotifyData *)handle->data;
 
 	Local<Value> nullValue = Nan::Null();
-	Handle<Value> argv[2];
+	Local<Value> argv[2];
 	argv[0] = data->m_result ? nullValue : Nan::Error("Unknown exception.");
 	if (data->m_result)
 	{
 		Local<Object> obj = Object::New(isolate);
-		obj->Set(String::NewFromUtf8(isolate, "msg"), Nan::New(data->m_msg).ToLocalChecked());
+		obj->Set(context, String::NewFromUtf8(isolate, "msg").ToLocalChecked(), Nan::New(data->m_msg).ToLocalChecked());
 		argv[1] = obj;
 	}
 
-	Local<Function>::New(isolate, data->m_callback)->Call(isolate->GetCurrentContext()->Global(), (data->m_result) ? 2 : 1, argv);
+	Local<Function>::New(isolate, data->m_callback)->Call(context, Null(isolate), (data->m_result) ? 2 : 1, argv);
 
 	data->m_callback.Reset();
 
@@ -482,7 +489,8 @@ void MessageBoxAsyncCallBack(uv_async_t *handle)
 
 void MessageBoxTimerCallBack(uv_timer_t *handle)
 {
-	Isolate* isolate = Isolate::GetCurrent();
+	auto isolate = Isolate::GetCurrent();
+	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
 
 	auto data = (MessageBoxNotifyData *)handle->data;
@@ -504,10 +512,10 @@ void MessageBoxTimerCallBack(uv_timer_t *handle)
 
 	if (asyncNotCalled)
 	{
-		Handle<Value> argv[1];
+		Local<Value> argv[1];
 		argv[0] = Nan::Error("Async callback timeout.");
 
-		Local<Function>::New(isolate, data->m_callback)->Call(isolate->GetCurrentContext()->Global(), 1, argv);
+		Local<Function>::New(isolate, data->m_callback)->Call(context, Null(isolate), 1, argv);
 
 		data->m_callback.Reset();
 
@@ -520,17 +528,18 @@ void MessageBoxTimerCallBack(uv_timer_t *handle)
 
 void AsyncWaitMessageBox(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
-	Isolate* isolate = info.GetIsolate();
+	auto isolate = info.GetIsolate();
+	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
 
 	int timeout = 3000;
 	if (info.Length() < 1 || !info[0]->IsFunction()) {
-		Nan::ThrowTypeError("Arg[0] must be a function.");
+		Nan::ThrowTypeError("Arg[0] must be function.");
 		return;
 	}
-	if (info.Length() >= 2 && !info[1]->IsUndefined())
+	if (info.Length() >= 2 && info[1]->IsInt32())
 	{
-		timeout = (int)info[1]->IntegerValue();
+		timeout = info[1]->Int32Value(context).ToChecked();
 		if (timeout < 0)
 			timeout = 0;
 	}
