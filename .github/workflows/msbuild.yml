@@ -92,12 +92,6 @@ jobs:
         )
       shell: cmd
 
-    - name: Link Windows SDK
-      working-directory: ${{env.GITHUB_WORKSPACE}}
-      run: |
-        mklink /d "%GITHUB_WORKSPACE%\winsdk" "${{env.WindowsSdkDir}}"
-      shell: cmd
-
     - name: build-CGAHook
       working-directory: ${{env.GITHUB_WORKSPACE}}
       run: MSBuild.exe CGAssistant.sln /t:CGAHook /p:Configuration=Release /p:Platform="x86" /p:PlatformToolset=v141
@@ -105,7 +99,6 @@ jobs:
     - name: build-qhttp
       working-directory: ${{env.GITHUB_WORKSPACE}}
       run: |
-        set PATH=%GITHUB_WORKSPACE%\winsdk\bin\10.0.17763.0\x86;%PATH%
         for /f "usebackq tokens=*" %%i in (`vswhere -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath`) do (
           set InstallDir=%%i
         )
