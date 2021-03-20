@@ -44,7 +44,6 @@ jobs:
       uses: microsoft/setup-msbuild@v1
       with:
         vs-version: 
-        # Version of Visual Studio to search; defaults to latest if not specified
 
     - name: Cache Qt
       id: cache-qt
@@ -79,23 +78,6 @@ jobs:
         cached: ${{ steps.cache-qt.outputs.cache-hit }}
         tools : 'tools_qtcreator,4.14.1-0,qt.tools.qtcreator'
 
-    - name: Setup VS Dev Environment
-      uses: seanmiddleditch/gha-setup-vsdevenv@v3
-      with:
-        # Name or path to vswhere.exr
-        vswhere: # optional, default is vswhere.exe
-        # Target build architecture
-        arch: x86_amd64 # optional, default is amd64
-        # Host architecture (x86, x86_amd64, or amd64)
-        host_arch: # optional, default is 
-        # Overrides the default WinSDK version
-        winsdk: '10.0.17134.0'
-         # optional, default is 
-        # Overrides the default toolset version
-        toolset_version: vc141 # optional, default is 
-        # List of components required in the selected VS installation (semi-colon separated)
-        components: # optional, default is Microsoft.VisualStudio.Component.VC.Tools.x86.x64
-
     - name: Link Windows SDK
       working-directory: ${{env.GITHUB_WORKSPACE}}
       run: |
@@ -110,7 +92,7 @@ jobs:
           set InstallDir=%%i
         )
         if exist "%InstallDir%\Common7\Tools\vsdevcmd.bat" (  
-          "%InstallDir%\Common7\Tools\vsdevcmd.bat" -arch=x86
+          "%InstallDir%\Common7\Tools\vsdevcmd.bat" -arch=x86 -winsdk=10.0.17134.0
           cd boost
           b2 --toolset=msvc-14.1 --with-date_time --with-thread --with-container --with-system --with-locale --with-serialization --with-regex --stagedir="stage" link=static variant=release address-model=32 stage
           b2 --toolset=msvc-14.1 --with-date_time --with-thread --with-container --with-system --with-locale --with-serialization --with-regex --stagedir="stage" runtime-link=static link=static variant=release address-model=32 stage
@@ -129,7 +111,7 @@ jobs:
           set InstallDir=%%i
         )
         if exist "%InstallDir%\Common7\Tools\vsdevcmd.bat" (  
-          "%InstallDir%\Common7\Tools\vsdevcmd.bat" -arch=x86
+          "%InstallDir%\Common7\Tools\vsdevcmd.bat" -arch=x86 -winsdk=10.0.17134.0
           cd qhttp
           qmake qhttp.pro -spec win32-msvc "CONFIG+=32bit" "CONFIG+=qtquickcompiler" "INCLUDEPATH+=%GITHUB_WORKSPACE%\winsdk\Include\10.0.17134.0\ucrt" "LIBS += -L%GITHUB_WORKSPACE%\winsdk\Lib\10.0.17134.0\um\x86" "LIBS += -L%GITHUB_WORKSPACE%\winsdk\Lib\10.0.17134.0\ucrt\x86"
           "${{env.IQTA_TOOLS}}\QtCreator\bin\jom.exe" -f MakeFile qmake_all
@@ -145,7 +127,7 @@ jobs:
           set InstallDir=%%i
         )
         if exist "%InstallDir%\Common7\Tools\vsdevcmd.bat" (          
-          "%InstallDir%\Common7\Tools\vsdevcmd.bat" -arch=x86
+          "%InstallDir%\Common7\Tools\vsdevcmd.bat" -arch=x86 -winsdk=10.0.17134.0
           cd CGAssistant
           qmake CGAssistant.pro -spec win32-msvc "CONFIG+=32bit" "CONFIG+=qtquickcompiler" "INCLUDEPATH+=%GITHUB_WORKSPACE%\winsdk\Include\10.0.17134.0\ucrt" "LIBS += -L%GITHUB_WORKSPACE%\winsdk\Lib\10.0.17134.0\um\x86" "LIBS += -L%GITHUB_WORKSPACE%\winsdk\Lib\10.0.17134.0\ucrt\x86"
           "${{env.IQTA_TOOLS}}\QtCreator\bin\jom.exe" -f MakeFile qmake_all
