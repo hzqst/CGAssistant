@@ -22,20 +22,11 @@ jobs:
       working-directory: ${{env.GITHUB_WORKSPACE}}
       run: |
         git submodule update --init --recursive
+        call "boost/bootstrap.bat"
         cd qhttp
         mkdir 3rdparty
         cd 3rdparty
         git clone https://github.com/nodejs/http-parser.git
-      shell: cmd
-
-    - name: build-boost
-      working-directory: ${{env.GITHUB_WORKSPACE}}
-      run: |
-        cd boost
-        call bootstrap.bat
-        type bootstrap.log
-        call b2 --toolset=msvc-14.1 --with-date_time --with-thread --with-container --with-system --with-locale --with-serialization --with-regex --stagedir="stage" link=static variant=release address-model=32 stage
-        call b2 --toolset=msvc-14.1 --with-date_time --with-thread --with-container --with-system --with-locale --with-serialization --with-regex --stagedir="stage" runtime-link=static link=static variant=release address-model=32 stage
       shell: cmd
 
     - name: Add MSBuild to PATH
@@ -100,6 +91,21 @@ jobs:
         mklink /d "%GITHUB_WORKSPACE%\winsdk" "${{env.WindowsSdkDir}}"
       shell: cmd
 
+    - name: build-boost
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      run: |
+        set PATH=%GITHUB_WORKSPACE%\winsdk\bin\10.0.17763.0\x86;%PATH%
+        for /f "usebackq tokens=*" %%i in (`vswhere -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath`) do (
+          set InstallDir=%%i
+        )
+        if exist "%InstallDir%\Common7\Tools\vsdevcmd.bat" (  
+          "%InstallDir%\Common7\Tools\vsdevcmd.bat" -arch=x86
+          cd boost
+          b2 --toolset=msvc-14.1 --with-date_time --with-thread --with-container --with-system --with-locale --with-serialization --with-regex --stagedir="stage" link=static variant=release address-model=32 stage
+          b2 --toolset=msvc-14.1 --with-date_time --with-thread --with-container --with-system --with-locale --with-serialization --with-regex --stagedir="stage" runtime-link=static link=static variant=release address-model=32 stage
+        )
+      shell: cmd
+
     - name: build-CGAHook
       working-directory: ${{env.GITHUB_WORKSPACE}}
       run: MSBuild.exe CGAssistant.sln /t:CGAHook /p:Configuration=Release /p:Platform="x86" /p:PlatformToolset=v141
@@ -135,4 +141,11 @@ jobs:
           "${{env.IQTA_TOOLS}}\QtCreator\bin\jom.exe"
           copy "%GITHUB_WORKSPACE%\CGassistant\release\CGassistant.exe" "%GITHUB_WORKSPACE%\build\"
         )
+      shell: cmd
+      
+    - name: build-nodegyp
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      run: |
+        npm install -g node-gyp
+        build-nodegyp.bat
       shell: cmd
