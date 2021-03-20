@@ -125,6 +125,6 @@ jobs:
     - name: Release Action
       uses: ncipollo/release-action@v1
       with:
-        artifacts: "CGAssistant-release.zip"
-        bodyFile: "body.md"
+        artifacts: 'CGAssistant-release.zip'
+        body: 'test'
         token: ${{ secrets.GITHUB_TOKEN }}
