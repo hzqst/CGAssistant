@@ -121,14 +121,18 @@ jobs:
       uses: actions/checkout@v2 
       with:
         repository: 'hzqst/CGAssistantJS'
+        path: 'CGAssistantJS'
+        ssh-key: '${{ secrets.CGASSISTANTJS_PK }}'
 
     - name: merge-CGAssistantJS
       working-directory: ${{env.GITHUB_WORKSPACE}}
       run: |
-        dir
+        cd CGAssistantJS
         xcopy "build\" "CGAssistantJS\" /y /e
         cd CGAssistantJS
         git add -A
+        git config --global user.name "hzqst"
+        git config --global user.email "113660872@qq.com"
         git commit -m "Update binaries from commit %GITHUB_SHA% by %GITHUB_ACTOR%"
         git push
       shell: cmd
