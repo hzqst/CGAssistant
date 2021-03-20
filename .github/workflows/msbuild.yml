@@ -83,8 +83,8 @@ jobs:
     - name: init-dep
       working-directory: ${{env.GITHUB_WORKSPACE}}
       run: |
-        npm install -g node-gyp
-        npm config set msvs_version 2017
+        call npm install -g node-gyp
+        call npm config set msvs_version 2017
         git submodule update --init --recursive
         cd qhttp
         mkdir 3rdparty
