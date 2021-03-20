@@ -18,22 +18,25 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     
-    - name: Setup VS Dev Environment
-      uses: seanmiddleditch/gha-setup-vsdevenv@v3
-      with:
-        # Name or path to vswhere.exr
-        vswhere: # optional, default is vswhere.exe
-        # Target build architecture
-        arch: x86_amd64 # optional, default is amd64
-        # Host architecture (x86, x86_amd64, or amd64)
-        host_arch: # optional, default is 
-        # Overrides the default WinSDK version
-        winsdk: '10.0.17134.0'
-         # optional, default is 
-        # Overrides the default toolset version
-        toolset_version: vc141 # optional, default is 
-        # List of components required in the selected VS installation (semi-colon separated)
-        components: # optional, default is Microsoft.VisualStudio.Component.VC.Tools.x86.x64
+    - name: init-dep
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      run: |
+        git submodule update --init --recursive
+        cd qhttp
+        mkdir 3rdparty
+        cd 3rdparty
+        git clone https://github.com/nodejs/http-parser.git
+      shell: cmd
+
+    - name: build-boost
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      run: |
+        cd boost
+        call bootstrap.bat
+        type bootstrap.log
+        call b2 --toolset=msvc-14.1 --with-date_time --with-thread --with-container --with-system --with-locale --with-serialization --with-regex --stagedir="stage" link=static stage
+        call b2 --toolset=msvc-14.1 --with-date_time --with-thread --with-container --with-system --with-locale --with-serialization --with-regex --stagedir="stage" runtime-link=static link=static stage
+      shell: cmd
 
     - name: Add MSBuild to PATH
       uses: microsoft/setup-msbuild@v1
@@ -74,32 +77,27 @@ jobs:
         cached: ${{ steps.cache-qt.outputs.cache-hit }}
         tools : 'tools_qtcreator,4.14.1-0,qt.tools.qtcreator'
 
-    - name: init-dep
-      working-directory: ${{env.GITHUB_WORKSPACE}}
-      run: |
-        call npm install -g node-gyp
-        call npm config set msvs_version 2017
-        git submodule update --init --recursive
-        cd qhttp
-        mkdir 3rdparty
-        cd 3rdparty
-        git clone https://github.com/nodejs/http-parser.git
-      shell: cmd
+    - name: Setup VS Dev Environment
+      uses: seanmiddleditch/gha-setup-vsdevenv@v3
+      with:
+        # Name or path to vswhere.exr
+        vswhere: # optional, default is vswhere.exe
+        # Target build architecture
+        arch: x86_amd64 # optional, default is amd64
+        # Host architecture (x86, x86_amd64, or amd64)
+        host_arch: # optional, default is 
+        # Overrides the default WinSDK version
+        winsdk: '10.0.17134.0'
+         # optional, default is 
+        # Overrides the default toolset version
+        toolset_version: vc141 # optional, default is 
+        # List of components required in the selected VS installation (semi-colon separated)
+        components: # optional, default is Microsoft.VisualStudio.Component.VC.Tools.x86.x64
 
     - name: Link Windows SDK
       working-directory: ${{env.GITHUB_WORKSPACE}}
       run: |
         mklink /d "%GITHUB_WORKSPACE%\winsdk" "${{env.WindowsSdkDir}}"
-      shell: cmd
-
-    - name: build-boost
-      working-directory: ${{env.GITHUB_WORKSPACE}}
-      run: |
-        cd boost
-        call bootstrap.bat
-        type bootstrap.log
-        call b2 --toolset=msvc-14.1 --with-date_time --with-thread --with-container --with-system --with-locale --with-serialization --with-regex --stagedir="stage" link=static stage
-        call b2 --toolset=msvc-14.1 --with-date_time --with-thread --with-container --with-system --with-locale --with-serialization --with-regex --stagedir="stage" runtime-link=static link=static stage
       shell: cmd
 
     - name: build-CGAHook
