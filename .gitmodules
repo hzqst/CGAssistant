@@ -1,4 +1,3 @@
-
 [submodule "qhttp"]
 	path = qhttp
 	url = https://github.com/azadkuh/qhttp
