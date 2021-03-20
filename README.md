@@ -18,13 +18,13 @@ Wiki: https://github.com/hzqst/CGAssistantJS/wiki
 
 Visual Studio 2017 or 2019
 
-Windows SDK 10
+Windows SDK 10 (the msvc projects uses Windows SDK version 10.0.17763.0, please redirect to your local version if you have installed a different version of Windows SDK)
 
-VC141 Toolset
+VC141 or VC142 Toolset (the msvc projects uses VC141 Toolset, if you want to use VC142 please change PlatformToolset in the vcxproj file and build-CGAHook.bat)
 
-QT 5.12 for msvc2017, win32 (x86)
+QT 5.12+ for msvc2017, win32 (x86), with QTCreator
 
-NodeJS 8.9 windows x86 (which could be downloaded from https://nodejs.org/dist/v8.9.0/ or other mirrors)
+NodeJS for windows x86 (which could be downloaded from https://nodejs.org/ or other mirrors)
 
 node-gyp (check https://www.npmjs.com/package/node-gyp how to install node-gyp)
 
@@ -36,17 +36,17 @@ Let's assume that you have all requirements installed correctly.
 
 ![](img/1.png)
 
-2. Run "init-dependencies.bat", wait until all required submodules / dependencies are pulled. (this may takes couple of minutes, depending on your network connection and download speed)
+2. Run "init-dep.bat", wait until all required submodules / dependencies are pulled. (this may takes couple of minutes, depending on your network connection and download speed)
 
 3. Run "build-boost.bat", wait until all boost static libs are generated. (this may takes couple of minutes, depending on your CPU performance)
 
-4. Run "build-CGAHook.bat", wait until "CGAHook.dll" is generated under "build" directory.
+4. Run "build-CGAHook.bat", wait until "CGAHook.dll" is generated under "build" directory. Remember to redirect the Windows SDK version for msvc project if you have installed a different version of Windows SDK other than "10.0.17763.0".
 
-5. Run "build-nodegyp.bat", wait until "node_cga.node" is generated under "build/Release" directory.
+5. Run "build-qhttp.bat", wait until "qhttp.dll" is generated under "build" directory.
 
-6. Run "build-qhttp.bat", wait until "qhttp.dll" is generated under "build" directory.
+6. Run "build-CGAssiatant.bat", wait until "CGAssistant.exe" is generated under "build" directory.
 
-7. Run "build-CGAssiatant.bat", wait until "CGAssistant.exe" is generated under "build" directory.
+7. Run "build-nodegyp.bat", wait until "node_cga.node" is generated under "build/Release" directory.
 
 8. Run "windeploy.bat"
 

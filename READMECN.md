@@ -18,13 +18,13 @@ Wiki（国内镜像）： https://gitee.com/hzqst/CGAssistantJS/wikis
 
 Visual Studio 2017 或 2019
 
-Windows SDK 10
+Windows SDK 10 (msvc工程文件里使用的是 Windows SDK version 10.0.17763.0，如果你安装了不同版本的 WindowsSDK 则需要“重定向项目”)
 
-VC141 工具集
+VC141 或者 VC142 工具集 (msvc工程文件里使用的是 VC141工具集，如果你需要使用VC142工具集请自行修改vcxproject和build-CGAHook.bat中的PlatformToolset字段)
 
-QT 5.12 for msvc2017, win32 (x86)
+QT 5.12+ for msvc2017, win32 (x86)
 
-NodeJS 8.9 windows x86 (可从 https://nodejs.org/dist/v8.9.0/ 或者其他镜像处下载)
+NodeJS windows x86 (可从 https://nodejs.org/ 或者其他镜像处下载)
 
 node-gyp (建议跟随 https://www.npmjs.com/package/node-gyp 的指示来安装 node-gyp)
 
@@ -36,7 +36,7 @@ node-gyp (建议跟随 https://www.npmjs.com/package/node-gyp 的指示来安装
 
 ![](img/1.png)
 
-2. 运行 "init-dependencies.bat", 等待所有子模块下载完成。 (这一步可能需要花费几分钟时间, 具体取决于你的网速，如果速度很慢或者下载出错建议尝试使用proxy)
+2. 运行 "init-dep.bat", 等待所有子模块和依赖项目下载完成。 (这一步可能需要花费几分钟时间, 具体取决于你的网速，如果速度很慢或者下载出错建议尝试使用proxy)
 
 3. 运行 "build-boost.bat", 等待boost的所有静态库编译完成。 (这一步可能需要花费十几分钟时间，具体取决于你的CPU性能)
 

@@ -8,14 +8,6 @@ if exist "%InstallDir%\Common7\Tools\vsdevcmd.bat" (
 
     cd qhttp
 
-    mkdir 3rdparty
-    
-    cd 3rdparty
-
-    git clone https://github.com/nodejs/http-parser.git
-
-    cd ..
-
     qmake qhttp.pro -spec win32-msvc "CONFIG+=qtquickcompiler"
 
     jom -f MakeFile qmake_all
