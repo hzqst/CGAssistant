@@ -104,7 +104,7 @@ jobs:
           qmake qhttp.pro -spec win32-msvc "CONFIG+=32bit" "INCLUDEPATH+=%GITHUB_WORKSPACE%\winsdk\Include\10.0.17134.0\ucrt" "LIBS += -L%GITHUB_WORKSPACE%\winsdk\Lib\10.0.17134.0\um\x86" "LIBS += -L%GITHUB_WORKSPACE%\winsdk\Lib\10.0.17134.0\ucrt\x86"
           "${{env.IQTA_TOOLS}}\QtCreator\bin\jom.exe" -f MakeFile qmake_all
           "${{env.IQTA_TOOLS}}\QtCreator\bin\jom.exe"
-          copy "\xbin\qhttp.dll" "%GITHUB_WORKSPACE%\build\"
+          copy "%GITHUB_WORKSPACE%\qhttp\xbin\qhttp.dll" "%GITHUB_WORKSPACE%\build\"
         )
       shell: cmd
 
