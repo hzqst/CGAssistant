@@ -18,22 +18,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     
-    - name: Setup VS Dev Environment
-      uses: seanmiddleditch/gha-setup-vsdevenv@v3
-      with:
-        # Name or path to vswhere.exr
-        vswhere: # optional, default is vswhere.exe
-        # Target build architecture
-        arch: x86_amd64 # optional, default is amd64
-        # Host architecture (x86, x86_amd64, or amd64)
-        host_arch: # optional, default is 
-        # Overrides the default WinSDK version
-        winsdk: '10.0.17134.0'
-         # optional, default is 
-        # Overrides the default toolset version
-        toolset_version: vc141 # optional, default is 
-        # List of components required in the selected VS installation (semi-colon separated)
-        components: # optional, default is Microsoft.VisualStudio.Component.VC.Tools.x86.x64
+
 
     - name: Add MSBuild to PATH
       uses: microsoft/setup-msbuild@v1
@@ -74,12 +59,6 @@ jobs:
         cached: ${{ steps.cache-qt.outputs.cache-hit }}
         tools : 'tools_qtcreator,4.14.1-0,qt.tools.qtcreator'
 
-    - name: Link Windows SDK
-      working-directory: ${{env.GITHUB_WORKSPACE}}
-      run: |
-        mklink /d "%GITHUB_WORKSPACE%\winsdk" "${{env.WindowsSdkDir}}"
-      shell: cmd
-
     - name: init-dep
       working-directory: ${{env.GITHUB_WORKSPACE}}
       run: |
@@ -91,6 +70,21 @@ jobs:
         cd 3rdparty
         git clone https://github.com/nodejs/http-parser.git
       shell: cmd
+
+    - name: Link Windows SDK
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      run: |
+        mklink /d "%GITHUB_WORKSPACE%\winsdk" "${{env.WindowsSdkDir}}"
+      shell: cmd
+
+    - name: build-boost
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      run: build-boost.bat
+      shell: cmd
+
+    - name: build-CGAHook
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      run: MSBuild.exe CGAssistant.sln /t:CGAHook /p:Configuration=Release /p:Platform="x86" /p:PlatformToolset=v141
 
     - name: build-qhttp
       working-directory: ${{env.GITHUB_WORKSPACE}}
@@ -108,15 +102,6 @@ jobs:
           copy "%GITHUB_WORKSPACE%\qhttp\xbin\qhttp.dll" "%GITHUB_WORKSPACE%\build\"
         )
       shell: cmd
-
-    - name: build-boost
-      working-directory: ${{env.GITHUB_WORKSPACE}}
-      run: build-boost.bat
-      shell: cmd
-
-    - name: build-CGAHook
-      working-directory: ${{env.GITHUB_WORKSPACE}}
-      run: MSBuild.exe CGAssistant.sln /t:CGAHook /p:Configuration=Release /p:Platform="x86" /p:PlatformToolset=v141
 
     - name: build-CGAssistant
       working-directory: ${{env.GITHUB_WORKSPACE}}
