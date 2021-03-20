@@ -29,7 +29,7 @@ jobs:
     - name: merge-CGAssistantJS
       working-directory: ${{env.GITHUB_WORKSPACE}}
       run: |
-        xcopy "CGAssistant\build\" "CGAssistantJS\" /y /e
+        xcopy "build" "CGAssistantJS" /y /e
         cd CGAssistantJS
         git add -A
         git config --global user.name "hzqst"
