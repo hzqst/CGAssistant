@@ -1,6 +1,6 @@
 cd CGANode
 
-call node-gyp configure --arch=ia32 --msvs_version=2017 build
+call node-gyp configure --arch=ia32 build
 
 mkdir "..\build\Release\"
 
