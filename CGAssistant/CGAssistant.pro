@@ -8,7 +8,6 @@ QT       += core gui widgets sql network
 
 TARGET = CGAssistant
 TEMPLATE = app
-DESTDIR = ../build
 
 DEFINES += CGA_IMPORT
 

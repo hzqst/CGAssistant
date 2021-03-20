@@ -83,8 +83,10 @@ jobs:
     - name: init-dep
       working-directory: ${{env.GITHUB_WORKSPACE}}
       run: |
-
-        git submodule update --init qhttp
+        npm install --global windows-build-tools
+        npm install -g node-gyp
+        npm config set msvs_version 2017
+        git submodule update --init --recursive
         cd qhttp
         mkdir 3rdparty
         cd 3rdparty
@@ -101,7 +103,7 @@ jobs:
         if exist "%InstallDir%\Common7\Tools\vsdevcmd.bat" (  
           "%InstallDir%\Common7\Tools\vsdevcmd.bat" -arch=x86
           cd qhttp
-          qmake qhttp.pro -spec win32-msvc "CONFIG+=32bit" "INCLUDEPATH+=%GITHUB_WORKSPACE%\winsdk\Include\10.0.17134.0\ucrt" "LIBS += -L%GITHUB_WORKSPACE%\winsdk\Lib\10.0.17134.0\um\x86" "LIBS += -L%GITHUB_WORKSPACE%\winsdk\Lib\10.0.17134.0\ucrt\x86"
+          qmake qhttp.pro -spec win32-msvc "CONFIG+=32bit" "CONFIG+=qtquickcompiler" "INCLUDEPATH+=%GITHUB_WORKSPACE%\winsdk\Include\10.0.17134.0\ucrt" "LIBS += -L%GITHUB_WORKSPACE%\winsdk\Lib\10.0.17134.0\um\x86" "LIBS += -L%GITHUB_WORKSPACE%\winsdk\Lib\10.0.17134.0\ucrt\x86"
           "${{env.IQTA_TOOLS}}\QtCreator\bin\jom.exe" -f MakeFile qmake_all
           "${{env.IQTA_TOOLS}}\QtCreator\bin\jom.exe"
           copy "%GITHUB_WORKSPACE%\qhttp\xbin\qhttp.dll" "%GITHUB_WORKSPACE%\build\"
@@ -113,6 +115,10 @@ jobs:
       run: build-boost.bat
       shell: cmd
 
+    - name: build-CGAHook
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      run: MSBuild.exe CGAssistant.sln /t:CGAHook /p:Configuration=Release /p:Platform="x86" /p:PlatformToolset=v141
+
     - name: build-CGAssistant
       working-directory: ${{env.GITHUB_WORKSPACE}}
       run: |
@@ -122,12 +128,9 @@ jobs:
         if exist "%InstallDir%\Common7\Tools\vsdevcmd.bat" (          
           "%InstallDir%\Common7\Tools\vsdevcmd.bat" -arch=x86
           cd CGAssistant
-          qmake CGAssistant.pro -spec win32-msvc "CONFIG+=32bit" "CONFIG+=qtquickcompiler"
+          qmake CGAssistant.pro -spec win32-msvc "CONFIG+=32bit" "CONFIG+=qtquickcompiler" "INCLUDEPATH+=%GITHUB_WORKSPACE%\winsdk\Include\10.0.17134.0\ucrt" "LIBS += -L%GITHUB_WORKSPACE%\winsdk\Lib\10.0.17134.0\um\x86" "LIBS += -L%GITHUB_WORKSPACE%\winsdk\Lib\10.0.17134.0\ucrt\x86"
           "${{env.IQTA_TOOLS}}\QtCreator\bin\jom.exe" -f MakeFile qmake_all
           "${{env.IQTA_TOOLS}}\QtCreator\bin\jom.exe"
+          copy "%GITHUB_WORKSPACE%\CGassistant\release\CGassistant.exe" "%GITHUB_WORKSPACE%\build\"
         )
       shell: cmd
-
-    - name: build-CGAHook
-      working-directory: ${{env.GITHUB_WORKSPACE}}
-      run: MSBuild.exe CGAssistant.sln /t:CGAHook /p:Configuration=Release /p:Platform="x86" /p:PlatformToolset=v141

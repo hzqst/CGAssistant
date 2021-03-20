@@ -14,6 +14,8 @@ if exist "%InstallDir%\Common7\Tools\vsdevcmd.bat" (
 
     jom
 
+    copy "release\CGAssistant.exe" "..\build\"
+
     jom clean
 
 )
