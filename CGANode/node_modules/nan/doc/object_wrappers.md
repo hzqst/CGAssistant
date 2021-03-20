@@ -42,7 +42,7 @@ class ObjectWrap {
    * attached to detached state it will be freed. Be careful not to access
    * the object after making this call as it might be gone!
    * (A "weak reference" means an object that only has a
-   * persistant handle.)
+   * persistent handle.)
    *
    * DO NOT CALL THIS FROM DESTRUCTOR
    */
@@ -100,7 +100,7 @@ class MyObject : public Nan::ObjectWrap {
       const int argc = 1;
       v8::Local<v8::Value> argv[argc] = {info[0]};
       v8::Local<v8::Function> cons = Nan::New(constructor());
-      info.GetReturnValue().Set(cons->NewInstance(argc, argv));
+      info.GetReturnValue().Set(Nan::NewInstance(cons, argc, argv).ToLocalChecked());
     }
   }
 

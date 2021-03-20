@@ -562,7 +562,8 @@ namespace CGA
 			skill_index = 0;
 			subskill_index = 0;
 			sub_type = 0;
-			memset(itempos, 0, sizeof(itempos));
+			for (int i = 0; i < 6; ++i)
+				itempos[i] = -1;
 		}
 		cga_craft_item_s(int a1, int a2, int a3) : skill_index(a1), subskill_index(a2), sub_type(a3)
 		{

@@ -7,7 +7,8 @@ extern CGA::CGAInterface *g_CGAInterface;
 
 void IsInGame(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
-	Isolate* isolate = info.GetIsolate();
+	auto isolate = info.GetIsolate();
+	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
 
 	int ingame = 0;
@@ -22,7 +23,8 @@ void IsInGame(const Nan::FunctionCallbackInfo<v8::Value>& info)
 
 void GetWorldStatus(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
-	Isolate* isolate = info.GetIsolate();
+	auto isolate = info.GetIsolate();
+	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
 
 	int status = 0;
@@ -37,7 +39,8 @@ void GetWorldStatus(const Nan::FunctionCallbackInfo<v8::Value>& info)
 
 void GetGameStatus(const Nan::FunctionCallbackInfo<v8::Value>& info) 
 {
-	Isolate* isolate = info.GetIsolate();
+	auto isolate = info.GetIsolate();
+	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
 
 	int status = 0;
@@ -52,7 +55,8 @@ void GetGameStatus(const Nan::FunctionCallbackInfo<v8::Value>& info)
 
 void GetBGMIndex(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
-	Isolate* isolate = info.GetIsolate();
+	auto isolate = info.GetIsolate();
+	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
 
 	int status = 0;
@@ -67,7 +71,8 @@ void GetBGMIndex(const Nan::FunctionCallbackInfo<v8::Value>& info)
 
 void GetSysTime(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
-	Isolate* isolate = info.GetIsolate();
+	auto isolate = info.GetIsolate();
+	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
 
 	CGA::cga_sys_time_t myinfo;
@@ -78,21 +83,22 @@ void GetSysTime(const Nan::FunctionCallbackInfo<v8::Value>& info)
 	}
 
 	Local<Object> obj = Object::New(isolate);
-	obj->Set(String::NewFromUtf8(isolate, "years"), Integer::New(isolate, myinfo.years));
-	obj->Set(String::NewFromUtf8(isolate, "month"), Integer::New(isolate, myinfo.month));
-	obj->Set(String::NewFromUtf8(isolate, "days"), Integer::New(isolate, myinfo.days));
-	obj->Set(String::NewFromUtf8(isolate, "hours"), Integer::New(isolate, myinfo.hours));
-	obj->Set(String::NewFromUtf8(isolate, "mins"), Integer::New(isolate, myinfo.mins));
-	obj->Set(String::NewFromUtf8(isolate, "secs"), Integer::New(isolate, myinfo.secs));
-	obj->Set(String::NewFromUtf8(isolate, "local_time"), Integer::New(isolate, myinfo.local_time));
-	obj->Set(String::NewFromUtf8(isolate, "server_time"), Integer::New(isolate, myinfo.server_time));
+	obj->Set(context, String::NewFromUtf8(isolate, "years").ToLocalChecked(), Integer::New(isolate, myinfo.years));
+	obj->Set(context, String::NewFromUtf8(isolate, "month").ToLocalChecked(), Integer::New(isolate, myinfo.month));
+	obj->Set(context, String::NewFromUtf8(isolate, "days").ToLocalChecked(), Integer::New(isolate, myinfo.days));
+	obj->Set(context, String::NewFromUtf8(isolate, "hours").ToLocalChecked(), Integer::New(isolate, myinfo.hours));
+	obj->Set(context, String::NewFromUtf8(isolate, "mins").ToLocalChecked(), Integer::New(isolate, myinfo.mins));
+	obj->Set(context, String::NewFromUtf8(isolate, "secs").ToLocalChecked(), Integer::New(isolate, myinfo.secs));
+	obj->Set(context, String::NewFromUtf8(isolate, "local_time").ToLocalChecked(), Integer::New(isolate, myinfo.local_time));
+	obj->Set(context, String::NewFromUtf8(isolate, "server_time").ToLocalChecked(), Integer::New(isolate, myinfo.server_time));
 
 	info.GetReturnValue().Set(obj);
 }
 
 void GetPlayerInfo(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
-	Isolate* isolate = info.GetIsolate();
+	auto isolate = info.GetIsolate();
+	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
 
 	CGA::cga_player_info_t myinfo;
@@ -103,87 +109,88 @@ void GetPlayerInfo(const Nan::FunctionCallbackInfo<v8::Value>& info)
 	}
 
 	Local<Object> obj = Object::New(isolate);
-	obj->Set(String::NewFromUtf8(isolate, "hp"), Integer::New(isolate, myinfo.hp));
-	obj->Set(String::NewFromUtf8(isolate, "maxhp"), Integer::New(isolate, myinfo.maxhp));
-	obj->Set(String::NewFromUtf8(isolate, "mp"), Integer::New(isolate, myinfo.mp));
-	obj->Set(String::NewFromUtf8(isolate, "maxmp"), Integer::New(isolate, myinfo.maxmp));
-	obj->Set(String::NewFromUtf8(isolate, "xp"), Integer::New(isolate, myinfo.xp));
-	obj->Set(String::NewFromUtf8(isolate, "maxxp"), Integer::New(isolate, myinfo.maxxp));
-	obj->Set(String::NewFromUtf8(isolate, "level"), Integer::New(isolate, myinfo.level));
-	obj->Set(String::NewFromUtf8(isolate, "health"), Integer::New(isolate, myinfo.health));
-	obj->Set(String::NewFromUtf8(isolate, "souls"), Integer::New(isolate, myinfo.souls));
-	obj->Set(String::NewFromUtf8(isolate, "gold"), Integer::New(isolate, myinfo.gold));
-	obj->Set(String::NewFromUtf8(isolate, "unitid"), Integer::New(isolate, myinfo.unitid));
-	obj->Set(String::NewFromUtf8(isolate, "petid"), Integer::New(isolate, myinfo.petid));
-	obj->Set(String::NewFromUtf8(isolate, "direction"), Integer::New(isolate, myinfo.direction));
-	obj->Set(String::NewFromUtf8(isolate, "battle_position"), Integer::New(isolate, myinfo.battle_position));
-	obj->Set(String::NewFromUtf8(isolate, "punchclock"), Integer::New(isolate, myinfo.punchclock));
-	obj->Set(String::NewFromUtf8(isolate, "usingpunchclock"), Boolean::New(isolate, myinfo.usingpunchclock));
-	obj->Set(String::NewFromUtf8(isolate, "petriding"), Boolean::New(isolate, myinfo.petriding));
-	obj->Set(String::NewFromUtf8(isolate, "name"), Nan::New(myinfo.name).ToLocalChecked());
-	obj->Set(String::NewFromUtf8(isolate, "job"), Nan::New(myinfo.job).ToLocalChecked());
+	obj->Set(context, String::NewFromUtf8(isolate, "hp").ToLocalChecked(), Integer::New(isolate, myinfo.hp));
+	obj->Set(context, String::NewFromUtf8(isolate, "maxhp").ToLocalChecked(), Integer::New(isolate, myinfo.maxhp));
+	obj->Set(context, String::NewFromUtf8(isolate, "mp").ToLocalChecked(), Integer::New(isolate, myinfo.mp));
+	obj->Set(context, String::NewFromUtf8(isolate, "maxmp").ToLocalChecked(), Integer::New(isolate, myinfo.maxmp));
+	obj->Set(context, String::NewFromUtf8(isolate, "xp").ToLocalChecked(), Integer::New(isolate, myinfo.xp));
+	obj->Set(context, String::NewFromUtf8(isolate, "maxxp").ToLocalChecked(), Integer::New(isolate, myinfo.maxxp));
+	obj->Set(context, String::NewFromUtf8(isolate, "level").ToLocalChecked(), Integer::New(isolate, myinfo.level));
+	obj->Set(context, String::NewFromUtf8(isolate, "health").ToLocalChecked(), Integer::New(isolate, myinfo.health));
+	obj->Set(context, String::NewFromUtf8(isolate, "souls").ToLocalChecked(), Integer::New(isolate, myinfo.souls));
+	obj->Set(context, String::NewFromUtf8(isolate, "gold").ToLocalChecked(), Integer::New(isolate, myinfo.gold));
+	obj->Set(context, String::NewFromUtf8(isolate, "unitid").ToLocalChecked(), Integer::New(isolate, myinfo.unitid));
+	obj->Set(context, String::NewFromUtf8(isolate, "petid").ToLocalChecked(), Integer::New(isolate, myinfo.petid));
+	obj->Set(context, String::NewFromUtf8(isolate, "direction").ToLocalChecked(), Integer::New(isolate, myinfo.direction));
+	obj->Set(context, String::NewFromUtf8(isolate, "battle_position").ToLocalChecked(), Integer::New(isolate, myinfo.battle_position));
+	obj->Set(context, String::NewFromUtf8(isolate, "punchclock").ToLocalChecked(), Integer::New(isolate, myinfo.punchclock));
+	obj->Set(context, String::NewFromUtf8(isolate, "usingpunchclock").ToLocalChecked(), Boolean::New(isolate, myinfo.usingpunchclock));
+	obj->Set(context, String::NewFromUtf8(isolate, "petriding").ToLocalChecked(), Boolean::New(isolate, myinfo.petriding));
+	obj->Set(context, String::NewFromUtf8(isolate, "name").ToLocalChecked(), Nan::New(myinfo.name).ToLocalChecked());
+	obj->Set(context, String::NewFromUtf8(isolate, "job").ToLocalChecked(), Nan::New(myinfo.job).ToLocalChecked());
 	Local<Array> arr = Array::New(isolate);
 	for (size_t i = 0; i < myinfo.titles.size(); ++i)
 	{
-		arr->Set(i, Nan::New(myinfo.titles[i]).ToLocalChecked());
+		arr->Set(context, i, Nan::New(myinfo.titles[i]).ToLocalChecked());
 	}
-	obj->Set(String::NewFromUtf8(isolate, "titles"), arr);
+	obj->Set(context, String::NewFromUtf8(isolate, "titles").ToLocalChecked(), arr);
 
 	Local<Object> objd = Object::New(isolate);
-	objd->Set(String::NewFromUtf8(isolate, "points_remain"), Integer::New(isolate, myinfo.detail.points_remain));
-	objd->Set(String::NewFromUtf8(isolate, "points_endurance"), Integer::New(isolate, myinfo.detail.points_endurance));
-	objd->Set(String::NewFromUtf8(isolate, "points_strength"), Integer::New(isolate, myinfo.detail.points_strength));
-	objd->Set(String::NewFromUtf8(isolate, "points_defense"), Integer::New(isolate, myinfo.detail.points_defense));
-	objd->Set(String::NewFromUtf8(isolate, "points_agility"), Integer::New(isolate, myinfo.detail.points_agility));
-	objd->Set(String::NewFromUtf8(isolate, "points_magical"), Integer::New(isolate, myinfo.detail.points_magical));
-	objd->Set(String::NewFromUtf8(isolate, "value_attack"), Integer::New(isolate, myinfo.detail.value_attack));
-	objd->Set(String::NewFromUtf8(isolate, "value_defensive"), Integer::New(isolate, myinfo.detail.value_defensive));
-	objd->Set(String::NewFromUtf8(isolate, "value_agility"), Integer::New(isolate, myinfo.detail.value_agility));
-	objd->Set(String::NewFromUtf8(isolate, "value_spirit"), Integer::New(isolate, myinfo.detail.value_spirit));
-	objd->Set(String::NewFromUtf8(isolate, "value_recovery"), Integer::New(isolate, myinfo.detail.value_recovery));
-	objd->Set(String::NewFromUtf8(isolate, "resist_poison"), Integer::New(isolate, myinfo.detail.resist_poison));
-	objd->Set(String::NewFromUtf8(isolate, "resist_sleep"), Integer::New(isolate, myinfo.detail.resist_sleep));
-	objd->Set(String::NewFromUtf8(isolate, "resist_medusa"), Integer::New(isolate, myinfo.detail.resist_medusa));
-	objd->Set(String::NewFromUtf8(isolate, "resist_drunk"), Integer::New(isolate, myinfo.detail.resist_drunk));
-	objd->Set(String::NewFromUtf8(isolate, "resist_chaos"), Integer::New(isolate, myinfo.detail.resist_chaos));
-	objd->Set(String::NewFromUtf8(isolate, "resist_forget"), Integer::New(isolate, myinfo.detail.resist_forget));
-	objd->Set(String::NewFromUtf8(isolate, "fix_critical"), Integer::New(isolate, myinfo.detail.fix_critical));
-	objd->Set(String::NewFromUtf8(isolate, "fix_strikeback"), Integer::New(isolate, myinfo.detail.fix_strikeback));
-	objd->Set(String::NewFromUtf8(isolate, "fix_accurancy"), Integer::New(isolate, myinfo.detail.fix_accurancy));
-	objd->Set(String::NewFromUtf8(isolate, "fix_dodge"), Integer::New(isolate, myinfo.detail.fix_dodge));
-	objd->Set(String::NewFromUtf8(isolate, "element_earth"), Integer::New(isolate, myinfo.detail.element_earth));
-	objd->Set(String::NewFromUtf8(isolate, "element_water"), Integer::New(isolate, myinfo.detail.element_water));
-	objd->Set(String::NewFromUtf8(isolate, "element_fire"), Integer::New(isolate, myinfo.detail.element_fire));
-	objd->Set(String::NewFromUtf8(isolate, "element_wind"), Integer::New(isolate, myinfo.detail.element_wind));
+	objd->Set(context, String::NewFromUtf8(isolate, "points_remain").ToLocalChecked(), Integer::New(isolate, myinfo.detail.points_remain));
+	objd->Set(context, String::NewFromUtf8(isolate, "points_endurance").ToLocalChecked(), Integer::New(isolate, myinfo.detail.points_endurance));
+	objd->Set(context, String::NewFromUtf8(isolate, "points_strength").ToLocalChecked(), Integer::New(isolate, myinfo.detail.points_strength));
+	objd->Set(context, String::NewFromUtf8(isolate, "points_defense").ToLocalChecked(), Integer::New(isolate, myinfo.detail.points_defense));
+	objd->Set(context, String::NewFromUtf8(isolate, "points_agility").ToLocalChecked(), Integer::New(isolate, myinfo.detail.points_agility));
+	objd->Set(context, String::NewFromUtf8(isolate, "points_magical").ToLocalChecked(), Integer::New(isolate, myinfo.detail.points_magical));
+	objd->Set(context, String::NewFromUtf8(isolate, "value_attack").ToLocalChecked(), Integer::New(isolate, myinfo.detail.value_attack));
+	objd->Set(context, String::NewFromUtf8(isolate, "value_defensive").ToLocalChecked(), Integer::New(isolate, myinfo.detail.value_defensive));
+	objd->Set(context, String::NewFromUtf8(isolate, "value_agility").ToLocalChecked(), Integer::New(isolate, myinfo.detail.value_agility));
+	objd->Set(context, String::NewFromUtf8(isolate, "value_spirit").ToLocalChecked(), Integer::New(isolate, myinfo.detail.value_spirit));
+	objd->Set(context, String::NewFromUtf8(isolate, "value_recovery").ToLocalChecked(), Integer::New(isolate, myinfo.detail.value_recovery));
+	objd->Set(context, String::NewFromUtf8(isolate, "resist_poison").ToLocalChecked(), Integer::New(isolate, myinfo.detail.resist_poison));
+	objd->Set(context, String::NewFromUtf8(isolate, "resist_sleep").ToLocalChecked(), Integer::New(isolate, myinfo.detail.resist_sleep));
+	objd->Set(context, String::NewFromUtf8(isolate, "resist_medusa").ToLocalChecked(), Integer::New(isolate, myinfo.detail.resist_medusa));
+	objd->Set(context, String::NewFromUtf8(isolate, "resist_drunk").ToLocalChecked(), Integer::New(isolate, myinfo.detail.resist_drunk));
+	objd->Set(context, String::NewFromUtf8(isolate, "resist_chaos").ToLocalChecked(), Integer::New(isolate, myinfo.detail.resist_chaos));
+	objd->Set(context, String::NewFromUtf8(isolate, "resist_forget").ToLocalChecked(), Integer::New(isolate, myinfo.detail.resist_forget));
+	objd->Set(context, String::NewFromUtf8(isolate, "fix_critical").ToLocalChecked(), Integer::New(isolate, myinfo.detail.fix_critical));
+	objd->Set(context, String::NewFromUtf8(isolate, "fix_strikeback").ToLocalChecked(), Integer::New(isolate, myinfo.detail.fix_strikeback));
+	objd->Set(context, String::NewFromUtf8(isolate, "fix_accurancy").ToLocalChecked(), Integer::New(isolate, myinfo.detail.fix_accurancy));
+	objd->Set(context, String::NewFromUtf8(isolate, "fix_dodge").ToLocalChecked(), Integer::New(isolate, myinfo.detail.fix_dodge));
+	objd->Set(context, String::NewFromUtf8(isolate, "element_earth").ToLocalChecked(), Integer::New(isolate, myinfo.detail.element_earth));
+	objd->Set(context, String::NewFromUtf8(isolate, "element_water").ToLocalChecked(), Integer::New(isolate, myinfo.detail.element_water));
+	objd->Set(context, String::NewFromUtf8(isolate, "element_fire").ToLocalChecked(), Integer::New(isolate, myinfo.detail.element_fire));
+	objd->Set(context, String::NewFromUtf8(isolate, "element_wind").ToLocalChecked(), Integer::New(isolate, myinfo.detail.element_wind));
 
-	objd->Set(String::NewFromUtf8(isolate, "manu_endurance"), Integer::New(isolate, myinfo.manu_endurance));
-	objd->Set(String::NewFromUtf8(isolate, "manu_skillful"), Integer::New(isolate, myinfo.manu_skillful));
-	objd->Set(String::NewFromUtf8(isolate, "manu_intelligence"), Integer::New(isolate, myinfo.manu_intelligence));
-	objd->Set(String::NewFromUtf8(isolate, "value_charisma"), Integer::New(isolate, myinfo.value_charisma));
+	objd->Set(context, String::NewFromUtf8(isolate, "manu_endurance").ToLocalChecked(), Integer::New(isolate, myinfo.manu_endurance));
+	objd->Set(context, String::NewFromUtf8(isolate, "manu_skillful").ToLocalChecked(), Integer::New(isolate, myinfo.manu_skillful));
+	objd->Set(context, String::NewFromUtf8(isolate, "manu_intelligence").ToLocalChecked(), Integer::New(isolate, myinfo.manu_intelligence));
+	objd->Set(context, String::NewFromUtf8(isolate, "value_charisma").ToLocalChecked(), Integer::New(isolate, myinfo.value_charisma));
 
-	obj->Set(String::NewFromUtf8(isolate, "detail"), objd);
+	obj->Set(context, String::NewFromUtf8(isolate, "detail").ToLocalChecked(), objd);
 
 	Local<Object> objp = Object::New(isolate);
-	objp->Set(String::NewFromUtf8(isolate, "sell_icon"), Integer::New(isolate, myinfo.persdesc.sellIcon));
-	objp->Set(String::NewFromUtf8(isolate, "sell_string"), Nan::New(myinfo.persdesc.sellString).ToLocalChecked());
-	objp->Set(String::NewFromUtf8(isolate, "buy_icon"), Integer::New(isolate, myinfo.persdesc.buyIcon));
-	objp->Set(String::NewFromUtf8(isolate, "buy_string"), Nan::New(myinfo.persdesc.buyString).ToLocalChecked());
-	objp->Set(String::NewFromUtf8(isolate, "want_icon"), Integer::New(isolate, myinfo.persdesc.wantIcon));
-	objp->Set(String::NewFromUtf8(isolate, "want_string"), Nan::New(myinfo.persdesc.wantString).ToLocalChecked());
-	objp->Set(String::NewFromUtf8(isolate, "desc_string"), Nan::New(myinfo.persdesc.descString).ToLocalChecked());
+	objp->Set(context, String::NewFromUtf8(isolate, "sell_icon").ToLocalChecked(), Integer::New(isolate, myinfo.persdesc.sellIcon));
+	objp->Set(context, String::NewFromUtf8(isolate, "sell_string").ToLocalChecked(), Nan::New(myinfo.persdesc.sellString).ToLocalChecked());
+	objp->Set(context, String::NewFromUtf8(isolate, "buy_icon").ToLocalChecked(), Integer::New(isolate, myinfo.persdesc.buyIcon));
+	objp->Set(context, String::NewFromUtf8(isolate, "buy_string").ToLocalChecked(), Nan::New(myinfo.persdesc.buyString).ToLocalChecked());
+	objp->Set(context, String::NewFromUtf8(isolate, "want_icon").ToLocalChecked(), Integer::New(isolate, myinfo.persdesc.wantIcon));
+	objp->Set(context, String::NewFromUtf8(isolate, "want_string").ToLocalChecked(), Nan::New(myinfo.persdesc.wantString).ToLocalChecked());
+	objp->Set(context, String::NewFromUtf8(isolate, "desc_string").ToLocalChecked(), Nan::New(myinfo.persdesc.descString).ToLocalChecked());
 
-	obj->Set(String::NewFromUtf8(isolate, "persdesc"), objp);
+	obj->Set(context, String::NewFromUtf8(isolate, "persdesc").ToLocalChecked(), objp);
 
 	info.GetReturnValue().Set(obj);
 }
 
 void SetPlayerFlagEnabled(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
-	Isolate* isolate = info.GetIsolate();
+	auto isolate = info.GetIsolate();
+	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
 
-	if (info.Length() < 1 || info[0]->IsUndefined()) {
-		Nan::ThrowTypeError("Arg[0] must be index.");
+	if (info.Length() < 1 || !info[0]->IsInt32()) {
+		Nan::ThrowTypeError("Arg[0] must be integer.");
 		return;
 	}
 
@@ -192,8 +199,8 @@ void SetPlayerFlagEnabled(const Nan::FunctionCallbackInfo<v8::Value>& info)
 		return;
 	}
 
-	int index = (int)info[0]->IntegerValue();
-	bool enable = info[1]->BooleanValue();
+	int index = info[0]->Int32Value(context).ToChecked();
+	bool enable = info[1]->BooleanValue(isolate);
 	if (!g_CGAInterface->SetPlayerFlagEnabled(index, enable))
 	{
 		Nan::ThrowError("RPC Invocation failed.");
@@ -205,15 +212,16 @@ void SetPlayerFlagEnabled(const Nan::FunctionCallbackInfo<v8::Value>& info)
 
 void IsPlayerFlagEnabled(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
-	Isolate* isolate = info.GetIsolate();
+	auto isolate = info.GetIsolate();
+	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
 
-	if (info.Length() < 1 || info[0]->IsUndefined()) {
-		Nan::ThrowTypeError("Arg[0] must be index.");
+	if (info.Length() < 1 || !info[0]->IsInt32()) {
+		Nan::ThrowTypeError("Arg[0] must be integer.");
 		return;
 	}
 
-	int index = (int)info[0]->IntegerValue();
+	int index = info[0]->Int32Value(context).ToChecked();
 
 	bool enable = false;
 
@@ -228,15 +236,16 @@ void IsPlayerFlagEnabled(const Nan::FunctionCallbackInfo<v8::Value>& info)
 
 void IsUIDialogPresent(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
-	Isolate* isolate = info.GetIsolate();
+	auto isolate = info.GetIsolate();
+	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
 
-	if (info.Length() < 1 || info[0]->IsUndefined()) {
-		Nan::ThrowTypeError("Arg[0] must be dialog.");
+	if (info.Length() < 1 || !info[0]->IsInt32()) {
+		Nan::ThrowTypeError("Arg[0] must be integer.");
 		return;
 	}
 
-	int index = (int)info[0]->IntegerValue();
+	int index = info[0]->Int32Value(context).ToChecked();
 	bool present = false;
 	if (!g_CGAInterface->IsUIDialogPresent(index, present))
 	{
@@ -249,7 +258,8 @@ void IsUIDialogPresent(const Nan::FunctionCallbackInfo<v8::Value>& info)
 
 void IsSkillValid(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
-	Isolate* isolate = info.GetIsolate();
+	auto isolate = info.GetIsolate();
+	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
 
 	if (info.Length() < 1) {
@@ -257,7 +267,7 @@ void IsSkillValid(const Nan::FunctionCallbackInfo<v8::Value>& info)
 		return;
 	}
 
-	int skillid = (int)info[0]->IntegerValue();
+	int skillid = info[0]->Int32Value(context).ToChecked();
 	bool valid = false;
 	if (!g_CGAInterface->IsSkillValid(skillid, valid))
 	{
@@ -270,7 +280,8 @@ void IsSkillValid(const Nan::FunctionCallbackInfo<v8::Value>& info)
 
 void GetSkillInfo(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
-	Isolate* isolate = info.GetIsolate();
+	auto isolate = info.GetIsolate();
+	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
 
 	if (info.Length() < 1) {
@@ -278,7 +289,7 @@ void GetSkillInfo(const Nan::FunctionCallbackInfo<v8::Value>& info)
 		return;
 	}
 
-	int skillid = (int)info[0]->IntegerValue();
+	int skillid = info[0]->Int32Value(context).ToChecked();
 	CGA::cga_skill_info_t myinfo;
 	if (!g_CGAInterface->GetSkillInfo(skillid, myinfo))
 	{
@@ -287,22 +298,23 @@ void GetSkillInfo(const Nan::FunctionCallbackInfo<v8::Value>& info)
 	}
 
 	Local<Object> obj = Object::New(isolate);
-	obj->Set(String::NewFromUtf8(isolate, "name"), Nan::New(myinfo.name).ToLocalChecked());
-	obj->Set(String::NewFromUtf8(isolate, "lv"), Integer::New(isolate, myinfo.lv));
-	obj->Set(String::NewFromUtf8(isolate, "maxlv"), Integer::New(isolate, myinfo.maxlv));
-	obj->Set(String::NewFromUtf8(isolate, "xp"), Integer::New(isolate, myinfo.xp));
-	obj->Set(String::NewFromUtf8(isolate, "maxxp"), Integer::New(isolate, myinfo.maxxp));
-	obj->Set(String::NewFromUtf8(isolate, "skill_id"), Integer::New(isolate, myinfo.skill_id));
-	obj->Set(String::NewFromUtf8(isolate, "type"), Integer::New(isolate, myinfo.type));
-	obj->Set(String::NewFromUtf8(isolate, "pos"), Integer::New(isolate, myinfo.pos));
-	obj->Set(String::NewFromUtf8(isolate, "index"), Integer::New(isolate, myinfo.index));
-	obj->Set(String::NewFromUtf8(isolate, "slotsize"), Integer::New(isolate, myinfo.slotsize));
+	obj->Set(context, String::NewFromUtf8(isolate, "name").ToLocalChecked(), Nan::New(myinfo.name).ToLocalChecked());
+	obj->Set(context, String::NewFromUtf8(isolate, "lv").ToLocalChecked(), Integer::New(isolate, myinfo.lv));
+	obj->Set(context, String::NewFromUtf8(isolate, "maxlv").ToLocalChecked(), Integer::New(isolate, myinfo.maxlv));
+	obj->Set(context, String::NewFromUtf8(isolate, "xp").ToLocalChecked(), Integer::New(isolate, myinfo.xp));
+	obj->Set(context, String::NewFromUtf8(isolate, "maxxp").ToLocalChecked(), Integer::New(isolate, myinfo.maxxp));
+	obj->Set(context, String::NewFromUtf8(isolate, "skill_id").ToLocalChecked(), Integer::New(isolate, myinfo.skill_id));
+	obj->Set(context, String::NewFromUtf8(isolate, "type").ToLocalChecked(), Integer::New(isolate, myinfo.type));
+	obj->Set(context, String::NewFromUtf8(isolate, "pos").ToLocalChecked(), Integer::New(isolate, myinfo.pos));
+	obj->Set(context, String::NewFromUtf8(isolate, "index").ToLocalChecked(), Integer::New(isolate, myinfo.index));
+	obj->Set(context, String::NewFromUtf8(isolate, "slotsize").ToLocalChecked(), Integer::New(isolate, myinfo.slotsize));
 	info.GetReturnValue().Set(obj);
 }
 
 void GetSkillsInfo(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
-	Isolate* isolate = info.GetIsolate();
+	auto isolate = info.GetIsolate();
+	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
 
 	CGA::cga_skills_info_t myinfos;
@@ -317,38 +329,39 @@ void GetSkillsInfo(const Nan::FunctionCallbackInfo<v8::Value>& info)
 	{
 		Local<Object> obj = Object::New(isolate);
 		const CGA::cga_skill_info_t &myinfo = myinfos.at(i);
-;		obj->Set(String::NewFromUtf8(isolate, "name"), Nan::New(myinfo.name).ToLocalChecked());
-		obj->Set(String::NewFromUtf8(isolate, "lv"), Integer::New(isolate, myinfo.lv));
-		obj->Set(String::NewFromUtf8(isolate, "maxlv"), Integer::New(isolate, myinfo.maxlv));
-		obj->Set(String::NewFromUtf8(isolate, "xp"), Integer::New(isolate, myinfo.xp));
-		obj->Set(String::NewFromUtf8(isolate, "maxxp"), Integer::New(isolate, myinfo.maxxp));
-		obj->Set(String::NewFromUtf8(isolate, "skill_id"), Integer::New(isolate, myinfo.skill_id));
-		obj->Set(String::NewFromUtf8(isolate, "type"), Integer::New(isolate, myinfo.type));
-		obj->Set(String::NewFromUtf8(isolate, "pos"), Integer::New(isolate, myinfo.pos));
-		obj->Set(String::NewFromUtf8(isolate, "index"), Integer::New(isolate, myinfo.index));
-		obj->Set(String::NewFromUtf8(isolate, "slotsize"), Integer::New(isolate, myinfo.slotsize));
-		arr->Set(i, obj);
+;		obj->Set(context, String::NewFromUtf8(isolate, "name").ToLocalChecked(), Nan::New(myinfo.name).ToLocalChecked());
+		obj->Set(context, String::NewFromUtf8(isolate, "lv").ToLocalChecked(), Integer::New(isolate, myinfo.lv));
+		obj->Set(context, String::NewFromUtf8(isolate, "maxlv").ToLocalChecked(), Integer::New(isolate, myinfo.maxlv));
+		obj->Set(context, String::NewFromUtf8(isolate, "xp").ToLocalChecked(), Integer::New(isolate, myinfo.xp));
+		obj->Set(context, String::NewFromUtf8(isolate, "maxxp").ToLocalChecked(), Integer::New(isolate, myinfo.maxxp));
+		obj->Set(context, String::NewFromUtf8(isolate, "skill_id").ToLocalChecked(), Integer::New(isolate, myinfo.skill_id));
+		obj->Set(context, String::NewFromUtf8(isolate, "type").ToLocalChecked(), Integer::New(isolate, myinfo.type));
+		obj->Set(context, String::NewFromUtf8(isolate, "pos").ToLocalChecked(), Integer::New(isolate, myinfo.pos));
+		obj->Set(context, String::NewFromUtf8(isolate, "index").ToLocalChecked(), Integer::New(isolate, myinfo.index));
+		obj->Set(context, String::NewFromUtf8(isolate, "slotsize").ToLocalChecked(), Integer::New(isolate, myinfo.slotsize));
+		arr->Set(context, i, obj);
 	}
 	info.GetReturnValue().Set(arr);
 }
 
 void GetCraftInfo(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
-	Isolate* isolate = info.GetIsolate();
+	auto isolate = info.GetIsolate();
+	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
 
-	if (info.Length() < 1 || info[0]->IsUndefined()) {
+	if (info.Length() < 1 || !info[0]->IsInt32()) {
 		Nan::ThrowTypeError("Arg[0] must be skillid.");
 		return;
 	}
 
-	if (info.Length() < 2 || info[1]->IsUndefined()) {
+	if (info.Length() < 2 || !info[1]->IsInt32()) {
 		Nan::ThrowTypeError("Arg[2] must be subskill_index.");
 		return;
 	}
 
-	int skillid = (int)info[0]->IntegerValue();
-	int subskill_index = (int)info[1]->IntegerValue();
+	int skillid = info[0]->Int32Value(context).ToChecked();
+	int subskill_index = info[1]->Int32Value(context).ToChecked();
 
 	CGA::cga_craft_info_t myinfo;
 	if (!g_CGAInterface->GetCraftInfo(skillid, subskill_index, myinfo))
@@ -358,14 +371,14 @@ void GetCraftInfo(const Nan::FunctionCallbackInfo<v8::Value>& info)
 	}
 
 	Local<Object> obj = Object::New(isolate);
-	obj->Set(String::NewFromUtf8(isolate, "name"), Nan::New(myinfo.name).ToLocalChecked());
-	obj->Set(String::NewFromUtf8(isolate, "info"), Nan::New(myinfo.info).ToLocalChecked());
-	obj->Set(String::NewFromUtf8(isolate, "itemid"), Integer::New(isolate, myinfo.itemid));
-	obj->Set(String::NewFromUtf8(isolate, "level"), Integer::New(isolate, myinfo.level));
-	obj->Set(String::NewFromUtf8(isolate, "cost"), Integer::New(isolate, myinfo.cost));
-	obj->Set(String::NewFromUtf8(isolate, "id"), Integer::New(isolate, myinfo.id));
-	obj->Set(String::NewFromUtf8(isolate, "index"), Integer::New(isolate, myinfo.index));
-	obj->Set(String::NewFromUtf8(isolate, "available"), Boolean::New(isolate, myinfo.available));
+	obj->Set(context, String::NewFromUtf8(isolate, "name").ToLocalChecked(), Nan::New(myinfo.name).ToLocalChecked());
+	obj->Set(context, String::NewFromUtf8(isolate, "info").ToLocalChecked(), Nan::New(myinfo.info).ToLocalChecked());
+	obj->Set(context, String::NewFromUtf8(isolate, "itemid").ToLocalChecked(), Integer::New(isolate, myinfo.itemid));
+	obj->Set(context, String::NewFromUtf8(isolate, "level").ToLocalChecked(), Integer::New(isolate, myinfo.level));
+	obj->Set(context, String::NewFromUtf8(isolate, "cost").ToLocalChecked(), Integer::New(isolate, myinfo.cost));
+	obj->Set(context, String::NewFromUtf8(isolate, "id").ToLocalChecked(), Integer::New(isolate, myinfo.id));
+	obj->Set(context, String::NewFromUtf8(isolate, "index").ToLocalChecked(), Integer::New(isolate, myinfo.index));
+	obj->Set(context, String::NewFromUtf8(isolate, "available").ToLocalChecked(), Boolean::New(isolate, myinfo.available));
 
 	Local<Array> mat_arr = Array::New(isolate);
 	for (size_t i = 0; i < 5; ++i)
@@ -374,29 +387,30 @@ void GetCraftInfo(const Nan::FunctionCallbackInfo<v8::Value>& info)
 		const CGA::cga_craft_material_t &mymat = myinfo.materials[i];
 		if (!mymat.name.empty())
 		{
-			mat_obj->Set(String::NewFromUtf8(isolate, "name"), Nan::New(mymat.name).ToLocalChecked());
-			mat_obj->Set(String::NewFromUtf8(isolate, "itemid"), Integer::New(isolate, mymat.itemid));
-			mat_obj->Set(String::NewFromUtf8(isolate, "count"), Integer::New(isolate, mymat.count));
-			mat_arr->Set(i, mat_obj);
+			mat_obj->Set(context, String::NewFromUtf8(isolate, "name").ToLocalChecked(), Nan::New(mymat.name).ToLocalChecked());
+			mat_obj->Set(context, String::NewFromUtf8(isolate, "itemid").ToLocalChecked(), Integer::New(isolate, mymat.itemid));
+			mat_obj->Set(context, String::NewFromUtf8(isolate, "count").ToLocalChecked(), Integer::New(isolate, mymat.count));
+			mat_arr->Set(context, i, mat_obj);
 		}
 	}
-	obj->Set(String::NewFromUtf8(isolate, "materials"), mat_arr);
+	obj->Set(context, String::NewFromUtf8(isolate, "materials").ToLocalChecked(), mat_arr);
 
 	info.GetReturnValue().Set(obj);
 }
 
 void GetCraftsInfo(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
-	Isolate* isolate = info.GetIsolate();
+	auto isolate = info.GetIsolate();
+	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
 
-	if (info.Length() < 1 || info[0]->IsUndefined())
+	if (info.Length() < 1 || !info[0]->IsInt32())
 	{
-		Nan::ThrowTypeError("Arg[0] must be skillid.");
+		Nan::ThrowTypeError("Arg[0] must be integer.");
 		return;
 	}
 
-	int skillid = (int)info[0]->IntegerValue();
+	int skillid = info[0]->Int32Value(context).ToChecked();
 
 	CGA::cga_crafts_info_t myinfos;
 	if (!g_CGAInterface->GetCraftsInfo(skillid, myinfos))
@@ -410,14 +424,14 @@ void GetCraftsInfo(const Nan::FunctionCallbackInfo<v8::Value>& info)
 	{
 		const CGA::cga_craft_info_t &myinfo = myinfos.at(i);
 		Local<Object> obj = Object::New(isolate);
-		obj->Set(String::NewFromUtf8(isolate, "name"), Nan::New(myinfo.name).ToLocalChecked());
-		obj->Set(String::NewFromUtf8(isolate, "info"), Nan::New(myinfo.info).ToLocalChecked());
-		obj->Set(String::NewFromUtf8(isolate, "itemid"), Integer::New(isolate, myinfo.itemid));
-		obj->Set(String::NewFromUtf8(isolate, "level"), Integer::New(isolate, myinfo.level));
-		obj->Set(String::NewFromUtf8(isolate, "cost"), Integer::New(isolate, myinfo.cost));
-		obj->Set(String::NewFromUtf8(isolate, "id"), Integer::New(isolate, myinfo.id));
-		obj->Set(String::NewFromUtf8(isolate, "index"), Integer::New(isolate, myinfo.index));
-		obj->Set(String::NewFromUtf8(isolate, "available"), Boolean::New(isolate, myinfo.available));
+		obj->Set(context, String::NewFromUtf8(isolate, "name").ToLocalChecked(), Nan::New(myinfo.name).ToLocalChecked());
+		obj->Set(context, String::NewFromUtf8(isolate, "info").ToLocalChecked(), Nan::New(myinfo.info).ToLocalChecked());
+		obj->Set(context, String::NewFromUtf8(isolate, "itemid").ToLocalChecked(), Integer::New(isolate, myinfo.itemid));
+		obj->Set(context, String::NewFromUtf8(isolate, "level").ToLocalChecked(), Integer::New(isolate, myinfo.level));
+		obj->Set(context, String::NewFromUtf8(isolate, "cost").ToLocalChecked(), Integer::New(isolate, myinfo.cost));
+		obj->Set(context, String::NewFromUtf8(isolate, "id").ToLocalChecked(), Integer::New(isolate, myinfo.id));
+		obj->Set(context, String::NewFromUtf8(isolate, "index").ToLocalChecked(), Integer::New(isolate, myinfo.index));
+		obj->Set(context, String::NewFromUtf8(isolate, "available").ToLocalChecked(), Boolean::New(isolate, myinfo.available));
 
 		Local<Array> mat_arr = Array::New(isolate);
 		for (size_t j = 0; j < 5; ++j)
@@ -426,22 +440,23 @@ void GetCraftsInfo(const Nan::FunctionCallbackInfo<v8::Value>& info)
 			const CGA::cga_craft_material_t &mymat = myinfo.materials[j];
 			if (!mymat.name.empty())
 			{
-				mat_obj->Set(String::NewFromUtf8(isolate, "name"), Nan::New(mymat.name).ToLocalChecked());
-				mat_obj->Set(String::NewFromUtf8(isolate, "itemid"), Integer::New(isolate, mymat.itemid));
-				mat_obj->Set(String::NewFromUtf8(isolate, "count"), Integer::New(isolate, mymat.count));
-				mat_arr->Set(j, mat_obj);
+				mat_obj->Set(context, String::NewFromUtf8(isolate, "name").ToLocalChecked(), Nan::New(mymat.name).ToLocalChecked());
+				mat_obj->Set(context, String::NewFromUtf8(isolate, "itemid").ToLocalChecked(), Integer::New(isolate, mymat.itemid));
+				mat_obj->Set(context, String::NewFromUtf8(isolate, "count").ToLocalChecked(), Integer::New(isolate, mymat.count));
+				mat_arr->Set(context, j, mat_obj);
 			}
 		}
-		obj->Set(String::NewFromUtf8(isolate, "materials"), mat_arr);
+		obj->Set(context, String::NewFromUtf8(isolate, "materials").ToLocalChecked(), mat_arr);
 
-		arr->Set(i, obj);
+		arr->Set(context, i, obj);
 	}
 	info.GetReturnValue().Set(arr);
 }
 
 void GetSubSkillInfo(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
-	Isolate* isolate = info.GetIsolate();
+	auto isolate = info.GetIsolate();
+	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
 
 	if (info.Length() < 1) {
@@ -453,8 +468,8 @@ void GetSubSkillInfo(const Nan::FunctionCallbackInfo<v8::Value>& info)
 		return;
 	}
 
-	int skillid = (int)info[0]->IntegerValue();
-	int stage = (int)info[1]->IntegerValue();
+	int skillid = info[0]->Int32Value(context).ToChecked();
+	int stage = info[1]->Int32Value(context).ToChecked();
 
 	CGA::cga_subskill_info_t myinfo;
 	if (!g_CGAInterface->GetSubSkillInfo(skillid, stage, myinfo))
@@ -464,18 +479,19 @@ void GetSubSkillInfo(const Nan::FunctionCallbackInfo<v8::Value>& info)
 	}
 
 	Local<Object> obj = Object::New(isolate);
-	obj->Set(String::NewFromUtf8(isolate, "name"), Nan::New(myinfo.name).ToLocalChecked());
-	obj->Set(String::NewFromUtf8(isolate, "info"), Nan::New(myinfo.info).ToLocalChecked());
-	obj->Set(String::NewFromUtf8(isolate, "level"), Integer::New(isolate, myinfo.level));
-	obj->Set(String::NewFromUtf8(isolate, "cost"), Integer::New(isolate, myinfo.cost));
-	obj->Set(String::NewFromUtf8(isolate, "flags"), Integer::New(isolate, myinfo.flags));
-	obj->Set(String::NewFromUtf8(isolate, "available"), Boolean::New(isolate, myinfo.available));
+	obj->Set(context, String::NewFromUtf8(isolate, "name").ToLocalChecked(), Nan::New(myinfo.name).ToLocalChecked());
+	obj->Set(context, String::NewFromUtf8(isolate, "info").ToLocalChecked(), Nan::New(myinfo.info).ToLocalChecked());
+	obj->Set(context, String::NewFromUtf8(isolate, "level").ToLocalChecked(), Integer::New(isolate, myinfo.level));
+	obj->Set(context, String::NewFromUtf8(isolate, "cost").ToLocalChecked(), Integer::New(isolate, myinfo.cost));
+	obj->Set(context, String::NewFromUtf8(isolate, "flags").ToLocalChecked(), Integer::New(isolate, myinfo.flags));
+	obj->Set(context, String::NewFromUtf8(isolate, "available").ToLocalChecked(), Boolean::New(isolate, myinfo.available));
 	info.GetReturnValue().Set(obj);
 }
 
 void GetSubSkillsInfo(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
-	Isolate* isolate = info.GetIsolate();
+	auto isolate = info.GetIsolate();
+	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
 
 	if (info.Length() < 1) {
@@ -483,7 +499,7 @@ void GetSubSkillsInfo(const Nan::FunctionCallbackInfo<v8::Value>& info)
 		return;
 	}
 
-	int skillid = (int)info[0]->IntegerValue();
+	int skillid = info[0]->Int32Value(context).ToChecked();
 
 	CGA::cga_subskills_info_t myinfos;
 	if (!g_CGAInterface->GetSubSkillsInfo(skillid, myinfos))
@@ -496,20 +512,21 @@ void GetSubSkillsInfo(const Nan::FunctionCallbackInfo<v8::Value>& info)
 	{
 		const CGA::cga_subskill_info_t &myinfo = myinfos.at(i);
 		Local<Object> obj = Object::New(isolate);
-		obj->Set(String::NewFromUtf8(isolate, "name"), Nan::New(myinfo.name).ToLocalChecked());
-		obj->Set(String::NewFromUtf8(isolate, "info"), Nan::New(myinfo.info).ToLocalChecked());
-		obj->Set(String::NewFromUtf8(isolate, "level"), Integer::New(isolate, myinfo.level));
-		obj->Set(String::NewFromUtf8(isolate, "cost"), Integer::New(isolate, myinfo.cost));
-		obj->Set(String::NewFromUtf8(isolate, "flags"), Integer::New(isolate, myinfo.flags));
-		obj->Set(String::NewFromUtf8(isolate, "available"), Boolean::New(isolate, myinfo.available));
-		arr->Set(i, obj);
+		obj->Set(context, String::NewFromUtf8(isolate, "name").ToLocalChecked(), Nan::New(myinfo.name).ToLocalChecked());
+		obj->Set(context, String::NewFromUtf8(isolate, "info").ToLocalChecked(), Nan::New(myinfo.info).ToLocalChecked());
+		obj->Set(context, String::NewFromUtf8(isolate, "level").ToLocalChecked(), Integer::New(isolate, myinfo.level));
+		obj->Set(context, String::NewFromUtf8(isolate, "cost").ToLocalChecked(), Integer::New(isolate, myinfo.cost));
+		obj->Set(context, String::NewFromUtf8(isolate, "flags").ToLocalChecked(), Integer::New(isolate, myinfo.flags));
+		obj->Set(context, String::NewFromUtf8(isolate, "available").ToLocalChecked(), Boolean::New(isolate, myinfo.available));
+		arr->Set(context, i, obj);
 	}
 	info.GetReturnValue().Set(arr);
 }
 
 void IsItemValid(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
-	Isolate* isolate = info.GetIsolate();
+	auto isolate = info.GetIsolate();
+	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
 
 	if (info.Length() < 1) {
@@ -517,7 +534,7 @@ void IsItemValid(const Nan::FunctionCallbackInfo<v8::Value>& info)
 		return;
 	}
 
-	int itempos = (int)info[0]->IntegerValue();
+	int itempos = info[0]->Int32Value(context).ToChecked();
 	bool valid = false;
 	if (!g_CGAInterface->IsItemValid(itempos, valid))
 	{
@@ -530,7 +547,8 @@ void IsItemValid(const Nan::FunctionCallbackInfo<v8::Value>& info)
 
 void GetItemInfo(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
-	Isolate* isolate = info.GetIsolate();
+	auto isolate = info.GetIsolate();
+	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
 
 	if (info.Length() < 1) {
@@ -538,7 +556,7 @@ void GetItemInfo(const Nan::FunctionCallbackInfo<v8::Value>& info)
 		return;
 	}
 
-	int itempos = (int)info[0]->IntegerValue();
+	int itempos = info[0]->Int32Value(context).ToChecked();
 
 	CGA::cga_item_info_t myinfo;
 	if (!g_CGAInterface->GetItemInfo(itempos, myinfo))
@@ -548,21 +566,22 @@ void GetItemInfo(const Nan::FunctionCallbackInfo<v8::Value>& info)
 	}
 
 	Local<Object> obj = Object::New(isolate);
-	obj->Set(String::NewFromUtf8(isolate, "name"), Nan::New(myinfo.name).ToLocalChecked());
-	obj->Set(String::NewFromUtf8(isolate, "info"), Nan::New(myinfo.info).ToLocalChecked());
-	obj->Set(String::NewFromUtf8(isolate, "attr"), Nan::New(myinfo.attr).ToLocalChecked());
-	obj->Set(String::NewFromUtf8(isolate, "count"), Integer::New(isolate, myinfo.count));
-	obj->Set(String::NewFromUtf8(isolate, "itemid"), Integer::New(isolate, myinfo.itemid));
-	obj->Set(String::NewFromUtf8(isolate, "pos"), Integer::New(isolate, myinfo.pos));
-	obj->Set(String::NewFromUtf8(isolate, "level"), Integer::New(isolate, myinfo.level));
-	obj->Set(String::NewFromUtf8(isolate, "type"), Integer::New(isolate, myinfo.type));
-	obj->Set(String::NewFromUtf8(isolate, "assessed"), Boolean::New(isolate, myinfo.assessed));
+	obj->Set(context, String::NewFromUtf8(isolate, "name").ToLocalChecked(), Nan::New(myinfo.name).ToLocalChecked());
+	obj->Set(context, String::NewFromUtf8(isolate, "info").ToLocalChecked(), Nan::New(myinfo.info).ToLocalChecked());
+	obj->Set(context, String::NewFromUtf8(isolate, "attr").ToLocalChecked(), Nan::New(myinfo.attr).ToLocalChecked());
+	obj->Set(context, String::NewFromUtf8(isolate, "count").ToLocalChecked(), Integer::New(isolate, myinfo.count));
+	obj->Set(context, String::NewFromUtf8(isolate, "itemid").ToLocalChecked(), Integer::New(isolate, myinfo.itemid));
+	obj->Set(context, String::NewFromUtf8(isolate, "pos").ToLocalChecked(), Integer::New(isolate, myinfo.pos));
+	obj->Set(context, String::NewFromUtf8(isolate, "level").ToLocalChecked(), Integer::New(isolate, myinfo.level));
+	obj->Set(context, String::NewFromUtf8(isolate, "type").ToLocalChecked(), Integer::New(isolate, myinfo.type));
+	obj->Set(context, String::NewFromUtf8(isolate, "assessed").ToLocalChecked(), Boolean::New(isolate, myinfo.assessed));
 	info.GetReturnValue().Set(obj);
 }
 
 void GetItemsInfo(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
-	Isolate* isolate = info.GetIsolate();
+	auto isolate = info.GetIsolate();
+	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
 
 	CGA::cga_items_info_t myinfos;
@@ -576,23 +595,24 @@ void GetItemsInfo(const Nan::FunctionCallbackInfo<v8::Value>& info)
 	{
 		const CGA::cga_item_info_t &myinfo = myinfos.at(i);
 		Local<Object> obj = Object::New(isolate);
-		obj->Set(String::NewFromUtf8(isolate, "name"), Nan::New(myinfo.name).ToLocalChecked());
-		obj->Set(String::NewFromUtf8(isolate, "info"), Nan::New(myinfo.info).ToLocalChecked());
-		obj->Set(String::NewFromUtf8(isolate, "attr"), Nan::New(myinfo.attr).ToLocalChecked());
-		obj->Set(String::NewFromUtf8(isolate, "count"), Integer::New(isolate, myinfo.count));
-		obj->Set(String::NewFromUtf8(isolate, "itemid"), Integer::New(isolate, myinfo.itemid));
-		obj->Set(String::NewFromUtf8(isolate, "pos"), Integer::New(isolate, myinfo.pos));
-		obj->Set(String::NewFromUtf8(isolate, "level"), Integer::New(isolate, myinfo.level));
-		obj->Set(String::NewFromUtf8(isolate, "type"), Integer::New(isolate, myinfo.type));
-		obj->Set(String::NewFromUtf8(isolate, "assessed"), Boolean::New(isolate, myinfo.assessed));
-		arr->Set(i, obj);
+		obj->Set(context, String::NewFromUtf8(isolate, "name").ToLocalChecked(), Nan::New(myinfo.name).ToLocalChecked());
+		obj->Set(context, String::NewFromUtf8(isolate, "info").ToLocalChecked(), Nan::New(myinfo.info).ToLocalChecked());
+		obj->Set(context, String::NewFromUtf8(isolate, "attr").ToLocalChecked(), Nan::New(myinfo.attr).ToLocalChecked());
+		obj->Set(context, String::NewFromUtf8(isolate, "count").ToLocalChecked(), Integer::New(isolate, myinfo.count));
+		obj->Set(context, String::NewFromUtf8(isolate, "itemid").ToLocalChecked(), Integer::New(isolate, myinfo.itemid));
+		obj->Set(context, String::NewFromUtf8(isolate, "pos").ToLocalChecked(), Integer::New(isolate, myinfo.pos));
+		obj->Set(context, String::NewFromUtf8(isolate, "level").ToLocalChecked(), Integer::New(isolate, myinfo.level));
+		obj->Set(context, String::NewFromUtf8(isolate, "type").ToLocalChecked(), Integer::New(isolate, myinfo.type));
+		obj->Set(context, String::NewFromUtf8(isolate, "assessed").ToLocalChecked(), Boolean::New(isolate, myinfo.assessed));
+		arr->Set(context, i, obj);
 	}
 	info.GetReturnValue().Set(arr);
 }
 
 void GetBankItemsInfo(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
-	Isolate* isolate = info.GetIsolate();
+	auto isolate = info.GetIsolate();
+	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
 
 	CGA::cga_items_info_t myinfos;
@@ -606,16 +626,16 @@ void GetBankItemsInfo(const Nan::FunctionCallbackInfo<v8::Value>& info)
 	{
 		const CGA::cga_item_info_t &myinfo = myinfos.at(i);
 		Local<Object> obj = Object::New(isolate);
-		obj->Set(String::NewFromUtf8(isolate, "name"), Nan::New(myinfo.name).ToLocalChecked());
-		obj->Set(String::NewFromUtf8(isolate, "info"), Nan::New(myinfo.info).ToLocalChecked());
-		obj->Set(String::NewFromUtf8(isolate, "attr"), Nan::New(myinfo.attr).ToLocalChecked());
-		obj->Set(String::NewFromUtf8(isolate, "count"), Integer::New(isolate, myinfo.count));
-		obj->Set(String::NewFromUtf8(isolate, "itemid"), Integer::New(isolate, myinfo.itemid));
-		obj->Set(String::NewFromUtf8(isolate, "pos"), Integer::New(isolate, myinfo.pos));
-		obj->Set(String::NewFromUtf8(isolate, "level"), Integer::New(isolate, myinfo.level));
-		obj->Set(String::NewFromUtf8(isolate, "type"), Integer::New(isolate, myinfo.type));
-		obj->Set(String::NewFromUtf8(isolate, "assessed"), Boolean::New(isolate, myinfo.assessed));
-		arr->Set(i, obj);
+		obj->Set(context, String::NewFromUtf8(isolate, "name").ToLocalChecked(), Nan::New(myinfo.name).ToLocalChecked());
+		obj->Set(context, String::NewFromUtf8(isolate, "info").ToLocalChecked(), Nan::New(myinfo.info).ToLocalChecked());
+		obj->Set(context, String::NewFromUtf8(isolate, "attr").ToLocalChecked(), Nan::New(myinfo.attr).ToLocalChecked());
+		obj->Set(context, String::NewFromUtf8(isolate, "count").ToLocalChecked(), Integer::New(isolate, myinfo.count));
+		obj->Set(context, String::NewFromUtf8(isolate, "itemid").ToLocalChecked(), Integer::New(isolate, myinfo.itemid));
+		obj->Set(context, String::NewFromUtf8(isolate, "pos").ToLocalChecked(), Integer::New(isolate, myinfo.pos));
+		obj->Set(context, String::NewFromUtf8(isolate, "level").ToLocalChecked(), Integer::New(isolate, myinfo.level));
+		obj->Set(context, String::NewFromUtf8(isolate, "type").ToLocalChecked(), Integer::New(isolate, myinfo.type));
+		obj->Set(context, String::NewFromUtf8(isolate, "assessed").ToLocalChecked(), Boolean::New(isolate, myinfo.assessed));
+		arr->Set(context, i, obj);
 	}
 	info.GetReturnValue().Set(arr);
 }
@@ -623,7 +643,8 @@ void GetBankItemsInfo(const Nan::FunctionCallbackInfo<v8::Value>& info)
 
 void GetBankGold(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
-	Isolate* isolate = info.GetIsolate();
+	auto isolate = info.GetIsolate();
+	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
 
 	int gold = 0;
@@ -639,7 +660,8 @@ void GetBankGold(const Nan::FunctionCallbackInfo<v8::Value>& info)
 
 void IsPetValid(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
-	Isolate* isolate = info.GetIsolate();
+	auto isolate = info.GetIsolate();
+	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
 
 	if (info.Length() < 1) {
@@ -647,7 +669,7 @@ void IsPetValid(const Nan::FunctionCallbackInfo<v8::Value>& info)
 		return;
 	}
 
-	int petid = (int)info[0]->IntegerValue();
+	int petid = info[0]->Int32Value(context).ToChecked();
 	bool valid = false;
 	if (!g_CGAInterface->IsPetValid(petid, valid))
 	{
@@ -660,7 +682,8 @@ void IsPetValid(const Nan::FunctionCallbackInfo<v8::Value>& info)
 
 void GetPetInfo(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
-	Isolate* isolate = info.GetIsolate();
+	auto isolate = info.GetIsolate();
+	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
 
 	if (info.Length() < 1) {
@@ -668,7 +691,7 @@ void GetPetInfo(const Nan::FunctionCallbackInfo<v8::Value>& info)
 		return;
 	}
 
-	int petid = (int)info[0]->IntegerValue();
+	int petid = info[0]->Int32Value(context).ToChecked();
 	CGA::cga_pet_info_t myinfo;
 	if (!g_CGAInterface->GetPetInfo(petid, myinfo))
 	{
@@ -677,57 +700,58 @@ void GetPetInfo(const Nan::FunctionCallbackInfo<v8::Value>& info)
 	}
 
 	Local<Object> obj = Object::New(isolate);
-	obj->Set(String::NewFromUtf8(isolate, "name"), Nan::New(myinfo.name).ToLocalChecked());
-	obj->Set(String::NewFromUtf8(isolate, "realname"), Nan::New(myinfo.realname).ToLocalChecked());
-	obj->Set(String::NewFromUtf8(isolate, "level"), Integer::New(isolate, myinfo.level));
-	obj->Set(String::NewFromUtf8(isolate, "race"), Integer::New(isolate, myinfo.race));
-	obj->Set(String::NewFromUtf8(isolate, "loyality"), Integer::New(isolate, myinfo.loyality));
-	obj->Set(String::NewFromUtf8(isolate, "health"), Integer::New(isolate, myinfo.health));
-	obj->Set(String::NewFromUtf8(isolate, "hp"), Integer::New(isolate, myinfo.hp));
-	obj->Set(String::NewFromUtf8(isolate, "maxhp"), Integer::New(isolate, myinfo.maxhp));
-	obj->Set(String::NewFromUtf8(isolate, "mp"), Integer::New(isolate, myinfo.mp));
-	obj->Set(String::NewFromUtf8(isolate, "maxmp"), Integer::New(isolate, myinfo.maxmp));
-	obj->Set(String::NewFromUtf8(isolate, "xp"), Integer::New(isolate, myinfo.xp));
-	obj->Set(String::NewFromUtf8(isolate, "maxxp"), Integer::New(isolate, myinfo.maxxp));
-	obj->Set(String::NewFromUtf8(isolate, "flags"), Integer::New(isolate, myinfo.flags));
-	obj->Set(String::NewFromUtf8(isolate, "battle_flags"), Integer::New(isolate, myinfo.battle_flags));
-	obj->Set(String::NewFromUtf8(isolate, "state"), Integer::New(isolate, myinfo.state));
-	obj->Set(String::NewFromUtf8(isolate, "index"), Integer::New(isolate, myinfo.index));
+	obj->Set(context, String::NewFromUtf8(isolate, "name").ToLocalChecked(), Nan::New(myinfo.name).ToLocalChecked());
+	obj->Set(context, String::NewFromUtf8(isolate, "realname").ToLocalChecked(), Nan::New(myinfo.realname).ToLocalChecked());
+	obj->Set(context, String::NewFromUtf8(isolate, "level").ToLocalChecked(), Integer::New(isolate, myinfo.level));
+	obj->Set(context, String::NewFromUtf8(isolate, "race").ToLocalChecked(), Integer::New(isolate, myinfo.race));
+	obj->Set(context, String::NewFromUtf8(isolate, "loyality").ToLocalChecked(), Integer::New(isolate, myinfo.loyality));
+	obj->Set(context, String::NewFromUtf8(isolate, "health").ToLocalChecked(), Integer::New(isolate, myinfo.health));
+	obj->Set(context, String::NewFromUtf8(isolate, "hp").ToLocalChecked(), Integer::New(isolate, myinfo.hp));
+	obj->Set(context, String::NewFromUtf8(isolate, "maxhp").ToLocalChecked(), Integer::New(isolate, myinfo.maxhp));
+	obj->Set(context, String::NewFromUtf8(isolate, "mp").ToLocalChecked(), Integer::New(isolate, myinfo.mp));
+	obj->Set(context, String::NewFromUtf8(isolate, "maxmp").ToLocalChecked(), Integer::New(isolate, myinfo.maxmp));
+	obj->Set(context, String::NewFromUtf8(isolate, "xp").ToLocalChecked(), Integer::New(isolate, myinfo.xp));
+	obj->Set(context, String::NewFromUtf8(isolate, "maxxp").ToLocalChecked(), Integer::New(isolate, myinfo.maxxp));
+	obj->Set(context, String::NewFromUtf8(isolate, "flags").ToLocalChecked(), Integer::New(isolate, myinfo.flags));
+	obj->Set(context, String::NewFromUtf8(isolate, "battle_flags").ToLocalChecked(), Integer::New(isolate, myinfo.battle_flags));
+	obj->Set(context, String::NewFromUtf8(isolate, "state").ToLocalChecked(), Integer::New(isolate, myinfo.state));
+	obj->Set(context, String::NewFromUtf8(isolate, "index").ToLocalChecked(), Integer::New(isolate, myinfo.index));
 
 	Local<Object> objd = Object::New(isolate);
-	objd->Set(String::NewFromUtf8(isolate, "points_remain"), Integer::New(isolate, myinfo.detail.points_remain));
-	objd->Set(String::NewFromUtf8(isolate, "points_endurance"), Integer::New(isolate, myinfo.detail.points_endurance));
-	objd->Set(String::NewFromUtf8(isolate, "points_strength"), Integer::New(isolate, myinfo.detail.points_strength));
-	objd->Set(String::NewFromUtf8(isolate, "points_defense"), Integer::New(isolate, myinfo.detail.points_defense));
-	objd->Set(String::NewFromUtf8(isolate, "points_agility"), Integer::New(isolate, myinfo.detail.points_agility));
-	objd->Set(String::NewFromUtf8(isolate, "points_magical"), Integer::New(isolate, myinfo.detail.points_magical));
-	objd->Set(String::NewFromUtf8(isolate, "value_attack"), Integer::New(isolate, myinfo.detail.value_attack));
-	objd->Set(String::NewFromUtf8(isolate, "value_defensive"), Integer::New(isolate, myinfo.detail.value_defensive));
-	objd->Set(String::NewFromUtf8(isolate, "value_agility"), Integer::New(isolate, myinfo.detail.value_agility));
-	objd->Set(String::NewFromUtf8(isolate, "value_spirit"), Integer::New(isolate, myinfo.detail.value_spirit));
-	objd->Set(String::NewFromUtf8(isolate, "value_recovery"), Integer::New(isolate, myinfo.detail.value_recovery));
-	objd->Set(String::NewFromUtf8(isolate, "resist_poison"), Integer::New(isolate, myinfo.detail.resist_poison));
-	objd->Set(String::NewFromUtf8(isolate, "resist_sleep"), Integer::New(isolate, myinfo.detail.resist_sleep));
-	objd->Set(String::NewFromUtf8(isolate, "resist_medusa"), Integer::New(isolate, myinfo.detail.resist_medusa));
-	objd->Set(String::NewFromUtf8(isolate, "resist_drunk"), Integer::New(isolate, myinfo.detail.resist_drunk));
-	objd->Set(String::NewFromUtf8(isolate, "resist_chaos"), Integer::New(isolate, myinfo.detail.resist_chaos));
-	objd->Set(String::NewFromUtf8(isolate, "resist_forget"), Integer::New(isolate, myinfo.detail.resist_forget));
-	objd->Set(String::NewFromUtf8(isolate, "fix_critical"), Integer::New(isolate, myinfo.detail.fix_critical));
-	objd->Set(String::NewFromUtf8(isolate, "fix_strikeback"), Integer::New(isolate, myinfo.detail.fix_strikeback));
-	objd->Set(String::NewFromUtf8(isolate, "fix_accurancy"), Integer::New(isolate, myinfo.detail.fix_accurancy));
-	objd->Set(String::NewFromUtf8(isolate, "fix_dodge"), Integer::New(isolate, myinfo.detail.fix_dodge));
-	objd->Set(String::NewFromUtf8(isolate, "element_earth"), Integer::New(isolate, myinfo.detail.element_earth));
-	objd->Set(String::NewFromUtf8(isolate, "element_water"), Integer::New(isolate, myinfo.detail.element_water));
-	objd->Set(String::NewFromUtf8(isolate, "element_fire"), Integer::New(isolate, myinfo.detail.element_fire));
-	objd->Set(String::NewFromUtf8(isolate, "element_wind"), Integer::New(isolate, myinfo.detail.element_wind));
-	obj->Set(String::NewFromUtf8(isolate, "detail"), objd);
+	objd->Set(context, String::NewFromUtf8(isolate, "points_remain").ToLocalChecked(), Integer::New(isolate, myinfo.detail.points_remain));
+	objd->Set(context, String::NewFromUtf8(isolate, "points_endurance").ToLocalChecked(), Integer::New(isolate, myinfo.detail.points_endurance));
+	objd->Set(context, String::NewFromUtf8(isolate, "points_strength").ToLocalChecked(), Integer::New(isolate, myinfo.detail.points_strength));
+	objd->Set(context, String::NewFromUtf8(isolate, "points_defense").ToLocalChecked(), Integer::New(isolate, myinfo.detail.points_defense));
+	objd->Set(context, String::NewFromUtf8(isolate, "points_agility").ToLocalChecked(), Integer::New(isolate, myinfo.detail.points_agility));
+	objd->Set(context, String::NewFromUtf8(isolate, "points_magical").ToLocalChecked(), Integer::New(isolate, myinfo.detail.points_magical));
+	objd->Set(context, String::NewFromUtf8(isolate, "value_attack").ToLocalChecked(), Integer::New(isolate, myinfo.detail.value_attack));
+	objd->Set(context, String::NewFromUtf8(isolate, "value_defensive").ToLocalChecked(), Integer::New(isolate, myinfo.detail.value_defensive));
+	objd->Set(context, String::NewFromUtf8(isolate, "value_agility").ToLocalChecked(), Integer::New(isolate, myinfo.detail.value_agility));
+	objd->Set(context, String::NewFromUtf8(isolate, "value_spirit").ToLocalChecked(), Integer::New(isolate, myinfo.detail.value_spirit));
+	objd->Set(context, String::NewFromUtf8(isolate, "value_recovery").ToLocalChecked(), Integer::New(isolate, myinfo.detail.value_recovery));
+	objd->Set(context, String::NewFromUtf8(isolate, "resist_poison").ToLocalChecked(), Integer::New(isolate, myinfo.detail.resist_poison));
+	objd->Set(context, String::NewFromUtf8(isolate, "resist_sleep").ToLocalChecked(), Integer::New(isolate, myinfo.detail.resist_sleep));
+	objd->Set(context, String::NewFromUtf8(isolate, "resist_medusa").ToLocalChecked(), Integer::New(isolate, myinfo.detail.resist_medusa));
+	objd->Set(context, String::NewFromUtf8(isolate, "resist_drunk").ToLocalChecked(), Integer::New(isolate, myinfo.detail.resist_drunk));
+	objd->Set(context, String::NewFromUtf8(isolate, "resist_chaos").ToLocalChecked(), Integer::New(isolate, myinfo.detail.resist_chaos));
+	objd->Set(context, String::NewFromUtf8(isolate, "resist_forget").ToLocalChecked(), Integer::New(isolate, myinfo.detail.resist_forget));
+	objd->Set(context, String::NewFromUtf8(isolate, "fix_critical").ToLocalChecked(), Integer::New(isolate, myinfo.detail.fix_critical));
+	objd->Set(context, String::NewFromUtf8(isolate, "fix_strikeback").ToLocalChecked(), Integer::New(isolate, myinfo.detail.fix_strikeback));
+	objd->Set(context, String::NewFromUtf8(isolate, "fix_accurancy").ToLocalChecked(), Integer::New(isolate, myinfo.detail.fix_accurancy));
+	objd->Set(context, String::NewFromUtf8(isolate, "fix_dodge").ToLocalChecked(), Integer::New(isolate, myinfo.detail.fix_dodge));
+	objd->Set(context, String::NewFromUtf8(isolate, "element_earth").ToLocalChecked(), Integer::New(isolate, myinfo.detail.element_earth));
+	objd->Set(context, String::NewFromUtf8(isolate, "element_water").ToLocalChecked(), Integer::New(isolate, myinfo.detail.element_water));
+	objd->Set(context, String::NewFromUtf8(isolate, "element_fire").ToLocalChecked(), Integer::New(isolate, myinfo.detail.element_fire));
+	objd->Set(context, String::NewFromUtf8(isolate, "element_wind").ToLocalChecked(), Integer::New(isolate, myinfo.detail.element_wind));
+	obj->Set(context, String::NewFromUtf8(isolate, "detail").ToLocalChecked(), objd);
 
 	info.GetReturnValue().Set(obj);
 }
 
 void GetPetsInfo(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
-	Isolate* isolate = info.GetIsolate();
+	auto isolate = info.GetIsolate();
+	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
 
 	CGA::cga_pets_info_t myinfos;
@@ -741,59 +765,60 @@ void GetPetsInfo(const Nan::FunctionCallbackInfo<v8::Value>& info)
 	{
 		Local<Object> obj = Object::New(isolate);
 		const CGA::cga_pet_info_t &myinfo = myinfos.at(i);
-		obj->Set(String::NewFromUtf8(isolate, "name"), Nan::New(myinfo.name).ToLocalChecked());
-		obj->Set(String::NewFromUtf8(isolate, "realname"), Nan::New(myinfo.realname).ToLocalChecked());
-		obj->Set(String::NewFromUtf8(isolate, "level"), Integer::New(isolate, myinfo.level));
-		obj->Set(String::NewFromUtf8(isolate, "race"), Integer::New(isolate, myinfo.race));
-		obj->Set(String::NewFromUtf8(isolate, "loyality"), Integer::New(isolate, myinfo.loyality));
-		obj->Set(String::NewFromUtf8(isolate, "health"), Integer::New(isolate, myinfo.health));
-		obj->Set(String::NewFromUtf8(isolate, "hp"), Integer::New(isolate, myinfo.hp));
-		obj->Set(String::NewFromUtf8(isolate, "maxhp"), Integer::New(isolate, myinfo.maxhp));
-		obj->Set(String::NewFromUtf8(isolate, "mp"), Integer::New(isolate, myinfo.mp));
-		obj->Set(String::NewFromUtf8(isolate, "maxmp"), Integer::New(isolate, myinfo.maxmp));
-		obj->Set(String::NewFromUtf8(isolate, "xp"), Integer::New(isolate, myinfo.xp));
-		obj->Set(String::NewFromUtf8(isolate, "maxxp"), Integer::New(isolate, myinfo.maxxp));
-		obj->Set(String::NewFromUtf8(isolate, "flags"), Integer::New(isolate, myinfo.flags));
-		obj->Set(String::NewFromUtf8(isolate, "battle_flags"), Integer::New(isolate, myinfo.battle_flags));
-		obj->Set(String::NewFromUtf8(isolate, "state"), Integer::New(isolate, myinfo.state));
-		obj->Set(String::NewFromUtf8(isolate, "index"), Integer::New(isolate, myinfo.index));
+		obj->Set(context, String::NewFromUtf8(isolate, "name").ToLocalChecked(), Nan::New(myinfo.name).ToLocalChecked());
+		obj->Set(context, String::NewFromUtf8(isolate, "realname").ToLocalChecked(), Nan::New(myinfo.realname).ToLocalChecked());
+		obj->Set(context, String::NewFromUtf8(isolate, "level").ToLocalChecked(), Integer::New(isolate, myinfo.level));
+		obj->Set(context, String::NewFromUtf8(isolate, "race").ToLocalChecked(), Integer::New(isolate, myinfo.race));
+		obj->Set(context, String::NewFromUtf8(isolate, "loyality").ToLocalChecked(), Integer::New(isolate, myinfo.loyality));
+		obj->Set(context, String::NewFromUtf8(isolate, "health").ToLocalChecked(), Integer::New(isolate, myinfo.health));
+		obj->Set(context, String::NewFromUtf8(isolate, "hp").ToLocalChecked(), Integer::New(isolate, myinfo.hp));
+		obj->Set(context, String::NewFromUtf8(isolate, "maxhp").ToLocalChecked(), Integer::New(isolate, myinfo.maxhp));
+		obj->Set(context, String::NewFromUtf8(isolate, "mp").ToLocalChecked(), Integer::New(isolate, myinfo.mp));
+		obj->Set(context, String::NewFromUtf8(isolate, "maxmp").ToLocalChecked(), Integer::New(isolate, myinfo.maxmp));
+		obj->Set(context, String::NewFromUtf8(isolate, "xp").ToLocalChecked(), Integer::New(isolate, myinfo.xp));
+		obj->Set(context, String::NewFromUtf8(isolate, "maxxp").ToLocalChecked(), Integer::New(isolate, myinfo.maxxp));
+		obj->Set(context, String::NewFromUtf8(isolate, "flags").ToLocalChecked(), Integer::New(isolate, myinfo.flags));
+		obj->Set(context, String::NewFromUtf8(isolate, "battle_flags").ToLocalChecked(), Integer::New(isolate, myinfo.battle_flags));
+		obj->Set(context, String::NewFromUtf8(isolate, "state").ToLocalChecked(), Integer::New(isolate, myinfo.state));
+		obj->Set(context, String::NewFromUtf8(isolate, "index").ToLocalChecked(), Integer::New(isolate, myinfo.index));
 
 		Local<Object> objd = Object::New(isolate);
-		objd->Set(String::NewFromUtf8(isolate, "points_remain"), Integer::New(isolate, myinfo.detail.points_remain));
-		objd->Set(String::NewFromUtf8(isolate, "points_endurance"), Integer::New(isolate, myinfo.detail.points_endurance));
-		objd->Set(String::NewFromUtf8(isolate, "points_strength"), Integer::New(isolate, myinfo.detail.points_strength));
-		objd->Set(String::NewFromUtf8(isolate, "points_defense"), Integer::New(isolate, myinfo.detail.points_defense));
-		objd->Set(String::NewFromUtf8(isolate, "points_agility"), Integer::New(isolate, myinfo.detail.points_agility));
-		objd->Set(String::NewFromUtf8(isolate, "points_magical"), Integer::New(isolate, myinfo.detail.points_magical));
-		objd->Set(String::NewFromUtf8(isolate, "value_attack"), Integer::New(isolate, myinfo.detail.value_attack));
-		objd->Set(String::NewFromUtf8(isolate, "value_defensive"), Integer::New(isolate, myinfo.detail.value_defensive));
-		objd->Set(String::NewFromUtf8(isolate, "value_agility"), Integer::New(isolate, myinfo.detail.value_agility));
-		objd->Set(String::NewFromUtf8(isolate, "value_spirit"), Integer::New(isolate, myinfo.detail.value_spirit));
-		objd->Set(String::NewFromUtf8(isolate, "value_recovery"), Integer::New(isolate, myinfo.detail.value_recovery));
-		objd->Set(String::NewFromUtf8(isolate, "resist_poison"), Integer::New(isolate, myinfo.detail.resist_poison));
-		objd->Set(String::NewFromUtf8(isolate, "resist_sleep"), Integer::New(isolate, myinfo.detail.resist_sleep));
-		objd->Set(String::NewFromUtf8(isolate, "resist_medusa"), Integer::New(isolate, myinfo.detail.resist_medusa));
-		objd->Set(String::NewFromUtf8(isolate, "resist_drunk"), Integer::New(isolate, myinfo.detail.resist_drunk));
-		objd->Set(String::NewFromUtf8(isolate, "resist_chaos"), Integer::New(isolate, myinfo.detail.resist_chaos));
-		objd->Set(String::NewFromUtf8(isolate, "resist_forget"), Integer::New(isolate, myinfo.detail.resist_forget));
-		objd->Set(String::NewFromUtf8(isolate, "fix_critical"), Integer::New(isolate, myinfo.detail.fix_critical));
-		objd->Set(String::NewFromUtf8(isolate, "fix_strikeback"), Integer::New(isolate, myinfo.detail.fix_strikeback));
-		objd->Set(String::NewFromUtf8(isolate, "fix_accurancy"), Integer::New(isolate, myinfo.detail.fix_accurancy));
-		objd->Set(String::NewFromUtf8(isolate, "fix_dodge"), Integer::New(isolate, myinfo.detail.fix_dodge));
-		objd->Set(String::NewFromUtf8(isolate, "element_earth"), Integer::New(isolate, myinfo.detail.element_earth));
-		objd->Set(String::NewFromUtf8(isolate, "element_water"), Integer::New(isolate, myinfo.detail.element_water));
-		objd->Set(String::NewFromUtf8(isolate, "element_fire"), Integer::New(isolate, myinfo.detail.element_fire));
-		objd->Set(String::NewFromUtf8(isolate, "element_wind"), Integer::New(isolate, myinfo.detail.element_wind));
-		obj->Set(String::NewFromUtf8(isolate, "detail"), objd);
+		objd->Set(context, String::NewFromUtf8(isolate, "points_remain").ToLocalChecked(), Integer::New(isolate, myinfo.detail.points_remain));
+		objd->Set(context, String::NewFromUtf8(isolate, "points_endurance").ToLocalChecked(), Integer::New(isolate, myinfo.detail.points_endurance));
+		objd->Set(context, String::NewFromUtf8(isolate, "points_strength").ToLocalChecked(), Integer::New(isolate, myinfo.detail.points_strength));
+		objd->Set(context, String::NewFromUtf8(isolate, "points_defense").ToLocalChecked(), Integer::New(isolate, myinfo.detail.points_defense));
+		objd->Set(context, String::NewFromUtf8(isolate, "points_agility").ToLocalChecked(), Integer::New(isolate, myinfo.detail.points_agility));
+		objd->Set(context, String::NewFromUtf8(isolate, "points_magical").ToLocalChecked(), Integer::New(isolate, myinfo.detail.points_magical));
+		objd->Set(context, String::NewFromUtf8(isolate, "value_attack").ToLocalChecked(), Integer::New(isolate, myinfo.detail.value_attack));
+		objd->Set(context, String::NewFromUtf8(isolate, "value_defensive").ToLocalChecked(), Integer::New(isolate, myinfo.detail.value_defensive));
+		objd->Set(context, String::NewFromUtf8(isolate, "value_agility").ToLocalChecked(), Integer::New(isolate, myinfo.detail.value_agility));
+		objd->Set(context, String::NewFromUtf8(isolate, "value_spirit").ToLocalChecked(), Integer::New(isolate, myinfo.detail.value_spirit));
+		objd->Set(context, String::NewFromUtf8(isolate, "value_recovery").ToLocalChecked(), Integer::New(isolate, myinfo.detail.value_recovery));
+		objd->Set(context, String::NewFromUtf8(isolate, "resist_poison").ToLocalChecked(), Integer::New(isolate, myinfo.detail.resist_poison));
+		objd->Set(context, String::NewFromUtf8(isolate, "resist_sleep").ToLocalChecked(), Integer::New(isolate, myinfo.detail.resist_sleep));
+		objd->Set(context, String::NewFromUtf8(isolate, "resist_medusa").ToLocalChecked(), Integer::New(isolate, myinfo.detail.resist_medusa));
+		objd->Set(context, String::NewFromUtf8(isolate, "resist_drunk").ToLocalChecked(), Integer::New(isolate, myinfo.detail.resist_drunk));
+		objd->Set(context, String::NewFromUtf8(isolate, "resist_chaos").ToLocalChecked(), Integer::New(isolate, myinfo.detail.resist_chaos));
+		objd->Set(context, String::NewFromUtf8(isolate, "resist_forget").ToLocalChecked(), Integer::New(isolate, myinfo.detail.resist_forget));
+		objd->Set(context, String::NewFromUtf8(isolate, "fix_critical").ToLocalChecked(), Integer::New(isolate, myinfo.detail.fix_critical));
+		objd->Set(context, String::NewFromUtf8(isolate, "fix_strikeback").ToLocalChecked(), Integer::New(isolate, myinfo.detail.fix_strikeback));
+		objd->Set(context, String::NewFromUtf8(isolate, "fix_accurancy").ToLocalChecked(), Integer::New(isolate, myinfo.detail.fix_accurancy));
+		objd->Set(context, String::NewFromUtf8(isolate, "fix_dodge").ToLocalChecked(), Integer::New(isolate, myinfo.detail.fix_dodge));
+		objd->Set(context, String::NewFromUtf8(isolate, "element_earth").ToLocalChecked(), Integer::New(isolate, myinfo.detail.element_earth));
+		objd->Set(context, String::NewFromUtf8(isolate, "element_water").ToLocalChecked(), Integer::New(isolate, myinfo.detail.element_water));
+		objd->Set(context, String::NewFromUtf8(isolate, "element_fire").ToLocalChecked(), Integer::New(isolate, myinfo.detail.element_fire));
+		objd->Set(context, String::NewFromUtf8(isolate, "element_wind").ToLocalChecked(), Integer::New(isolate, myinfo.detail.element_wind));
+		obj->Set(context, String::NewFromUtf8(isolate, "detail").ToLocalChecked(), objd);
 
-		arr->Set(i, obj);
+		arr->Set(context, i, obj);
 	}
 	info.GetReturnValue().Set(arr);
 }
 
 void GetBankPetsInfo(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
-	Isolate* isolate = info.GetIsolate();
+	auto isolate = info.GetIsolate();
+	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
 
 	CGA::cga_pets_info_t myinfos;
@@ -807,59 +832,41 @@ void GetBankPetsInfo(const Nan::FunctionCallbackInfo<v8::Value>& info)
 	{
 		Local<Object> obj = Object::New(isolate);
 		const CGA::cga_pet_info_t &myinfo = myinfos.at(i);
-		obj->Set(String::NewFromUtf8(isolate, "name"), Nan::New(myinfo.name).ToLocalChecked());
-		obj->Set(String::NewFromUtf8(isolate, "realname"), Nan::New(myinfo.realname).ToLocalChecked());
-		obj->Set(String::NewFromUtf8(isolate, "level"), Integer::New(isolate, myinfo.level));
-		obj->Set(String::NewFromUtf8(isolate, "race"), Integer::New(isolate, myinfo.race));
-		obj->Set(String::NewFromUtf8(isolate, "loyality"), Integer::New(isolate, myinfo.loyality));
-		//obj->Set(String::NewFromUtf8(isolate, "health"), Integer::New(isolate, myinfo.health));
-		//obj->Set(String::NewFromUtf8(isolate, "hp"), Integer::New(isolate, myinfo.hp));
-		obj->Set(String::NewFromUtf8(isolate, "maxhp"), Integer::New(isolate, myinfo.maxhp));
-		//obj->Set(String::NewFromUtf8(isolate, "mp"), Integer::New(isolate, myinfo.mp));
-		obj->Set(String::NewFromUtf8(isolate, "maxmp"), Integer::New(isolate, myinfo.maxmp));
-		//obj->Set(String::NewFromUtf8(isolate, "xp"), Integer::New(isolate, myinfo.xp));
-		//obj->Set(String::NewFromUtf8(isolate, "maxxp"), Integer::New(isolate, myinfo.maxxp));
-		//obj->Set(String::NewFromUtf8(isolate, "flags"), Integer::New(isolate, myinfo.flags));
-		//obj->Set(String::NewFromUtf8(isolate, "battle_flags"), Integer::New(isolate, myinfo.battle_flags));
-		//obj->Set(String::NewFromUtf8(isolate, "state"), Integer::New(isolate, myinfo.state));
-		obj->Set(String::NewFromUtf8(isolate, "index"), Integer::New(isolate, myinfo.index));
+		obj->Set(context, String::NewFromUtf8(isolate, "name").ToLocalChecked(), Nan::New(myinfo.name).ToLocalChecked());
+		obj->Set(context, String::NewFromUtf8(isolate, "realname").ToLocalChecked(), Nan::New(myinfo.realname).ToLocalChecked());
+		obj->Set(context, String::NewFromUtf8(isolate, "level").ToLocalChecked(), Integer::New(isolate, myinfo.level));
+		obj->Set(context, String::NewFromUtf8(isolate, "race").ToLocalChecked(), Integer::New(isolate, myinfo.race));
+		obj->Set(context, String::NewFromUtf8(isolate, "loyality").ToLocalChecked(), Integer::New(isolate, myinfo.loyality));
+		obj->Set(context, String::NewFromUtf8(isolate, "maxhp").ToLocalChecked(), Integer::New(isolate, myinfo.maxhp));
+		obj->Set(context, String::NewFromUtf8(isolate, "maxmp").ToLocalChecked(), Integer::New(isolate, myinfo.maxmp));
+		obj->Set(context, String::NewFromUtf8(isolate, "index").ToLocalChecked(), Integer::New(isolate, myinfo.index));
 
 		Local<Object> objd = Object::New(isolate);
-		//objd->Set(String::NewFromUtf8(isolate, "points_remain"), Integer::New(isolate, myinfo.detail.points_remain));
-		objd->Set(String::NewFromUtf8(isolate, "points_endurance"), Integer::New(isolate, myinfo.detail.points_endurance));
-		objd->Set(String::NewFromUtf8(isolate, "points_strength"), Integer::New(isolate, myinfo.detail.points_strength));
-		objd->Set(String::NewFromUtf8(isolate, "points_defense"), Integer::New(isolate, myinfo.detail.points_defense));
-		objd->Set(String::NewFromUtf8(isolate, "points_agility"), Integer::New(isolate, myinfo.detail.points_agility));
-		objd->Set(String::NewFromUtf8(isolate, "points_magical"), Integer::New(isolate, myinfo.detail.points_magical));
-		objd->Set(String::NewFromUtf8(isolate, "value_attack"), Integer::New(isolate, myinfo.detail.value_attack));
-		objd->Set(String::NewFromUtf8(isolate, "value_defensive"), Integer::New(isolate, myinfo.detail.value_defensive));
-		objd->Set(String::NewFromUtf8(isolate, "value_agility"), Integer::New(isolate, myinfo.detail.value_agility));
-		objd->Set(String::NewFromUtf8(isolate, "value_spirit"), Integer::New(isolate, myinfo.detail.value_spirit));
-		objd->Set(String::NewFromUtf8(isolate, "value_recovery"), Integer::New(isolate, myinfo.detail.value_recovery));
-		//objd->Set(String::NewFromUtf8(isolate, "resist_poison"), Integer::New(isolate, myinfo.detail.resist_poison));
-		//objd->Set(String::NewFromUtf8(isolate, "resist_sleep"), Integer::New(isolate, myinfo.detail.resist_sleep));
-		//objd->Set(String::NewFromUtf8(isolate, "resist_medusa"), Integer::New(isolate, myinfo.detail.resist_medusa));
-		//objd->Set(String::NewFromUtf8(isolate, "resist_drunk"), Integer::New(isolate, myinfo.detail.resist_drunk));
-		//objd->Set(String::NewFromUtf8(isolate, "resist_chaos"), Integer::New(isolate, myinfo.detail.resist_chaos));
-		//objd->Set(String::NewFromUtf8(isolate, "resist_forget"), Integer::New(isolate, myinfo.detail.resist_forget));
-		//objd->Set(String::NewFromUtf8(isolate, "fix_critical"), Integer::New(isolate, myinfo.detail.fix_critical));
-		//objd->Set(String::NewFromUtf8(isolate, "fix_strikeback"), Integer::New(isolate, myinfo.detail.fix_strikeback));
-		//objd->Set(String::NewFromUtf8(isolate, "fix_accurancy"), Integer::New(isolate, myinfo.detail.fix_accurancy));
-		//objd->Set(String::NewFromUtf8(isolate, "fix_dodge"), Integer::New(isolate, myinfo.detail.fix_dodge));
-		objd->Set(String::NewFromUtf8(isolate, "element_earth"), Integer::New(isolate, myinfo.detail.element_earth));
-		objd->Set(String::NewFromUtf8(isolate, "element_water"), Integer::New(isolate, myinfo.detail.element_water));
-		objd->Set(String::NewFromUtf8(isolate, "element_fire"), Integer::New(isolate, myinfo.detail.element_fire));
-		objd->Set(String::NewFromUtf8(isolate, "element_wind"), Integer::New(isolate, myinfo.detail.element_wind));
-		obj->Set(String::NewFromUtf8(isolate, "detail"), objd);
+		objd->Set(context, String::NewFromUtf8(isolate, "points_endurance").ToLocalChecked(), Integer::New(isolate, myinfo.detail.points_endurance));
+		objd->Set(context, String::NewFromUtf8(isolate, "points_strength").ToLocalChecked(), Integer::New(isolate, myinfo.detail.points_strength));
+		objd->Set(context, String::NewFromUtf8(isolate, "points_defense").ToLocalChecked(), Integer::New(isolate, myinfo.detail.points_defense));
+		objd->Set(context, String::NewFromUtf8(isolate, "points_agility").ToLocalChecked(), Integer::New(isolate, myinfo.detail.points_agility));
+		objd->Set(context, String::NewFromUtf8(isolate, "points_magical").ToLocalChecked(), Integer::New(isolate, myinfo.detail.points_magical));
+		objd->Set(context, String::NewFromUtf8(isolate, "value_attack").ToLocalChecked(), Integer::New(isolate, myinfo.detail.value_attack));
+		objd->Set(context, String::NewFromUtf8(isolate, "value_defensive").ToLocalChecked(), Integer::New(isolate, myinfo.detail.value_defensive));
+		objd->Set(context, String::NewFromUtf8(isolate, "value_agility").ToLocalChecked(), Integer::New(isolate, myinfo.detail.value_agility));
+		objd->Set(context, String::NewFromUtf8(isolate, "value_spirit").ToLocalChecked(), Integer::New(isolate, myinfo.detail.value_spirit));
+		objd->Set(context, String::NewFromUtf8(isolate, "value_recovery").ToLocalChecked(), Integer::New(isolate, myinfo.detail.value_recovery));
+		objd->Set(context, String::NewFromUtf8(isolate, "element_earth").ToLocalChecked(), Integer::New(isolate, myinfo.detail.element_earth));
+		objd->Set(context, String::NewFromUtf8(isolate, "element_water").ToLocalChecked(), Integer::New(isolate, myinfo.detail.element_water));
+		objd->Set(context, String::NewFromUtf8(isolate, "element_fire").ToLocalChecked(), Integer::New(isolate, myinfo.detail.element_fire));
+		objd->Set(context, String::NewFromUtf8(isolate, "element_wind").ToLocalChecked(), Integer::New(isolate, myinfo.detail.element_wind));
+		obj->Set(context, String::NewFromUtf8(isolate, "detail").ToLocalChecked(), objd);
 
-		arr->Set(i, obj);
+		arr->Set(context, i, obj);
 	}
 	info.GetReturnValue().Set(arr);
 }
 
 void IsPetSkillValid(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
-	Isolate* isolate = info.GetIsolate();
+	auto isolate = info.GetIsolate();
+	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
 
 	if (info.Length() < 1) {
@@ -871,8 +878,8 @@ void IsPetSkillValid(const Nan::FunctionCallbackInfo<v8::Value>& info)
 		return;
 	}
 
-	int petid = (int)info[0]->IntegerValue();
-	int skillid = (int)info[1]->IntegerValue();
+	int petid = info[0]->Int32Value(context).ToChecked();
+	int skillid = info[1]->Int32Value(context).ToChecked();
 	bool valid = false;
 	if (!g_CGAInterface->IsPetSkillValid(petid, skillid, valid))
 	{
@@ -885,7 +892,8 @@ void IsPetSkillValid(const Nan::FunctionCallbackInfo<v8::Value>& info)
 
 void GetPetSkillInfo(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
-	Isolate* isolate = info.GetIsolate();
+	auto isolate = info.GetIsolate();
+	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
 
 	if (info.Length() < 1) {
@@ -897,8 +905,8 @@ void GetPetSkillInfo(const Nan::FunctionCallbackInfo<v8::Value>& info)
 		return;
 	}
 
-	int petid = (int)info[0]->IntegerValue();
-	int skillid = (int)info[1]->IntegerValue();
+	int petid = info[0]->Int32Value(context).ToChecked();
+	int skillid = info[1]->Int32Value(context).ToChecked();
 	CGA::cga_pet_skill_info_t myinfo;
 	if (!g_CGAInterface->GetPetSkillInfo(petid, skillid, myinfo))
 	{
@@ -907,17 +915,18 @@ void GetPetSkillInfo(const Nan::FunctionCallbackInfo<v8::Value>& info)
 	}
 
 	Local<Object> obj = Object::New(isolate);
-	obj->Set(String::NewFromUtf8(isolate, "name"), Nan::New(myinfo.name).ToLocalChecked());
-	obj->Set(String::NewFromUtf8(isolate, "info"), Nan::New(myinfo.info).ToLocalChecked());
-	obj->Set(String::NewFromUtf8(isolate, "cost"), Integer::New(isolate, myinfo.cost));
-	obj->Set(String::NewFromUtf8(isolate, "flags"), Integer::New(isolate, myinfo.flags));
-	obj->Set(String::NewFromUtf8(isolate, "index"), Integer::New(isolate, myinfo.index));
+	obj->Set(context, String::NewFromUtf8(isolate, "name").ToLocalChecked(), Nan::New(myinfo.name).ToLocalChecked());
+	obj->Set(context, String::NewFromUtf8(isolate, "info").ToLocalChecked(), Nan::New(myinfo.info).ToLocalChecked());
+	obj->Set(context, String::NewFromUtf8(isolate, "cost").ToLocalChecked(), Integer::New(isolate, myinfo.cost));
+	obj->Set(context, String::NewFromUtf8(isolate, "flags").ToLocalChecked(), Integer::New(isolate, myinfo.flags));
+	obj->Set(context, String::NewFromUtf8(isolate, "index").ToLocalChecked(), Integer::New(isolate, myinfo.index));
 	info.GetReturnValue().Set(obj);
 }
 
 void GetPetSkillsInfo(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
-	Isolate* isolate = info.GetIsolate();
+	auto isolate = info.GetIsolate();
+	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
 
 	if (info.Length() < 1) {
@@ -925,7 +934,7 @@ void GetPetSkillsInfo(const Nan::FunctionCallbackInfo<v8::Value>& info)
 		return;
 	}
 
-	int petid = (int)info[0]->IntegerValue();
+	int petid = info[0]->Int32Value(context).ToChecked();
 	CGA::cga_pet_skills_info_t myinfos;
 	if (!g_CGAInterface->GetPetSkillsInfo(petid, myinfos))
 	{
@@ -937,19 +946,20 @@ void GetPetSkillsInfo(const Nan::FunctionCallbackInfo<v8::Value>& info)
 	{
 		Local<Object> obj = Object::New(isolate);
 		const CGA::cga_pet_skill_info_t &myinfo = myinfos.at(i);
-		obj->Set(String::NewFromUtf8(isolate, "name"), Nan::New(myinfo.name).ToLocalChecked());
-		obj->Set(String::NewFromUtf8(isolate, "info"), Nan::New(myinfo.info).ToLocalChecked());
-		obj->Set(String::NewFromUtf8(isolate, "cost"), Integer::New(isolate, myinfo.cost));
-		obj->Set(String::NewFromUtf8(isolate, "flags"), Integer::New(isolate, myinfo.flags));
-		obj->Set(String::NewFromUtf8(isolate, "index"), Integer::New(isolate, myinfo.index));
-		arr->Set(i, obj);
+		obj->Set(context, String::NewFromUtf8(isolate, "name").ToLocalChecked(), Nan::New(myinfo.name).ToLocalChecked());
+		obj->Set(context, String::NewFromUtf8(isolate, "info").ToLocalChecked(), Nan::New(myinfo.info).ToLocalChecked());
+		obj->Set(context, String::NewFromUtf8(isolate, "cost").ToLocalChecked(), Integer::New(isolate, myinfo.cost));
+		obj->Set(context, String::NewFromUtf8(isolate, "flags").ToLocalChecked(), Integer::New(isolate, myinfo.flags));
+		obj->Set(context, String::NewFromUtf8(isolate, "index").ToLocalChecked(), Integer::New(isolate, myinfo.index));
+		arr->Set(context, i, obj);
 	}
 	info.GetReturnValue().Set(arr);
 }
 
 void GetTeamPlayerInfo(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
-	Isolate* isolate = info.GetIsolate();
+	auto isolate = info.GetIsolate();
+	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
 
 	CGA::cga_team_players_t plinfo;
@@ -963,15 +973,15 @@ void GetTeamPlayerInfo(const Nan::FunctionCallbackInfo<v8::Value>& info)
 	for (size_t i = 0; i < plinfo.size(); ++i)
 	{
 		Local<Object> obj = Object::New(isolate);
-		obj->Set(String::NewFromUtf8(isolate, "unit_id"), Integer::New(isolate, plinfo[i].unit_id));
-		obj->Set(String::NewFromUtf8(isolate, "hp"), Integer::New(isolate, plinfo[i].hp));
-		obj->Set(String::NewFromUtf8(isolate, "maxhp"), Integer::New(isolate, plinfo[i].maxhp));
-		obj->Set(String::NewFromUtf8(isolate, "mp"), Integer::New(isolate, plinfo[i].mp));
-		obj->Set(String::NewFromUtf8(isolate, "maxmp"), Integer::New(isolate, plinfo[i].maxmp));
-		obj->Set(String::NewFromUtf8(isolate, "xpos"), Integer::New(isolate, plinfo[i].xpos));
-		obj->Set(String::NewFromUtf8(isolate, "ypos"), Integer::New(isolate, plinfo[i].ypos));
-		obj->Set(String::NewFromUtf8(isolate, "name"), Nan::New(plinfo[i].name).ToLocalChecked());
-		arr->Set(i, obj);
+		obj->Set(context, String::NewFromUtf8(isolate, "unit_id").ToLocalChecked(), Integer::New(isolate, plinfo[i].unit_id));
+		obj->Set(context, String::NewFromUtf8(isolate, "hp").ToLocalChecked(), Integer::New(isolate, plinfo[i].hp));
+		obj->Set(context, String::NewFromUtf8(isolate, "maxhp").ToLocalChecked(), Integer::New(isolate, plinfo[i].maxhp));
+		obj->Set(context, String::NewFromUtf8(isolate, "mp").ToLocalChecked(), Integer::New(isolate, plinfo[i].mp));
+		obj->Set(context, String::NewFromUtf8(isolate, "maxmp").ToLocalChecked(), Integer::New(isolate, plinfo[i].maxmp));
+		obj->Set(context, String::NewFromUtf8(isolate, "xpos").ToLocalChecked(), Integer::New(isolate, plinfo[i].xpos));
+		obj->Set(context, String::NewFromUtf8(isolate, "ypos").ToLocalChecked(), Integer::New(isolate, plinfo[i].ypos));
+		obj->Set(context, String::NewFromUtf8(isolate, "name").ToLocalChecked(), Nan::New(plinfo[i].name).ToLocalChecked());
+		arr->Set(context, i, obj);
 	}
 
 	info.GetReturnValue().Set(arr);
