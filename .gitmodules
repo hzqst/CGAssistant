@@ -1,8 +1,3 @@
-[submodule "boost"]
-	path = boost
-	url = https://github.com/boostorg/boost
-	tag = boost-1.75.0
-	branch = boost-1.75.0
 
 [submodule "qhttp"]
 	path = qhttp
