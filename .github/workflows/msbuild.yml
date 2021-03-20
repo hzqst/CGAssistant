@@ -97,6 +97,7 @@ jobs:
       run: |
         cd boost
         call bootstrap.bat
+        type bootstrap.log
         call b2 --toolset=msvc-14.1 --with-date_time --with-thread --with-container --with-system --with-locale --with-serialization --with-regex --stagedir="stage" link=static stage
         call b2 --toolset=msvc-14.1 --with-date_time --with-thread --with-container --with-system --with-locale --with-serialization --with-regex --stagedir="stage" runtime-link=static link=static stage
       shell: cmd
