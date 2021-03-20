@@ -78,16 +78,9 @@ jobs:
         cached: ${{ steps.cache-qt.outputs.cache-hit }}
         tools : 'tools_qtcreator,4.14.1-0,qt.tools.qtcreator'
 
-    - name: Link Windows SDK
-      working-directory: ${{env.GITHUB_WORKSPACE}}
-      run: |
-        mklink /d "%GITHUB_WORKSPACE%\winsdk" "${{env.WindowsSdkDir}}"
-      shell: cmd
-
     - name: build-boost
       working-directory: ${{env.GITHUB_WORKSPACE}}
       run: |
-        set PATH=%GITHUB_WORKSPACE%\winsdk\bin\10.0.17763.0\x86;%PATH%
         for /f "usebackq tokens=*" %%i in (`vswhere -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath`) do (
           set InstallDir=%%i
         )
@@ -97,6 +90,12 @@ jobs:
           b2 --toolset=msvc-14.1 --with-date_time --with-thread --with-container --with-system --with-locale --with-serialization --with-regex --stagedir="stage" link=static variant=release address-model=32 stage
           b2 --toolset=msvc-14.1 --with-date_time --with-thread --with-container --with-system --with-locale --with-serialization --with-regex --stagedir="stage" runtime-link=static link=static variant=release address-model=32 stage
         )
+      shell: cmd
+
+    - name: Link Windows SDK
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      run: |
+        mklink /d "%GITHUB_WORKSPACE%\winsdk" "${{env.WindowsSdkDir}}"
       shell: cmd
 
     - name: build-CGAHook
