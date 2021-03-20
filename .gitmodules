@@ -1,8 +1,0 @@
-[submodule "qhttp"]
-	path = qhttp
-	url = https://github.com/azadkuh/qhttp
-	branch = master
-[submodule "rapidjson"]
-	path = rapidjson
-	url = https://github.com/Tencent/rapidjson/
-	branch = master
