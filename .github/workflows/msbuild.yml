@@ -128,9 +128,11 @@ jobs:
         )
       shell: cmd
       
+    - name: init-nodegyp
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      run: npm install -g node-gyp
+
     - name: build-nodegyp
       working-directory: ${{env.GITHUB_WORKSPACE}}
-      run: |
-        npm install -g node-gyp
-        build-nodegyp.bat
+      run: build-nodegyp.bat
       shell: cmd
