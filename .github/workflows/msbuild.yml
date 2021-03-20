@@ -136,3 +136,16 @@ jobs:
       working-directory: ${{env.GITHUB_WORKSPACE}}
       run: build-nodegyp.bat
       shell: cmd
+
+    - name: Archive Release
+      uses: thedoctor0/zip-release@master
+      with:
+        filename: 'CGAssistant-release.zip'
+        path : 'build'
+
+    - name: Release Action
+      uses: ncipollo/release-action@v1
+      with:
+        artifacts: "CGAssistant-release.zip"
+        bodyFile: "body.md"
+        token: ${{ secrets.GITHUB_TOKEN }}
