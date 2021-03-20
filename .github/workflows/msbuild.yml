@@ -119,7 +119,7 @@ jobs:
  
     - name: checkout-CGAssistantJS
       uses: actions/checkout@v2 
-      repository: 'hzqst/CGAssistantJS'
+        repository: 'hzqst/CGAssistantJS'
 
     - name: merge-CGAssistantJS
       working-directory: ${{env.GITHUB_WORKSPACE}}
