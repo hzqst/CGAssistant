@@ -22,11 +22,22 @@ jobs:
       working-directory: ${{env.GITHUB_WORKSPACE}}
       run: |
         git submodule update --init --recursive
-        call "boost/bootstrap.bat"
+      shell: cmd
+
+    - name: init-qhttp
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      run: |
         cd qhttp
         mkdir 3rdparty
         cd 3rdparty
         git clone https://github.com/nodejs/http-parser.git
+      shell: cmd
+
+    - name: init-boost
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      run: |
+        cd boost
+        bootstrap.bat
       shell: cmd
 
     - name: Add MSBuild to PATH
