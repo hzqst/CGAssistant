@@ -6,15 +6,29 @@
 
 CGAssistant is a helper for you to play CrossGate with highly automated game experience.
 
-Only cg_item_6000 supported for now
-
 QQ Group: 300303705
 
-The latest package could be cloned or downloaded from https://github.com/hzqst/CGAssistantJS 
+## Warning
 
-Wiki: https://github.com/hzqst/CGAssistantJS/wiki
+This project is only for academic purposes, commercial use is prohibited.
 
-## Requirement
+You are prohibited to publish this project elsewhere than GitHub.
+
+All binaries included in the [Release Package](https://github.com/hzqst/CGAssistantJS) are compiled and built by [GitHub Actions](https://docs.github.com/en/actions/learn-github-actions) from [Source Code](https://github.com/hzqst/CGAssistant), which could be reviewed and supervised by everyone. There is no chance of having malware or virus in this project.
+
+However we make no promises to your game accounts and so you have to use this project at your own risk, including taking any damage to your accounts from scripts and binaries.
+
+This project is licensed under MIT License, however if it is otherwise stated before, the latter shall prevail.
+
+## Links
+
+[Source Code](https://github.com/hzqst/CGAssistant)
+
+[Release Package (Github)](https://github.com/hzqst/CGAssistantJS) [Release Package (Gitee, CN mirror)](https://gitee.com/hzqst/CGAssistantJS)
+
+[Wiki (Github)](https://github.com/hzqst/CGAssistantJS/wiki) [Wiki (Gitee, CN mirror)](https://gitee.com/hzqst/CGAssistantJS/wikis)
+
+## Build Requirement
 
 Visual Studio 2017 or 2019
 
@@ -28,7 +42,7 @@ NodeJS for windows x86 (which could be downloaded from https://nodejs.org/ or ot
 
 node-gyp (check https://www.npmjs.com/package/node-gyp how to install node-gyp)
 
-## Build
+## Build Instruction
 
 Let's assume that you have all requirements installed correctly.
 
