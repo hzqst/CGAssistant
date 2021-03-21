@@ -351,17 +351,17 @@ extern "C"
 		PMSG pMsg = (PMSG)lParam;
 		if (Code == HC_ACTION && pMsg->hwnd != NULL && !g_MainHwnd)
 		{
-			WCHAR szClass[256];
-			if (GetClassNameW(pMsg->hwnd, szClass, 256))
+			char szClass[256];
+			if (GetClassNameA(pMsg->hwnd, szClass, 256))
 			{
 				WCHAR szModulePath[MAX_PATH];
 				GetModuleFileNameW(NULL, szModulePath, MAX_PATH);
 				LPCWSTR pModuleName = ExtractFileName(szModulePath);
-				if (!_wcsicmp(pModuleName, L"cg_se_3000.exe") && !wcscmp(szClass, L"Ä§Á¦±¦±´"))
+				if (!_wcsicmp(pModuleName, L"cg_se_3000.exe") && !strcmp(szClass, "Ä§Á¦±¦±´"))
 				{
 					InitializeHooks(GetCurrentThreadId(), pMsg->hwnd, CGA::cg_se_3000);
 				}
-				else if (!_wcsicmp(pModuleName, L"cg_item_6000.exe") && !wcscmp(szClass, L"Ä§Á¦±¦±´"))
+				else if (!_wcsicmp(pModuleName, L"cg_item_6000.exe") && !strcmp(szClass, "Ä§Á¦±¦±´"))
 				{
 					InitializeHooks(GetCurrentThreadId(), pMsg->hwnd, CGA::cg_item_6000);
 				}
