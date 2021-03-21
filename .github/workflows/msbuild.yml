@@ -58,7 +58,7 @@ jobs:
         cached: false # ${{ steps.cache-qt.outputs.cache-hit }}
         tools : 'tools_qtcreator,4.14.1-0,qt.tools.qtcreator'
 
-    - name: build-boost
+    - name: Build boost
       working-directory: ${{env.GITHUB_WORKSPACE}}
       run: |
         for /f "usebackq tokens=*" %%i in (`vswhere -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath`) do (
@@ -72,11 +72,15 @@ jobs:
         )
       shell: cmd
 
-    - name: build-CGAHook
+    - name: build CGAHook
       working-directory: ${{env.GITHUB_WORKSPACE}}
       run: MSBuild.exe CGAssistant.sln /t:CGAHook /p:Configuration=Release /p:Platform="x86" /p:PlatformToolset=v142
 
-    - name: build-qhttp
+    - name: build CGALib64
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      run: MSBuild.exe CGAssistant.sln /t:CGALib /p:Configuration=Release /p:Platform="x64" /p:PlatformToolset=v142
+
+    - name: Build qhttp
       working-directory: ${{env.GITHUB_WORKSPACE}}
       run: |
         for /f "usebackq tokens=*" %%i in (`vswhere -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath`) do (
@@ -92,7 +96,7 @@ jobs:
         )
       shell: cmd
 
-    - name: build-CGAssistant
+    - name: Build CGAssistant
       working-directory: ${{env.GITHUB_WORKSPACE}}
       run: |
         for /f "usebackq tokens=*" %%i in (`vswhere -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath`) do (
@@ -108,35 +112,39 @@ jobs:
         )
       shell: cmd
 
-    - name: init-nodegyp
+    - name: Install node-gyp
       working-directory: ${{env.GITHUB_WORKSPACE}}
       run: npm install -g node-gyp
 
-    - name: build-nodegyp
+    - name: Build node-gyp
       working-directory: ${{env.GITHUB_WORKSPACE}}
       run: build-nodegyp.bat
       shell: cmd
 
-    - name: windeploy
+    - name: Deploy qt and msvc redistribution
       working-directory: ${{env.GITHUB_WORKSPACE}}
-      run: windeploy.bat
+      run: |
+        for /f "usebackq tokens=*" %%i in (`vswhere -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath`) do (
+          set VCINSTALLDIR=%%i
+        )        
+        windeploy.bat
       shell: cmd
  
-    - name: checkout-CGAssistantJS
+    - name: checkout CGAssistantJS
       uses: actions/checkout@v2 
       with:
         repository: 'hzqst/CGAssistantJS'
         path: 'CGAssistantJS'
         ssh-key: '${{ secrets.CGASSISTANTJS_PK }}'
 
-    - name: merge-CGAssistantJS
+    - name: Upload binaries for CGAssistantJS
       working-directory: ${{env.GITHUB_WORKSPACE}}
       run: |
         xcopy "build" "CGAssistantJS" /y /e
         cd CGAssistantJS
         git add -A
-        git config --global user.name "hzqst"
+        git config --global user.name "Git Actions (Bot)"
         git config --global user.email "113660872@qq.com"
-        git commit -m "Update binaries from commit %GITHUB_SHA% by %GITHUB_ACTOR%"
+        git commit -m "Update binaries by %GITHUB_ACTOR% from commit SHA %GITHUB_SHA% "
         git push
       shell: cmd

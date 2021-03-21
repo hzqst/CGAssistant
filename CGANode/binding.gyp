@@ -41,6 +41,7 @@
                                         "LinkTimeCodeGeneration": 1,
                                         "LinkIncremental": 1,
                                         "AdditionalLibraryDirectories": [
+                                            "../../x64/Debug/",
 											"../../Debug/",
                                             "../../boost/stage/lib"
                                         ]
@@ -63,6 +64,7 @@
                                     "VCLinkerTool": {
                                         "LinkTimeCodeGeneration": 1,
                                         "AdditionalLibraryDirectories": [
+                                            "../../x64/Release/",
                                             "../../Release/",
 											"../../boost/stage/lib"
                                         ]
