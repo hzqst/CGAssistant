@@ -86,8 +86,8 @@ void ChatMsgNotify(CGA::cga_chat_msg_t msg)
 void ChatMsgAsyncCallBack(uv_async_t *handle)
 {
 	auto isolate = Isolate::GetCurrent();
-	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	auto data = (ChatMsgNotifyData *)handle->data;
 
@@ -103,7 +103,7 @@ void ChatMsgAsyncCallBack(uv_async_t *handle)
 		obj->Set(context, String::NewFromUtf8(isolate, "size").ToLocalChecked(), Integer::New(isolate, data->m_msg.size));
 		argv[1] = obj;
 	}
-
+	
 	Local<Function>::New(isolate, data->m_callback)->Call(context, Null(isolate), (data->m_result) ? 2 : 1, argv);
 
 	data->m_callback.Reset();
@@ -117,8 +117,8 @@ void ChatMsgAsyncCallBack(uv_async_t *handle)
 void ChatMsgTimerCallBack(uv_timer_t *handle)
 {
 	auto isolate = Isolate::GetCurrent();
-	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	auto data = (ChatMsgNotifyData *)handle->data;
 
@@ -156,8 +156,8 @@ void ChatMsgTimerCallBack(uv_timer_t *handle)
 void AsyncWaitChatMsg(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
 	auto isolate = info.GetIsolate();
-	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	int timeout = 3000;
 	if (info.Length() < 1 || !info[0]->IsFunction()) {
@@ -275,8 +275,8 @@ void ConnectionStateNotify(CGA::cga_conn_state_t msg)
 void ConnectionStateAsyncCallBack(uv_async_t *handle)
 {
 	auto isolate = Isolate::GetCurrent();
-	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	auto data = (ConnectionStateNotifyData *)handle->data;
 
@@ -304,8 +304,8 @@ void ConnectionStateAsyncCallBack(uv_async_t *handle)
 void ConnectionStateTimerCallBack(uv_timer_t *handle)
 {
 	auto isolate = Isolate::GetCurrent();
-	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	auto data = (ConnectionStateNotifyData *)handle->data;
 
@@ -343,8 +343,8 @@ void ConnectionStateTimerCallBack(uv_timer_t *handle)
 void AsyncWaitConnectionState(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
 	auto isolate = info.GetIsolate();
-	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	int timeout = 3000;
 	if (info.Length() < 1 || !info[0]->IsFunction()) {
@@ -462,8 +462,8 @@ void MessageBoxNotify(std::string msg)
 void MessageBoxAsyncCallBack(uv_async_t *handle)
 {
 	auto isolate = Isolate::GetCurrent();
-	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	auto data = (MessageBoxNotifyData *)handle->data;
 
@@ -490,8 +490,8 @@ void MessageBoxAsyncCallBack(uv_async_t *handle)
 void MessageBoxTimerCallBack(uv_timer_t *handle)
 {
 	auto isolate = Isolate::GetCurrent();
-	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	auto data = (MessageBoxNotifyData *)handle->data;
 
@@ -529,8 +529,8 @@ void MessageBoxTimerCallBack(uv_timer_t *handle)
 void AsyncWaitMessageBox(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
 	auto isolate = info.GetIsolate();
-	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	int timeout = 3000;
 	if (info.Length() < 1 || !info[0]->IsFunction()) {

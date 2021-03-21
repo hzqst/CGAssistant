@@ -42,7 +42,7 @@ VC141 或者 VC142 工具集 (msvc工程文件里使用的是 VC141工具集，�
 
 QT 5.12+ for msvc2017, win32 (x86)
 
-NodeJS windows x86 (可从 https://nodejs.org/ 或者其他镜像处下载)
+NodeJS v14+ (32位 或 64位 均可)
 
 node-gyp (建议跟随 https://www.npmjs.com/package/node-gyp 的指示来安装 node-gyp)
 

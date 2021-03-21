@@ -82,8 +82,8 @@ void DownloadMapNotify(CGA::cga_download_map_t msg)
 void DownloadMapAsyncCallBack(uv_async_t *handle)
 {
 	auto isolate = Isolate::GetCurrent();
-	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	auto data = (DownloadMapNotifyData *)handle->data;
 
@@ -115,8 +115,8 @@ void DownloadMapAsyncCallBack(uv_async_t *handle)
 void DownloadMapTimerCallBack(uv_timer_t *handle)
 {
 	auto isolate = Isolate::GetCurrent();
-	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	auto data = (DownloadMapNotifyData *)handle->data;
 
@@ -154,8 +154,8 @@ void DownloadMapTimerCallBack(uv_timer_t *handle)
 void AsyncWaitDownloadMap(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
 	auto isolate = info.GetIsolate();
-	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	int timeout = 3000;
 	if (info.Length() < 1 || !info[0]->IsFunction()) {
@@ -204,8 +204,8 @@ void AsyncWaitDownloadMap(const Nan::FunctionCallbackInfo<v8::Value>& info)
 void RequestDownloadMap(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
 	auto isolate = info.GetIsolate();
-	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	if (info.Length() < 1 || !info[0]->IsInt32()) {
 		Nan::ThrowTypeError("Arg[0] must be integer.");
@@ -242,8 +242,8 @@ void RequestDownloadMap(const Nan::FunctionCallbackInfo<v8::Value>& info)
 void FixMapWarpStuck(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
 	auto isolate = info.GetIsolate();
-	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	if (info.Length() < 1 || !info[0]->IsInt32()) {
 		Nan::ThrowTypeError("Arg[0] must be integer.");
@@ -262,8 +262,8 @@ void FixMapWarpStuck(const Nan::FunctionCallbackInfo<v8::Value>& info)
 void GetMapIndex(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
 	auto isolate = info.GetIsolate();
-	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	int index1, index2, index3;
 	if (!g_CGAInterface->GetMapIndex(index1, index2, index3))
@@ -282,8 +282,8 @@ void GetMapIndex(const Nan::FunctionCallbackInfo<v8::Value>& info)
 void GetMapXY(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
 	auto isolate = info.GetIsolate();
-	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	int x, y;
 	if (!g_CGAInterface->GetMapXY(x, y))
@@ -301,8 +301,8 @@ void GetMapXY(const Nan::FunctionCallbackInfo<v8::Value>& info)
 void GetMapXYFloat(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
 	auto isolate = info.GetIsolate();
-	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	float x, y;
 	if (!g_CGAInterface->GetMapXYFloat(x, y))
@@ -320,8 +320,8 @@ void GetMapXYFloat(const Nan::FunctionCallbackInfo<v8::Value>& info)
 void GetMoveSpeed(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
 	auto isolate = info.GetIsolate();
-	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	float x, y;
 	if (!g_CGAInterface->GetMoveSpeed(x, y))
@@ -339,8 +339,8 @@ void GetMoveSpeed(const Nan::FunctionCallbackInfo<v8::Value>& info)
 void GetMapName(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
 	auto isolate = info.GetIsolate();
-	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	std::string name;
 	if (!g_CGAInterface->GetMapName(name))
@@ -355,8 +355,8 @@ void GetMapName(const Nan::FunctionCallbackInfo<v8::Value>& info)
 void GetMapUnits(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
 	auto isolate = info.GetIsolate();
-	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	CGA::cga_map_units_t units;
 	if (!g_CGAInterface->GetMapUnits(units))
@@ -392,8 +392,8 @@ void GetMapUnits(const Nan::FunctionCallbackInfo<v8::Value>& info)
 void GetMapCollisionTableRaw(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
 	auto isolate = info.GetIsolate();
-	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	if (info.Length() < 1 || !info[0]->IsBoolean()) {
 		Nan::ThrowTypeError("Arg[0] must be boolean.");
@@ -426,8 +426,8 @@ void GetMapCollisionTableRaw(const Nan::FunctionCallbackInfo<v8::Value>& info)
 void GetMapCollisionTable(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
 	auto isolate = info.GetIsolate();
-	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	if (info.Length() < 1) {
 		Nan::ThrowTypeError("Arg[0] must be boolean.");
@@ -460,8 +460,8 @@ void GetMapCollisionTable(const Nan::FunctionCallbackInfo<v8::Value>& info)
 void GetMapObjectTable(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
 	auto isolate = info.GetIsolate();
-	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	if (info.Length() < 1 || !info[0]->IsBoolean()) {
 		Nan::ThrowTypeError("Arg[0] must be boolean.");
@@ -494,8 +494,8 @@ void GetMapObjectTable(const Nan::FunctionCallbackInfo<v8::Value>& info)
 void GetMapTileTable(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
 	auto isolate = info.GetIsolate();
-	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	if (info.Length() < 1 || !info[0]->IsBoolean()) {
 		Nan::ThrowTypeError("Arg[0] must be boolean.");
@@ -528,8 +528,8 @@ void GetMapTileTable(const Nan::FunctionCallbackInfo<v8::Value>& info)
 void WalkTo(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
 	auto isolate = info.GetIsolate();
-	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	if (info.Length() < 1 || !info[0]->IsInt32()) {
 		Nan::ThrowTypeError("Arg[0] must be integer.");
@@ -553,8 +553,8 @@ void WalkTo(const Nan::FunctionCallbackInfo<v8::Value>& info)
 void TurnTo(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
 	auto isolate = info.GetIsolate();
-	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	if (info.Length() < 1 || !info[0]->IsInt32()) {
 		Nan::ThrowTypeError("Arg[0] must be integer.");
@@ -578,8 +578,8 @@ void TurnTo(const Nan::FunctionCallbackInfo<v8::Value>& info)
 void IsMapCellPassable(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
 	auto isolate = info.GetIsolate();
-	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	if (info.Length() < 1 || !info[0]->IsInt32()) {
 		Nan::ThrowTypeError("Arg[0] must be integer.");
@@ -604,8 +604,8 @@ void IsMapCellPassable(const Nan::FunctionCallbackInfo<v8::Value>& info)
 void ForceMove(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
 	auto isolate = info.GetIsolate();
-	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	if (info.Length() < 1 || !info[0]->IsInt32()) {
 		Nan::ThrowTypeError("Arg[0] must be integer.");
@@ -631,8 +631,8 @@ void ForceMove(const Nan::FunctionCallbackInfo<v8::Value>& info)
 void ForceMoveTo(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
 	auto isolate = info.GetIsolate();
-	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	if (info.Length() < 1 || !info[0]->IsInt32()) {
 		Nan::ThrowTypeError("Arg[0] must be integer.");
@@ -866,8 +866,8 @@ void WalkToWorker(uv_work_t* req)
 void WalkToAfterWorker(uv_work_t* req, int status)
 {
 	auto isolate = Isolate::GetCurrent();
-	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	//enable map warp entrance, that is, restore it to default...
 	g_CGAInterface->FixMapWarpStuck(2);
@@ -899,19 +899,19 @@ void WalkToAfterWorker(uv_work_t* req, int status)
 void AsyncWalkTo(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
 	auto isolate = info.GetIsolate();
-	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	if (info.Length() < 1 || !info[0]->IsInt32()) {
-		Nan::ThrowTypeError("Arg[0] must be x.");
+		Nan::ThrowTypeError("Arg[0] must be integer.");
 		return;
 	}
 	if (info.Length() < 2 || !info[1]->IsInt32()) {
-		Nan::ThrowTypeError("Arg[1] must be y.");
+		Nan::ThrowTypeError("Arg[1] must be integer.");
 		return;
 	}
 	if (info.Length() < 3) {
-		Nan::ThrowTypeError("Arg[2] must be desired map name(string) or mapindex (array) or null.");
+		Nan::ThrowTypeError("Arg[2] must be string or array(integer) or null.");
 		return;
 	}
 	if (info.Length() < 4) {
@@ -1125,8 +1125,8 @@ void WaitMoveWorker(uv_work_t* req)
 void WaitMoveAfterWorker(uv_work_t* req, int status)
 {
 	auto isolate = Isolate::GetCurrent();
-	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	auto data = (WaitMoveWorkerData *)req->data;
 
@@ -1155,15 +1155,15 @@ void WaitMoveAfterWorker(uv_work_t* req, int status)
 void AsyncWaitMovement(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
 	auto isolate = info.GetIsolate();
-	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	if (info.Length() < 1 || !info[0]->IsObject()) {
-		Nan::ThrowTypeError("Arg[0] must be an object.");
+		Nan::ThrowTypeError("Arg[0] must be object.");
 		return;
 	}
 	if (info.Length() < 2 || !info[1]->IsFunction()) {
-		Nan::ThrowTypeError("Arg[1] must be a function.");
+		Nan::ThrowTypeError("Arg[1] must be function.");
 		return;
 	}
 

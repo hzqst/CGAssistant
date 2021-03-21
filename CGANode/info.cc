@@ -8,8 +8,8 @@ extern CGA::CGAInterface *g_CGAInterface;
 void IsInGame(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
 	auto isolate = info.GetIsolate();
-	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	int ingame = 0;
 	if (!g_CGAInterface->IsInGame(ingame))
@@ -24,8 +24,8 @@ void IsInGame(const Nan::FunctionCallbackInfo<v8::Value>& info)
 void GetWorldStatus(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
 	auto isolate = info.GetIsolate();
-	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	int status = 0;
 	if (!g_CGAInterface->GetWorldStatus(status))
@@ -40,8 +40,8 @@ void GetWorldStatus(const Nan::FunctionCallbackInfo<v8::Value>& info)
 void GetGameStatus(const Nan::FunctionCallbackInfo<v8::Value>& info) 
 {
 	auto isolate = info.GetIsolate();
-	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	int status = 0;
 	if (!g_CGAInterface->GetGameStatus(status))
@@ -56,8 +56,8 @@ void GetGameStatus(const Nan::FunctionCallbackInfo<v8::Value>& info)
 void GetBGMIndex(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
 	auto isolate = info.GetIsolate();
-	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	int status = 0;
 	if (!g_CGAInterface->GetBGMIndex(status))
@@ -72,8 +72,8 @@ void GetBGMIndex(const Nan::FunctionCallbackInfo<v8::Value>& info)
 void GetSysTime(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
 	auto isolate = info.GetIsolate();
-	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	CGA::cga_sys_time_t myinfo;
 	if (!g_CGAInterface->GetSysTime(myinfo))
@@ -98,8 +98,8 @@ void GetSysTime(const Nan::FunctionCallbackInfo<v8::Value>& info)
 void GetPlayerInfo(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
 	auto isolate = info.GetIsolate();
-	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	CGA::cga_player_info_t myinfo;
 	if (!g_CGAInterface->GetPlayerInfo(myinfo))
@@ -186,8 +186,8 @@ void GetPlayerInfo(const Nan::FunctionCallbackInfo<v8::Value>& info)
 void SetPlayerFlagEnabled(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
 	auto isolate = info.GetIsolate();
-	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	if (info.Length() < 1 || !info[0]->IsInt32()) {
 		Nan::ThrowTypeError("Arg[0] must be integer.");
@@ -213,8 +213,8 @@ void SetPlayerFlagEnabled(const Nan::FunctionCallbackInfo<v8::Value>& info)
 void IsPlayerFlagEnabled(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
 	auto isolate = info.GetIsolate();
-	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	if (info.Length() < 1 || !info[0]->IsInt32()) {
 		Nan::ThrowTypeError("Arg[0] must be integer.");
@@ -237,8 +237,8 @@ void IsPlayerFlagEnabled(const Nan::FunctionCallbackInfo<v8::Value>& info)
 void IsUIDialogPresent(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
 	auto isolate = info.GetIsolate();
-	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	if (info.Length() < 1 || !info[0]->IsInt32()) {
 		Nan::ThrowTypeError("Arg[0] must be integer.");
@@ -259,16 +259,18 @@ void IsUIDialogPresent(const Nan::FunctionCallbackInfo<v8::Value>& info)
 void IsSkillValid(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
 	auto isolate = info.GetIsolate();
-	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
-	if (info.Length() < 1) {
-		Nan::ThrowTypeError("Arg[0] must be skillid.");
+	if (info.Length() < 1 || !info[0]->IsInt32()) {
+		Nan::ThrowTypeError("Arg[0] must be integer.");
 		return;
 	}
 
 	int skillid = info[0]->Int32Value(context).ToChecked();
+
 	bool valid = false;
+
 	if (!g_CGAInterface->IsSkillValid(skillid, valid))
 	{
 		Nan::ThrowError("RPC Invocation failed.");
@@ -281,16 +283,18 @@ void IsSkillValid(const Nan::FunctionCallbackInfo<v8::Value>& info)
 void GetSkillInfo(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
 	auto isolate = info.GetIsolate();
-	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
-	if (info.Length() < 1) {
-		Nan::ThrowTypeError("Arg[0] must be skillid.");
+	if (info.Length() < 1 || !info[0]->IsInt32()) {
+		Nan::ThrowTypeError("Arg[0] must be integer.");
 		return;
 	}
 
-	int skillid = info[0]->Int32Value(context).ToChecked();
 	CGA::cga_skill_info_t myinfo;
+
+	int skillid = info[0]->Int32Value(context).ToChecked();
+
 	if (!g_CGAInterface->GetSkillInfo(skillid, myinfo))
 	{
 		Nan::ThrowError("RPC Invocation failed.");
@@ -314,8 +318,8 @@ void GetSkillInfo(const Nan::FunctionCallbackInfo<v8::Value>& info)
 void GetSkillsInfo(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
 	auto isolate = info.GetIsolate();
-	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	CGA::cga_skills_info_t myinfos;
 	if (!g_CGAInterface->GetSkillsInfo(myinfos))
@@ -347,16 +351,16 @@ void GetSkillsInfo(const Nan::FunctionCallbackInfo<v8::Value>& info)
 void GetCraftInfo(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
 	auto isolate = info.GetIsolate();
-	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	if (info.Length() < 1 || !info[0]->IsInt32()) {
-		Nan::ThrowTypeError("Arg[0] must be skillid.");
+		Nan::ThrowTypeError("Arg[0] must be integer.");
 		return;
 	}
 
 	if (info.Length() < 2 || !info[1]->IsInt32()) {
-		Nan::ThrowTypeError("Arg[2] must be subskill_index.");
+		Nan::ThrowTypeError("Arg[1] must be integer.");
 		return;
 	}
 
@@ -401,8 +405,8 @@ void GetCraftInfo(const Nan::FunctionCallbackInfo<v8::Value>& info)
 void GetCraftsInfo(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
 	auto isolate = info.GetIsolate();
-	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	if (info.Length() < 1 || !info[0]->IsInt32())
 	{
@@ -456,15 +460,15 @@ void GetCraftsInfo(const Nan::FunctionCallbackInfo<v8::Value>& info)
 void GetSubSkillInfo(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
 	auto isolate = info.GetIsolate();
-	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
-	if (info.Length() < 1) {
-		Nan::ThrowTypeError("Arg[0] must be skillid.");
+	if (info.Length() < 1 || !info[0]->IsInt32()) {
+		Nan::ThrowTypeError("Arg[0] must be integer.");
 		return;
 	}
-	if (info.Length() < 2) {
-		Nan::ThrowTypeError("Arg[0] must be stage.");
+	if (info.Length() < 2 || !info[1]->IsInt32()) {
+		Nan::ThrowTypeError("Arg[1] must be integer.");
 		return;
 	}
 
@@ -491,11 +495,11 @@ void GetSubSkillInfo(const Nan::FunctionCallbackInfo<v8::Value>& info)
 void GetSubSkillsInfo(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
 	auto isolate = info.GetIsolate();
-	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
-	if (info.Length() < 1) {
-		Nan::ThrowTypeError("Arg[0] must be skillid.");
+	if (info.Length() < 1 || !info[0]->IsInt32()) {
+		Nan::ThrowTypeError("Arg[0] must be integer.");
 		return;
 	}
 
@@ -526,16 +530,18 @@ void GetSubSkillsInfo(const Nan::FunctionCallbackInfo<v8::Value>& info)
 void IsItemValid(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
 	auto isolate = info.GetIsolate();
-	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
-	if (info.Length() < 1) {
-		Nan::ThrowTypeError("Arg[0] must be itempos.");
+	if (info.Length() < 1 || !info[0]->IsInt32()) {
+		Nan::ThrowTypeError("Arg[0] must be integer.");
 		return;
 	}
 
 	int itempos = info[0]->Int32Value(context).ToChecked();
+
 	bool valid = false;
+
 	if (!g_CGAInterface->IsItemValid(itempos, valid))
 	{
 		Nan::ThrowError("RPC Invocation failed.");
@@ -548,11 +554,11 @@ void IsItemValid(const Nan::FunctionCallbackInfo<v8::Value>& info)
 void GetItemInfo(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
 	auto isolate = info.GetIsolate();
-	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
-	if (info.Length() < 1) {
-		Nan::ThrowTypeError("Arg[0] must be itempos.");
+	if (info.Length() < 1 || !info[0]->IsInt32()) {
+		Nan::ThrowTypeError("Arg[0] must be integer.");
 		return;
 	}
 
@@ -581,8 +587,8 @@ void GetItemInfo(const Nan::FunctionCallbackInfo<v8::Value>& info)
 void GetItemsInfo(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
 	auto isolate = info.GetIsolate();
-	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	CGA::cga_items_info_t myinfos;
 	if (!g_CGAInterface->GetItemsInfo(myinfos))
@@ -590,6 +596,7 @@ void GetItemsInfo(const Nan::FunctionCallbackInfo<v8::Value>& info)
 		Nan::ThrowError("RPC Invocation failed.");
 		return;
 	}
+
 	Local<Array> arr = Array::New(isolate);
 	for (size_t i = 0; i < myinfos.size(); ++i)
 	{
@@ -612,8 +619,8 @@ void GetItemsInfo(const Nan::FunctionCallbackInfo<v8::Value>& info)
 void GetBankItemsInfo(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
 	auto isolate = info.GetIsolate();
-	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	CGA::cga_items_info_t myinfos;
 	if (!g_CGAInterface->GetBankItemsInfo(myinfos))
@@ -644,8 +651,8 @@ void GetBankItemsInfo(const Nan::FunctionCallbackInfo<v8::Value>& info)
 void GetBankGold(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
 	auto isolate = info.GetIsolate();
-	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	int gold = 0;
 
@@ -661,11 +668,11 @@ void GetBankGold(const Nan::FunctionCallbackInfo<v8::Value>& info)
 void IsPetValid(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
 	auto isolate = info.GetIsolate();
-	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
-	if (info.Length() < 1) {
-		Nan::ThrowTypeError("Arg[0] must be petid.");
+	if (info.Length() < 1 || !info[0]->IsInt32()) {
+		Nan::ThrowTypeError("Arg[0] must be integer.");
 		return;
 	}
 
@@ -683,11 +690,11 @@ void IsPetValid(const Nan::FunctionCallbackInfo<v8::Value>& info)
 void GetPetInfo(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
 	auto isolate = info.GetIsolate();
-	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
-	if (info.Length() < 1) {
-		Nan::ThrowTypeError("Arg[0] must be petid.");
+	if (info.Length() < 1 || !info[0]->IsInt32()) {
+		Nan::ThrowTypeError("Arg[0] must be integer.");
 		return;
 	}
 
@@ -751,8 +758,8 @@ void GetPetInfo(const Nan::FunctionCallbackInfo<v8::Value>& info)
 void GetPetsInfo(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
 	auto isolate = info.GetIsolate();
-	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	CGA::cga_pets_info_t myinfos;
 	if (!g_CGAInterface->GetPetsInfo(myinfos))
@@ -818,8 +825,8 @@ void GetPetsInfo(const Nan::FunctionCallbackInfo<v8::Value>& info)
 void GetBankPetsInfo(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
 	auto isolate = info.GetIsolate();
-	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	CGA::cga_pets_info_t myinfos;
 	if (!g_CGAInterface->GetBankPetsInfo(myinfos))
@@ -866,15 +873,15 @@ void GetBankPetsInfo(const Nan::FunctionCallbackInfo<v8::Value>& info)
 void IsPetSkillValid(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
 	auto isolate = info.GetIsolate();
-	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
-	if (info.Length() < 1) {
-		Nan::ThrowTypeError("Arg[0] must be petid.");
+	if (info.Length() < 1 || !info[0]->IsInt32()) {
+		Nan::ThrowTypeError("Arg[0] must be integer.");
 		return;
 	}
-	if (info.Length() < 2) {
-		Nan::ThrowTypeError("Arg[1] must be skill index.");
+	if (info.Length() < 2 || !info[1]->IsInt32()) {
+		Nan::ThrowTypeError("Arg[1] must be integer.");
 		return;
 	}
 
@@ -893,15 +900,15 @@ void IsPetSkillValid(const Nan::FunctionCallbackInfo<v8::Value>& info)
 void GetPetSkillInfo(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
 	auto isolate = info.GetIsolate();
-	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
-	if (info.Length() < 1) {
-		Nan::ThrowTypeError("Arg[0] must be petid.");
+	if (info.Length() < 1 || !info[0]->IsInt32()) {
+		Nan::ThrowTypeError("Arg[0] must be integer.");
 		return;
 	}
-	if (info.Length() < 2) {
-		Nan::ThrowTypeError("Arg[1] must be skillid.");
+	if (info.Length() < 2 || !info[0]->IsInt32()) {
+		Nan::ThrowTypeError("Arg[1] must be integer.");
 		return;
 	}
 
@@ -926,11 +933,11 @@ void GetPetSkillInfo(const Nan::FunctionCallbackInfo<v8::Value>& info)
 void GetPetSkillsInfo(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
 	auto isolate = info.GetIsolate();
-	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
-	if (info.Length() < 1) {
-		Nan::ThrowTypeError("Arg[0] must be petid.");
+	if (info.Length() < 1 || !info[0]->IsInt32()) {
+		Nan::ThrowTypeError("Arg[0] must be integer.");
 		return;
 	}
 
@@ -959,8 +966,8 @@ void GetPetSkillsInfo(const Nan::FunctionCallbackInfo<v8::Value>& info)
 void GetTeamPlayerInfo(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
 	auto isolate = info.GetIsolate();
-	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	CGA::cga_team_players_t plinfo;
 	if (!g_CGAInterface->GetTeamPlayerInfo(plinfo))

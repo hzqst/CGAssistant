@@ -36,9 +36,9 @@ Windows SDK 10 (the msvc projects uses Windows SDK version 10.0.17763.0, please 
 
 VC141 or VC142 Toolset (the msvc projects uses VC141 Toolset, if you want to use VC142 please change PlatformToolset in the vcxproj file and build-CGAHook.bat)
 
-QT 5.12+ for msvc2017, win32 (x86), with QTCreator
+QT 5.12+ for msvc2017, win32 (x86), with QtCreator
 
-NodeJS for windows x86 (which could be downloaded from https://nodejs.org/ or other mirrors)
+NodeJS v14+ (either 32-bit or 64-bit is okay)
 
 node-gyp (check https://www.npmjs.com/package/node-gyp how to install node-gyp)
 

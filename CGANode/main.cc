@@ -22,8 +22,8 @@ void FreeUVHandleCallBack(uv_handle_t *handle)
 void LogBack(const Nan::FunctionCallbackInfo<v8::Value>& info) 
 {
 	auto isolate = info.GetIsolate();
-	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 	
 	if (!g_CGAInterface->LogBack())
 	{
@@ -35,8 +35,8 @@ void LogBack(const Nan::FunctionCallbackInfo<v8::Value>& info)
 void LogOut(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
 	auto isolate = info.GetIsolate();
-	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	if (!g_CGAInterface->LogOut())
 	{
@@ -48,8 +48,8 @@ void LogOut(const Nan::FunctionCallbackInfo<v8::Value>& info)
 void SayWords(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
 	auto isolate = info.GetIsolate();
-	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	if (info.Length() < 1 || !info[0]->IsString()) {
 		Nan::ThrowTypeError("Arg[0] must be string.");
@@ -90,8 +90,8 @@ void SayWords(const Nan::FunctionCallbackInfo<v8::Value>& info)
 void ChangeNickName(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
 	auto isolate = info.GetIsolate();
-	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	if (info.Length() < 1 || !info[0]->IsString()) {
 		Nan::ThrowTypeError("Arg[0] must be string.");
@@ -116,8 +116,8 @@ void ChangeNickName(const Nan::FunctionCallbackInfo<v8::Value>& info)
 void ChangeTitleName(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
 	auto isolate = info.GetIsolate();
-	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	if (info.Length() < 1 || !info[0]->IsInt32()) {
 		Nan::ThrowTypeError("Arg[0] must be integer.");
@@ -140,8 +140,8 @@ void ChangeTitleName(const Nan::FunctionCallbackInfo<v8::Value>& info)
 void ChangePersDesc(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
 	auto isolate = info.GetIsolate();
-	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	if (info.Length() < 1 || !info[0]->IsObject()) {
 		Nan::ThrowTypeError("Arg[0] must be object.");

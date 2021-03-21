@@ -77,8 +77,8 @@ void NPCDialogNotify(CGA::cga_npc_dialog_t dlg)
 void NPCDialogAsyncCallBack(uv_async_t *handle)
 {
 	auto isolate = Isolate::GetCurrent();
-	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	auto data = (NPCDialogNotifyData *)handle->data;
 
@@ -109,8 +109,8 @@ void NPCDialogAsyncCallBack(uv_async_t *handle)
 void NPCDialogTimerCallBack(uv_timer_t *handle)
 {
 	auto isolate = Isolate::GetCurrent();
-	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	auto data = (NPCDialogNotifyData *)handle->data;
 
@@ -148,8 +148,8 @@ void NPCDialogTimerCallBack(uv_timer_t *handle)
 void AsyncWaitNPCDialog(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
 	auto isolate = info.GetIsolate();
-	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	int timeout = 3000;
 	if (info.Length() < 1 || !info[0]->IsFunction()) {
@@ -200,8 +200,8 @@ void AsyncWaitNPCDialog(const Nan::FunctionCallbackInfo<v8::Value>& info)
 void ClickNPCDialog(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
 	auto isolate = info.GetIsolate();
-	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	if (info.Length() < 1 && !info[0]->IsInt32()) {
 		Nan::ThrowTypeError("Arg[0] must be integr.");
@@ -229,8 +229,8 @@ void ClickNPCDialog(const Nan::FunctionCallbackInfo<v8::Value>& info)
 void SellNPCStore(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
 	auto isolate = info.GetIsolate();
-	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	if (info.Length() < 1 || !info[0]->IsArray()) {
 		Nan::ThrowTypeError("Arg[0] must be array.");
@@ -292,8 +292,8 @@ void SellNPCStore(const Nan::FunctionCallbackInfo<v8::Value>& info)
 void BuyNPCStore(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
 	auto isolate = info.GetIsolate();
-	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	if (info.Length() < 1 || !info[0]->IsArray()) {
 		Nan::ThrowTypeError("Arg[0] must be array.");

@@ -63,9 +63,9 @@ void ConnectWorker(uv_work_t* req)
 
 void ConnectAfterWorker(uv_work_t* req, int status)
 {
-	Isolate* isolate = Isolate::GetCurrent();
+	auto isolate = Isolate::GetCurrent();
 	HandleScope handle_scope(isolate);
-	Local<Context> context = isolate->GetCurrentContext();
+	auto context = isolate->GetCurrentContext();
 
 	auto data = (ConnectWorkerData *)req->data;
 
@@ -81,9 +81,9 @@ void ConnectAfterWorker(uv_work_t* req, int status)
 
 void AsyncConnect(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
-	Isolate* isolate = info.GetIsolate();
+	auto isolate = info.GetIsolate();
 	HandleScope handle_scope(isolate);
-	Local<Context> context = isolate->GetCurrentContext();
+	auto context = isolate->GetCurrentContext();
 
 	if (info.Length() < 1 || !info[0]->IsInt32()) {
 		Nan::ThrowTypeError("Arg[0] must be integer.");

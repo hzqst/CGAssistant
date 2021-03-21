@@ -79,8 +79,8 @@ void BattleActionNotify(int flags)
 void BattleActionAsyncCallBack(uv_async_t *handle)
 {
 	auto isolate = Isolate::GetCurrent();
-	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	auto data = (BattleActionNotifyData *)handle->data;
 
@@ -103,8 +103,8 @@ void BattleActionAsyncCallBack(uv_async_t *handle)
 void BattleActionTimerCallBack(uv_timer_t *handle)
 {
 	auto isolate = Isolate::GetCurrent();
-	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	auto data = (BattleActionNotifyData *)handle->data;
 
@@ -142,8 +142,8 @@ void BattleActionTimerCallBack(uv_timer_t *handle)
 void AsyncWaitBattleAction(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
 	auto isolate = info.GetIsolate();
-	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	int timeout = 3000;
 	if (info.Length() < 1 || !info[0]->IsFunction()) {
@@ -192,8 +192,8 @@ void AsyncWaitBattleAction(const Nan::FunctionCallbackInfo<v8::Value>& info)
 void GetBattleUnits(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
 	auto isolate = info.GetIsolate();
-	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	CGA::cga_battle_units_t myinfos;
 	if (!g_CGAInterface->GetBattleUnits(myinfos))
@@ -224,8 +224,8 @@ void GetBattleUnits(const Nan::FunctionCallbackInfo<v8::Value>& info)
 void GetBattleContext(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
 	auto isolate = info.GetIsolate();
-	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	CGA::cga_battle_context_t ctx;
 	if (!g_CGAInterface->GetBattleContext(ctx))
@@ -251,8 +251,8 @@ void GetBattleContext(const Nan::FunctionCallbackInfo<v8::Value>& info)
 void BattleNormalAttack(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
 	auto isolate = info.GetIsolate();
-	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	if (info.Length() < 1 || !info[0]->IsInt32()) {
 		Nan::ThrowTypeError("Arg[0] must be integer.");
@@ -273,8 +273,8 @@ void BattleNormalAttack(const Nan::FunctionCallbackInfo<v8::Value>& info)
 void BattleSkillAttack(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
 	auto isolate = info.GetIsolate();
-	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	if (info.Length() < 1 || !info[0]->IsInt32()) {
 		Nan::ThrowTypeError("Arg[0] must be integer.");
@@ -309,8 +309,8 @@ void BattleSkillAttack(const Nan::FunctionCallbackInfo<v8::Value>& info)
 void BattleRebirth(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
 	auto isolate = info.GetIsolate();
-	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	bool bResult = false;
 	if (!g_CGAInterface->BattleRebirth(bResult))
@@ -324,8 +324,8 @@ void BattleRebirth(const Nan::FunctionCallbackInfo<v8::Value>& info)
 void BattleGuard(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
 	auto isolate = info.GetIsolate();
-	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	bool bResult = false;
 	if (!g_CGAInterface->BattleGuard(bResult))
@@ -339,8 +339,8 @@ void BattleGuard(const Nan::FunctionCallbackInfo<v8::Value>& info)
 void BattleEscape(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
 	auto isolate = info.GetIsolate();
-	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	bool bResult = false;
 	if (!g_CGAInterface->BattleEscape(bResult))
@@ -355,6 +355,7 @@ void BattleDoNothing(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
 	auto isolate = info.GetIsolate();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	bool bResult = false;
 	if (!g_CGAInterface->BattleDoNothing(bResult))
@@ -368,8 +369,8 @@ void BattleDoNothing(const Nan::FunctionCallbackInfo<v8::Value>& info)
 void BattleExchangePosition(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
 	auto isolate = info.GetIsolate();
-	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	bool bResult = false;
 	if (!g_CGAInterface->BattleExchangePosition(bResult))
@@ -383,8 +384,8 @@ void BattleExchangePosition(const Nan::FunctionCallbackInfo<v8::Value>& info)
 void BattleChangePet(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
 	auto isolate = info.GetIsolate();
-	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	if (info.Length() < 1 || !info[0]->IsInt32()) {
 		Nan::ThrowTypeError("Arg[0] must be integer");
@@ -405,8 +406,8 @@ void BattleChangePet(const Nan::FunctionCallbackInfo<v8::Value>& info)
 void BattleUseItem(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
 	auto isolate = info.GetIsolate();
-	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	if (info.Length() < 1 || !info[0]->IsInt32()) {
 		Nan::ThrowTypeError("Arg[0] must be integer");
@@ -433,8 +434,8 @@ void BattleUseItem(const Nan::FunctionCallbackInfo<v8::Value>& info)
 void BattlePetSkillAttack(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
 	auto isolate = info.GetIsolate();
-	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	if (info.Length() < 1 || !info[0]->IsInt32()) {
 		Nan::ThrowTypeError("Arg[0] must be integer.");

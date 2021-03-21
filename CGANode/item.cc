@@ -143,8 +143,8 @@ std::vector<UnitMenuCacheData *> g_UnitMenu_Caches;
 void ChangePetState(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
 	auto isolate = info.GetIsolate();
-	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	if (info.Length() < 1 || !info[0]->IsInt32()) {
 		Nan::ThrowTypeError("Arg[0] must be integer.");
@@ -172,8 +172,8 @@ void ChangePetState(const Nan::FunctionCallbackInfo<v8::Value>& info)
 void DropPet(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
 	auto isolate = info.GetIsolate();
-	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	if (info.Length() < 1 || !info[0]->IsInt32()) {
 		Nan::ThrowTypeError("Arg[0] must be integer.");
@@ -196,8 +196,8 @@ void DropPet(const Nan::FunctionCallbackInfo<v8::Value>& info)
 void DropItem(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
 	auto isolate = info.GetIsolate();
-	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	if (info.Length() < 1 || !info[0]->IsInt32()) {
 		Nan::ThrowTypeError("Arg[0] must be integer.");
@@ -258,8 +258,8 @@ void TradeStateNotify(int state)
 void TradeStateAsyncCallBack(uv_async_t *handle)
 {
 	auto isolate = Isolate::GetCurrent();
-	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	auto data = (TradeStateNotifyData *)handle->data;
 
@@ -282,8 +282,8 @@ void TradeStateAsyncCallBack(uv_async_t *handle)
 void TradeStateTimerCallBack(uv_timer_t *handle)
 {
 	auto isolate = Isolate::GetCurrent();
-	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	auto data = (TradeStateNotifyData *)handle->data;
 
@@ -359,8 +359,8 @@ void TradeDialogNotify(CGA::cga_trade_dialog_t info)
 void TradeDialogAsyncCallBack(uv_async_t *handle)
 {
 	auto isolate = Isolate::GetCurrent();
-	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	auto data = (TradeDialogNotifyData *)handle->data;
 
@@ -386,8 +386,8 @@ void TradeDialogAsyncCallBack(uv_async_t *handle)
 void TradeDialogTimerCallBack(uv_timer_t *handle)
 {
 	auto isolate = Isolate::GetCurrent();
-	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	auto data = (TradeDialogNotifyData *)handle->data;
 
@@ -463,8 +463,8 @@ void TradeStuffsNotify(CGA::cga_trade_stuff_info_t info)
 void TradeStuffsAsyncCallBack(uv_async_t *handle)
 {
 	auto isolate = Isolate::GetCurrent();
-	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	auto data = (TradeStuffsNotifyData *)handle->data;
 
@@ -595,8 +595,8 @@ void TradeStuffsAsyncCallBack(uv_async_t *handle)
 void TradeStuffsTimerCallBack(uv_timer_t *handle)
 {
 	auto isolate = Isolate::GetCurrent();
-	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	auto data = (TradeStuffsNotifyData *)handle->data;
 
@@ -672,8 +672,8 @@ void PlayerMenuNotify(CGA::cga_player_menu_items_t players)
 void PlayerMenuAsyncCallBack(uv_async_t *handle)
 {
 	auto isolate = Isolate::GetCurrent();
-	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	auto data = (PlayerMenuNotifyData *)handle->data;
 
@@ -707,8 +707,8 @@ void PlayerMenuAsyncCallBack(uv_async_t *handle)
 void PlayerMenuTimerCallBack(uv_timer_t *handle)
 {
 	auto isolate = Isolate::GetCurrent();
-	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	auto data = (PlayerMenuNotifyData *)handle->data;
 
@@ -784,8 +784,8 @@ void UnitMenuNotify(CGA::cga_unit_menu_items_t units)
 void UnitMenuAsyncCallBack(uv_async_t *handle)
 {
 	auto isolate = Isolate::GetCurrent();
-	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	auto data = (UnitMenuNotifyData *)handle->data;
 
@@ -825,8 +825,8 @@ void UnitMenuAsyncCallBack(uv_async_t *handle)
 void UnitMenuTimerCallBack(uv_timer_t *handle)
 {
 	auto isolate = Isolate::GetCurrent();
-	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	auto data = (UnitMenuNotifyData *)handle->data;
 
@@ -864,8 +864,8 @@ void UnitMenuTimerCallBack(uv_timer_t *handle)
 void UseItem(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
 	auto isolate = info.GetIsolate();
-	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	if (info.Length() < 1 || !info[0]->IsInt32()) {
 		Nan::ThrowTypeError("Arg[0] must be integer.");
@@ -887,8 +887,8 @@ void UseItem(const Nan::FunctionCallbackInfo<v8::Value>& info)
 void MoveItem(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
 	auto isolate = info.GetIsolate();
-	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	if (info.Length() < 1 || !info[0]->IsInt32()) {
 		Nan::ThrowTypeError("Arg[0] must be integer.");
@@ -924,8 +924,8 @@ void MoveItem(const Nan::FunctionCallbackInfo<v8::Value>& info)
 void MovePet(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
 	auto isolate = info.GetIsolate();
-	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	if (info.Length() < 1 || !info[0]->IsInt32()) {
 		Nan::ThrowTypeError("Arg[0] must be integer.");
@@ -952,8 +952,8 @@ void MovePet(const Nan::FunctionCallbackInfo<v8::Value>& info)
 void MoveGold(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
 	auto isolate = info.GetIsolate();
-	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	if (info.Length() < 1 || !info[0]->IsInt32()) {
 		Nan::ThrowTypeError("Arg[0] must be integer.");
@@ -980,8 +980,8 @@ void MoveGold(const Nan::FunctionCallbackInfo<v8::Value>& info)
 void AsyncWaitPlayerMenu(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
 	auto isolate = info.GetIsolate();
-	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	int timeout = 3000;
 	if (info.Length() < 1 || !info[0]->IsFunction()) {
@@ -1031,8 +1031,8 @@ void AsyncWaitPlayerMenu(const Nan::FunctionCallbackInfo<v8::Value>& info)
 void PlayerMenuSelect(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
 	auto isolate = info.GetIsolate();
-	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	if (info.Length() < 1) {
 		Nan::ThrowTypeError("Arg[0] must be integer.");
@@ -1062,8 +1062,8 @@ void PlayerMenuSelect(const Nan::FunctionCallbackInfo<v8::Value>& info)
 void AsyncWaitUnitMenu(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
 	auto isolate = info.GetIsolate();
-	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	int timeout = 3000;
 	if (info.Length() < 1 || !info[0]->IsFunction()) {
@@ -1112,8 +1112,8 @@ void AsyncWaitUnitMenu(const Nan::FunctionCallbackInfo<v8::Value>& info)
 void UnitMenuSelect(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
 	auto isolate = info.GetIsolate();
-	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	if (info.Length() < 1 || !info[0]->IsInt32()) {
 		Nan::ThrowTypeError("Arg[0] must be integer.");
@@ -1136,8 +1136,8 @@ void UnitMenuSelect(const Nan::FunctionCallbackInfo<v8::Value>& info)
 void UpgradePlayer(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
 	auto isolate = info.GetIsolate();
-	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	if (info.Length() < 1 || !info[0]->IsInt32()) {
 		Nan::ThrowTypeError("Arg[0] must be integer.");
@@ -1158,8 +1158,8 @@ void UpgradePlayer(const Nan::FunctionCallbackInfo<v8::Value>& info)
 void UpgradePet(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
 	auto isolate = info.GetIsolate();
-	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	if (info.Length() < 1 || !info[0]->IsInt32()) {
 		Nan::ThrowTypeError("Arg[0] must be integer.");
@@ -1187,8 +1187,8 @@ void UpgradePet(const Nan::FunctionCallbackInfo<v8::Value>& info)
 void DoRequest(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
 	auto isolate = info.GetIsolate();
-	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	if (info.Length() < 1 || !info[0]->IsInt32()) {
 		Nan::ThrowTypeError("Arg[0] must be integer.");
@@ -1211,8 +1211,8 @@ void DoRequest(const Nan::FunctionCallbackInfo<v8::Value>& info)
 void EnableFlags(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
 	auto isolate = info.GetIsolate();
-	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	if (info.Length() < 1 || !info[0]->IsInt32()) {
 		Nan::ThrowTypeError("Arg[0] must be integer.");
@@ -1242,8 +1242,8 @@ void EnableFlags(const Nan::FunctionCallbackInfo<v8::Value>& info)
 void TradeAddStuffs(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
 	auto isolate = info.GetIsolate();
-	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	if (info.Length() < 1 || !info[0]->IsArray()) {
 		Nan::ThrowTypeError("Arg[0] must be array.");
@@ -1332,8 +1332,8 @@ void TradeAddStuffs(const Nan::FunctionCallbackInfo<v8::Value>& info)
 void AsyncWaitTradeStuffs(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
 	auto isolate = info.GetIsolate();
-	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	int timeout = 3000;
 	if (info.Length() < 1 || !info[0]->IsFunction()) {
@@ -1382,8 +1382,8 @@ void AsyncWaitTradeStuffs(const Nan::FunctionCallbackInfo<v8::Value>& info)
 void AsyncWaitTradeDialog(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
 	auto isolate = info.GetIsolate();
-	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	int timeout = 3000;
 	if (info.Length() < 1 || !info[0]->IsFunction()) {
@@ -1433,8 +1433,8 @@ void AsyncWaitTradeDialog(const Nan::FunctionCallbackInfo<v8::Value>& info)
 void AsyncWaitTradeState(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
 	auto isolate = info.GetIsolate();
-	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	int timeout = 3000;
 	if (info.Length() < 1 || !info[0]->IsFunction()) {

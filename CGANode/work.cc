@@ -78,8 +78,8 @@ void WorkingResultNotify(CGA::cga_working_result_t results)
 void WorkingResultAsyncCallBack(uv_async_t *handle)
 {
 	auto isolate = Isolate::GetCurrent();
-	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	auto data = (WorkingResultNotifyData *)handle->data;
 
@@ -128,8 +128,8 @@ void WorkingResultAsyncCallBack(uv_async_t *handle)
 void WorkingResultTimerCallBack(uv_timer_t *handle)
 {
 	auto isolate = Isolate::GetCurrent();
-	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	auto data = (WorkingResultNotifyData *)handle->data;
 
@@ -167,8 +167,8 @@ void WorkingResultTimerCallBack(uv_timer_t *handle)
 void AsyncWaitWorkingResult(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
 	auto isolate = info.GetIsolate();
-	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	if (info.Length() < 1 || !info[0]->IsFunction()) {
 		Nan::ThrowTypeError("Arg[0] must be function.");
@@ -218,8 +218,8 @@ void AsyncWaitWorkingResult(const Nan::FunctionCallbackInfo<v8::Value>& info)
 void StartWork(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
 	auto isolate = info.GetIsolate();
-	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	if (info.Length() < 1 || !info[0]->IsInt32()) {
 		Nan::ThrowTypeError("Arg[0] must be integer.");
@@ -254,8 +254,8 @@ void StartWork(const Nan::FunctionCallbackInfo<v8::Value>& info)
 void GetCraftStatus(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
 	auto isolate = info.GetIsolate();
-	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	int status = 0;
 	if (!g_CGAInterface->GetCraftStatus(status))
@@ -270,8 +270,8 @@ void GetCraftStatus(const Nan::FunctionCallbackInfo<v8::Value>& info)
 void GetImmediateDoneWorkState(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
 	auto isolate = info.GetIsolate();
-	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	int state = 0;
 	if (!g_CGAInterface->GetImmediateDoneWorkState(state))
@@ -286,8 +286,8 @@ void GetImmediateDoneWorkState(const Nan::FunctionCallbackInfo<v8::Value>& info)
 void CraftItem(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
 	auto isolate = info.GetIsolate();
-	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	if (info.Length() < 1 || !info[0]->IsInt32()) {
 		Nan::ThrowTypeError("Arg[0] must be integer.");
@@ -335,8 +335,8 @@ void CraftItem(const Nan::FunctionCallbackInfo<v8::Value>& info)
 void AssessItem(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
 	auto isolate = info.GetIsolate();
-	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	if (info.Length() < 1 || !info[0]->IsInt32()) {
 		Nan::ThrowTypeError("Arg[0] must be integer.");
@@ -363,8 +363,8 @@ void AssessItem(const Nan::FunctionCallbackInfo<v8::Value>& info)
 void SetImmediateDoneWork(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
 	auto isolate = info.GetIsolate();
-	auto context = isolate->GetCurrentContext();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	if (info.Length() < 1 || !info[0]->IsBoolean()) {
 		Nan::ThrowTypeError("Arg[0] must be boolean.");
