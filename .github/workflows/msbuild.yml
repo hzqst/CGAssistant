@@ -19,13 +19,13 @@ jobs:
     steps:
     - uses: actions/checkout@v2
       
-    - name: init-dep
+    - name: Initialize dependencies
       working-directory: ${{env.GITHUB_WORKSPACE}}
       run: |
         git submodule update --init --recursive
       shell: cmd
 
-    - name: init-qhttp
+    - name: Initialize qhttp
       working-directory: ${{env.GITHUB_WORKSPACE}}
       run: |
         cd qhttp
@@ -34,7 +34,7 @@ jobs:
         git clone https://github.com/nodejs/http-parser.git
       shell: cmd
 
-    - name: init-boost
+    - name: Initialize boost
       working-directory: ${{env.GITHUB_WORKSPACE}}
       run: |
         cd boost
@@ -72,11 +72,11 @@ jobs:
         )
       shell: cmd
 
-    - name: build CGAHook
+    - name: Build CGAHook
       working-directory: ${{env.GITHUB_WORKSPACE}}
       run: MSBuild.exe CGAssistant.sln /t:CGAHook /p:Configuration=Release /p:Platform="x86" /p:PlatformToolset=v142
 
-    - name: build CGALib64
+    - name: Build CGALib64
       working-directory: ${{env.GITHUB_WORKSPACE}}
       run: MSBuild.exe CGAssistant.sln /t:CGALib /p:Configuration=Release /p:Platform="x64" /p:PlatformToolset=v142
 
@@ -125,12 +125,12 @@ jobs:
       working-directory: ${{env.GITHUB_WORKSPACE}}
       run: |
         for /f "usebackq tokens=*" %%i in (`vswhere -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath`) do (
-          set VCINSTALLDIR=%%i
-        )        
+          set VCINSTALLDIR=%%i\VC
+        )
         windeploy.bat
       shell: cmd
  
-    - name: checkout CGAssistantJS
+    - name: Checkout CGAssistantJS
       uses: actions/checkout@v2 
       with:
         repository: 'hzqst/CGAssistantJS'
