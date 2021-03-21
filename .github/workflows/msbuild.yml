@@ -113,6 +113,11 @@ jobs:
       working-directory: ${{env.GITHUB_WORKSPACE}}
       run: npm install -g node-gyp
 
+    - uses: actions/setup-node@v2
+      with:
+        node-version: '14'
+        architecture: 'x86'
+
     - name: build-nodegyp
       working-directory: ${{env.GITHUB_WORKSPACE}}
       run: build-nodegyp.bat
