@@ -76,10 +76,6 @@ jobs:
       working-directory: ${{env.GITHUB_WORKSPACE}}
       run: MSBuild.exe CGAssistant.sln /t:CGAHook /p:Configuration=Release /p:Platform="x86" /p:PlatformToolset=v142
 
-    - name: Build CGALib64
-      working-directory: ${{env.GITHUB_WORKSPACE}}
-      run: MSBuild.exe CGAssistant.sln /t:CGALib /p:Configuration=Release /p:Platform="x64" /p:PlatformToolset=v142
-
     - name: Build qhttp
       working-directory: ${{env.GITHUB_WORKSPACE}}
       run: |

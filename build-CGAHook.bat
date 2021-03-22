@@ -7,5 +7,4 @@ if exist "%InstallDir%\Common7\Tools\vsdevcmd.bat" (
     "%InstallDir%\Common7\Tools\vsdevcmd.bat" -arch=x86
     
     MSBuild.exe CGAssistant.sln /t:CGAHook /p:Configuration=Release /p:Platform="x86" /p:PlatformToolset=v141
-    MSBuild.exe CGAssistant.sln /t:CGALib /p:Configuration=Release /p:Platform="x64" /p:PlatformToolset=v141
 )
