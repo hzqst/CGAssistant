@@ -1,6 +1,6 @@
 cd CGANode
 
-call node-gyp configure build
+call node-gyp configure build --arch=ia32
 
 mkdir "..\build\Release\"
 

@@ -112,6 +112,12 @@ jobs:
         )
       shell: cmd
 
+    - name: Setup node environment
+      uses: actions/setup-node@v2
+      with:
+        node-version: '14.16'
+        architecture: 'x86'
+
     - name: Install node-gyp
       working-directory: ${{env.GITHUB_WORKSPACE}}
       run: npm install -g node-gyp
@@ -123,11 +129,7 @@ jobs:
 
     - name: Deploy qt and msvc redistribution
       working-directory: ${{env.GITHUB_WORKSPACE}}
-      run: |
-        for /f "usebackq tokens=*" %%i in (`vswhere -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath`) do (
-          set VCINSTALLDIR=%%i\VC
-        )
-        windeploy.bat
+      run: windeploy.bat
       shell: cmd
  
     - name: Checkout CGAssistantJS

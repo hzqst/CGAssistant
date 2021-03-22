@@ -38,7 +38,7 @@ VC141 or VC142 Toolset (the msvc projects uses VC141 Toolset, if you want to use
 
 QT 5.12+ for msvc2017, win32 (x86), with QtCreator
 
-NodeJS v14+ (either 32-bit or 64-bit is okay)
+NodeJS v14.16 (32-bit)
 
 node-gyp (check https://www.npmjs.com/package/node-gyp how to install node-gyp)
 
