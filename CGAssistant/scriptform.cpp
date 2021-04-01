@@ -377,7 +377,7 @@ void ScriptForm::RunNavigatorScript(int x, int y, int enter, QString *result)
 
         env.insert("CGA_GAME_PORT", qgetenv("CGA_GAME_PORT"));
         env.insert("CGA_GUI_PORT", qgetenv("CGA_GUI_PORT"));
-        env.insert("PATH", QDir::currentPath());
+        env.insert("NODE_SKIP_PLATFORM_CHECK", "1");
         m_node->setProcessEnvironment(env);
 
         m_node->setWorkingDirectory(fileInfo.dir().absolutePath());
@@ -415,7 +415,7 @@ void ScriptForm::on_pushButton_debug_clicked()
 
         env.insert("CGA_GAME_PORT", qgetenv("CGA_GAME_PORT"));
         env.insert("CGA_GUI_PORT", qgetenv("CGA_GUI_PORT"));
-        env.insert("PATH", QDir::currentPath());
+        env.insert("NODE_SKIP_PLATFORM_CHECK", "1");
         m_node->setProcessEnvironment(env);
 
         m_node->setWorkingDirectory(fileInfo.dir().absolutePath());        
