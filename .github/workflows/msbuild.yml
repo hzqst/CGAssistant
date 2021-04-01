@@ -21,9 +21,7 @@ jobs:
       
     - name: Initialize dependencies
       working-directory: ${{env.GITHUB_WORKSPACE}}
-      run: |
-        git submodule update --init --recursive
-      shell: cmd
+      run: git submodule update --init --recursive
 
     - name: Initialize qhttp
       working-directory: ${{env.GITHUB_WORKSPACE}}
@@ -56,7 +54,7 @@ jobs:
         install-deps: # optional, default is true
         modules: # optional
         cached: false # ${{ steps.cache-qt.outputs.cache-hit }}
-        tools : 'tools_qtcreator,4.14.1-0,qt.tools.qtcreator'
+        tools : 'tools_qtcreator,4.14.2-0,qt.tools.qtcreator'
 
     - name: Build boost
       working-directory: ${{env.GITHUB_WORKSPACE}}
