@@ -98,12 +98,14 @@
     <ClCompile Include="commandline.cpp" />
     <ClCompile Include="dump.cpp" />
     <ClCompile Include="gameservice.cpp" />
+    <ClCompile Include="Inject.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="server.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="commandline.h" />
     <ClInclude Include="gameservice.h" />
+    <ClInclude Include="inject.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -1,5 +1,6 @@
 #include <Windows.h>
 #include <stdlib.h>
+#include <detours.h>
 #include "gameservice.h"
 
 DWORD WINAPI CGAServerThread(LPVOID);
@@ -17,6 +18,13 @@ HANDLE g_hPortMutex;
 HANDLE g_hDataLock = NULL;
 HANDLE g_hServreThread = NULL;
 char g_BasicWindowTitle[256] = {0};
+
+HMODULE g_hCGAModule = NULL;
+WCHAR g_szCGAModulePath[1024] = {0};
+
+using typeCreateMutexA = decltype(CreateMutexA);
+
+typeCreateMutexA *g_pfnCreateMutexA;
 
 LPCWSTR ExtractFileName(LPCWSTR szPath)
 {
@@ -328,6 +336,9 @@ LRESULT CALLBACK NewWndProcPOLCN(HWND hWnd, UINT message, WPARAM wParam, LPARAM 
 
 void InitializeHooks(int ThreadId, HWND hWnd, CGA::game_type type)
 {
+	if (g_MainThreadId && g_MainThreadId != ThreadId)
+		return;
+
 	g_MainThreadId = ThreadId;
 	g_MainHwnd = hWnd;
 
@@ -335,7 +346,7 @@ void InitializeHooks(int ThreadId, HWND hWnd, CGA::game_type type)
 
 	g_CGAService.Initialize(type);
 
-	if (hWnd)
+	if (hWnd && !g_OldProc)
 	{
 		g_OldProc = (WNDPROC)GetWindowLongPtrA(hWnd, GWL_WNDPROC);
 		SetWindowLongPtrA(hWnd, GWL_WNDPROC, (LONG_PTR)(type == CGA::game_type::polcn ? NewWndProcPOLCN : NewWndProc));
@@ -365,14 +376,57 @@ extern "C"
 				{
 					InitializeHooks(GetCurrentThreadId(), pMsg->hwnd, CGA::cg_item_6000);
 				}
+				else if (!_wcsicmp(pModuleName, L"cg_se_6000.exe") && !strcmp(szClass, "Ä§Á¦±¦±´"))
+				{
+					//InitializeHooks(GetCurrentThreadId(), pMsg->hwnd, CGA::cg_se_6000);
+				}
 				else if (!_wcsicmp(pModuleName, L"POLCN_Launcher.exe"))
 				{
 					InitializeHooks(GetCurrentThreadId(), pMsg->hwnd, CGA::polcn);
-				}				
+				}
 			}
 		}
 		return CallNextHookEx(NULL, Code, wParam, lParam);
 	}
+}
+
+extern "C"
+{
+	NTSYSAPI ULONG NTAPI RtlWalkFrameChain(
+		OUT PVOID *Callers,
+		IN ULONG Count,
+		IN ULONG Flags
+	);
+}
+
+HANDLE WINAPI NewCreateMutexA_PatchGame(LPSECURITY_ATTRIBUTES lpMutexAttributes, BOOL bInitialOwner, LPCSTR lpName)
+{
+	if (!lpMutexAttributes && bInitialOwner == 1 && lpName)
+	{
+		//Patch se_6000 windowed bug
+		if (g_CGAService.m_game_type == CGA::cg_se_6000)
+		{
+			bool bLegitCaller = false;
+			PVOID callers[16];
+			ULONG caller_count = RtlWalkFrameChain(callers, _countof(callers), 0);
+			for (ULONG i = 0; i < caller_count; ++i)
+			{
+				if (callers[i] == (PVOID)(g_CGAService.m_ImageBase + 0x51F60))
+				{
+					bLegitCaller = true;
+					break;
+				}
+			}
+			if (bLegitCaller)
+			{
+				DWORD oldProtect;
+				VirtualProtect((void *)(g_CGAService.m_ImageBase + 0x3BAD3), 1, PAGE_EXECUTE_READWRITE, &oldProtect);
+				memcpy((void *)(g_CGAService.m_ImageBase + 0x3BAD3), "\xEB", 1);
+				VirtualProtect((void *)(g_CGAService.m_ImageBase + 0x3BAD3), 1, oldProtect, &oldProtect);
+			}
+		}
+	}
+	return g_pfnCreateMutexA(lpMutexAttributes, bInitialOwner, lpName);
 }
 
 int WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpReserved)
@@ -382,6 +436,9 @@ int WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpReserved)
 		WCHAR szModulePath[MAX_PATH];
 		GetModuleFileNameW(NULL, szModulePath, MAX_PATH);
 		LPCWSTR pModuleName = ExtractFileName(szModulePath);
+
+		g_hCGAModule = (HMODULE)hinstDLL;
+		GetModuleFileNameW(g_hCGAModule, g_szCGAModulePath, 1024);
 
 		if (!_wcsicmp(pModuleName, L"POLCN_Launcher.exe"))
 		{
@@ -394,6 +451,17 @@ int WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpReserved)
 			}
 
 			InitializeHooks(GetCurrentThreadId(), NULL, CGA::polcn);
+		}
+		else if (!_wcsicmp(pModuleName, L"cg_se_6000.exe"))//Patch se_6000 windowed bug
+		{
+			g_pfnCreateMutexA = (typeCreateMutexA *)GetProcAddress(GetModuleHandleA("kernel32.dll"), "CreateMutexA");
+
+			g_CGAService.m_ImageBase = (ULONG_PTR)GetModuleHandleA(NULL);
+			g_CGAService.m_game_type = CGA::cg_se_6000;
+
+			DetourTransactionBegin();
+			DetourAttach(&(void *&)g_pfnCreateMutexA, ::NewCreateMutexA_PatchGame);
+			DetourTransactionCommit();
 		}
 	}
 	return TRUE;

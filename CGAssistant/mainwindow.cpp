@@ -98,6 +98,8 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(playerWorker, &CPlayerWorker::NotifyGetInfoFailed, this, &MainWindow::OnNotifyGetInfoFailed, Qt::ConnectionType::QueuedConnection);
     connect(playerWorker, &CPlayerWorker::NotifyGetPlayerInfo, this, &MainWindow::OnNotifyGetPlayerInfo, Qt::ConnectionType::QueuedConnection);
     connect(playerWorker, &CPlayerWorker::NotifyGetPlayerInfo, chatForm, &ChatForm::OnNotifyGetPlayerInfo, Qt::ConnectionType::QueuedConnection);
+    connect(playerWorker, &CPlayerWorker::NotifyChatMsg, playerFrom, &PlayerForm::OnNotifyChatMsg, Qt::ConnectionType::QueuedConnection);
+    connect(battleWorker, &CBattleWorker::NotifyBattleAction, playerFrom, &PlayerForm::OnNotifyBattleAction, Qt::ConnectionType::QueuedConnection);
     connect(playerWorker, &CPlayerWorker::NotifyChatMsg, chatForm, &ChatForm::OnNotifyChatMsg, Qt::ConnectionType::QueuedConnection);
     connect(playerWorker, &CPlayerWorker::NotifyConnectionState, accountForm, &AccountForm::OnNotifyConnectionState, Qt::ConnectionType::QueuedConnection);
     connect(accountForm, &AccountForm::NotifyKillProcess, processWorker, &CProcessWorker::OnKillProcess);

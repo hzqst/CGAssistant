@@ -687,7 +687,6 @@ namespace CGA
 		pet_t *g_pet_base;
 		int *g_pet_id;
 		int *g_pet_state;
-		short_pet_t *g_short_pet_base;
 		char *g_job_name;
 		skill_t *g_skill_base;
 		short *g_map_x;
@@ -938,15 +937,6 @@ namespace CGA
 		int(__cdecl *UI_IsCharacterPresent)(int index);
 		int(__cdecl *UI_ShowMessageBox)(const char *text);
 		int(__cdecl *UI_ShowLostConnectionDialog)();
-		int(__cdecl *UI_BattleEscape)(int index, char flags);
-		int(__cdecl *UI_BattleGuard)(int index, char flags);
-		int(__cdecl *UI_BattleExchangePosition)(int index, char flags);
-		int(__cdecl *UI_BattleChangePet)(int index, char flags);
-		int(__cdecl *UI_BattleWithdrawPet)(int index, char flags);
-		int(__cdecl *UI_BattleClickChangePet)(int index, char flags);
-		int(__cdecl *UI_BattleRebirth)(int index, char flags);
-		int(__cdecl *UI_BattlePetSkill)(int index, char flags);
-		int(__cdecl *UI_BattleOpenPetSkillDialog)(int index, char flags);
 		int(__cdecl *UI_DisplayAnimFrame)(int index);
 		void (__cdecl *UI_DialogShowupFrame)(int dialog);
 		void(__cdecl *UI_UpdatePersDesc)(int);

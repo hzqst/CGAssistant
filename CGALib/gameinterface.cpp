@@ -1349,11 +1349,18 @@ namespace CGA
 						if (callback) 
 							callback(flags);
 					},
-						[](auto const& e) {}
+						[](auto const& e) {
+						OutputDebugStringA("RegisterBattleActionNotify failed 2");
+						OutputDebugStringA(e.get_error_message().c_str());
+					}
 					);
 					return true;
 				}
-				catch (timax::rpc::exception const& e) {}
+				catch (timax::rpc::exception const& e) {
+
+					OutputDebugStringA("RegisterBattleActionNotify failed");
+					OutputDebugStringA(e.get_error_message().c_str());
+				}
 			}
 			return false;
 		}

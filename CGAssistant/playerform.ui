@@ -555,6 +555,9 @@
           <property name="enabled">
            <bool>true</bool>
           </property>
+          <property name="toolTip">
+           <string>Automatically use food for player</string>
+          </property>
           <property name="text">
            <string>Use Food</string>
           </property>
@@ -570,6 +573,9 @@
          <widget class="QCheckBox" name="checkBox_petFood">
           <property name="enabled">
            <bool>true</bool>
+          </property>
+          <property name="toolTip">
+           <string>Automatically use food for pets</string>
           </property>
           <property name="text">
            <string>Pet Food</string>
@@ -589,6 +595,9 @@
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
+          </property>
+          <property name="toolTip">
+           <string>Auto resupply when talking to nurse</string>
           </property>
           <property name="layoutDirection">
            <enum>Qt::LeftToRight</enum>
@@ -610,6 +619,9 @@
           <property name="enabled">
            <bool>true</bool>
           </property>
+          <property name="toolTip">
+           <string>Automatically use medicine for player</string>
+          </property>
           <property name="text">
            <string>Use Med</string>
           </property>
@@ -625,6 +637,9 @@
          <widget class="QCheckBox" name="checkBox_petMed">
           <property name="enabled">
            <bool>true</bool>
+          </property>
+          <property name="toolTip">
+           <string>Automatically use medicine for pets</string>
           </property>
           <property name="text">
            <string>Pet Med</string>
@@ -645,11 +660,37 @@
             <verstretch>0</verstretch>
            </sizepolicy>
           </property>
+          <property name="toolTip">
+           <string>Disable animation for scene switching</string>
+          </property>
           <property name="layoutDirection">
            <enum>Qt::LeftToRight</enum>
           </property>
           <property name="text">
            <string>SwitchAnim off</string>
+          </property>
+          <property name="tristate">
+           <bool>false</bool>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_17" stretch="0">
+        <item>
+         <widget class="QCheckBox" name="checkBox_shareData">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
+          <property name="toolTip">
+           <string>Share non-sensitive data to help CGAssistant works better</string>
+          </property>
+          <property name="text">
+           <string>Share data</string>
+          </property>
+          <property name="checkable">
+           <bool>true</bool>
           </property>
           <property name="tristate">
            <bool>false</bool>
@@ -674,6 +715,9 @@
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
+          </property>
+          <property name="toolTip">
+           <string>Use food for player under this condition</string>
           </property>
           <property name="editable">
            <bool>true</bool>
@@ -700,6 +744,9 @@
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
+          </property>
+          <property name="toolTip">
+           <string>Use food for pets under this condition</string>
           </property>
           <property name="editable">
            <bool>true</bool>
@@ -728,6 +775,9 @@
             <verstretch>0</verstretch>
            </sizepolicy>
           </property>
+          <property name="toolTip">
+           <string>Use medicine for player under this condition</string>
+          </property>
           <property name="editable">
            <bool>true</bool>
           </property>
@@ -750,6 +800,9 @@
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
+          </property>
+          <property name="toolTip">
+           <string>Use medicine for pets under this condition</string>
           </property>
           <property name="editable">
            <bool>true</bool>
@@ -787,8 +840,11 @@
         </item>
         <item>
          <widget class="QSlider" name="horizontalSlider_workacc">
+          <property name="toolTip">
+           <string>Craft acceleration</string>
+          </property>
           <property name="statusTip">
-           <string>Work acceleration</string>
+           <string>Craft acceleration</string>
           </property>
           <property name="minimum">
            <number>10</number>
@@ -857,6 +913,9 @@
         </item>
         <item>
          <widget class="QSlider" name="horizontalSlider_workdelay">
+          <property name="toolTip">
+           <string>Gather duration</string>
+          </property>
           <property name="statusTip">
            <string>Gather duration</string>
           </property>
@@ -927,8 +986,11 @@
         </item>
         <item>
          <widget class="QSlider" name="horizontalSlider_movespd">
+          <property name="toolTip">
+           <string>Player movement speed</string>
+          </property>
           <property name="statusTip">
-           <string>Move speed</string>
+           <string>Player movement speed</string>
           </property>
           <property name="minimum">
            <number>1</number>
@@ -980,6 +1042,9 @@
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
+          </property>
+          <property name="toolTip">
+           <string/>
           </property>
           <property name="text">
            <string>Save</string>

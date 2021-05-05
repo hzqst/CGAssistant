@@ -9,8 +9,11 @@
 #include <rapidjson/writer.h>
 
 #include <intrin.h>
+#include "inject.h"
 
 extern HWND g_MainHwnd;
+extern HMODULE g_hCGAModule;
+extern WCHAR g_szCGAModulePath[1024];
 
 #pragma comment(lib, "ntdll.lib")
 
@@ -32,15 +35,12 @@ const int index2player_flags[] = {
 	PLAYER_ENABLE_FLAGS_FAMILY
 };
 
-#define UI_BATTLE_ESCAPE 1
-#define UI_BATTLE_GUARD 2
-#define UI_BATTLE_EXCHANGE_POSITION 3
-#define UI_BATTLE_CHANGE_PET 4
-#define UI_BATTLE_NORMAL_ATTACK 5
-#define UI_BATTLE_SKILL_ATTACK 6
-#define UI_BATTLE_USE_ITEM 7
-#define UI_BATTLE_REBIRTH 8
-#define UI_BATTLE_PET_SKILL_ATTACK 9
+void ANSIToUnicode(const std::string &str, std::wstring &out)
+{
+	int len = MultiByteToWideChar(CP_ACP, 0, str.c_str(), str.length(), NULL, 0);
+	out.resize(len);
+	MultiByteToWideChar(CP_ACP, 0, str.c_str(), str.length(), (LPWSTR)out.data(), len);
+}
 
 void WriteLog(LPCSTR fmt, ...)
 {
@@ -527,6 +527,15 @@ BOOL WINAPI NewSetForegroundWindow(HWND hWnd)
 	return TRUE;
 }
 
+extern "C"
+{
+	NTSYSAPI ULONG NTAPI RtlWalkFrameChain(
+		OUT PVOID *Callers,
+		IN ULONG Count,
+		IN ULONG Flags
+	);
+}
+
 BOOL WINAPI NewCreateProcessA(
 	_In_opt_ LPCSTR lpApplicationName,
 	_Inout_opt_ LPSTR lpCommandLine,
@@ -540,12 +549,38 @@ BOOL WINAPI NewCreateProcessA(
 	_Out_ LPPROCESS_INFORMATION lpProcessInformation
 )
 {
+	dwCreationFlags |= CREATE_SUSPENDED;
+
 	auto r = g_CGAService.pfnCreateProcessA(lpApplicationName, lpCommandLine, lpProcessAttributes, lpThreadAttributes, bInheritHandles, dwCreationFlags, lpEnvironment, lpCurrentDirectory, lpStartupInfo, lpProcessInformation);
 
 	if (r && lpProcessInformation->dwProcessId)
 	{
-		g_CGAService.m_run_game_pid = lpProcessInformation->dwProcessId;
-		g_CGAService.m_run_game_tid = lpProcessInformation->dwThreadId;
+		bool bLegitCaller = false;
+		PVOID callers[16];
+		ULONG caller_count = RtlWalkFrameChain(callers, _countof(callers), 0);
+		for (ULONG i = 0; i < caller_count; ++i)
+		{
+			if (callers[i] == (PVOID)(g_CGAService.m_ImageBase + 0x6CFF))
+			{
+				bLegitCaller = true;
+				break;
+			}
+		}
+
+		if (bLegitCaller)
+		{
+			g_CGAService.m_run_game_pid = lpProcessInformation->dwProcessId;
+			g_CGAService.m_run_game_tid = lpProcessInformation->dwThreadId;
+
+			if (g_szCGAModulePath[0])
+			{
+				CInject injector;
+				injector.Initialize();
+				injector.InjectByHookNtdll(lpProcessInformation->hProcess, g_szCGAModulePath);
+			}
+		}
+
+		ResumeThread(lpProcessInformation->hThread);
 	}
 
 	return r;
@@ -578,39 +613,10 @@ int __fastcall NewCMainDialog_OnInitDialog(void *pthis, int dummy)
 void CGAService::NewBATTLE_PlayerAction()
 {
 	int prevPlayerStatus = *g_btl_player_status;
-	//int moustate = *g_mouse_states;
-
-	/*if (m_ui_battle_action == UI_BATTLE_NORMAL_ATTACK)
-	{
-		*g_btl_select_action = 0;
-		*g_mouse_states |= 1;
-		*g_mouse_states &= ~2;
-	}
-	else if (m_ui_battle_action == UI_BATTLE_SKILL_ATTACK)
-	{
-		*g_btl_select_action = 2;
-		*g_mouse_states |= 1;
-		*g_mouse_states &= ~2;
-	}
-	else if (m_ui_battle_action == UI_BATTLE_USE_ITEM)
-	{
-		*g_btl_select_action = 3;
-		*g_mouse_states |= 1;
-		*g_mouse_states &= ~2;
-	}
-	else if (m_ui_battle_action == UI_BATTLE_PET_SKILL_ATTACK)
-	{
-		if (*g_btl_select_pet_skill_index == m_ui_battle_action_param.select_skill_index)
-		{
-			*g_mouse_states |= 1;
-			*g_mouse_states &= ~2;
-		}
-	}*/
 
 	BATTLE_PlayerAction();
 
 	int playerStatus = *g_btl_player_status;
-	//*g_mouse_states = moustate;
 
 	if (prevPlayerStatus == 2 && playerStatus == 0)
 	{
@@ -1585,7 +1591,7 @@ void __cdecl NewNET_ParseMeetEnemy(int a1, int a2, int a3)
 {
 	g_CGAService.NET_ParseMeetEnemy(a1, a2, a3);
 
-	WriteLog("NewNET_ParseMeetEnemy %d %d\n", a2, a3);
+	OutputDebugStringA("NewNET_ParseMeetEnemy1");
 
 	CGA_NotifyBattleAction(FL_BATTLE_ACTION_BEGIN);
 }
@@ -2292,279 +2298,6 @@ int __cdecl NewUI_ShowLostConnectionDialog()
 	return g_CGAService.NewUI_ShowLostConnectionDialog();
 }
 
-/*int CGAService::NewUI_BattleEscape(int index, char flags)
-{
-	int ret = 0;
-	if (m_ui_battle_action == UI_BATTLE_ESCAPE)
-	{
-		flags = 2;
-
-		ret = UI_BattleEscape(index, flags);
-
-		if (ret == 1)
-		{
-			m_ui_battle_action = 0;
-		}
-	}
-	else
-	{
-		ret = UI_BattleEscape(index, flags);
-	}
-
-	return ret;
-}
-
-int __cdecl NewUI_BattleEscape(int index, char flags)
-{
-	return g_CGAService.NewUI_BattleEscape(index, flags);
-}
-
-int CGAService::NewUI_BattleGuard(int index, char flags)
-{
-	int ret = 0;
-	if (m_ui_battle_action == UI_BATTLE_GUARD)
-	{
-		flags = 2;
-
-		ret = UI_BattleGuard(index, flags);
-
-		if (ret == 1)
-		{
-			m_ui_battle_action = 0;
-		}
-	}
-	else
-	{
-		ret = UI_BattleGuard(index, flags);
-	}
-
-	return ret;
-}
-
-int __cdecl NewUI_BattleGuard(int index, char flags)
-{
-	return g_CGAService.NewUI_BattleGuard(index, flags);
-}
-
-int CGAService::NewUI_BattleExchangePosition(int index, char flags)
-{
-	int ret = 0;
-	if (m_ui_battle_action == UI_BATTLE_EXCHANGE_POSITION)
-	{
-		flags = 2;
-
-		ret = UI_BattleExchangePosition(index, flags);
-
-		if (ret == 1)
-		{
-			m_ui_battle_action = 0;
-		}
-	}
-	else
-	{
-		ret = UI_BattleExchangePosition(index, flags);
-	}
-
-	return ret;
-}
-
-int __cdecl NewUI_BattleExchangePosition(int index, char flags)
-{
-	return g_CGAService.NewUI_BattleExchangePosition(index, flags);
-}
-
-int CGAService::NewUI_BattleChangePet(int index, char flags)
-{
-	int ret = 0;
-	if (m_ui_battle_action == UI_BATTLE_CHANGE_PET)
-	{
-		int targetpetid = m_ui_battle_action_param.change_petid;
-		if (targetpetid >= 0 && targetpetid < 5)
-		{
-			if ((g_pet_base[targetpetid].flags & 0xFFFF) == 1 &&
-				(g_pet_base[targetpetid].battle_flags == 1 || g_pet_base[targetpetid].battle_flags == 2)
-				)
-			{
-				int select_index = index - 2;
-				int valid_index = -1;
-				for (int i = 0; i < 5; ++i)
-				{
-					int petid = g_short_pet_base[i].petid;
-					if ((g_pet_base[petid].flags & 0xFFFF) == 1 && (g_pet_base[petid].battle_flags == 1 || g_pet_base[petid].battle_flags == 2))
-						++valid_index;
-					if (valid_index == select_index && petid == targetpetid)
-					{
-						flags = 2;
-						break;
-					}
-				}
-			}
-		}
-
-		ret = UI_BattleChangePet(index, flags);
-
-		if (ret == 1)
-		{
-			m_ui_battle_action = 0;
-		}
-	}
-	else
-	{
-		ret = UI_BattleChangePet(index, flags);
-	}
-
-	return ret;
-}
-
-int __cdecl NewUI_BattleChangePet(int index, char flags)
-{
-	return g_CGAService.NewUI_BattleChangePet(index, flags);
-}
-
-int CGAService::NewUI_BattleWithdrawPet(int index, char flags)
-{
-	int ret = 0;
-	if (m_ui_battle_action == UI_BATTLE_CHANGE_PET)
-	{
-		if (m_ui_battle_action_param.change_petid >= 0 && m_ui_battle_action_param.change_petid < 5)
-		{
-			
-		}
-		else
-		{
-			flags = 2;
-		}
-
-		ret = UI_BattleWithdrawPet(index, flags);
-
-		if (ret == 1)
-		{
-			m_ui_battle_action = 0;
-		}
-	}
-	else
-	{
-		ret = UI_BattleWithdrawPet(index, flags);
-	}
-
-	return ret;
-}
-
-int __cdecl NewUI_BattleWithdrawPet(int index, char flags)
-{
-	return g_CGAService.NewUI_BattleWithdrawPet(index, flags);
-}
-
-int CGAService::NewUI_BattleClickChangePet(int index, char flags)
-{
-	int ret = 0;
-	if (m_ui_battle_action == UI_BATTLE_CHANGE_PET)
-	{
-		flags = 2;
-
-		ret = UI_BattleClickChangePet(index, flags);
-	}
-	else
-	{
-		ret = UI_BattleClickChangePet(index, flags);
-	}
-
-	return ret;
-}
-
-int __cdecl NewUI_BattleClickChangePet(int index, char flags)
-{
-	return g_CGAService.NewUI_BattleClickChangePet(index, flags);
-}
-
-int CGAService::NewUI_BattleRebirth(int index, char flags)
-{
-	int ret = 0;
-	if (m_ui_battle_action == UI_BATTLE_REBIRTH)
-	{
-		flags = 2;
-
-		ret = UI_BattleRebirth(index, flags);
-
-		if (ret == 1)
-		{
-			m_ui_battle_action = 0;
-		}
-	}
-	else
-	{
-		ret = UI_BattleRebirth(index, flags);
-	}
-
-	return ret;
-}
-
-int __cdecl NewUI_BattleRebirth(int index, char flags)
-{
-	return g_CGAService.NewUI_BattleRebirth(index, flags);
-}
-
-int CGAService::NewUI_BattlePetSkill(int index, char flags)
-{
-	int ret = 0;
-	if (m_ui_battle_action == UI_BATTLE_PET_SKILL_ATTACK
-		&& index - 17 == m_ui_battle_action_param.select_skill_index
-		&& m_ui_battle_action_param.select_skill_ok == false)
-	{
-		flags = 2;
-
-		ret = UI_BattlePetSkill(index, flags);
-
-		if (ret == 1)
-		{
-			m_ui_battle_action_param.select_skill_ok = true;
-		}
-	}
-	else
-	{
-		ret = UI_BattlePetSkill(index, flags);
-	}
-
-	return ret;
-}
-
-int __cdecl NewUI_BattlePetSkill(int index, char flags)
-{
-	return g_CGAService.NewUI_BattlePetSkill(index, flags);
-}
-
-int CGAService::NewUI_BattleOpenPetSkillDialog(int index, char flags)
-{
-	int ret = 0;
-
-	bool dialog_visible = (*g_ui_battle_skill_dialog) != 0;
-
-	if (m_ui_battle_action == UI_BATTLE_PET_SKILL_ATTACK && 
-		*g_btl_select_pet_skill_index != m_ui_battle_action_param.select_skill_index &&
-		!dialog_visible)
-	{
-		flags = 2;
-
-		ret = UI_BattleOpenPetSkillDialog(index, flags);
-
-		if (ret == 1)
-		{
-			//m_ui_battle_action = 0;
-		}
-	}
-	else
-	{
-		ret = UI_BattleOpenPetSkillDialog(index, flags);
-	}
-
-	return ret;
-}
-
-int __cdecl NewUI_BattleOpenPetSkillDialog(int index, char flags)
-{
-	return g_CGAService.NewUI_BattleOpenPetSkillDialog(index, flags);
-}*/
-
 int CGAService::NewUI_DisplayAnimFrame(int index)
 {
 	int ret = 0;
@@ -2689,7 +2422,7 @@ void CGAService::Initialize(game_type type)
 	if (m_initialized)
 		return;
 
-	HMODULE hGameBase = (HMODULE)GetModuleHandle(NULL);
+	HMODULE hGameBase = (HMODULE)GetModuleHandleA(NULL);
 	m_ImageBase = (ULONG_PTR)hGameBase;
 	m_ImageSize = MH_GetModuleSize(hGameBase);
 
@@ -2801,6 +2534,272 @@ void CGAService::Initialize(game_type type)
 		NPC_ClickExchangeDialog = CONVERT_GAMEVAR(void(__cdecl *)(int), 0);//TODO
 		UI_OpenGatherDialog = CONVERT_GAMEVAR(void(__cdecl *)(int, int), 0);//TODO
 	}
+	else if (m_game_type == cg_se_6000)
+	{
+		g_server_time = CONVERT_GAMEVAR(int *, 0x6BB5F8-0x400000);//ok
+		g_local_time = CONVERT_GAMEVAR(int *, 0x6BB5D0- 0x400000);//ok
+		g_sys_time = CONVERT_GAMEVAR(sys_time_t *, 0x6BB5E0-0x400000);//ok
+		g_bgm_index = CONVERT_GAMEVAR(int *, 0x53AEAC-0x400000);//ok
+		g_pet_riding_stru = CONVERT_GAMEVAR(void **, 0xFC6274-0x400000);//ok
+		g_new_world_status_cgitem = CONVERT_GAMEVAR(int *, 0xED007C-0x400000);//ok
+		g_world_status_cgitem = CONVERT_GAMEVAR(int *, 0xED0064-0x400000);//ok
+		g_game_status_cgitem = CONVERT_GAMEVAR(int *, 0xED0060-0x400000);//ok
+		g_player_xpos = CONVERT_GAMEVAR(CXorValue *, 0xFB8B40-0x400000);//ok
+		g_player_ypos = CONVERT_GAMEVAR(CXorValue *, 0xFB8B6C-0x400000);//ok
+		g_playerBase_cgitem = CONVERT_GAMEVAR(playerbase_t *, 0xFBAEC8-0x400000);//ok
+		g_playerBase = &g_playerBase_cgitem;
+		g_bank_item_base = CONVERT_GAMEVAR(bank_item_info_t *, 0xBC9EB0-0x400000);//ok
+		g_bank_pet_base = CONVERT_GAMEVAR(bank_pet_info_t *, 0xBB4EE8-0x400000);//ok
+		g_bank_gold = CONVERT_GAMEVAR(int *, 0xBE9A94-0x400000);//ok
+		g_npcdlg_item_base = CONVERT_GAMEVAR(npcdlg_item_info_t *, 0xBB8518-0x400000);//ok
+		g_player_name = CONVERT_GAMEVAR(char *, 0xCDC660-0x400000);//ok
+		g_pet_base = CONVERT_GAMEVAR(pet_t *, 0xFB8C90-0x400000);//ok
+		g_pet_state = CONVERT_GAMEVAR(int *, 0xC144CC-0x400000);//ok
+		g_player_remain_points = CONVERT_GAMEVAR(int *, 0xBC8EFC-0x400000);//ok
+		g_pet_id = CONVERT_GAMEVAR(int *, 0xB998A4-0x400000);//ok
+		g_job_name = CONVERT_GAMEVAR(char *, 0xCDCF30-0x400000);//ok
+		g_skill_base = CONVERT_GAMEVAR(skill_t *, 0xCDCF4C-0x400000);//ok
+		g_map_x = CONVERT_GAMEVAR(short *, 0x717AE0);//ok
+		g_map_y = CONVERT_GAMEVAR(short *, 0x8367C8);//ok
+
+		g_map_name = CONVERT_GAMEVAR(char *, 0x836894);//ok
+		g_move_xdest = CONVERT_GAMEVAR(int *, 0x8B3968);//ok
+		g_move_ydest = CONVERT_GAMEVAR(int *, 0x8B3960);//ok
+		g_move_destx = CONVERT_GAMEVAR(CXorValue *, 0x8AB3D4);//ok
+		g_move_desty = CONVERT_GAMEVAR(CXorValue *, 0x8AB3C4);//ok
+		g_move_xspeed = CONVERT_GAMEVAR(float *, 0x836890);//ok
+		g_move_yspeed = CONVERT_GAMEVAR(float *, 0x819EC4);//ok
+		g_map_xf = CONVERT_GAMEVAR(float *, 0x5D1134);//ok
+		g_map_yf = CONVERT_GAMEVAR(float *, 0x81B354);//ok
+		g_map_xf2 = CONVERT_GAMEVAR(float *, 0x819EE0);//ok
+		g_map_yf2 = CONVERT_GAMEVAR(float *, 0x5D6870);//ok
+		g_map_xpos = CONVERT_GAMEVAR(CXorValue *, 0x8AB324);//ok
+		g_map_ypos = CONVERT_GAMEVAR(CXorValue *, 0x8AB344);//ok
+		g_move_walking = CONVERT_GAMEVAR(int *, 0x8AB2BC);//ok
+		g_move_turning = CONVERT_GAMEVAR(int *, 0x8B3994);//ok
+		g_mouse_states = CONVERT_GAMEVAR(int *, 0xB1E7CC);//ok
+		g_is_ingame = CONVERT_GAMEVAR(int *, 0xBDBA78);//ok
+
+		g_btl_buffers = CONVERT_GAMEVAR(char *, 0x23B830);//ok
+		g_btl_buffer_index = CONVERT_GAMEVAR(int *, 0x23B828);//ok
+		g_btl_round_count = CONVERT_GAMEVAR(int *, 0x23FA1C);//ok
+		g_btl_select_skill_level = CONVERT_GAMEVAR(int *, 0x23FA8C);//ok
+		g_btl_select_skill_index = CONVERT_GAMEVAR(int *, 0x23FA24);//ok
+		g_btl_select_pet_skill_index = CONVERT_GAMEVAR(int *, 0x20182C);//ok
+		g_btl_select_pet_skill_state = CONVERT_GAMEVAR(int *, 0x201830);//ok
+		g_ui_manager = CONVERT_GAMEVAR(void *, 0x8CF53C);//ok
+		g_ui_trade_dialog = CONVERT_GAMEVAR(void *, 0x8BDD48);//ok
+		g_btl_player_pos = CONVERT_GAMEVAR(int *, 0x23FA94);//ok
+		g_btl_select_action = CONVERT_GAMEVAR(int *, 0x23F95C);//ok
+		g_btl_petskill_allowbit = CONVERT_GAMEVAR(int *, 0x23F9BC);//ok
+		g_btl_skill_allowbit = CONVERT_GAMEVAR(int *, 0x23FA28);//ok
+		g_btl_weapon_allowbit = CONVERT_GAMEVAR(int *, 0x23FA9C);//ok
+		g_btl_player_status = CONVERT_GAMEVAR(int *, 0x23FA44);//ok
+		g_btl_petid = CONVERT_GAMEVAR(int *, 0x23F9C0);//ok
+		g_btl_action_done = CONVERT_GAMEVAR(int *, 0x23F924);//ok
+		g_btl_select_item_pos = CONVERT_GAMEVAR(int *, 0x23F9F4);//ok
+		g_btl_skill_performed = CONVERT_GAMEVAR(int *, 0x23F9F8);//ok
+		g_btl_round_endtick = CONVERT_GAMEVAR(unsigned int *, 0x23F92C);//ok
+		g_btl_unit_base = CONVERT_GAMEVAR(char *, 0x235798);//ok
+		g_ui_anim_base = CONVERT_GAMEVAR(ui_anim_t *, 0x8BD7A8);
+		g_ui_battle_skill_dialog = CONVERT_GAMEVAR(int **, 0x8BD274);//ok
+
+		g_net_socket = CONVERT_GAMEVAR(int *, 0xB00C78-0x400000);//ok
+
+		g_item_base = CONVERT_GAMEVAR(item_t *, 0x8C70B0);//ok
+		g_item_info_base = CONVERT_GAMEVAR(item_info_t *, 0xE12DCC);//ok
+		g_trade_item_base = CONVERT_GAMEVAR(item_t *, 0x8BF2C0);//ok
+
+		g_logback = CONVERT_GAMEVAR(int *, 0xB12AA4);//ok
+		g_item_cur_using = CONVERT_GAMEVAR(int *, 0x8CEFFC);//ok
+
+		g_trade_item_array = CONVERT_GAMEVAR(char *, 0x8CF6B0);
+		g_trade_pet_array = CONVERT_GAMEVAR(char *, 0x8BE8BC);
+		g_trade_gold = CONVERT_GAMEVAR(int *, 0x938570);
+
+		g_unit_count = CONVERT_GAMEVAR(int *, 0x23FB0C);//ok
+		g_map_units = CONVERT_GAMEVAR(map_unit_t *, 0x240008);//ok
+
+		g_npc_dialog_show = CONVERT_GAMEVAR(int *, 0x8E4A98);//ok
+		g_npc_dialog_type = CONVERT_GAMEVAR(int *, 0x2277FC);//ok
+		g_npc_dialog_option = CONVERT_GAMEVAR(int *, 0x9386E4);//ok
+		g_npc_dialog_dlgid = CONVERT_GAMEVAR(int *, 0x8CF9F0);//ok
+		g_npc_dialog_npcid = CONVERT_GAMEVAR(int *, 0x8CF6A0);//ok
+		g_petskilldialog_select_index = CONVERT_GAMEVAR(int *, 0x8DBB38);//ok
+		g_petskilldialog_select_pet = CONVERT_GAMEVAR(int *, 0x92F71C);//ok
+
+		g_disable_move = CONVERT_GAMEVAR(short *, 0x801144);//ok
+		g_is_moving = CONVERT_GAMEVAR(int *, 0x8AB2F4);//ok
+		g_do_switch_map = CONVERT_GAMEVAR(int *, 0x8AB2F8);//ok
+		g_switch_map_frames = CONVERT_GAMEVAR(int *, 0x8AB2FC);//ok
+		g_switch_map_type = CONVERT_GAMEVAR(int *, 0x8AB300);//ok
+
+		g_map_x_bottom = CONVERT_GAMEVAR(short *, 0x819ED4);//ok
+		g_map_y_bottom = CONVERT_GAMEVAR(short *, 0x819ED0);//ok
+		g_map_x_size = CONVERT_GAMEVAR(short *, 0x801134);//ok
+		g_map_y_size = CONVERT_GAMEVAR(short *, 0x819EE4);//ok
+		g_map_index1 = CONVERT_GAMEVAR(int *, 0x81B344);
+		g_map_index2 = CONVERT_GAMEVAR(int *, 0x5D1130);
+		g_map_index3 = CONVERT_GAMEVAR(int *, 0x80114C);
+		g_map_collision_table_raw = CONVERT_GAMEVAR(short *, 0x819EE8);//ok
+		g_map_collision_table = CONVERT_GAMEVAR(short *, 0x5D1148);//ok
+		g_map_object_table = CONVERT_GAMEVAR(short *, 0x835370);
+		g_map_tile_table = CONVERT_GAMEVAR(short *, 0x5D5330);
+
+		g_healing_skill_index = CONVERT_GAMEVAR(int *, 0x8E481C);//ok
+		g_healing_subskill_index = CONVERT_GAMEVAR(int *, 0x8E3C44);//ok
+		g_ui_craftdialog_additem_count = CONVERT_GAMEVAR(char *, 0xF12880 - 0x400000);//ok
+
+		g_heal_player_menu_type = CONVERT_GAMEVAR(int *, 0x8E3C54);//ok
+		g_heal_player_menu_select = CONVERT_GAMEVAR(int *, 0x929D48);//ok
+		g_heal_menu_type = CONVERT_GAMEVAR(int *, 0x92DA00);//ok
+		g_item_player_menu_type = CONVERT_GAMEVAR(short *, 0x92F638);//ok
+		g_item_player_select = CONVERT_GAMEVAR(int *, 0x9298B0);//ok
+
+		g_work_basedelay = CONVERT_GAMEVAR(int *, 0x8B4190);//ok
+		g_work_start_tick = CONVERT_GAMEVAR(int *, 0xCE4C1C - 0x400000);//ok
+		g_craft_status = CONVERT_GAMEVAR(int *, 0xCBF15E - 0x400000);//ok
+		g_work_rebirth = CONVERT_GAMEVAR(char *, 0x63FFFE - 0x400000);//ok;
+		g_work_accelerate_percent = CONVERT_GAMEVAR(char *, 0x627E8C - 0x400000);//ok;
+		g_craft_done_tick = CONVERT_GAMEVAR(int *, 0xCCF858 - 0x400000);//ok
+		g_mutex = CONVERT_GAMEVAR(HANDLE *, 0x5D0D00);//ok
+		g_resolution_width = CONVERT_GAMEVAR(int *, 0x2091EC);//ok
+		g_resolution_height = CONVERT_GAMEVAR(int *, 0x2091F0);//ok
+		g_select_big_server = CONVERT_GAMEVAR(int *, 0x20650C);//ok
+		g_select_big_server_btn = CONVERT_GAMEVAR(btn_rect_t *, 0x208AD0);//ok
+		g_select_server_btn = CONVERT_GAMEVAR(btn_rect_t *, 0x2088A0);//ok
+		g_last_login_tick = CONVERT_GAMEVAR(int *, 0x3D3A58);//ok
+		g_next_anim_tick = CONVERT_GAMEVAR(double *, 0x3D2A50);//ok
+		g_create_character_status = CONVERT_GAMEVAR(int *, 0x5CEB78);//ok
+
+		g_is_in_team = CONVERT_GAMEVAR(short *, 0xE109F0);//ok
+		g_team_flags = CONVERT_GAMEVAR(short *, 0xE12DB2);//ok
+		g_team_player_base = CONVERT_GAMEVAR(team_player_t *, 0xCC25B0);//ok
+		g_title_table = CONVERT_GAMEVAR(char *, 0xCBFFF0);//ok
+
+		g_enableflags = CONVERT_GAMEVAR(short *, 0xE12DBC);//ok
+
+		g_player_pers_desc = CONVERT_GAMEVAR(player_pers_desc_t *, 0xEAB3E0);//ok;
+		g_pers_desc = CONVERT_GAMEVAR(player_pers_desc_t *, 0xEBC658);//ok;
+		g_avatar_public_state = CONVERT_GAMEVAR(int *, 0xEAAFD4);//ok;
+		g_local_player_index = CONVERT_GAMEVAR(short *, 0xECFA0C-0x400000);//ok;
+
+		Sys_CheckModify = CONVERT_GAMEVAR(char(__cdecl *)(const char *), 0x1BD030);//ok
+		COMMON_PlaySound = CONVERT_GAMEVAR(void(__cdecl *)(int, int, int), 0x1B1570);//ok
+		BATTLE_PlayerAction = CONVERT_GAMEVAR(void(__cdecl *)(), 0xD83A0);//ok
+		BATTLE_GetSelectTarget = CONVERT_GAMEVAR(int(__cdecl *)(), 0x46150);//ok
+		NET_ParseTradeItemsPackets = CONVERT_GAMEVAR(void(__cdecl *)(int, const char *), 0x183CD0);//ok
+		NET_ParseTradePetPackets = CONVERT_GAMEVAR(void(__cdecl *)(int, int, const char *), 0x183D00);//ok
+		NET_ParseTradePetSkillPackets = CONVERT_GAMEVAR(void(__cdecl *)(int, int, const char *), 0x183D30);//ok
+		NET_ParseTradeGoldPackets = CONVERT_GAMEVAR(void(__cdecl *)(int, int), 0x183CA0);//ok
+		NET_ParseTradePlayers = CONVERT_GAMEVAR(void(__cdecl *)(int, const char *, char *), 0x183BE0);//ok
+		NET_ParseHealPlayers = CONVERT_GAMEVAR(void(__cdecl *)(int, const char *), 0x183B10);
+		NET_ParseHealUnits = CONVERT_GAMEVAR(void(__cdecl *)(int, const char *), 0x183B40);
+		NET_ParseItemPlayers = CONVERT_GAMEVAR(void(__cdecl *)(int, const char *), 0x183B70);
+		NET_ParseItemUnits = CONVERT_GAMEVAR(void(__cdecl *)(int, const char *), 0x183BA0);
+		NET_ParseMeetEnemy = CONVERT_GAMEVAR(void(__cdecl *)(int a1, int a2, int a3), 0x181FB0);
+		NET_ParseDownloadMap = CONVERT_GAMEVAR(void(__cdecl *)(int sock, int index1, int index3, int xbase, int ybase, int xtop, int ytop, const char *buf), 0x17ADE0);
+		NET_ParseBattlePackets = CONVERT_GAMEVAR(void(__cdecl *)(int, const char *), 0x1822A0);//ok
+		NET_ParseWorkingResult = CONVERT_GAMEVAR(void(__cdecl *)(int, int, int, const char *), 0x181140);//ok
+		NET_ParseChatMsg = CONVERT_GAMEVAR(void(__cdecl *)(int, int, const char *, int, int), 0x1814F0);//ok
+		NET_ParseSysMsg = CONVERT_GAMEVAR(void(__cdecl *)(int a1, const char *buf), 0x181AA0);//ok
+		NET_ParseReadyTrade = CONVERT_GAMEVAR(void(__cdecl *)(), 0x183C70);
+		NET_ParseConfirmTrade = CONVERT_GAMEVAR(void(__cdecl *)(int a1, int a2), 0x183DB0);
+		NET_ParseWarp = CONVERT_GAMEVAR(void(__cdecl *)(int a1, int index1, int index3, int xsize, int ysize, int xpos, int ypos, int a8, int a9, int a10, int a11, int a12, int warpTimes), 0x17B0A0);//ok
+		NET_ParseTeamInfo = CONVERT_GAMEVAR(void(__cdecl *)(int a1, int a2, const char *a3), 0x17CEC0);
+		NET_ParseTeamState = CONVERT_GAMEVAR(void(__cdecl *)(int a1, int a2, int a3), 0x181E90);
+		NET_ParseServerBasicInfo = CONVERT_GAMEVAR(void(__cdecl *)(int a1, int a2, int server_time, int serverIndex, int a5), 0x1811C0);
+		NET_ParseLoginResult = CONVERT_GAMEVAR(void(__cdecl *)(int a1, int a2, const char *a3), 0x179E90);
+		NET_ParseLoginResult2 = CONVERT_GAMEVAR(void(__cdecl *)(int a1, const char *a2, const char *a3), 0x17A7D0);
+		R_DrawText = CONVERT_GAMEVAR(void(__cdecl *)(int), 0x79490);//ok
+		g_pGameBase = CONVERT_GAMEVAR(void *, 0x2BBA7C);//ok
+		NET_WritePacket3_cgitem = CONVERT_GAMEVAR(void(__cdecl *)(int, int, int, int, int, int, const char *), 0x189530);//ok
+		NET_WriteSayWords_cgitem = CONVERT_GAMEVAR(void(__cdecl *)(int, int, int, const char *, int, int, int), 0x188710);//ok
+		NET_WriteLogbackPacket_cgitem = CONVERT_GAMEVAR(void(__cdecl *)(int), 0x189D50);//ok
+		NET_WriteUseItemPacket_cgitem = CONVERT_GAMEVAR(void(__cdecl *)(int, int, int, int, int), 0x187730);//ok
+		NET_WriteBattlePacket_cgitem = CONVERT_GAMEVAR(void(__cdecl *)(int, const char *), 0x189CB0);//ok
+		NET_WriteDropItemPacket_cgitem = CONVERT_GAMEVAR(void(__cdecl *)(int, int, int, int), 0x187950);//ok
+		NET_WriteDropGoldPacket_cgitem = CONVERT_GAMEVAR(void(__cdecl *)(int, int, int, int), 0x1879F0);//ok
+		NET_WriteMovePacket_cgitem = CONVERT_GAMEVAR(void(__cdecl *)(int, int, const char *), 0x181240);//ok
+		NET_WriteWorkPacket_cgitem = CONVERT_GAMEVAR(void(__cdecl *)(int, int, int, int, const char *), 0x188E50);//ok
+		NET_WriteJoinTeamPacket_cgitem = CONVERT_GAMEVAR(void(__cdecl *)(int, int, int, int), 0x1888B0);//ok
+		NET_WriteKickTeamPacket_cgitem = CONVERT_GAMEVAR(void(__cdecl *)(int), 0x1912E0);//ok
+		NET_WriteTradePacket_cgitem = CONVERT_GAMEVAR(void(__cdecl *)(int), 0x188F10);//ok
+		NET_WriteTradeAddItemPacket_cgitem = CONVERT_GAMEVAR(void(__cdecl *)(int, const char *, const char *, int), 0x188FB0);//ok
+		NET_WriteTradeConfirmPacket_cgitem = CONVERT_GAMEVAR(void(__cdecl *)(int), 0x1890A0);//ok
+		NET_WriteTradeRefusePacket_cgitem = CONVERT_GAMEVAR(void(__cdecl *)(int), 0x189050);//ok
+		NET_WriteExchangeCardPacket_cgitem = CONVERT_GAMEVAR(void(__cdecl *)(int, int, int), 0x187E90);//ok
+		NET_WritePKPacket_cgitem = CONVERT_GAMEVAR(void(__cdecl *)(int, int, int), 0x187540);//ok
+		NET_WriteOpenHealDialog_cgitem = CONVERT_GAMEVAR(void(__cdecl *)(int, int), 0x188AA0);//ok
+		NET_WriteMoveItemPacket_cgitem = CONVERT_GAMEVAR(void(__cdecl *)(int, int, int, int), 0x187B30);
+		NET_WriteMovePetPacket_cgitem = CONVERT_GAMEVAR(void(__cdecl *)(int, int, int, int), 0x188A30);
+		NET_WriteRequestDownloadMapPacket_cgitem = CONVERT_GAMEVAR(void(__cdecl *)(int, int, int, int, int, int, int), 0x1873D0);
+		NET_WritePrepareCraftItemPacket_cgitem = CONVERT_GAMEVAR(void(__cdecl *)(int, int), 0x189E20);
+		NET_WriteDropPetPacket_cgitem = CONVERT_GAMEVAR(void(__cdecl *)(int, int, int, int), 0x187A90);
+		NET_WriteWorkMiscPacket_cgitem = CONVERT_GAMEVAR(void(__cdecl *)(int, int, int, int), 0x188C50);
+		NET_WriteEndBattlePacket_cgitem = CONVERT_GAMEVAR(void(__cdecl *)(int, int), 0x1875B0);
+		NET_WriteChangePetStatePacket_cgitem = CONVERT_GAMEVAR(void(__cdecl *)(int, int, int, int, int, int), 0x188950);
+		NET_WriteUpgradePlayerPacket = CONVERT_GAMEVAR(void(__cdecl *)(int, int), 0x1892A0);
+		NET_WriteUpgradePetPacket = CONVERT_GAMEVAR(void(__cdecl *)(int, int, int), 0x1892F0);
+		NET_WriteChangeNickNamePacket_cgitem = CONVERT_GAMEVAR(void(__cdecl *)(int, const char *), 0x189250);
+		NET_WriteChangePersDescPacket_cgitem = CONVERT_GAMEVAR(void(__cdecl *)(int, int, const char *, int, const char *, int, const char *, const char *), 0x188400);
+		NET_WriteChangeAvatarPublicStatePacket_cgitem = CONVERT_GAMEVAR(void(__cdecl *)(int, int), 0x188670);
+		NET_WriteChangeBattlePositionPacket_cgitem = CONVERT_GAMEVAR(void(__cdecl *)(int), 0x189470);
+		NET_WriteChangeTitleNamePacket_cgitem = CONVERT_GAMEVAR(void(__cdecl *)(int, int), 0x1891B0);
+
+		Move_Player = CONVERT_GAMEVAR(void(__cdecl *)(), 0x98280);//ok
+		UI_HandleLogbackMouseEvent = CONVERT_GAMEVAR(int(__cdecl *)(int, char), 0xD2BF0);//ok
+		UI_HandleLogoutMouseEvent = CONVERT_GAMEVAR(int(__cdecl *)(int, char), 0xD2CD0);//ok
+		NPC_ShowDialogInternal = CONVERT_GAMEVAR(void(__cdecl *)(int, int, int, int, const char *), 0xDE390);//ok
+		NPC_ClickDialog = CONVERT_GAMEVAR(int(__cdecl *)(int, int, int, char), 0xDEC00);//ok
+		NPC_ClickExchangeDialog = CONVERT_GAMEVAR(void(__cdecl *)(int), 0xE2880);//ok
+		UI_OpenGatherDialog = CONVERT_GAMEVAR(void(__cdecl *)(int, int), 0xBDB30);//ok
+		UI_OpenCraftDialog = CONVERT_GAMEVAR(void(__cdecl *)(int, int, int), 0xB5E10);//ok
+		UI_OpenAssessDialog = CONVERT_GAMEVAR(void(__cdecl *)(int, int), 0xB5FF0);//ok
+		UI_HandleMiniDialogMouseEvent = CONVERT_GAMEVAR(int(__cdecl *)(int, char), 0xE22E0);//ok
+		UI_IsMouseInRect = CONVERT_GAMEVAR(int(__cdecl *)(int, int, int, int, int), 0x174160);//ok
+		UI_ButtonCheckMouse = CONVERT_GAMEVAR(int(__cdecl *)(btn_rect_t *btn), 0x8A510);//ok
+		UI_HandleLearnSkillConfirmMouseEvent = CONVERT_GAMEVAR(int(__cdecl *)(int, char), 0x111F20);//ok
+		UI_HandleSkillDialogCancelButtonMouseEvent = CONVERT_GAMEVAR(int(__cdecl *)(int, char), 0x112060);
+		UI_HandleSellDialogCancelButtonMouseEvent = CONVERT_GAMEVAR(int(__cdecl *)(int, char), 0x10A080);
+		UI_HandleForgetSkillMouseEvent = CONVERT_GAMEVAR(int(__cdecl *)(int, char), 0x113130);//ok
+		UI_HandleLearnPetSkillCloseButtonMouseEvent = CONVERT_GAMEVAR(int(__cdecl *)(int, char), 0x111E50);//ok
+		UI_HandleSellDialogCloseButtonMouseEvent = CONVERT_GAMEVAR(int(__cdecl *)(int, char), 0x108690);//ok
+		UI_HandleEnablePlayerFlagsMouseEvent = CONVERT_GAMEVAR(int(__cdecl *)(int, char), 0xA9320);//ok
+		UI_HandleCraftItemSlotMouseEvent = CONVERT_GAMEVAR(int(__cdecl *)(int, char), 0xBACA0);//ok
+		UI_HandleCraftItemButtonMouseEvent = CONVERT_GAMEVAR(int(__cdecl *)(int, char), 0xB9BC0);//ok		
+		IsMapObjectEntrance = CONVERT_GAMEVAR(decltype(IsMapObjectEntrance), 0x99800);//ok
+		UI_PlaySwitchAnim = CONVERT_GAMEVAR(int(__cdecl *)(int, char, float), 0x1A07F0);//ok
+		UI_HandleEnableFlags = CONVERT_GAMEVAR(int(__cdecl *)(int, char), 0xA9320);//ok
+		UI_SelectHealPlayer = CONVERT_GAMEVAR(int(__cdecl *)(int, const char *), 0xBF800);//ok
+		UI_SelectItemPlayer = CONVERT_GAMEVAR(int(__cdecl *)(int, const char *), 0xC5280);//ok
+		UI_SelectTradePlayer = CONVERT_GAMEVAR(int(__cdecl *)(int, const char *), 0x1479F0);//ok
+		UI_SelectHealUnit = CONVERT_GAMEVAR(int(__cdecl *)(int), 0xBFB50);
+		UI_SelectItemUnit = CONVERT_GAMEVAR(int(__cdecl *)(int), 0xC5450);
+		UI_SelectTradeAddStuffs = CONVERT_GAMEVAR(int(__cdecl *)(int a1, char a2), 0xFA8D0);
+		UI_RemoveTradeItemArray = CONVERT_GAMEVAR(int(__cdecl*)(int), 0xF99C0);
+		UI_AddTradeItemArray = CONVERT_GAMEVAR(int(__cdecl*)(int, int), 0xF9970);
+
+		UI_SelectServer = CONVERT_GAMEVAR(void(__cdecl *)(), 0x8B820);
+		UI_SelectCharacter = CONVERT_GAMEVAR(int(__cdecl *)(int index, int a2), 0x8DBE0);
+		UI_ShowMessageBox = CONVERT_GAMEVAR(int(__cdecl *)(const char *text), 0x81090);
+		UI_ShowLostConnectionDialog = CONVERT_GAMEVAR(int(__cdecl *)(), 0x76E20);
+		UI_DialogShowupFrame = CONVERT_GAMEVAR(void(__cdecl *)(int dialog), 0xA5310);
+		UI_UpdatePersDesc = CONVERT_GAMEVAR(void(__cdecl *)(int), 0x1CBE50);
+		UI_DisplayAnimFrame = CONVERT_GAMEVAR(int(__cdecl *)(int index), 0xD6240);
+		UI_GatherNextWork = CONVERT_GAMEVAR(void(__cdecl *)(int uicore), 0xBDF80);
+		UI_IsCharacterPresent = CONVERT_GAMEVAR(int(__cdecl *)(int index), 0x199DB0);
+		UI_OpenTradeDialog = CONVERT_GAMEVAR(void(__cdecl *)(const char *, int), 0x148840);
+		SYS_ResetWindow = CONVERT_GAMEVAR(void(__cdecl *)(), 0x93E10);
+		format_mapname = CONVERT_GAMEVAR(void(__cdecl *)(char *, int, int, int), 0x95920);
+		BuildMapCollisionTable = CONVERT_GAMEVAR(decltype(BuildMapCollisionTable), 0x9E670);
+		Actor_SetAnimation = CONVERT_GAMEVAR(void(__cdecl *)(void *, int, int), 0x4FCA0);
+		Actor_Render = CONVERT_GAMEVAR(void(__cdecl *)(void *, int), 0x551D0);
+		GetBattleUnitDistance = CONVERT_GAMEVAR(int(__cdecl *)(void *a1, float a2, float a3), 0x1A680);
+		SetWorldStatus = CONVERT_GAMEVAR(void(__cdecl *)(int a1), 0x19C010);
+		V_strstr = CONVERT_GAMEVAR(char *(__cdecl *)(char *a1, const char *a2), 0x1CEAF0);
+		pfnSleep = (typeSleep *)GetProcAddress(GetModuleHandleA("kernel32.dll"), "Sleep");
+	}
 	else if (m_game_type == cg_item_6000)
 	{
 		g_server_time = CONVERT_GAMEVAR(int *, 0x3D3AD4);//ok
@@ -2822,7 +2821,6 @@ void CGAService::Initialize(game_type type)
 		g_player_name = CONVERT_GAMEVAR(char *, 0xBDB998);//ok
 		g_pet_base = CONVERT_GAMEVAR(pet_t *, 0xE109F8);//ok
 		g_pet_state = CONVERT_GAMEVAR(int *, 0x92F568);//ok
-		g_short_pet_base = CONVERT_GAMEVAR(short_pet_t *, 0xCBFFC0);//ok
 		g_player_remain_points = CONVERT_GAMEVAR(int *, 0x8E3C50);//ok
 		g_pet_id = CONVERT_GAMEVAR(int *, 0x8B4164);//ok
 		g_job_name = CONVERT_GAMEVAR(char *, 0xC1CD48);//ok
@@ -3052,15 +3050,6 @@ void CGAService::Initialize(game_type type)
 		UI_SelectCharacter = CONVERT_GAMEVAR(int(__cdecl *)(int index, int a2), 0x8DBE0);
 		UI_ShowMessageBox = CONVERT_GAMEVAR(int(__cdecl *)(const char *text), 0x81090);
 		UI_ShowLostConnectionDialog = CONVERT_GAMEVAR(int(__cdecl *)(), 0x76E20);
-		UI_BattleEscape = CONVERT_GAMEVAR(int(__cdecl *)(int index, char flags), 0xD7680);
-		UI_BattleGuard = CONVERT_GAMEVAR(int(__cdecl *)(int index, char flags), 0xD6D50);
-		UI_BattleExchangePosition = CONVERT_GAMEVAR(int(__cdecl *)(int index, char flags), 0xD7530);
-		UI_BattleChangePet = CONVERT_GAMEVAR(int(__cdecl *)(int index, char flags), 0xDC430);
-		UI_BattleWithdrawPet = CONVERT_GAMEVAR(int(__cdecl *)(int index, char flags), 0xDC300);
-		UI_BattleClickChangePet = CONVERT_GAMEVAR(int(__cdecl *)(int index, char flags), 0xD7370);
-		UI_BattleRebirth = CONVERT_GAMEVAR(int(__cdecl *)(int index, char flags), 0xD77D0);
-		UI_BattlePetSkill = CONVERT_GAMEVAR(int(__cdecl *)(int index, char flags), 0xB5820);
-		UI_BattleOpenPetSkillDialog = CONVERT_GAMEVAR(int(__cdecl *)(int index, char flags), 0xD7DA0);
 		UI_DialogShowupFrame = CONVERT_GAMEVAR(void(__cdecl *)(int dialog), 0xA5310);
 		UI_UpdatePersDesc = CONVERT_GAMEVAR(void(__cdecl *)(int), 0x1CBE50);
 		UI_DisplayAnimFrame = CONVERT_GAMEVAR(int(__cdecl *)(int index), 0xD6240);
@@ -3115,7 +3104,6 @@ void CGAService::Initialize(game_type type)
 		DetourAttach(&(void *&)CWnd_MessageBoxA, ::NewCWnd_MessageBoxA);
 		DetourAttach(&(void *&)CDialog_DoModal, ::NewCDialog_DoModal);
 		DetourAttach(&(void *&)CWnd_SetFocus, ::NewCWnd_SetFocus);
-		//DetourAttach(&(void *&)pfnSleep, ::NewSleep);
 		DetourTransactionCommit();
 
 		DWORD oldProtect;
@@ -3157,7 +3145,69 @@ void CGAService::Initialize(game_type type)
 		}
 	}
 
-	if (type != polcn)
+	if (type == cg_se_6000)
+	{
+		m_hFont = CreateFontW(16, 0, 0, 0, FW_THIN, false, false, false,
+			CHINESEBIG5_CHARSET, OUT_CHARACTER_PRECIS,
+			CLIP_CHARACTER_PRECIS, DEFAULT_QUALITY,
+			FF_MODERN, L"ËÎÌו");
+
+		m_btl_showhpmp_enable = false;
+		m_btl_highspeed_enable = false;
+
+		for (int i = 0; i < 20; ++i)
+			m_battle_units[i].exist = false;
+
+		m_btl_effect_flags = 0;
+
+		m_move_to = 0;
+		m_move_to_x = 0;
+		m_move_to_y = 0;
+		m_move_speed = 100;
+		m_move_checkwarp = true;
+		m_btl_delayanimpacket.isdelay = false;
+		m_ui_minidialog_loop = false;
+		m_ui_minidialog_loop_index = -1;
+		m_ui_minidialog_click_index = -1;
+		m_ui_dialog_cancel = -1;
+		m_ui_learn_skill_confirm = -1;
+		m_ui_forget_skill_index = -1;
+		m_desired_player_enable_flags = 0;
+		m_change_player_enable_flags = 0;
+		m_ui_craftdialog_click_begin = false;
+		m_ui_craftdialog_loop = false;
+		m_ui_craftdialog_loop_index = -1;
+		m_ui_craftdialog_click_index = -1;
+		for (int i = 0; i < 5; ++i)
+			m_ui_craftdialog_additem[i] = -1;
+		m_ui_craftdialog_additemcount = 0;
+		m_work_acceleration = 100;
+		m_work_immediate = false;
+		m_work_immediate_state = 0;
+		m_work_basedelay_enforced = 2000;
+		m_ui_noswitchanim = false;
+		m_player_menu_type = 0;
+		m_unit_menu_type = 0;
+		m_ui_selectbigserver_click_index = -1;
+		m_ui_selectserver_click_index = -1;
+		m_ui_selectserver_loop = false;
+		m_ui_selectcharacter_click_index = -1;
+		m_fakeCGSharedMem[0] = 0;
+		m_ui_auto_login = false;
+		m_run_game_pid = 0;
+		m_run_game_tid = 0;
+		m_ui_battle_action = 0;
+		m_ui_battle_hevent = CreateEventA(NULL, FALSE, FALSE, NULL);
+		m_trade_add_all_stuffs = false;
+
+		if (*g_mutex)
+		{
+			CloseHandle(*g_mutex);
+			*g_mutex = NULL;
+		}
+	}
+
+	if (type == cg_item_6000)
 	{
 		m_hFont = CreateFontW(16, 0, 0, 0, FW_THIN, false, false, false,
 			CHINESEBIG5_CHARSET, OUT_CHARACTER_PRECIS,
@@ -3240,8 +3290,6 @@ void CGAService::Initialize(game_type type)
 		DetourAttach(&(void *&)NET_ParseServerBasicInfo, ::NewNET_ParseServerBasicInfo);
 		DetourAttach(&(void *&)NET_ParseLoginResult, ::NewNET_ParseLoginResult);
 		DetourAttach(&(void *&)NET_ParseLoginResult2, ::NewNET_ParseLoginResult2);
-		//DetourAttach(&(void *&)NET_ParseWarp, ::NewNET_ParseWarp);
-		//DetourAttach(&(void *&)NET_ParseTeamState, ::NewNET_ParseTeamState);
 		DetourAttach(&(void *&)R_DrawText, NewR_DrawText);
 		DetourAttach(&(void *&)Move_Player, ::NewMove_Player);
 		DetourAttach(&(void *&)NPC_ShowDialogInternal, ::NewNPC_ShowDialogInternal);
@@ -3264,21 +3312,10 @@ void CGAService::Initialize(game_type type)
 		DetourAttach(&(void *&)UI_SelectCharacter, ::NewUI_SelectCharacter);
 		DetourAttach(&(void *&)UI_ShowMessageBox, ::NewUI_ShowMessageBox);
 		DetourAttach(&(void *&)UI_ShowLostConnectionDialog, ::NewUI_ShowLostConnectionDialog);
-		//DetourAttach(&(void *&)UI_BattleEscape, ::NewUI_BattleEscape);
-		//DetourAttach(&(void *&)UI_BattleGuard, ::NewUI_BattleGuard);
-		//DetourAttach(&(void *&)UI_BattleExchangePosition, ::NewUI_BattleExchangePosition);
-		//DetourAttach(&(void *&)UI_BattleChangePet, ::NewUI_BattleChangePet);
-		//DetourAttach(&(void *&)UI_BattleWithdrawPet, ::NewUI_BattleWithdrawPet);
-		//DetourAttach(&(void *&)UI_BattleClickChangePet, ::NewUI_BattleClickChangePet);
-		//DetourAttach(&(void *&)UI_BattleRebirth, ::NewUI_BattleRebirth);
-		//DetourAttach(&(void *&)UI_BattlePetSkill, ::NewUI_BattlePetSkill);
-		//DetourAttach(&(void *&)UI_BattleOpenPetSkillDialog, ::NewUI_BattleOpenPetSkillDialog);
 		DetourAttach(&(void *&)UI_SelectTradeAddStuffs, ::NewUI_SelectTradeAddStuffs);
 		DetourAttach(&(void *&)UI_DisplayAnimFrame, ::NewUI_DisplayAnimFrame);
 		DetourAttach(&(void *&)UI_DialogShowupFrame, ::NewUI_DialogShowupFrame);
 		DetourAttach(&(void *&)UI_GatherNextWork, ::NewUI_GatherNextWork);
-		//DetourAttach(&(void *&)Actor_SetAnimation, ::NewActor_SetAnimation);
-		//DetourAttach(&(void *&)Actor_Render, ::NewActor_Render);
 		DetourAttach(&(void *&)IsMapObjectEntrance, ::NewIsMapObjectEntrance);
 		DetourAttach(&(void *&)NET_WritePrepareCraftItemPacket_cgitem, ::NewNET_WritePrepareCraftItemPacket_cgitem);
 		DetourAttach(&(void *&)NET_WriteWorkPacket_cgitem, ::NewNET_WriteWorkPacket_cgitem);
@@ -3288,7 +3325,7 @@ void CGAService::Initialize(game_type type)
 		DetourAttach(&(void *&)pfnSleep, ::NewSleep);
 		DetourTransactionCommit();
 
-		//fuck chat
+		//Remove chat limit
 		DWORD oldProtect = 0;
 		VirtualProtect((void *)(m_ImageBase + 0x181394), 1, PAGE_EXECUTE_READWRITE, &oldProtect);
 		memcpy((void *)(m_ImageBase + 0x181394), "\xEB", 1);
@@ -4821,21 +4858,6 @@ bool CGAService::WM_BattleNormalAttack(int target)
 
 bool CGAService::BattleNormalAttack(int target)
 {
-	/*if (!IsInGame())
-		return false;
-	if (*g_btl_player_status != 1)
-		return false;
-
-	m_ui_battle_action = UI_BATTLE_NORMAL_ATTACK;
-	m_ui_battle_action_param.select_target = target;
-
-	if (WAIT_OBJECT_0 == WaitForSingleObject(m_ui_battle_hevent, 1000))
-		return true;
-
-	m_ui_battle_action = 0;
-
-	return false;*/
-
 	return SendMessageA(g_MainHwnd, WM_CGA_BATTLE_NORMALATTACK, target, 0) ? true : false;
 }
 

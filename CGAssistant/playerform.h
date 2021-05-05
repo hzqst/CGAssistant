@@ -7,6 +7,10 @@
 #include "player.h"
 #include "battle.h"
 
+#include "qhttpclient.hpp"
+#include "qhttpclientrequest.hpp"
+#include "qhttpclientresponse.hpp"
+
 namespace Ui {
 class PlayerForm;
 }
@@ -34,6 +38,8 @@ private slots:
 
 public slots:
     void OnCloseWindow();
+    void OnNotifyBattleAction(int flags);
+    void OnNotifyChatMsg(int unitid, QString msg, int size, int color);
     void OnNotifyGetInfoFailed(bool bIsConnected, bool bIsInGame);
     void OnNotifyGetPlayerInfo(QSharedPointer<CGA_PlayerInfo_t> player);
     void OnNotifyGetPetsInfo(QSharedPointer<CGA_PetList_t> pets);
@@ -59,6 +65,8 @@ private:
     CPlayerWorker *m_worker;
     QStandardItemModel *m_model_Pet;
     QStandardItemModel *m_model_Skill;
+    int m_ServerIndex;
+    qhttp::client::QHttpClient *m_HttpClient;
 };
 
 #endif // PLAYERFORM_H

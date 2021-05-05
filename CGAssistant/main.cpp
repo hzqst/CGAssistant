@@ -84,7 +84,7 @@ int main(int argc, char *argv[])
 
     QCommandLineOption loadsettings("loadsettings", "", "loadsettings");
 
-    QCommandLineOption killfreeze("killfreeze", "", "killfreeze", "30");
+    QCommandLineOption killfreeze("killfreeze", "", "killfreeze", "60");
 
     QCommandLineParser parser;
 
@@ -118,13 +118,12 @@ int main(int argc, char *argv[])
 
     SetUnhandledExceptionFilter(MinidumpCallback);
 
-     using namespace qhttp::server;
+    using namespace qhttp::server;
 
     QHttpServer qserver(qApp);
 
     MainWindow w;
 
-    using namespace qhttp::server;
 
     for(unsigned int qport = 14396; qport < 14396 + 1000; ++qport)
     {

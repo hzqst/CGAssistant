@@ -9,7 +9,7 @@ QT       += core gui widgets sql network
 TARGET = CGAssistant
 TEMPLATE = app
 
-DEFINES += CGA_IMPORT
+DEFINES += CGA_IMPORT QHTTP_HAS_CLIENT
 
 TRANSLATIONS += lang.ts
 

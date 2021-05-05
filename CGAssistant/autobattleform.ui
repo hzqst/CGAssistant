@@ -179,6 +179,9 @@ Action</string>
          <string>Player Force
 Action</string>
         </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
         <property name="checked">
          <bool>false</bool>
         </property>

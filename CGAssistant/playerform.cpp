@@ -1,5 +1,6 @@
 #include "playerform.h"
 #include "ui_playerform.h"
+#include <QApplication>
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QJsonDocument>
@@ -11,6 +12,13 @@ PlayerForm::PlayerForm(CPlayerWorker *worker, CBattleWorker *bworker, QWidget *p
     ui(new Ui::PlayerForm), m_worker(worker)
 {
     ui->setupUi(this);
+
+    m_ServerIndex = 0;
+    m_HttpClient = new qhttp::client::QHttpClient(this);
+
+    m_HttpClient->setConnectingTimeOut(5000, []{
+        qDebug("connecting to HTTP server timed out!");
+    });
 
     m_model_Pet = new QStandardItemModel(ui->treeView_pets);
     ui->treeView_pets->setModel(m_model_Pet);
@@ -192,6 +200,66 @@ void PlayerForm::OnNotifyGetPetsInfo(QSharedPointer<CGA_PetList_t> pets)
     }
 }
 
+void PlayerForm::OnNotifyBattleAction(int flags)
+{
+    if(ui->checkBox_shareData->isChecked()){
+
+        if(flags & 8){
+
+            using namespace qhttp::client;
+
+            auto nameEncoded = ui->lineEdit_playerName->text().toUtf8().toPercentEncoding();
+            QString urlString = QString("http://121.41.12.89:8080/api/battle/report?name=%1&gametype=%2&serverindex=%3")
+                    .arg(QString(nameEncoded)).arg(4).arg(m_ServerIndex);
+
+            QUrl url(urlString);
+
+            m_HttpClient->request(qhttp::EHTTP_GET, url, [](QHttpResponse* res) {
+                // response handler, called when the incoming HTTP headers are ready
+
+                // gather HTTP response data (HTTP body)
+                res->collectData();
+
+                // when all data in HTTP response have been read:
+                res->onEnd([&]() {
+
+                });
+            });
+
+        }
+    }
+}
+
+void PlayerForm::OnNotifyChatMsg(int unitid, QString msg, int size, int color)
+{
+    if(ui->checkBox_shareData->isChecked()){
+
+        if(unitid == -1 && msg.indexOf("\xe9\xad\x94\xe6\x97\x8f\xe7\x9a\x84\xe6\xb0\x94\xe6\x81\xaf") > 0)
+        {
+            using namespace qhttp::client;
+
+            auto nameEncoded = ui->lineEdit_playerName->text().toUtf8().toPercentEncoding();
+            QString urlString = QString("http://121.41.12.89:8080/api/shenlan/report?name=%1&gametype=%2&serverindex=%3")
+                    .arg(QString(nameEncoded)).arg(4).arg(m_ServerIndex);
+
+            QUrl url(urlString);
+
+            m_HttpClient->request(qhttp::EHTTP_GET, url, [](QHttpResponse* res) {
+                // response handler, called when the incoming HTTP headers are ready
+
+                // gather HTTP response data (HTTP body)
+                res->collectData();
+
+                // when all data in HTTP response have been read:
+                res->onEnd([&]() {
+
+                });
+            });
+
+        }
+    }
+}
+
 void PlayerForm::OnNotifyGetSkillsInfo(QSharedPointer<CGA_SkillList_t> skills)
 {
     if(skills->empty())
@@ -256,6 +324,7 @@ void PlayerForm::OnNotifyGetMapInfo(QString name, int index1, int index2, int in
     QString str = QString("%1, %2, %3 (%4, %5)").arg(x).arg(y).arg(index3).arg(worldStatus).arg(gameStatus);
     if(str != ui->lineEdit_mapxy->text())
         ui->lineEdit_mapxy->setText(str);
+
 }
 
 void PlayerForm::OnNotifyGetPlayerInfo(QSharedPointer<CGA_PlayerInfo_t> player)
@@ -303,6 +372,8 @@ void PlayerForm::OnNotifyGetPlayerInfo(QSharedPointer<CGA_PlayerInfo_t> player)
     str = QString::number(player->maxxp - player->xp);
     if(ui->lineEdit_xp_remain->text() != str)
         ui->lineEdit_xp_remain->setText(str);
+
+    m_ServerIndex = player->serverindex;
 }
 
 void PlayerForm::OnNotifyGetInfoFailed(bool bIsConnected, bool bIsInGame)
@@ -363,6 +434,7 @@ void PlayerForm::SaveSettings(QJsonDocument &doc)
     QJsonObject player;
     player.insert("noswitchanim", ui->checkBox_SwitchAnim->isChecked());
     player.insert("autosupply", ui->checkBox_autoSupply->isChecked());
+    player.insert("sharedata", ui->checkBox_shareData->isChecked());
 
     player.insert("usefood", ui->checkBox_useFood->isChecked());
     player.insert("usemed", ui->checkBox_useMed->isChecked());
@@ -436,6 +508,7 @@ bool PlayerForm::ParsePlayerSettings(const QJsonValue &val)
 
    ui->checkBox_SwitchAnim->setChecked(playerobj.take("noswitchanim").toBool());
    ui->checkBox_autoSupply->setChecked(playerobj.take("autosupply").toBool());
+   ui->checkBox_shareData->setChecked(playerobj.take("sharedata").toBool());
 
    ui->checkBox_useFood->setChecked(playerobj.take("usefood").toBool());
    ui->checkBox_useMed->setChecked(playerobj.take("usemed").toBool());

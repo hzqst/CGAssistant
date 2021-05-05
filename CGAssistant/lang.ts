@@ -646,11 +646,15 @@ meet BOSS</source>
     </message>
     <message>
         <source>Game already attached by other instance of CGAssistant.</source>
-        <translation>游戏已经被另一个CGAssistant附加。</translation>
+        <translation type="vanished">游戏已经被另一个CGAssistant附加。</translation>
     </message>
     <message>
         <source>not attached to any game process yet.</source>
-        <translation>未附加到任何游戏</translation>
+        <translation>未附加到任何游戏。</translation>
+    </message>
+    <message>
+        <source>Game already attached by another instance of CGAssistant.</source>
+        <translation>游戏已经被另一个CGASsistant附加。</translation>
     </message>
 </context>
 <context>
@@ -856,7 +860,7 @@ p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:&apos;SimSun&apos;; font-size:9pt; font-weight:400; font-style:normal;&quot;&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;img src=&quot;:/logo.png&quot; /&gt;&lt;/p&gt;
 &lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:16px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; line-height:160%; font-family:&apos;-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol,Liberation Sans,PingFang SC,Microsoft YaHei,Hiragino Sans GB,Wenquanyi Micro Hei,WenQuanYi Zen Hei,ST Heiti,SimHei,SimSun,WenQuanYi Zen Hei Sharp,sans-serif&apos;; font-size:16px; color:#40485b; background-color:#ffffff;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:16px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; line-height:160%; background-color:#ffffff;&quot;&gt;&lt;span style=&quot; font-family:&apos;-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol,Liberation Sans,PingFang SC,Microsoft YaHei,Hiragino Sans GB,Wenquanyi Micro Hei,WenQuanYi Zen Hei,ST Heiti,SimHei,SimSun,WenQuanYi Zen Hei Sharp,sans-serif&apos;; font-size:16px; color:#40485b; background-color:#ffffff;&quot;&gt;当前版本：2020-10-15&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:16px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; line-height:160%; background-color:#ffffff;&quot;&gt;&lt;span style=&quot; font-family:&apos;-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol,Liberation Sans,PingFang SC,Microsoft YaHei,Hiragino Sans GB,Wenquanyi Micro Hei,WenQuanYi Zen Hei,ST Heiti,SimHei,SimSun,WenQuanYi Zen Hei Sharp,sans-serif&apos;; font-size:16px; color:#40485b; background-color:#ffffff;&quot;&gt;当前版本：2021-05-06&lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:16px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; line-height:160%; background-color:#ffffff;&quot;&gt;&lt;span style=&quot; font-family:&apos;-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol,Liberation Sans,PingFang SC,Microsoft YaHei,Hiragino Sans GB,Wenquanyi Micro Hei,WenQuanYi Zen Hei,ST Heiti,SimHei,SimSun,WenQuanYi Zen Hei Sharp,sans-serif&apos;; font-size:16px; color:#40485b; background-color:#ffffff;&quot;&gt;下载最新版本：群号 300303705&lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:16px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; line-height:160%; background-color:#ffffff;&quot;&gt;&lt;span style=&quot; font-family:&apos;-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol,Liberation Sans,PingFang SC,Microsoft YaHei,Hiragino Sans GB,Wenquanyi Micro Hei,WenQuanYi Zen Hei,ST Heiti,SimHei,SimSun,WenQuanYi Zen Hei Sharp,sans-serif&apos;; font-size:16px; color:#40485b; background-color:#ffffff;&quot;&gt;或 &lt;/span&gt;&lt;a href=&quot;https://github.com/hzqst/CGAssistantJS/issues&quot;&gt;&lt;span style=&quot; font-family:&apos;-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol,Liberation Sans,PingFang SC,Microsoft YaHei,Hiragino Sans GB,Wenquanyi Micro Hei,WenQuanYi Zen Hei,ST Heiti,SimHei,SimSun,WenQuanYi Zen Hei Sharp,sans-serif&apos;; font-size:16px; text-decoration: underline; color:#005980; background-color:transparent;&quot;&gt;https://github.com/hzqst/CGAssistantJS/&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:16px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; line-height:160%; background-color:#ffffff;&quot;&gt;&lt;a href=&quot;https://github.com/hzqst/CGAssistantJS/issues&quot;&gt;&lt;span style=&quot; font-family:&apos;-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol,Liberation Sans,PingFang SC,Microsoft YaHei,Hiragino Sans GB,Wenquanyi Micro Hei,WenQuanYi Zen Hei,ST Heiti,SimHei,SimSun,WenQuanYi Zen Hei Sharp,sans-serif&apos;; font-size:16px; text-decoration: underline; color:#005980; background-color:transparent;&quot;&gt;或 &lt;/span&gt;&lt;/a&gt;&lt;a href=&quot;https://gitee.com/hzqst/CGAssistantJS/issues&quot;&gt;&lt;span style=&quot; font-family:&apos;-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol,Liberation Sans,PingFang SC,Microsoft YaHei,Hiragino Sans GB,Wenquanyi Micro Hei,WenQuanYi Zen Hei,ST Heiti,SimHei,SimSun,WenQuanYi Zen Hei Sharp,sans-serif&apos;; font-size:16px; text-decoration: underline; color:#005980; background-color:transparent;&quot;&gt;https://gitee.com/hzqst/CGAssistantJS/&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
@@ -985,7 +989,7 @@ p, li { white-space: pre-wrap; }
     </message>
     <message>
         <source>Work acceleration</source>
-        <translation>生产系工作加速</translation>
+        <translation type="vanished">生产系工作加速</translation>
     </message>
     <message>
         <source>Gather</source>
@@ -997,7 +1001,7 @@ p, li { white-space: pre-wrap; }
     </message>
     <message>
         <source>Move speed</source>
-        <translation>移动速度</translation>
+        <translation type="vanished">移动速度</translation>
     </message>
     <message>
         <source>Clock</source>
@@ -1078,7 +1082,63 @@ error: %1</source>
     </message>
     <message>
         <source>json parse error</source>
-        <translation type="unfinished">json解析失败</translation>
+        <translation>json解析失败</translation>
+    </message>
+    <message>
+        <source>Automatically use food for player</source>
+        <translation>对玩家自动使用食物</translation>
+    </message>
+    <message>
+        <source>Automatically use food for pets</source>
+        <translation>对宠物自动使用食物</translation>
+    </message>
+    <message>
+        <source>Auto resupply when talking to nurse</source>
+        <translation>跟护士对话时自动补血</translation>
+    </message>
+    <message>
+        <source>Automatically use medicine for player</source>
+        <translation>对玩家自动使用药水</translation>
+    </message>
+    <message>
+        <source>Automatically use medicine for pets</source>
+        <translation>对宠物自动使用药水</translation>
+    </message>
+    <message>
+        <source>Disable animation for scene switching</source>
+        <translation>屏蔽场景切换的动画</translation>
+    </message>
+    <message>
+        <source>Share non-sensitive data to help CGAssistant works better</source>
+        <translation>将非敏感数据（如：深蓝线，随机NPC位置）分享给他人（注：此功能可能需要访问网络）</translation>
+    </message>
+    <message>
+        <source>Share data</source>
+        <translation>加入数据分享计划</translation>
+    </message>
+    <message>
+        <source>Use food for player under this condition</source>
+        <translation>在此条件下对自己使用食物</translation>
+    </message>
+    <message>
+        <source>Use food for pets under this condition</source>
+        <translation>在此条件下对宠物使用食物</translation>
+    </message>
+    <message>
+        <source>Use medicine for player under this condition</source>
+        <translation>在此条件下对自己使用药水</translation>
+    </message>
+    <message>
+        <source>Use medicine for pets under this condition</source>
+        <translation>在此条件下对宠物使用药水</translation>
+    </message>
+    <message>
+        <source>Craft acceleration</source>
+        <translation>制造加速</translation>
+    </message>
+    <message>
+        <source>Player movement speed</source>
+        <translation>移动速度修正</translation>
     </message>
 </context>
 <context>
