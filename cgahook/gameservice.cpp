@@ -1591,8 +1591,6 @@ void __cdecl NewNET_ParseMeetEnemy(int a1, int a2, int a3)
 {
 	g_CGAService.NET_ParseMeetEnemy(a1, a2, a3);
 
-	OutputDebugStringA("NewNET_ParseMeetEnemy1");
-
 	CGA_NotifyBattleAction(FL_BATTLE_ACTION_BEGIN);
 }
 

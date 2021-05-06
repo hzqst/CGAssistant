@@ -1273,6 +1273,8 @@ bool CBattleCondition_EnemyUnit::Check(CGA_BattleContext_t &context, int &condit
             if(m_relation == BattleCond_StrRel_CONTAIN){
                 conditionTarget = i;
                 return true;
+            } else if (m_relation == BattleCond_StrRel_NOT_CONTAIN){
+                return false;
             }
         }
     }
