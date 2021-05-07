@@ -540,6 +540,17 @@ namespace CGA
 
 	static_assert(sizeof(sys_time_t) == 24, "Size check");
 
+	typedef struct login_character_s
+	{
+		int level;
+		int logintimes;
+		int unk[15];
+		char name[80];
+	}login_character_t;
+
+	static_assert(sizeof(login_character_t) == 148, "Size check");
+
+
 #pragma pack()
 
 	class CGAService
@@ -663,6 +674,7 @@ namespace CGA
 		virtual bool IsUIDialogPresent(int dialog);
 
 		virtual void LoginGameServer(std::string gid, std::string glt, int serverid, int bigServerIndex, int serverIndex,int character);
+		virtual void CreateCharacter(cga_create_chara_t request);
 	public:
 		int *g_server_time;
 		int *g_local_time;
@@ -826,6 +838,22 @@ namespace CGA
 		player_pers_desc_t *g_pers_desc;
 		int *g_avatar_public_state;
 		short *g_local_player_index;
+
+		int *g_chara_table;
+		int *g_avatar_table;
+		char *g_create_chara_name;
+		int *g_create_chara_chara;
+		int *g_create_chara_avatar;
+		int *g_create_chara_endurance;
+		int *g_create_chara_strength;
+		int *g_create_chara_defense;
+		int *g_create_chara_agility;
+		int *g_create_chara_magical;
+		int *g_create_chara_earth;
+		int *g_create_chara_water;
+		int *g_create_chara_fire;
+		int *g_create_chara_wind;
+		login_character_t *g_login_character;
 	public:
 		char(__cdecl *Sys_CheckModify)(const char *a1);
 		void(__cdecl *COMMON_PlaySound)(int a1, int a2, int a3);
@@ -935,6 +963,8 @@ namespace CGA
 		void(__cdecl *UI_SelectServer)();
 		int(__cdecl *UI_SelectCharacter)(int index, int a2);
 		int(__cdecl *UI_IsCharacterPresent)(int index);
+		int(__cdecl *UI_CreateCharacterPickChara)(void);//1=ok
+		int(__cdecl *UI_CreateCharacterFillProperty)(void);//1=ok
 		int(__cdecl *UI_ShowMessageBox)(const char *text);
 		int(__cdecl *UI_ShowLostConnectionDialog)();
 		int(__cdecl *UI_DisplayAnimFrame)(int index);
@@ -1042,15 +1072,8 @@ namespace CGA
 		int NewUI_ShowLostConnectionDialog();
 		void NewNET_ParseDownloadMap(int sock, int index1, int index3, int xbase, int ybase, int xtop, int ytop, const char *buf);
 		void NewNET_ParseWarp(int a1, int index1, int index3, int xsize, int ysize, int xpos, int ypos, int a8, int a9, int a10, int a11, int a12, int warpTimes);
-		/*int NewUI_BattleEscape(int index, char flags);
-		int NewUI_BattleGuard(int index, char flags);
-		int NewUI_BattleExchangePosition(int index, char flags);
-		int NewUI_BattleChangePet(int index, char flags);
-		int NewUI_BattleWithdrawPet(int index, char flags);
-		int NewUI_BattleClickChangePet(int index, char flags);
-		int NewUI_BattleRebirth(int index, char flags);
-		int NewUI_BattlePetSkill(int index, char flags);
-		int NewUI_BattleOpenPetSkillDialog(int index, char flags);*/
+		int NewUI_CreateCharacterPickChara(void);//1=ok
+		int NewUI_CreateCharacterFillProperty(void);//1=ok
 		int NewUI_DisplayAnimFrame(int index);
 		void NewUI_DialogShowupFrame(int dialog);
 		int NewUI_PlaySwitchAnim(int a1, char a2, float a3);
@@ -1183,6 +1206,25 @@ namespace CGA
 		int m_ui_selectbigserver_click_index;
 		int m_ui_selectserver_click_index;
 		int m_ui_selectcharacter_click_index;
+		bool m_ui_create_character;
+		struct
+		{
+			char name[20];
+			int character;
+			int color;
+			int eye;
+			int mouth;
+			int endurance;
+			int strength;
+			int defense;
+			int agility;
+			int magical;
+			int earth;
+			int water;
+			int fire;
+			int wind;
+		}m_ui_create_character_param;
+		
 		bool m_ui_auto_login;
 
 		int m_run_game_pid;

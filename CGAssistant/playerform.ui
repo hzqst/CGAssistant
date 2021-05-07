@@ -505,7 +505,7 @@
         <item>
          <widget class="QLabel" name="label_xp_remain">
           <property name="sizePolicy">
-           <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+           <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
@@ -542,6 +542,25 @@
            </sizepolicy>
           </property>
           <property name="readOnly">
+           <bool>false</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QCheckBox" name="checkBox_shareData">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
+          <property name="toolTip">
+           <string>Share non-sensitive data to help CGAssistant works better</string>
+          </property>
+          <property name="text">
+           <string>Share data</string>
+          </property>
+          <property name="checkable">
+           <bool>true</bool>
+          </property>
+          <property name="tristate">
            <bool>false</bool>
           </property>
          </widget>
@@ -668,29 +687,6 @@
           </property>
           <property name="text">
            <string>SwitchAnim off</string>
-          </property>
-          <property name="tristate">
-           <bool>false</bool>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </item>
-      <item>
-       <layout class="QHBoxLayout" name="horizontalLayout_17" stretch="0">
-        <item>
-         <widget class="QCheckBox" name="checkBox_shareData">
-          <property name="enabled">
-           <bool>true</bool>
-          </property>
-          <property name="toolTip">
-           <string>Share non-sensitive data to help CGAssistant works better</string>
-          </property>
-          <property name="text">
-           <string>Share data</string>
-          </property>
-          <property name="checkable">
-           <bool>true</bool>
           </property>
           <property name="tristate">
            <bool>false</bool>

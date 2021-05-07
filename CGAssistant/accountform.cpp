@@ -42,6 +42,55 @@ AccountForm::AccountForm(QWidget *parent) :
 
     ui->comboBox_character->addItem(QObject::tr("Left"), QVariant(0));
     ui->comboBox_character->addItem(QObject::tr("Right"), QVariant(1));
+    ui->comboBox_character->addItem(QObject::tr("Highest Lv"), QVariant(2));
+    ui->comboBox_character->addItem(QObject::tr("Lowest Lv"), QVariant(3));
+
+    ui->comboBox_CharaEye->addItem(QObject::tr("1"), QVariant(0));
+    ui->comboBox_CharaEye->addItem(QObject::tr("2"), QVariant(1));
+    ui->comboBox_CharaEye->addItem(QObject::tr("3"), QVariant(2));
+    ui->comboBox_CharaEye->addItem(QObject::tr("4"), QVariant(3));
+    ui->comboBox_CharaEye->addItem(QObject::tr("5"), QVariant(4));
+
+    ui->comboBox_CharaMou->addItem(QObject::tr("1"), QVariant(0));
+    ui->comboBox_CharaMou->addItem(QObject::tr("2"), QVariant(1));
+    ui->comboBox_CharaMou->addItem(QObject::tr("3"), QVariant(2));
+    ui->comboBox_CharaMou->addItem(QObject::tr("4"), QVariant(3));
+    ui->comboBox_CharaMou->addItem(QObject::tr("5"), QVariant(4));
+
+    ui->comboBox_CharaColor->addItem(QObject::tr("1"), QVariant(0));
+    ui->comboBox_CharaColor->addItem(QObject::tr("2"), QVariant(1));
+    ui->comboBox_CharaColor->addItem(QObject::tr("3"), QVariant(2));
+    ui->comboBox_CharaColor->addItem(QObject::tr("4"), QVariant(3));
+
+    ui->comboBox_Chara->addItem(QObject::tr("bawu"), QVariant(0));
+    ui->comboBox_Chara->addItem(QObject::tr("kazi"), QVariant(1));
+    ui->comboBox_Chara->addItem(QObject::tr("xin"), QVariant(2));
+    ui->comboBox_Chara->addItem(QObject::tr("tuobu"), QVariant(3));
+    ui->comboBox_Chara->addItem(QObject::tr("kai"), QVariant(4));
+    ui->comboBox_Chara->addItem(QObject::tr("feite"), QVariant(5));
+    ui->comboBox_Chara->addItem(QObject::tr("boke"), QVariant(6));
+    ui->comboBox_Chara->addItem(QObject::tr("wulu"), QVariant(7));
+    ui->comboBox_Chara->addItem(QObject::tr("moeko"), QVariant(8));
+    ui->comboBox_Chara->addItem(QObject::tr("ami"), QVariant(9));
+    ui->comboBox_Chara->addItem(QObject::tr("meigu"), QVariant(10));
+    ui->comboBox_Chara->addItem(QObject::tr("li"), QVariant(11));
+    ui->comboBox_Chara->addItem(QObject::tr("kayi"), QVariant(12));
+    ui->comboBox_Chara->addItem(QObject::tr("ailu"), QVariant(13));
+
+    ui->comboBox_Chara->addItem(QObject::tr("xiedi"), QVariant(14 + 0));
+    ui->comboBox_Chara->addItem(QObject::tr("pite"), QVariant(14 + 1));
+    ui->comboBox_Chara->addItem(QObject::tr("zuozang"), QVariant(14 + 2));
+    ui->comboBox_Chara->addItem(QObject::tr("niersen"), QVariant(14 + 3));
+    ui->comboBox_Chara->addItem(QObject::tr("beidite"), QVariant(14 + 4));
+    ui->comboBox_Chara->addItem(QObject::tr("lansiluote"), QVariant(14 + 5));
+    ui->comboBox_Chara->addItem(QObject::tr("weisikaier"), QVariant(14 + 6));
+    ui->comboBox_Chara->addItem(QObject::tr("shala"), QVariant(14 + 7));
+    ui->comboBox_Chara->addItem(QObject::tr("aya"), QVariant(14 + 8));
+    ui->comboBox_Chara->addItem(QObject::tr("fuerdiya"), QVariant(14 + 9));
+    ui->comboBox_Chara->addItem(QObject::tr("xiala"), QVariant(14 + 10));
+    ui->comboBox_Chara->addItem(QObject::tr("pingping"), QVariant(14 + 11));
+    ui->comboBox_Chara->addItem(QObject::tr("geleisi"), QVariant(14 + 12));
+    ui->comboBox_Chara->addItem(QObject::tr("hemi"), QVariant(14 + 13));
 
     QTimer *timer = new QTimer(this);
     connect(timer, SIGNAL(timeout()), this, SLOT(OnAutoLogin()));
@@ -68,12 +117,20 @@ void AccountForm::OnAutoLogin()
         }
     }
 
+    if(!ui->checkBox_createChara->isChecked())
+    {
+        CGA::cga_create_chara_t req;
+        g_CGAInterface->CreateCharacter(req);
+    }
+
     if(!ui->checkBox_autoLogin->isChecked())
     {
-        if(g_CGAInterface->IsConnected())
+        if(g_CGAInterface->IsConnected()){
             g_CGAInterface->LoginGameServer("", "", 0, 0, 0, 0);
+        }
 
         ui->label_status->setText(tr("Auto-Login off."));
+
         if(m_polcn_lock)
         {
             CloseHandle(m_polcn_lock);
@@ -94,6 +151,7 @@ void AccountForm::OnAutoLogin()
         {
             ui->textEdit_output->setText(tr("Game-Login succeeded.\n"));
             ui->label_status->setText(tr("Game-Login succeeded."));
+
             if(m_polcn_lock)
             {
                 CloseHandle(m_polcn_lock);
@@ -111,7 +169,7 @@ void AccountForm::OnAutoLogin()
         int worldStatus = 0;
         if(g_CGAInterface->GetGameStatus(gameStatus) && g_CGAInterface->GetWorldStatus(worldStatus))
         {
-            if(worldStatus == 2 && gameStatus == 1)
+            if((worldStatus == 2 && gameStatus == 1) || (worldStatus == 3 && gameStatus == 11))
             {
                 if(m_loginresult.elapsed() > 1000*60 || m_glt.isEmpty())
                 {
@@ -311,6 +369,40 @@ void AccountForm::on_pushButton_logingame_clicked()
 {
     if(g_CGAInterface->IsConnected())
     {
+        if(ui->checkBox_createChara->isChecked()){
+            CGA::cga_create_chara_t req;
+
+            req.name = ui->lineEdit_CharaName->text().toStdString();
+            req.character = ui->comboBox_Chara->currentData().toInt();
+            req.eye = ui->comboBox_CharaEye->currentData().toInt();
+            req.mouth = ui->comboBox_CharaMou->currentData().toInt();
+            req.color = ui->comboBox_CharaColor->currentData().toInt();
+
+            QStringList points = ui->lineEdit_CharaPoints->text().split(",");
+
+            if(points.size() == 5){
+                req.endurance = points[0].toInt();
+                req.strength = points[1].toInt();
+                req.defense = points[2].toInt();
+                req.agility = points[3].toInt();
+                req.magical = points[4].toInt();
+            }
+
+            QStringList elements = ui->lineEdit_CharaElements->text().split(",");
+
+            if(elements.size() == 4){
+                req.earth = elements[0].toInt();
+                req.water = elements[1].toInt();
+                req.fire = elements[2].toInt();
+                req.wind = elements[3].toInt();
+            }
+
+            g_CGAInterface->CreateCharacter(req);
+        } else {
+            CGA::cga_create_chara_t req;
+            g_CGAInterface->CreateCharacter(req);
+        }
+
         g_CGAInterface->LoginGameServer(ui->comboBox_gid->currentText().toStdString(),
                                         m_glt.toStdString(),
                                         m_serverid,
@@ -346,7 +438,11 @@ void AccountForm::OnNotifyConnectionState(int state, QString msg)
     }
 }
 
-void AccountForm::OnNotifyFillAutoLogin(int game, QString user, QString pwd, QString gid, int bigserver, int server, int character, bool autologin, bool skipupdate, bool autochangeserver)
+void AccountForm::OnNotifyFillAutoLogin(int game, QString user, QString pwd, QString gid,
+                                        int bigserver, int server, int character,
+                                        bool autologin, bool skipupdate, bool autochangeserver,
+                                        bool create_chara, int create_chara_chara, int create_chara_eye, int create_chara_mou, int create_chara_color,
+                                        QString create_chara_points, QString create_chara_elements, QString create_chara_name)
 {
     if(game == 4)
         ui->comboBox_gameType->setCurrentIndex(0);
@@ -381,6 +477,31 @@ void AccountForm::OnNotifyFillAutoLogin(int game, QString user, QString pwd, QSt
 
     if(autochangeserver)
         ui->checkBox_autoChangeServer->setChecked(true);
+
+    if(create_chara)
+    {
+        ui->checkBox_createChara->setChecked(true);
+        on_checkBox_createChara_stateChanged(1);
+    }
+
+    if(create_chara_chara)
+        ui->comboBox_Chara->setCurrentIndex(create_chara_chara-1);
+
+    if(create_chara_eye)
+        ui->comboBox_CharaEye->setCurrentIndex(create_chara_eye-1);
+    if(create_chara_mou)
+        ui->comboBox_CharaMou->setCurrentIndex(create_chara_mou-1);
+    if(create_chara_color)
+        ui->comboBox_CharaColor->setCurrentIndex(create_chara_color-1);
+
+    if(!create_chara_points.isEmpty())
+        ui->lineEdit_CharaPoints->setText(create_chara_points);
+
+    if(!create_chara_elements.isEmpty())
+        ui->lineEdit_CharaElements->setText(create_chara_elements);
+
+    if(!create_chara_name.isEmpty())
+        ui->lineEdit_CharaName->setText(create_chara_name);
 }
 
 void AccountForm::OnHttpLoadAccount(QString query, QByteArray postdata, QJsonDocument* doc)
@@ -475,6 +596,71 @@ void AccountForm::OnHttpLoadAccount(QString query, QByteArray postdata, QJsonDoc
               ui->checkBox_autoChangeServer->setChecked(qautochangeserver.toBool());
             }
        }
+       if(newobj.contains("autocreatechara")){
+           auto qautocreatechara = newobj.take("autocreatechara");
+            if(qautocreatechara.isBool()){
+              ui->checkBox_createChara->setChecked(qautocreatechara.toBool());
+              on_checkBox_createChara_stateChanged(qautocreatechara.toBool() ? 1 : 0);
+            }
+       }
+       if(newobj.contains("createcharachara")){
+           auto qcreatecharachara = newobj.take("createcharachara");
+
+           int createcharachara = qcreatecharachara.toInt();
+           if(createcharachara >= 1 && createcharachara <= 28)
+               ui->comboBox_Chara->setCurrentIndex(createcharachara-1);
+       }
+       if(newobj.contains("createcharaeye")){
+           auto qcreatecharaeye = newobj.take("createcharaeye");
+
+           int createcharaeye = qcreatecharaeye.toInt();
+           if(createcharaeye >= 1 && createcharaeye <= 5)
+               ui->comboBox_CharaEye->setCurrentIndex(createcharaeye - 1);
+       }
+       if(newobj.contains("createcharamouth")){
+           auto qcreatecharamouth = newobj.take("createcharamouth");
+
+           int createcharamouth = qcreatecharamouth.toInt();
+           if(createcharamouth >= 1 && createcharamouth <= 5)
+               ui->comboBox_CharaMou->setCurrentIndex(createcharamouth - 1);
+       }
+       if(newobj.contains("createcharacolor")){
+           auto qcreatecharacolor = newobj.take("createcharacolor");
+
+           int createcharacolor = qcreatecharacolor.toInt();
+           if(createcharacolor >= 1 && createcharacolor <= 5)
+               ui->comboBox_CharaColor->setCurrentIndex(createcharacolor - 1);
+       }
+       if(newobj.contains("createcharapoints")){
+           auto qcreatecharapoints = newobj.take("createcharapoints");
+           if(qcreatecharapoints.isString()){
+               auto points = qcreatecharapoints.toString();
+               if(!points.isEmpty())
+               {
+                    ui->lineEdit_CharaPoints->setText(points);
+               }
+           }
+       }
+       if(newobj.contains("createcharaelements")){
+           auto qcreatecharaelements = newobj.take("createcharaelements");
+           if(qcreatecharaelements.isString()){
+               auto elements = qcreatecharaelements.toString();
+               if(!elements.isEmpty())
+               {
+                    ui->lineEdit_CharaElements->setText(elements);
+               }
+           }
+       }
+       if(newobj.contains("createcharaname")){
+           auto qcreatecharaname = newobj.take("createcharaname");
+           if(qcreatecharaname.isString()){
+               auto name = qcreatecharaname.toString();
+               if(!name.isEmpty())
+               {
+                    ui->lineEdit_CharaName->setText(name);
+               }
+           }
+       }
     }
     else
     {
@@ -483,4 +669,25 @@ void AccountForm::OnHttpLoadAccount(QString query, QByteArray postdata, QJsonDoc
     }
 end:
    doc->setObject(obj);
+}
+
+void AccountForm::on_checkBox_createChara_stateChanged(int arg1)
+{
+    if(arg1){
+        ui->comboBox_Chara->setEnabled(true);
+        ui->comboBox_CharaEye->setEnabled(true);
+        ui->comboBox_CharaMou->setEnabled(true);
+        ui->comboBox_CharaColor->setEnabled(true);
+        ui->lineEdit_CharaName->setEnabled(true);
+        ui->lineEdit_CharaPoints->setEnabled(true);
+        ui->lineEdit_CharaElements->setEnabled(true);
+    } else {
+        ui->comboBox_Chara->setEnabled(false);
+        ui->comboBox_CharaEye->setEnabled(false);
+        ui->comboBox_CharaMou->setEnabled(false);
+        ui->comboBox_CharaColor->setEnabled(false);
+        ui->lineEdit_CharaName->setEnabled(false);
+        ui->lineEdit_CharaPoints->setEnabled(false);
+        ui->lineEdit_CharaElements->setEnabled(false);
+    }
 }

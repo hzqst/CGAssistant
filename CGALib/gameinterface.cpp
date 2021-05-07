@@ -110,6 +110,7 @@ namespace CGAServiceProtocol
 	TIMAX_DEFINE_PROTOCOL(GetNextAnimTickCount, double());
 	TIMAX_DEFINE_PROTOCOL(IsUIDialogPresent, bool(int));
 	TIMAX_DEFINE_PROTOCOL(LoginGameServer, void(std::string, std::string, int, int, int, int));
+	TIMAX_DEFINE_PROTOCOL(CreateCharacter, void(cga_create_chara_t));
 	TIMAX_DEFINE_FORWARD(NotifyServerShutdown, int);
 	TIMAX_DEFINE_FORWARD(NotifyBattleAction, int);
 	TIMAX_DEFINE_FORWARD(NotifyPlayerMenu, cga_player_menu_items_t);
@@ -1299,6 +1300,18 @@ namespace CGA
 			if (m_connected) {
 				try {
 					m_client.call(std::chrono::milliseconds(10000), m_endpoint, CGAServiceProtocol::LoginGameServer, gid, glt, serverid, bigServerIndex, serverIndex, character);
+					return true;
+				}
+				catch (timax::rpc::exception const &e) { if (e.get_error_code() != timax::rpc::error_code::TIMEOUT) m_connected = false; OutputDebugStringA("rpc exception from " __FUNCTION__); OutputDebugStringA(e.get_error_message().c_str()); }
+				catch (msgpack::parse_error &e) { OutputDebugStringA("parse exception from " __FUNCTION__); OutputDebugStringA(e.what()); }
+			}
+			return false;
+		}
+		virtual bool CreateCharacter(const CGA::cga_create_chara_t &req)
+		{
+			if (m_connected) {
+				try {
+					m_client.call(std::chrono::milliseconds(10000), m_endpoint, CGAServiceProtocol::CreateCharacter, req);
 					return true;
 				}
 				catch (timax::rpc::exception const &e) { if (e.get_error_code() != timax::rpc::error_code::TIMEOUT) m_connected = false; OutputDebugStringA("rpc exception from " __FUNCTION__); OutputDebugStringA(e.get_error_message().c_str()); }

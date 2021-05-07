@@ -139,6 +139,50 @@
         <source>Auto Change Server</source>
         <translation>自动换线</translation>
     </message>
+    <message>
+        <source>Mouth</source>
+        <translation>嘴</translation>
+    </message>
+    <message>
+        <source>e.g. 0,10,0,0</source>
+        <translation>按地水火风的顺序填写：如0,10,0,0</translation>
+    </message>
+    <message>
+        <source>Eye</source>
+        <translation>眼</translation>
+    </message>
+    <message>
+        <source>Name</source>
+        <translation>名字</translation>
+    </message>
+    <message>
+        <source>e.g. 0,15,0,15,0</source>
+        <translation>按血攻防敏魔的顺序填写：如0,15,0,15,0</translation>
+    </message>
+    <message>
+        <source>Color</source>
+        <translation>颜色</translation>
+    </message>
+    <message>
+        <source>Elements</source>
+        <translation>初始水晶</translation>
+    </message>
+    <message>
+        <source>Points</source>
+        <translation>初始点数</translation>
+    </message>
+    <message>
+        <source>Create Character</source>
+        <translation>自动创建人物</translation>
+    </message>
+    <message>
+        <source>0,0,0,0</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>0,0,0,0,0</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>AutoBattleForm</name>
@@ -860,7 +904,7 @@ p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:&apos;SimSun&apos;; font-size:9pt; font-weight:400; font-style:normal;&quot;&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;img src=&quot;:/logo.png&quot; /&gt;&lt;/p&gt;
 &lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:16px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; line-height:160%; font-family:&apos;-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol,Liberation Sans,PingFang SC,Microsoft YaHei,Hiragino Sans GB,Wenquanyi Micro Hei,WenQuanYi Zen Hei,ST Heiti,SimHei,SimSun,WenQuanYi Zen Hei Sharp,sans-serif&apos;; font-size:16px; color:#40485b; background-color:#ffffff;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:16px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; line-height:160%; background-color:#ffffff;&quot;&gt;&lt;span style=&quot; font-family:&apos;-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol,Liberation Sans,PingFang SC,Microsoft YaHei,Hiragino Sans GB,Wenquanyi Micro Hei,WenQuanYi Zen Hei,ST Heiti,SimHei,SimSun,WenQuanYi Zen Hei Sharp,sans-serif&apos;; font-size:16px; color:#40485b; background-color:#ffffff;&quot;&gt;当前版本：2021-05-06&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:16px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; line-height:160%; background-color:#ffffff;&quot;&gt;&lt;span style=&quot; font-family:&apos;-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol,Liberation Sans,PingFang SC,Microsoft YaHei,Hiragino Sans GB,Wenquanyi Micro Hei,WenQuanYi Zen Hei,ST Heiti,SimHei,SimSun,WenQuanYi Zen Hei Sharp,sans-serif&apos;; font-size:16px; color:#40485b; background-color:#ffffff;&quot;&gt;当前版本：2021-05-07&lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:16px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; line-height:160%; background-color:#ffffff;&quot;&gt;&lt;span style=&quot; font-family:&apos;-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol,Liberation Sans,PingFang SC,Microsoft YaHei,Hiragino Sans GB,Wenquanyi Micro Hei,WenQuanYi Zen Hei,ST Heiti,SimHei,SimSun,WenQuanYi Zen Hei Sharp,sans-serif&apos;; font-size:16px; color:#40485b; background-color:#ffffff;&quot;&gt;下载最新版本：群号 300303705&lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:16px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; line-height:160%; background-color:#ffffff;&quot;&gt;&lt;span style=&quot; font-family:&apos;-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol,Liberation Sans,PingFang SC,Microsoft YaHei,Hiragino Sans GB,Wenquanyi Micro Hei,WenQuanYi Zen Hei,ST Heiti,SimHei,SimSun,WenQuanYi Zen Hei Sharp,sans-serif&apos;; font-size:16px; color:#40485b; background-color:#ffffff;&quot;&gt;或 &lt;/span&gt;&lt;a href=&quot;https://github.com/hzqst/CGAssistantJS/issues&quot;&gt;&lt;span style=&quot; font-family:&apos;-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol,Liberation Sans,PingFang SC,Microsoft YaHei,Hiragino Sans GB,Wenquanyi Micro Hei,WenQuanYi Zen Hei,ST Heiti,SimHei,SimSun,WenQuanYi Zen Hei Sharp,sans-serif&apos;; font-size:16px; text-decoration: underline; color:#005980; background-color:transparent;&quot;&gt;https://github.com/hzqst/CGAssistantJS/&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:16px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; line-height:160%; background-color:#ffffff;&quot;&gt;&lt;a href=&quot;https://github.com/hzqst/CGAssistantJS/issues&quot;&gt;&lt;span style=&quot; font-family:&apos;-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol,Liberation Sans,PingFang SC,Microsoft YaHei,Hiragino Sans GB,Wenquanyi Micro Hei,WenQuanYi Zen Hei,ST Heiti,SimHei,SimSun,WenQuanYi Zen Hei Sharp,sans-serif&apos;; font-size:16px; text-decoration: underline; color:#005980; background-color:transparent;&quot;&gt;或 &lt;/span&gt;&lt;/a&gt;&lt;a href=&quot;https://gitee.com/hzqst/CGAssistantJS/issues&quot;&gt;&lt;span style=&quot; font-family:&apos;-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol,Liberation Sans,PingFang SC,Microsoft YaHei,Hiragino Sans GB,Wenquanyi Micro Hei,WenQuanYi Zen Hei,ST Heiti,SimHei,SimSun,WenQuanYi Zen Hei Sharp,sans-serif&apos;; font-size:16px; text-decoration: underline; color:#005980; background-color:transparent;&quot;&gt;https://gitee.com/hzqst/CGAssistantJS/&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
@@ -1450,6 +1494,146 @@ error: %1</source>
     <message>
         <source>TeammateCount %1%2</source>
         <translation>己方数量 %1%2</translation>
+    </message>
+    <message>
+        <source>1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>3</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>4</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>5</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>bawu</source>
+        <translation>巴乌</translation>
+    </message>
+    <message>
+        <source>kazi</source>
+        <translation>卡兹</translation>
+    </message>
+    <message>
+        <source>xin</source>
+        <translation>辛</translation>
+    </message>
+    <message>
+        <source>tuobu</source>
+        <translation>托布</translation>
+    </message>
+    <message>
+        <source>kai</source>
+        <translation>凯</translation>
+    </message>
+    <message>
+        <source>feite</source>
+        <translation>菲特</translation>
+    </message>
+    <message>
+        <source>boke</source>
+        <translation>伯克</translation>
+    </message>
+    <message>
+        <source>wulu</source>
+        <translation>乌噜</translation>
+    </message>
+    <message>
+        <source>moeko</source>
+        <translation>萌子</translation>
+    </message>
+    <message>
+        <source>ami</source>
+        <translation>阿咪</translation>
+    </message>
+    <message>
+        <source>meigu</source>
+        <translation>梅古</translation>
+    </message>
+    <message>
+        <source>li</source>
+        <translation>丽</translation>
+    </message>
+    <message>
+        <source>kayi</source>
+        <translation>卡伊</translation>
+    </message>
+    <message>
+        <source>ailu</source>
+        <translation>艾露</translation>
+    </message>
+    <message>
+        <source>xiedi</source>
+        <translation>谢堤</translation>
+    </message>
+    <message>
+        <source>pite</source>
+        <translation>彼特</translation>
+    </message>
+    <message>
+        <source>zuozang</source>
+        <translation>左藏</translation>
+    </message>
+    <message>
+        <source>niersen</source>
+        <translation>尼尔森</translation>
+    </message>
+    <message>
+        <source>beidite</source>
+        <translation>贝堤特</translation>
+    </message>
+    <message>
+        <source>lansiluote</source>
+        <translation>兰斯洛特</translation>
+    </message>
+    <message>
+        <source>weisikaier</source>
+        <translation>威斯凯尔</translation>
+    </message>
+    <message>
+        <source>shala</source>
+        <translation>莎拉</translation>
+    </message>
+    <message>
+        <source>aya</source>
+        <translation>绫女</translation>
+    </message>
+    <message>
+        <source>fuerdiya</source>
+        <translation>福尔蒂雅</translation>
+    </message>
+    <message>
+        <source>xiala</source>
+        <translation>夏菈</translation>
+    </message>
+    <message>
+        <source>pingping</source>
+        <translation>萍萍</translation>
+    </message>
+    <message>
+        <source>geleisi</source>
+        <translation>葛蕾丝</translation>
+    </message>
+    <message>
+        <source>hemi</source>
+        <translation>荷蜜</translation>
+    </message>
+    <message>
+        <source>Highest Lv</source>
+        <translation>最高等级</translation>
+    </message>
+    <message>
+        <source>Lowest Lv</source>
+        <translation>最低等级</translation>
     </message>
 </context>
 <context>

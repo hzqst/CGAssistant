@@ -2225,13 +2225,63 @@ void __cdecl NewUI_SelectServer()
 	g_CGAService.NewUI_SelectServer();
 }
 
+//return 0 for creating chara, 1 for selecting existing chara.
 int CGAService::NewUI_SelectCharacter(int index, int a2)
 {
-	if(m_ui_selectcharacter_click_index != -1 && index == m_ui_selectcharacter_click_index && UI_IsCharacterPresent(index))
+	if(m_ui_selectcharacter_click_index != -1 && (index == 0 || index == 1))
 	{
-		m_ui_selectcharacter_click_index = -1;
-		m_fakeCGSharedMem[0] = 0;
-		return 1;
+		bool bClick = false;
+
+		if (index == m_ui_selectcharacter_click_index)
+		{
+			bClick = true;
+		}
+		else if (m_ui_selectcharacter_click_index == 2 && UI_IsCharacterPresent(index))
+		{
+			if (UI_IsCharacterPresent(1 - index) && g_login_character[index].level >= g_login_character[1 - index].level)
+			{
+				bClick = true;
+			}
+			else if(!UI_IsCharacterPresent(1 - index))
+			{
+				bClick = true;
+			}
+		}
+		else if (m_ui_selectcharacter_click_index == 3 && UI_IsCharacterPresent(index))
+		{
+			if (UI_IsCharacterPresent(1 - index) && g_login_character[index].level <= g_login_character[1 - index].level)
+			{
+				bClick = true;
+			}
+			else if (!UI_IsCharacterPresent(1 - index))
+			{
+				bClick = true;
+			}
+		}
+
+		if (bClick)
+		{
+			m_ui_selectcharacter_click_index = -1;
+			if (UI_IsCharacterPresent(index))
+			{
+				m_fakeCGSharedMem[0] = 0;
+				return 1;
+			}
+			else
+			{
+				//no chara? create one?
+				if (m_ui_create_character)
+				{
+					m_fakeCGSharedMem[0] = 0;
+					return 0;
+				}
+				else
+				{
+					CGA::cga_conn_state_t msg(3, "no character");
+					CGA_NotifyConnectionState(msg);
+				}
+			}
+		}
 	}
 	return UI_SelectCharacter(index, a2);
 }
@@ -2392,6 +2442,61 @@ void CGAService::NewUI_GatherNextWork(int uicore)
 void __cdecl NewUI_GatherNextWork(int uicore)
 {
 	return g_CGAService.NewUI_GatherNextWork(uicore);
+}
+
+int __cdecl NewUI_CreateCharacterPickChara(void)
+{
+	return g_CGAService.NewUI_CreateCharacterPickChara();
+}
+
+int CGAService::NewUI_CreateCharacterPickChara(void)
+{
+	if (m_ui_create_character)
+	{
+		return 1;
+	}
+
+	return UI_CreateCharacterPickChara();
+}
+
+int __cdecl NewUI_CreateCharacterFillProperty(void)
+{
+	return g_CGAService.NewUI_CreateCharacterFillProperty();
+}
+
+int CGAService::NewUI_CreateCharacterFillProperty(void)
+{
+	if (m_ui_create_character)
+	{
+		strncpy(g_create_chara_name, m_ui_create_character_param.name, 19);
+		g_create_chara_name[19] = 0;
+
+		*g_create_chara_endurance = m_ui_create_character_param.endurance;
+		*g_create_chara_strength = m_ui_create_character_param.strength;
+		*g_create_chara_defense = m_ui_create_character_param.defense;
+		*g_create_chara_agility = m_ui_create_character_param.agility;
+		*g_create_chara_magical = m_ui_create_character_param.magical;
+		*g_create_chara_earth = m_ui_create_character_param.earth;
+		*g_create_chara_water = m_ui_create_character_param.water;
+		*g_create_chara_fire = m_ui_create_character_param.fire;
+		*g_create_chara_wind = m_ui_create_character_param.wind;
+		int chara_index = std::min(std::max(m_ui_create_character_param.character, 0), 27);
+		int color = std::min(std::max(m_ui_create_character_param.color, 0), 3);
+		*g_create_chara_chara = g_chara_table[chara_index] + 6 * color;
+
+		int eye = std::min(std::max(m_ui_create_character_param.eye, 0), 4);
+		int mouth = std::min(std::max(m_ui_create_character_param.mouth, 0), 4);
+		*g_create_chara_avatar = g_avatar_table[chara_index] + 5 * eye + 25 * color + mouth;
+
+		*g_create_character_status = 11;
+
+		memset(&m_ui_create_character_param, 0, sizeof(m_ui_create_character_param));
+		m_ui_create_character = false;
+
+		return 1;
+	}
+
+	return UI_CreateCharacterFillProperty();
 }
 
 ULONG MH_GetModuleSize(HMODULE hModule)
@@ -2787,6 +2892,8 @@ void CGAService::Initialize(game_type type)
 		UI_DisplayAnimFrame = CONVERT_GAMEVAR(int(__cdecl *)(int index), 0xD6240);
 		UI_GatherNextWork = CONVERT_GAMEVAR(void(__cdecl *)(int uicore), 0xBDF80);
 		UI_IsCharacterPresent = CONVERT_GAMEVAR(int(__cdecl *)(int index), 0x199DB0);
+		UI_CreateCharacterPickChara = CONVERT_GAMEVAR(int(__cdecl *)(void), 0);
+		UI_CreateCharacterFillProperty = CONVERT_GAMEVAR(int(__cdecl *)(void), 0);
 		UI_OpenTradeDialog = CONVERT_GAMEVAR(void(__cdecl *)(const char *, int), 0x148840);
 		SYS_ResetWindow = CONVERT_GAMEVAR(void(__cdecl *)(), 0x93E10);
 		format_mapname = CONVERT_GAMEVAR(void(__cdecl *)(char *, int, int, int), 0x95920);
@@ -2948,6 +3055,22 @@ void CGAService::Initialize(game_type type)
 		g_avatar_public_state = CONVERT_GAMEVAR(int *, 0xEAAFD4);//ok;
 		g_local_player_index = CONVERT_GAMEVAR(short *, 0xDFBE44);//ok;
 
+		g_chara_table = CONVERT_GAMEVAR(int *, 0x5EBB90 - 0x400000);//ok;
+		g_avatar_table = CONVERT_GAMEVAR(int *, 0x608FC0 - 0x400000);//ok;
+		g_create_chara_name = CONVERT_GAMEVAR(char *, 0x10C2794 - 0x400000);//ok;
+		g_create_chara_chara = CONVERT_GAMEVAR(int *, 0x10BFFAC - 0x400000);//ok;
+		g_create_chara_avatar = CONVERT_GAMEVAR(int *, 0x10BFFA8 - 0x400000);//ok;
+		g_create_chara_endurance = CONVERT_GAMEVAR(int *, 0x12109E0 - 0x400000);//ok;
+		g_create_chara_strength = CONVERT_GAMEVAR(int *, 0x10623A4 - 0x400000);//ok;
+		g_create_chara_defense = CONVERT_GAMEVAR(int *, 0x10BFFB0 - 0x400000);//ok;
+		g_create_chara_agility = CONVERT_GAMEVAR(int *, 0x10C25A8 - 0x400000);//ok;
+		g_create_chara_magical = CONVERT_GAMEVAR(int *, 0x10C25AC - 0x400000);//ok;
+		g_create_chara_earth = CONVERT_GAMEVAR(int *, 0x10BFFBC - 0x400000);//ok;
+		g_create_chara_water = CONVERT_GAMEVAR(int *, 0x10C0A74 - 0x400000);//ok;
+		g_create_chara_fire = CONVERT_GAMEVAR(int *, 0x10C0A68 - 0x400000);//ok;
+		g_create_chara_wind = CONVERT_GAMEVAR(int *, 0x10C0A70 - 0x400000);//ok;
+		g_login_character = CONVERT_GAMEVAR(login_character_t *, 0x11FBD2A - 0x400000);//ok;
+
 		Sys_CheckModify = CONVERT_GAMEVAR(char(__cdecl *)(const char *), 0x1BD030);//ok
 		COMMON_PlaySound = CONVERT_GAMEVAR(void(__cdecl *)(int, int, int), 0x1B1570);//ok
 		BATTLE_PlayerAction = CONVERT_GAMEVAR(void(__cdecl *)(), 0xD83A0);//ok
@@ -3053,6 +3176,8 @@ void CGAService::Initialize(game_type type)
 		UI_DisplayAnimFrame = CONVERT_GAMEVAR(int(__cdecl *)(int index), 0xD6240);
 		UI_GatherNextWork = CONVERT_GAMEVAR(void(__cdecl *)(int uicore), 0xBDF80);
 		UI_IsCharacterPresent = CONVERT_GAMEVAR(int(__cdecl *)(int index), 0x199DB0);
+		UI_CreateCharacterPickChara = CONVERT_GAMEVAR(int(__cdecl *)(void), 0x8EE00);
+		UI_CreateCharacterFillProperty = CONVERT_GAMEVAR(int(__cdecl *)(void), 0x8F7B0);
 		UI_OpenTradeDialog = CONVERT_GAMEVAR(void(__cdecl *)(const char *, int), 0x148840);
 		SYS_ResetWindow = CONVERT_GAMEVAR(void(__cdecl *)(), 0x93E10);
 		format_mapname = CONVERT_GAMEVAR(void(__cdecl *)(char *, int , int , int ), 0x95920);
@@ -3192,6 +3317,7 @@ void CGAService::Initialize(game_type type)
 		m_ui_selectcharacter_click_index = -1;
 		m_fakeCGSharedMem[0] = 0;
 		m_ui_auto_login = false;
+		m_ui_create_character = false;
 		m_run_game_pid = 0;
 		m_run_game_tid = 0;
 		m_ui_battle_action = 0;
@@ -3259,6 +3385,7 @@ void CGAService::Initialize(game_type type)
 		m_ui_selectcharacter_click_index = -1;
 		m_fakeCGSharedMem[0] = 0;
 		m_ui_auto_login = false;
+		m_ui_create_character = false;
 		m_run_game_pid = 0;
 		m_run_game_tid = 0;
 		m_ui_battle_action = 0;
@@ -3314,6 +3441,8 @@ void CGAService::Initialize(game_type type)
 		DetourAttach(&(void *&)UI_DisplayAnimFrame, ::NewUI_DisplayAnimFrame);
 		DetourAttach(&(void *&)UI_DialogShowupFrame, ::NewUI_DialogShowupFrame);
 		DetourAttach(&(void *&)UI_GatherNextWork, ::NewUI_GatherNextWork);
+		DetourAttach(&(void *&)UI_CreateCharacterPickChara, ::NewUI_CreateCharacterPickChara);
+		DetourAttach(&(void *&)UI_CreateCharacterFillProperty, ::NewUI_CreateCharacterFillProperty);
 		DetourAttach(&(void *&)IsMapObjectEntrance, ::NewIsMapObjectEntrance);
 		DetourAttach(&(void *&)NET_WritePrepareCraftItemPacket_cgitem, ::NewNET_WritePrepareCraftItemPacket_cgitem);
 		DetourAttach(&(void *&)NET_WriteWorkPacket_cgitem, ::NewNET_WriteWorkPacket_cgitem);
@@ -6845,6 +6974,37 @@ void CGAService::RequestDownloadMap(int xbottom, int ybottom, int xsize, int ysi
 	SendMessageA(g_MainHwnd, WM_CGA_REQUEST_DOWNLOAD_MAP, xbottom & 0xffff | ((xsize & 0xffff) << 16), ybottom & 0xffff | ((ysize & 0xffff) << 16));
 }
 
+void CGAService::CreateCharacter(cga_create_chara_t request)
+{
+	if (!request.name.empty())
+	{
+		m_ui_create_character_param.character = request.character;
+		m_ui_create_character_param.color = request.color;
+		m_ui_create_character_param.eye = request.eye;
+		m_ui_create_character_param.mouth = request.mouth;
+		m_ui_create_character_param.endurance = request.endurance;
+		m_ui_create_character_param.strength = request.strength;
+		m_ui_create_character_param.defense = request.defense;
+		m_ui_create_character_param.agility = request.agility;
+		m_ui_create_character_param.magical = request.magical;
+		m_ui_create_character_param.earth = request.earth;
+		m_ui_create_character_param.water = request.water;
+		m_ui_create_character_param.fire = request.fire;
+		m_ui_create_character_param.wind = request.wind;
+
+		auto name = boost::locale::conv::from_utf<char>(request.name, "GBK");
+
+		strncpy(m_ui_create_character_param.name, name.c_str(), 19);
+		m_ui_create_character_param.name[19] = 0;
+		m_ui_create_character = true;
+	}
+	else
+	{
+		memset(&m_ui_create_character_param, 0, sizeof(m_ui_create_character_param));
+		m_ui_create_character = false;
+	}
+}
+
 void CGAService::LoginGameServer(std::string gid, std::string glt, int serverid, int bigServerIndex, int serverIndex, int character)
 {
 	if (gid.empty())
@@ -6853,7 +7013,8 @@ void CGAService::LoginGameServer(std::string gid, std::string glt, int serverid,
 	}
 	else
 	{
-		sprintf(m_fakeCGSharedMem, "gid:%s glt:%s:%d", gid.c_str(), glt.c_str(), serverid);
+		snprintf(m_fakeCGSharedMem, 1023, "gid:%s glt:%s:%d", gid.c_str(), glt.c_str(), serverid);
+		m_fakeCGSharedMem[1023] = 0;
 		m_ui_auto_login = true;
 		m_ui_selectbigserver_click_index = bigServerIndex;
 		m_ui_selectserver_click_index = serverIndex;

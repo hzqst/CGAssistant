@@ -1666,6 +1666,80 @@ namespace msgpack {
 				}
 			};
 
+			//cga_create_chara_t
+
+			template<>
+			struct convert<cga_create_chara_t> {
+				msgpack::object const& operator()(msgpack::object const& o, cga_create_chara_t& v) const {
+					if (o.type != msgpack::type::ARRAY) throw msgpack::type_error();
+					if (o.via.array.size != 14) throw msgpack::type_error();
+
+					v.name = o.via.array.ptr[0].as<std::string>();
+					v.character = o.via.array.ptr[1].as<int>();
+					v.color = o.via.array.ptr[2].as<int>();
+					v.eye = o.via.array.ptr[3].as<int>();
+					v.mouth = o.via.array.ptr[4].as<int>();
+					v.endurance = o.via.array.ptr[5].as<int>();
+					v.strength = o.via.array.ptr[6].as<int>();
+					v.defense = o.via.array.ptr[7].as<int>();
+					v.agility = o.via.array.ptr[8].as<int>();
+					v.magical = o.via.array.ptr[9].as<int>();
+					v.earth = o.via.array.ptr[10].as<int>();
+					v.water = o.via.array.ptr[11].as<int>();
+					v.fire = o.via.array.ptr[12].as<int>();
+					v.wind = o.via.array.ptr[13].as<int>();
+
+					return o;
+				}
+			};
+
+			template<>
+			struct pack<cga_create_chara_t> {
+				template <typename Stream>
+				packer<Stream>& operator()(msgpack::packer<Stream>& o, cga_create_chara_t const& v) const {
+					// packing member variables as an array.
+					o.pack_array(14);
+					o.pack(v.name);
+					o.pack(v.character);
+					o.pack(v.color);
+					o.pack(v.eye);
+					o.pack(v.mouth);
+					o.pack(v.endurance);
+					o.pack(v.strength);
+					o.pack(v.defense);
+					o.pack(v.agility);
+					o.pack(v.magical);
+					o.pack(v.earth);
+					o.pack(v.water);
+					o.pack(v.fire);
+					o.pack(v.wind);
+					return o;
+				}
+			};
+
+			template <>
+			struct object_with_zone<cga_create_chara_t> {
+				void operator()(msgpack::object::with_zone& o, cga_create_chara_t const& v) const {
+					o.type = type::ARRAY;
+					o.via.array.size = 14;
+					o.via.array.ptr = static_cast<msgpack::object*>(o.zone.allocate_align(sizeof(msgpack::object) * o.via.array.size));
+					o.via.array.ptr[0] = msgpack::object(v.name, o.zone);
+					o.via.array.ptr[1] = msgpack::object(v.character, o.zone);
+					o.via.array.ptr[2] = msgpack::object(v.color, o.zone);
+					o.via.array.ptr[3] = msgpack::object(v.eye, o.zone);
+					o.via.array.ptr[4] = msgpack::object(v.mouth, o.zone);
+					o.via.array.ptr[5] = msgpack::object(v.endurance, o.zone);
+					o.via.array.ptr[6] = msgpack::object(v.strength, o.zone);
+					o.via.array.ptr[7] = msgpack::object(v.defense, o.zone);
+					o.via.array.ptr[8] = msgpack::object(v.agility, o.zone);
+					o.via.array.ptr[9] = msgpack::object(v.magical, o.zone);
+					o.via.array.ptr[10] = msgpack::object(v.earth, o.zone);
+					o.via.array.ptr[11] = msgpack::object(v.water, o.zone);
+					o.via.array.ptr[12] = msgpack::object(v.fire, o.zone);
+					o.via.array.ptr[13] = msgpack::object(v.wind, o.zone);
+				}
+			};
+
 		} // namespace adaptor
 	} // MSGPACK_API_VERSION_NAMESPACE(MSGPACK_DEFAULT_API_NS)
 } // namespace msgpack

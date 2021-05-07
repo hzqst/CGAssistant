@@ -58,6 +58,48 @@ namespace CGA
 		std::string descString;
 	}cga_pers_desc_t;
 
+	typedef struct cga_create_chara_s
+	{
+		cga_create_chara_s()
+		{
+			character = 0;
+			color = 0;
+			eye = 0;
+			mouth = 0;
+			endurance = 0;
+			strength = 0;
+			defense = 0;
+			agility = 0;
+			magical = 0;
+			earth = 0;
+			water = 0;
+			fire = 0;
+			wind = 0;
+		}
+
+		cga_create_chara_s(const std::string &a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11, int a12, int a13, int a14) :
+			name(a1), character(a2), color(a3), eye(a4), mouth(a5), 
+			endurance(a6), strength(a7), defense(a8), agility(a9), magical(a10), 
+			earth(a11), water(a12), fire(a13), wind(a14)
+		{
+		}
+
+		std::string name;
+		int character;
+		int color;
+		int eye;
+		int mouth;
+		int endurance;
+		int strength;
+		int defense;
+		int agility;
+		int magical;
+		int earth;
+		int water;
+		int fire;
+		int wind;
+	}cga_create_chara_t;
+
 	typedef struct cga_playerpet_detail_info_s
 	{
 		cga_playerpet_detail_info_s()
@@ -1069,7 +1111,7 @@ namespace CGA
 		virtual bool RequestDownloadMap(int xbottom, int ybottom, int xsize, int ysize) = 0;
 		virtual bool GetNextAnimTickCount(double &next_anim_tick) = 0;
 		virtual bool LoginGameServer(const std::string &gid, const std::string &glt, int serverid, int bigServerIndex, int serverIndex, int character) = 0;
-
+		virtual bool CreateCharacter(const CGA::cga_create_chara_t &req) = 0;
 		virtual bool IsUIDialogPresent(int dialog, bool &result) = 0;
 
 		virtual bool RegisterServerShutdownNotify(const std::function<void(int)> &callback) = 0;

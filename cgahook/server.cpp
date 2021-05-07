@@ -282,6 +282,7 @@ DWORD WINAPI CGAServerThread(LPVOID)
 				server->register_handler("RequestDownloadMap", timax::bind(&CGAService::RequestDownloadMap, &g_CGAService));
 				server->register_handler("GetNextAnimTickCount", timax::bind(&CGAService::GetNextAnimTickCount, &g_CGAService));
 				server->register_handler("LoginGameServer", timax::bind(&CGAService::LoginGameServer, &g_CGAService));
+				server->register_handler("CreateCharacter", timax::bind(&CGAService::CreateCharacter, &g_CGAService));
 
 				server->start();
 

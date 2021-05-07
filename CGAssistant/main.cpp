@@ -72,6 +72,22 @@ int main(int argc, char *argv[])
 
     QCommandLineOption autochangeserver("autochangeserver");
 
+    QCommandLineOption autocreatechara("autocreatechara");
+
+    QCommandLineOption createcharachara("createcharachara");
+
+    QCommandLineOption createcharaeye("createcharaeye");
+
+    QCommandLineOption createcharamouth("createcharamouth");
+
+    QCommandLineOption createcharacolor("createcharacolor");
+
+    QCommandLineOption createcharapoints("createcharapoints");
+
+    QCommandLineOption createcharaelements("createcharaelements");
+
+    QCommandLineOption createcharaname("createcharaname");
+
     QCommandLineOption loadscript("loadscript", "", "loadscript");
 
     QCommandLineOption scriptautorestart("scriptautorestart");
@@ -100,6 +116,14 @@ int main(int argc, char *argv[])
     parser.addOption(autologin);
     parser.addOption(skipupdate);
     parser.addOption(autochangeserver);
+    parser.addOption(autocreatechara);
+    parser.addOption(createcharachara);
+    parser.addOption(createcharaeye);
+    parser.addOption(createcharamouth);
+    parser.addOption(createcharacolor);
+    parser.addOption(createcharapoints);
+    parser.addOption(createcharaelements);
+    parser.addOption(createcharaname);
     parser.addOption(loadscript);
     parser.addOption(scriptautorestart);
     parser.addOption(scriptautoterm);
@@ -229,7 +253,16 @@ int main(int argc, char *argv[])
                            parser.value(character).toInt(),
                            parser.isSet(autologin) ? true : false,
                           parser.isSet(skipupdate) ? true : false,
-                          parser.isSet(autochangeserver) ? true : false);
+                          parser.isSet(autochangeserver) ? true : false,
+                          parser.isSet(autocreatechara) ? true : false,
+                          parser.value(createcharachara).toInt(),
+                          parser.value(createcharaeye).toInt(),
+                          parser.value(createcharamouth).toInt(),
+                          parser.value(createcharacolor).toInt(),
+                          parser.value(createcharapoints),
+                          parser.value(createcharaelements),
+                          parser.value(createcharaname)
+                          );
 
     w.NotifyFillLoadScript(parser.value(loadscript),
                            parser.isSet(scriptautorestart) ? true : false,
