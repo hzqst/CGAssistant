@@ -74,19 +74,19 @@ int main(int argc, char *argv[])
 
     QCommandLineOption autocreatechara("autocreatechara");
 
-    QCommandLineOption createcharachara("createcharachara");
+    QCommandLineOption createcharachara("createcharachara", "", "createcharachara");
 
-    QCommandLineOption createcharaeye("createcharaeye");
+    QCommandLineOption createcharaeye("createcharaeye", "", "createcharaeye");
 
-    QCommandLineOption createcharamouth("createcharamouth");
+    QCommandLineOption createcharamouth("createcharamouth", "", "createcharamouth");
 
-    QCommandLineOption createcharacolor("createcharacolor");
+    QCommandLineOption createcharacolor("createcharacolor", "", "createcharacolor");
 
-    QCommandLineOption createcharapoints("createcharapoints");
+    QCommandLineOption createcharapoints("createcharapoints", "", "createcharapoints");
 
-    QCommandLineOption createcharaelements("createcharaelements");
+    QCommandLineOption createcharaelements("createcharaelements", "", "createcharaelements");
 
-    QCommandLineOption createcharaname("createcharaname");
+    QCommandLineOption createcharaname("createcharaname", "", "createcharaname");
 
     QCommandLineOption loadscript("loadscript", "", "loadscript");
 
