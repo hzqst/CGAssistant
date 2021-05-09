@@ -39,7 +39,6 @@ private slots:
 public slots:
     void OnCloseWindow();
     void OnNotifyBattleAction(int flags);
-    void OnNotifyChatMsg(int unitid, QString msg, int size, int color);
     void OnNotifyGetInfoFailed(bool bIsConnected, bool bIsInGame);
     void OnNotifyGetPlayerInfo(QSharedPointer<CGA_PlayerInfo_t> player);
     void OnNotifyGetPetsInfo(QSharedPointer<CGA_PetList_t> pets);

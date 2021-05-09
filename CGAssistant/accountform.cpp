@@ -500,8 +500,9 @@ void AccountForm::OnNotifyFillAutoLogin(int game, QString user, QString pwd, QSt
     if(!create_chara_elements.isEmpty())
         ui->lineEdit_CharaElements->setText(create_chara_elements);
 
-    if(!create_chara_name.isEmpty())
+    if(!create_chara_name.isEmpty()){
         ui->lineEdit_CharaName->setText(create_chara_name);
+    }
 }
 
 void AccountForm::OnHttpLoadAccount(QString query, QByteArray postdata, QJsonDocument* doc)
