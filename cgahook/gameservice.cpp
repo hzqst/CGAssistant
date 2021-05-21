@@ -2849,6 +2849,7 @@ void CGAService::Initialize(game_type type)
 		NET_WriteChangeAvatarPublicStatePacket_cgitem = CONVERT_GAMEVAR(void(__cdecl *)(int, int), 0x188670);
 		NET_WriteChangeBattlePositionPacket_cgitem = CONVERT_GAMEVAR(void(__cdecl *)(int), 0x189470);
 		NET_WriteChangeTitleNamePacket_cgitem = CONVERT_GAMEVAR(void(__cdecl *)(int, int), 0x1891B0);
+		NET_WriteChangePetNamePacket_cgitem = CONVERT_GAMEVAR(void(__cdecl *)(int , int , const char *), 0x1894C0);
 
 		Move_Player = CONVERT_GAMEVAR(void(__cdecl *)(), 0x98280);//ok
 		UI_HandleLogbackMouseEvent = CONVERT_GAMEVAR(int(__cdecl *)(int, char), 0xD2BF0);//ok
@@ -3133,6 +3134,7 @@ void CGAService::Initialize(game_type type)
 		NET_WriteChangeAvatarPublicStatePacket_cgitem = CONVERT_GAMEVAR(void(__cdecl *)(int, int), 0x188670);
 		NET_WriteChangeBattlePositionPacket_cgitem = CONVERT_GAMEVAR(void(__cdecl *)(int), 0x189470);
 		NET_WriteChangeTitleNamePacket_cgitem = CONVERT_GAMEVAR(void(__cdecl *)(int, int), 0x1891B0);
+		NET_WriteChangePetNamePacket_cgitem = CONVERT_GAMEVAR(void(__cdecl *)(int, int, const char *), 0x1894C0);
 
 		Move_Player = CONVERT_GAMEVAR(void(__cdecl *)(), 0x98280);//ok
 		UI_HandleLogbackMouseEvent = CONVERT_GAMEVAR(int(__cdecl *)(int, char), 0xD2BF0);//ok
@@ -5887,6 +5889,29 @@ bool CGAService::WM_ChangeTitleName(int titleId)
 bool CGAService::ChangeTitleName(int titleId)
 {
 	return SendMessageA(g_MainHwnd, WM_CGA_CHANGE_TITLE_NAME, (WPARAM)titleId, (LPARAM)NULL) ? true : false;
+}
+
+bool CGAService::WM_ChangePetName(int petId, const char *name)
+{
+	if (petId >= 0 && petId <= 4 && g_pet_base[petId].level)
+	{
+		auto str = boost::locale::conv::from_utf<char>(name, "GBK");
+		
+		char buf[256] = {0};
+		strncpy(buf, str.c_str(), 255);
+		buf[255] = 0;
+
+		NET_EscapeStringEx(buf);
+		NET_WriteChangePetNamePacket_cgitem(*g_net_socket, petId, buf);
+
+		return true;
+	}
+	return false;
+}
+
+bool CGAService::ChangePetName(int petId, std::string name)
+{
+	return SendMessageA(g_MainHwnd, WM_CGA_CHANGE_PET_NAME, (WPARAM)petId, (LPARAM)name.c_str()) ? true : false;
 }
 
 void CGAService::WM_ChangePersDesc(cga_pers_desc_t *input)

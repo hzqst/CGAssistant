@@ -100,6 +100,7 @@ void ChatForm::OnNotifyChatMsg(int unitid, QString msg, int size, int color)
             line.append(QString("%1: %2<br>").arg(name).arg(msg));
         }
 
+        ui->textEdit_chat->moveCursor(QTextCursor::End);
         ui->textEdit_chat->insertHtml(line);
         ui->textEdit_chat->moveCursor(QTextCursor::End);
     }

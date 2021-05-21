@@ -1059,6 +1059,7 @@ namespace CGA
 		virtual bool ChangeNickName(std::string &str, bool &result) = 0;
 		virtual bool ChangeTitleName(int titleId, bool &result) = 0;
 		virtual bool ChangePersDesc(CGA::cga_pers_desc_t &desc) = 0;
+		virtual bool ChangePetName(int petId, std::string &name, bool &result) = 0;
 
 		virtual bool UseItem(int itempos, bool &result) = 0;
         virtual bool ClickNPCDialog(int option, int index, bool &result) = 0;

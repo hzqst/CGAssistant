@@ -644,6 +644,7 @@ namespace CGA
 		virtual void ChangePersDesc(cga_pers_desc_t desc);
 		virtual bool ChangeNickName(std::string str);
 		virtual bool ChangeTitleName(int titleId);
+		virtual bool ChangePetName(int petId, std::string name);
 		virtual void SayWords(std::string str, int color, int range, int size);
 		virtual void SetWorkDelay(int delay);
 		virtual void SetWorkAcceleration(int percent);
@@ -926,6 +927,7 @@ namespace CGA
 		void(__cdecl *NET_WriteChangeAvatarPublicStatePacket_cgitem)(int a1, int isPublic);
 		void(__cdecl *NET_WriteChangeBattlePositionPacket_cgitem)(int a1);
 		void(__cdecl *NET_WriteChangeTitleNamePacket_cgitem)(int a1, int titleId);
+		void(__cdecl *NET_WriteChangePetNamePacket_cgitem)(int a1, int petid, const char *petName);
 
 		void(__cdecl *NPC_ShowDialogInternal)(int type, int options, int dlgid, int objid, const char *message);
 		int(__cdecl *NPC_ClickDialog)(int option, int index, int a3, char a4);
@@ -1160,6 +1162,7 @@ namespace CGA
 		bool WM_ChangeNickName(const char *name);
 		void WM_ChangePersDesc(cga_pers_desc_t *input);
 		bool WM_ChangeTitleName(int titleId);
+		bool WM_ChangePetName(int petId, const char *name);
 
 		bool m_initialized;
 		bool m_btl_highspeed_enable;
@@ -1320,5 +1323,6 @@ namespace CGA
 #define WM_CGA_CHANGE_NICK_NAME WM_USER+10065
 #define WM_CGA_CHANGE_TITLE_NAME WM_USER+10066
 #define WM_CGA_CHANGE_PERS_DESC WM_USER+10067
+#define WM_CGA_CHANGE_PET_NAME WM_USER+10068
 
 #define CGA_PORT_BASE 4396

@@ -137,6 +137,38 @@ void ChangeTitleName(const Nan::FunctionCallbackInfo<v8::Value>& info)
 	info.GetReturnValue().Set(bResult);
 }
 
+void ChangePetName(const Nan::FunctionCallbackInfo<v8::Value>& info)
+{
+	auto isolate = info.GetIsolate();
+	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
+
+	if (info.Length() < 1 || !info[0]->IsInt32()) {
+		Nan::ThrowTypeError("Arg[0] must be integer.");
+		return;
+	}
+	if (info.Length() < 2 || !info[1]->IsString()) {
+		Nan::ThrowTypeError("Arg[1] must be string.");
+		return;
+	}
+
+	int petId = info[0]->Int32Value(context).ToChecked();
+
+	v8::String::Utf8Value str(isolate, info[1]->ToString(context).ToLocalChecked());
+
+	std::string sstr(*str);
+
+	bool bResult = false;
+
+	if (!g_CGAInterface->ChangePetName(petId, sstr, bResult))
+	{
+		Nan::ThrowError("RPC Invocation failed.");
+		return;
+	}
+
+	info.GetReturnValue().Set(bResult);
+}
+
 void ChangePersDesc(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
 	auto isolate = info.GetIsolate();
@@ -308,6 +340,7 @@ void Init(v8::Local<v8::Object> exports) {
 	exports->Set(context, Nan::New("SayWords").ToLocalChecked(), Nan::New<v8::FunctionTemplate>(SayWords)->GetFunction(context).ToLocalChecked());
 	exports->Set(context, Nan::New("ChangeNickName").ToLocalChecked(), Nan::New<v8::FunctionTemplate>(ChangeNickName)->GetFunction(context).ToLocalChecked());
 	exports->Set(context, Nan::New("ChangeTitleName").ToLocalChecked(), Nan::New<v8::FunctionTemplate>(ChangeTitleName)->GetFunction(context).ToLocalChecked());
+	exports->Set(context, Nan::New("ChangePetName").ToLocalChecked(), Nan::New<v8::FunctionTemplate>(ChangePetName)->GetFunction(context).ToLocalChecked());
 	exports->Set(context, Nan::New("ChangePersDesc").ToLocalChecked(), Nan::New<v8::FunctionTemplate>(ChangePersDesc)->GetFunction(context).ToLocalChecked());
 	exports->Set(context, Nan::New("AsyncWaitWorkingResult").ToLocalChecked(), Nan::New<v8::FunctionTemplate>(AsyncWaitWorkingResult)->GetFunction(context).ToLocalChecked());
 	exports->Set(context, Nan::New("SetImmediateDoneWork").ToLocalChecked(), Nan::New<v8::FunctionTemplate>(SetImmediateDoneWork)->GetFunction(context).ToLocalChecked());

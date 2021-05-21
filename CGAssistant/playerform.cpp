@@ -446,22 +446,45 @@ bool PlayerForm::ParsePlayerSettings(const QJsonValue &val)
 
     auto playerobj = val.toObject();
 
-   ui->checkBox_SwitchAnim->setChecked(playerobj.take("noswitchanim").toBool());
-   ui->checkBox_autoSupply->setChecked(playerobj.take("autosupply").toBool());
+    if(playerobj.contains("noswitchanim"))
+        ui->checkBox_SwitchAnim->setChecked(playerobj.take("noswitchanim").toBool());
+    if(playerobj.contains("autosupply"))
+        ui->checkBox_autoSupply->setChecked(playerobj.take("autosupply").toBool());
 
-   ui->checkBox_useFood->setChecked(playerobj.take("usefood").toBool());
-   ui->checkBox_useMed->setChecked(playerobj.take("usemed").toBool());
-   ui->checkBox_petFood->setChecked(playerobj.take("petfood").toBool());
-   ui->checkBox_petMed->setChecked(playerobj.take("petmed").toBool());
+    if(playerobj.contains("usefood"))
+        ui->checkBox_useFood->setChecked(playerobj.take("usefood").toBool());
 
-   ui->comboBox_useFoodAt->setCurrentText(playerobj.take("usefoodat").toString());
-   ui->comboBox_useMedAt->setCurrentText(playerobj.take("usemedat").toString());
-   ui->comboBox_petFoodAt->setCurrentText(playerobj.take("petfoodat").toString());
-   ui->comboBox_petMedAt->setCurrentText(playerobj.take("petmedat").toString());
+    if(playerobj.contains("usemed"))
+        ui->checkBox_useMed->setChecked(playerobj.take("usemed").toBool());
 
-   ui->horizontalSlider_movespd->setValue(playerobj.take("movespd").toInt());
-   ui->horizontalSlider_workacc->setValue(playerobj.take("workacc").toInt());
-   ui->horizontalSlider_workdelay->setValue(playerobj.take("workdelay").toInt());
+    if(playerobj.contains("petfood"))
+        ui->checkBox_petFood->setChecked(playerobj.take("petfood").toBool());
+
+    if(playerobj.contains("petmed"))
+        ui->checkBox_petMed->setChecked(playerobj.take("petmed").toBool());
+
+
+    if(playerobj.contains("usefoodat"))
+        ui->comboBox_useFoodAt->setCurrentText(playerobj.take("usefoodat").toString());
+
+    if(playerobj.contains("usemedat"))
+        ui->comboBox_useMedAt->setCurrentText(playerobj.take("usemedat").toString());
+
+    if(playerobj.contains("petfoodat"))
+        ui->comboBox_petFoodAt->setCurrentText(playerobj.take("petfoodat").toString());
+
+    if(playerobj.contains("petmedat"))
+        ui->comboBox_petMedAt->setCurrentText(playerobj.take("petmedat").toString());
+
+
+    if(playerobj.contains("movespd"))
+        ui->horizontalSlider_movespd->setValue(playerobj.take("movespd").toInt());
+
+    if(playerobj.contains("workacc"))
+        ui->horizontalSlider_workacc->setValue(playerobj.take("workacc").toInt());
+
+    if(playerobj.contains("workdelay"))
+        ui->horizontalSlider_workdelay->setValue(playerobj.take("workdelay").toInt());
 
     return true;
 }
