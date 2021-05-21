@@ -1902,6 +1902,10 @@ int CGAService::NewUI_ButtonCheckMouse(btn_rect_t *btn)
 			return 0xC0;
 		}
 	}
+	if (btn == g_update_game_version_button)
+	{
+		return 0x41;
+	}
 	return UI_ButtonCheckMouse(btn);
 }
 
@@ -2228,7 +2232,7 @@ void __cdecl NewUI_SelectServer()
 //return 0 for creating chara, 1 for selecting existing chara.
 int CGAService::NewUI_SelectCharacter(int index, int a2)
 {
-	if(m_ui_selectcharacter_click_index != -1 && (index == 0 || index == 1))
+	if(m_ui_selectcharacter_click_index != -1 && (index == 0 || index == 1) && *g_game_version >= 8)
 	{
 		bool bClick = false;
 
@@ -3072,6 +3076,8 @@ void CGAService::Initialize(game_type type)
 		g_create_chara_wind = CONVERT_GAMEVAR(int *, 0x10C0A70 - 0x400000);//ok;
 		g_login_character = CONVERT_GAMEVAR(login_character_t *, 0x11FBD2A - 0x400000);//ok;
 		g_card_info = CONVERT_GAMEVAR(card_info_t *, 0x10C0A78 - 0x400000);//ok;
+		g_update_game_version_button = CONVERT_GAMEVAR(btn_rect_t *, 0x608FA0 - 0x400000);//ok;
+		g_game_version = CONVERT_GAMEVAR(int *, 0x9CFDBE - 0x400000);//ok;
 
 		Sys_CheckModify = CONVERT_GAMEVAR(char(__cdecl *)(const char *), 0x1BD030);//ok
 		COMMON_PlaySound = CONVERT_GAMEVAR(void(__cdecl *)(int, int, int), 0x1B1570);//ok

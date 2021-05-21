@@ -873,6 +873,8 @@ namespace CGA
 		login_character_t *g_login_character;
 
 		card_info_t *g_card_info;
+		btn_rect_t *g_update_game_version_button;
+		int *g_game_version;
 	public:
 		char(__cdecl *Sys_CheckModify)(const char *a1);
 		void(__cdecl *COMMON_PlaySound)(int a1, int a2, int a3);
