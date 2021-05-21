@@ -189,6 +189,21 @@ namespace CGA
 
 	static_assert(sizeof(player_pers_desc_t) == 0x828, "Size check");
 
+	//10C0A78
+	typedef struct card_info_s
+	{
+		short valid; //0x0000 
+		short server; //0x0002 
+		int unk; //0x0004 
+		int level; //0x0008 
+		int avatar; //0x000C 
+		char name[17]; //0x98CE0C 
+		char title[17]; //0x98CE0C 
+		char unk2[66]; //0x98CE0C 
+	}card_info_t;
+
+	static_assert(sizeof(card_info_t) == 116, "Size check");
+
 #define PLAYER_ENABLE_FLAGS_PK (1<<2)
 #define PLAYER_ENABLE_FLAGS_TEAMCHAT (1<<3)
 #define PLAYER_ENABLE_FLAGS_JOINTEAM (1<<0)
@@ -580,6 +595,7 @@ namespace CGA
 		virtual cga_skills_info_t GetSkillsInfo();
 		virtual cga_subskill_info_t GetSubSkillInfo(int index, int stage);
 		virtual cga_subskills_info_t GetSubSkillsInfo(int index);
+		virtual cga_cards_info_t GetCardsInfo();
 		virtual bool IsPetValid(int petid);
 		virtual cga_pet_info_t GetPetInfo(int index);
 		virtual cga_pets_info_t GetPetsInfo();
@@ -855,6 +871,8 @@ namespace CGA
 		int *g_create_chara_fire;
 		int *g_create_chara_wind;
 		login_character_t *g_login_character;
+
+		card_info_t *g_card_info;
 	public:
 		char(__cdecl *Sys_CheckModify)(const char *a1);
 		void(__cdecl *COMMON_PlaySound)(int a1, int a2, int a3);
@@ -1121,6 +1139,7 @@ namespace CGA
 		void WM_GetSkillsInfo(cga_skills_info_t *info);
 		void WM_GetSubSkillInfo(int index, int stage, cga_subskill_info_t *info);
 		void WM_GetSubSkillsInfo(int index, cga_subskills_info_t *info);
+		void WM_GetCardsInfo(cga_cards_info_t *info);
 		void WM_GetPetInfo(int index, cga_pet_info_t *info);
 		void WM_GetPetsInfo(cga_pets_info_t *info);
 		void WM_GetBankPetsInfo(cga_pets_info_t *info);
@@ -1324,5 +1343,6 @@ namespace CGA
 #define WM_CGA_CHANGE_TITLE_NAME WM_USER+10066
 #define WM_CGA_CHANGE_PERS_DESC WM_USER+10067
 #define WM_CGA_CHANGE_PET_NAME WM_USER+10068
+#define WM_CGA_GET_CARDS_INFO WM_USER+10069
 
 #define CGA_PORT_BASE 4396

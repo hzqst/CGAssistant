@@ -755,6 +755,34 @@ void GetPetInfo(const Nan::FunctionCallbackInfo<v8::Value>& info)
 	info.GetReturnValue().Set(obj);
 }
 
+void GetCardsInfo(const Nan::FunctionCallbackInfo<v8::Value>& info)
+{
+	auto isolate = info.GetIsolate();
+	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
+
+	CGA::cga_cards_info_t myinfos;
+	if (!g_CGAInterface->GetCardsInfo(myinfos))
+	{
+		Nan::ThrowError("RPC Invocation failed.");
+		return;
+	}
+	Local<Array> arr = Array::New(isolate);
+	for (size_t i = 0; i < myinfos.size(); ++i)
+	{
+		Local<Object> obj = Object::New(isolate);
+		const CGA::cga_card_info_t &myinfo = myinfos.at(i);
+		obj->Set(context, String::NewFromUtf8(isolate, "name").ToLocalChecked(), Nan::New(myinfo.name).ToLocalChecked());
+		obj->Set(context, String::NewFromUtf8(isolate, "title").ToLocalChecked(), Nan::New(myinfo.title).ToLocalChecked());
+		obj->Set(context, String::NewFromUtf8(isolate, "level").ToLocalChecked(), Integer::New(isolate, myinfo.level));
+		obj->Set(context, String::NewFromUtf8(isolate, "avatar").ToLocalChecked(), Integer::New(isolate, myinfo.avatar));
+		obj->Set(context, String::NewFromUtf8(isolate, "server").ToLocalChecked(), Integer::New(isolate, myinfo.server));
+		obj->Set(context, String::NewFromUtf8(isolate, "index").ToLocalChecked(), Integer::New(isolate, myinfo.index));
+		arr->Set(context, i, obj);
+	}
+	info.GetReturnValue().Set(arr);
+}
+
 void GetPetsInfo(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
 	auto isolate = info.GetIsolate();

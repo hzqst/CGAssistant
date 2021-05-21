@@ -466,7 +466,7 @@ void AccountForm::OnNotifyFillAutoLogin(int game, QString user, QString pwd, QSt
     if(server >= 1 && server <= 10)
         ui->comboBox_server->setCurrentIndex(server - 1);
 
-    if(character >= 1 && character <= 2)
+    if(character >= 1 && character <= 4)
         ui->comboBox_character->setCurrentIndex(character - 1);
 
     if(autologin)

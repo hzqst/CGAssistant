@@ -267,6 +267,9 @@ LRESULT CALLBACK NewWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
 		return 1;
 	case WM_CGA_CHANGE_PET_NAME:
 		return g_CGAService.WM_ChangePetName((int)wParam, (const char *)lParam);
+	case WM_CGA_GET_CARDS_INFO:
+		g_CGAService.WM_GetCardsInfo((CGA::cga_cards_info_t *)wParam);
+		return 1;
 	case WM_KEYDOWN:
 		if (GetForegroundWindow() == g_MainHwnd)
 		{

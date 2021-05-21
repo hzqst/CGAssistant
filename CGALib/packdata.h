@@ -1740,6 +1740,56 @@ namespace msgpack {
 				}
 			};
 
+			//cga_card_info_t
+
+			template<>
+			struct convert<cga_card_info_t> {
+				msgpack::object const& operator()(msgpack::object const& o, cga_card_info_t& v) const {
+					if (o.type != msgpack::type::ARRAY) throw msgpack::type_error();
+					if (o.via.array.size != 6) throw msgpack::type_error();
+
+					v.index = o.via.array.ptr[0].as<int>();
+					v.level = o.via.array.ptr[1].as<int>();
+					v.avatar = o.via.array.ptr[2].as<int>();
+					v.server = o.via.array.ptr[3].as<int>();
+					v.name = o.via.array.ptr[4].as<std::string>();
+					v.title = o.via.array.ptr[5].as<std::string>();
+
+					return o;
+				}
+			};
+
+			template<>
+			struct pack<cga_card_info_t> {
+				template <typename Stream>
+				packer<Stream>& operator()(msgpack::packer<Stream>& o, cga_card_info_t const& v) const {
+					// packing member variables as an array.
+					o.pack_array(6);
+					o.pack(v.index);
+					o.pack(v.level);
+					o.pack(v.avatar);
+					o.pack(v.server);
+					o.pack(v.name);
+					o.pack(v.title);
+					return o;
+				}
+			};
+
+			template <>
+			struct object_with_zone<cga_card_info_t> {
+				void operator()(msgpack::object::with_zone& o, cga_card_info_t const& v) const {
+					o.type = type::ARRAY;
+					o.via.array.size = 6;
+					o.via.array.ptr = static_cast<msgpack::object*>(o.zone.allocate_align(sizeof(msgpack::object) * o.via.array.size));
+					o.via.array.ptr[0] = msgpack::object(v.index, o.zone);
+					o.via.array.ptr[1] = msgpack::object(v.level, o.zone);
+					o.via.array.ptr[2] = msgpack::object(v.avatar, o.zone);
+					o.via.array.ptr[3] = msgpack::object(v.server, o.zone);
+					o.via.array.ptr[4] = msgpack::object(v.name, o.zone);
+					o.via.array.ptr[5] = msgpack::object(v.title, o.zone);
+				}
+			};
+
 		} // namespace adaptor
 	} // MSGPACK_API_VERSION_NAMESPACE(MSGPACK_DEFAULT_API_NS)
 } // namespace msgpack

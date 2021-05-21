@@ -917,6 +917,29 @@ namespace CGA
 		int reserved;
 	}cga_game_data_t;
 
+	typedef struct cga_card_info_s
+	{
+		cga_card_info_s()
+		{
+			index = 0;
+			level = 0;
+			avatar = 0;
+			server = 0;
+		}
+		cga_card_info_s(int a1, int a2, int a3, int a4, std::string &a5, std::string &a6)
+			: index(a1), level(a2), avatar(a3), server(a4), name(a5), title(a6)
+		{
+		}
+		int index;
+		int level;
+		int avatar;
+		int server;
+		std::string name;
+		std::string title;
+	}cga_card_info_t;
+
+	typedef std::vector<cga_card_info_t> cga_cards_info_t;
+
 #define TRADE_STUFFS_ITEM 1
 #define TRADE_STUFFS_PET 2
 #define TRADE_STUFFS_PETSKILL 3
@@ -1025,6 +1048,7 @@ namespace CGA
 		virtual bool GetSubSkillInfo(int id, int stage, cga_subskill_info_t &info) = 0;
 		virtual bool GetSubSkillsInfo(int id, cga_subskills_info_t &info) = 0;
 
+		virtual bool GetCardsInfo(cga_cards_info_t &info) = 0;
 		virtual bool IsItemValid(int itempos, bool &valid) = 0;
 		virtual bool GetItemInfo(int itempos, cga_item_info_t &info) = 0;
 		virtual bool GetItemsInfo(cga_items_info_t &info) = 0;

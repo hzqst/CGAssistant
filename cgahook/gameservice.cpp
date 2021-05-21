@@ -3071,6 +3071,7 @@ void CGAService::Initialize(game_type type)
 		g_create_chara_fire = CONVERT_GAMEVAR(int *, 0x10C0A68 - 0x400000);//ok;
 		g_create_chara_wind = CONVERT_GAMEVAR(int *, 0x10C0A70 - 0x400000);//ok;
 		g_login_character = CONVERT_GAMEVAR(login_character_t *, 0x11FBD2A - 0x400000);//ok;
+		g_card_info = CONVERT_GAMEVAR(card_info_t *, 0x10C0A78 - 0x400000);//ok;
 
 		Sys_CheckModify = CONVERT_GAMEVAR(char(__cdecl *)(const char *), 0x1BD030);//ok
 		COMMON_PlaySound = CONVERT_GAMEVAR(void(__cdecl *)(int, int, int), 0x1B1570);//ok
@@ -3962,6 +3963,36 @@ cga_subskills_info_t CGAService::GetSubSkillsInfo(int index)
 	cga_subskills_info_t info;
 
 	SendMessageA(g_MainHwnd, WM_CGA_GET_SUBSKILLS_INFO, index, (LPARAM)&info);
+
+	return info;
+}
+
+void CGAService::WM_GetCardsInfo(cga_cards_info_t *info)
+{
+	if (!IsInGame())
+		return;
+
+	for (int i = 0; i < 60; ++i)
+	{
+		if (g_card_info[i].valid)
+		{
+			info->emplace_back(
+				i,
+				g_card_info[i].level,
+				g_card_info[i].avatar,
+				g_card_info[i].server,
+				boost::locale::conv::to_utf<char>(g_card_info[i].name, "GBK"),
+				boost::locale::conv::to_utf<char>(g_card_info[i].title, "GBK")
+			);
+		}
+	}
+}
+
+cga_cards_info_t CGAService::GetCardsInfo()
+{
+	cga_cards_info_t info;
+
+	SendMessageA(g_MainHwnd, WM_CGA_GET_CARDS_INFO, (WPARAM)&info, 0);
 
 	return info;
 }

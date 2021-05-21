@@ -220,6 +220,7 @@ DWORD WINAPI CGAServerThread(LPVOID)
 				server->register_handler("ChangeTitleName", timax::bind(&CGAService::ChangeTitleName, &g_CGAService));
 				server->register_handler("ChangePersDesc", timax::bind(&CGAService::ChangePersDesc, &g_CGAService));
 				server->register_handler("ChangePetName", timax::bind(&CGAService::ChangePetName, &g_CGAService));
+				server->register_handler("GetCardsInfo", timax::bind(&CGAService::GetCardsInfo, &g_CGAService));
 
 				server->register_handler("IsItemValid", timax::bind(&CGAService::IsItemValid, &g_CGAService));
 				server->register_handler("GetItemInfo", timax::bind(&CGAService::GetItemInfo, &g_CGAService));

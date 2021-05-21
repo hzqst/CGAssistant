@@ -295,6 +295,7 @@ void Init(v8::Local<v8::Object> exports) {
 	exports->Set(context, Nan::New("GetBankGold").ToLocalChecked(), Nan::New<v8::FunctionTemplate>(GetBankGold)->GetFunction(context).ToLocalChecked());
 	exports->Set(context, Nan::New("IsPetValid").ToLocalChecked(), Nan::New<v8::FunctionTemplate>(IsPetValid)->GetFunction(context).ToLocalChecked());
 	exports->Set(context, Nan::New("GetPetInfo").ToLocalChecked(), Nan::New<v8::FunctionTemplate>(GetPetInfo)->GetFunction(context).ToLocalChecked());
+	exports->Set(context, Nan::New("GetCardsInfo").ToLocalChecked(), Nan::New<v8::FunctionTemplate>(GetCardsInfo)->GetFunction(context).ToLocalChecked());
 	exports->Set(context, Nan::New("GetPetsInfo").ToLocalChecked(), Nan::New<v8::FunctionTemplate>(GetPetsInfo)->GetFunction(context).ToLocalChecked());
 	exports->Set(context, Nan::New("GetBankPetsInfo").ToLocalChecked(), Nan::New<v8::FunctionTemplate>(GetBankPetsInfo)->GetFunction(context).ToLocalChecked());
 	exports->Set(context, Nan::New("IsPetSkillValid").ToLocalChecked(), Nan::New<v8::FunctionTemplate>(IsPetSkillValid)->GetFunction(context).ToLocalChecked());

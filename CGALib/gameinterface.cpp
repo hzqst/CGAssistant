@@ -33,6 +33,7 @@ namespace CGAServiceProtocol
 	TIMAX_DEFINE_PROTOCOL(GetItemInfo, cga_item_info_t(int));
 	TIMAX_DEFINE_PROTOCOL(GetItemsInfo, cga_items_info_t());
 	TIMAX_DEFINE_PROTOCOL(GetBankItemsInfo, cga_items_info_t());
+	TIMAX_DEFINE_PROTOCOL(GetCardsInfo, cga_cards_info_t());
 	TIMAX_DEFINE_PROTOCOL(GetBankGold, int());
 	TIMAX_DEFINE_PROTOCOL(UseItem, bool(int));
 	TIMAX_DEFINE_PROTOCOL(MoveItem, bool(int, int, int));
@@ -393,6 +394,17 @@ namespace CGA
 				catch (msgpack::parse_error &e) { OutputDebugStringA("parse exception from " __FUNCTION__); OutputDebugStringA(e.what()); }
 			}
 			return 0;
+		}
+		virtual bool GetCardsInfo(cga_cards_info_t &info) {
+			if (m_connected) {
+				try {
+					info = m_client.call(std::chrono::milliseconds(10000), m_endpoint, CGAServiceProtocol::GetCardsInfo);
+					return true;
+				}
+				catch (timax::rpc::exception const &e) { if (e.get_error_code() != timax::rpc::error_code::TIMEOUT) m_connected = false; OutputDebugStringA("rpc exception from " __FUNCTION__); OutputDebugStringA(e.get_error_message().c_str()); }
+				catch (msgpack::parse_error &e) { OutputDebugStringA("parse exception from " __FUNCTION__); OutputDebugStringA(e.what()); }
+			}
+			return false;
 		}
 		virtual bool IsItemValid(int itempos, bool &valid) {
 			if (m_connected) {
