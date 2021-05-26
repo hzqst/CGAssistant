@@ -35,9 +35,7 @@ private slots:
     void on_pushButton_del_clicked();
     void on_pushButton_moveUp_clicked();
     void on_pushButton_moveDown_clicked();
-
     void on_comboBox_petAction_2_currentIndexChanged(int index);
-
     void on_comboBox_petTarget_2_currentIndexChanged(int index);
 
 public slots:

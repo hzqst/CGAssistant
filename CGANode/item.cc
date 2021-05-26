@@ -142,21 +142,22 @@ std::vector<UnitMenuCacheData *> g_UnitMenu_Caches;
 
 void ChangePetState(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
-	Isolate* isolate = info.GetIsolate();
+	auto isolate = info.GetIsolate();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
-	if (info.Length() < 1) {
-		Nan::ThrowTypeError("Arg[0] must be petpos.");
+	if (info.Length() < 1 || !info[0]->IsInt32()) {
+		Nan::ThrowTypeError("Arg[0] must be integer.");
 		return;
 	}
 
-	if (info.Length() < 2) {
-		Nan::ThrowTypeError("Arg[1] must be state.");
+	if (info.Length() < 2 || !info[1]->IsInt32()) {
+		Nan::ThrowTypeError("Arg[1] must be integer.");
 		return;
 	}
 
-	int petpos = (int)info[0]->IntegerValue();
-	int state = (int)info[1]->IntegerValue();
+	int petpos = info[0]->Int32Value(context).ToChecked();
+	int state = info[1]->Int32Value(context).ToChecked();
 
 	bool result = false;
 	if (!g_CGAInterface->ChangePetState(petpos, state, result))
@@ -170,16 +171,19 @@ void ChangePetState(const Nan::FunctionCallbackInfo<v8::Value>& info)
 
 void DropPet(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
-	Isolate* isolate = info.GetIsolate();
+	auto isolate = info.GetIsolate();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
-	if (info.Length() < 1) {
-		Nan::ThrowTypeError("Arg[0] must be petpos.");
+	if (info.Length() < 1 || !info[0]->IsInt32()) {
+		Nan::ThrowTypeError("Arg[0] must be integer.");
 		return;
 	}
 
-	int petpos = (int)info[0]->IntegerValue();
+	int petpos = info[0]->Int32Value(context).ToChecked();
+
 	bool result = false;
+
 	if (!g_CGAInterface->DropPet(petpos, result))
 	{
 		Nan::ThrowError("RPC Invocation failed.");
@@ -191,16 +195,19 @@ void DropPet(const Nan::FunctionCallbackInfo<v8::Value>& info)
 
 void DropItem(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
-	Isolate* isolate = info.GetIsolate();
+	auto isolate = info.GetIsolate();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
-	if (info.Length() < 1) {
-		Nan::ThrowTypeError("Arg[0] must be itempos.");
+	if (info.Length() < 1 || !info[0]->IsInt32()) {
+		Nan::ThrowTypeError("Arg[0] must be integer.");
 		return;
 	}
 
-	int itempos = (int)info[0]->IntegerValue();
+	int itempos = info[0]->Int32Value(context).ToChecked();
+
 	bool result = false;
+
 	if (!g_CGAInterface->DropItem(itempos, result))
 	{
 		Nan::ThrowError("RPC Invocation failed.");
@@ -250,18 +257,19 @@ void TradeStateNotify(int state)
 
 void TradeStateAsyncCallBack(uv_async_t *handle)
 {
-	Isolate* isolate = Isolate::GetCurrent();
+	auto isolate = Isolate::GetCurrent();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	auto data = (TradeStateNotifyData *)handle->data;
 
-	Handle<Value> argv[2];
+	Local<Value> argv[2];
 	Local<Value> nullValue = Nan::Null();
-	argv[0] = data->m_result ? nullValue : Nan::TypeError("Unknown exception.");
+	argv[0] = data->m_result ? nullValue : Nan::Error("Unknown exception.");
 	if (data->m_result)
 		argv[1] = Integer::New(isolate, data->m_info);
 
-	Local<Function>::New(isolate, data->m_callback)->Call(isolate->GetCurrentContext()->Global(), (data->m_result) ? 2 : 1, argv);
+	Local<Function>::New(isolate, data->m_callback)->Call(context, Null(isolate), (data->m_result) ? 2 : 1, argv);
 
 	data->m_callback.Reset();
 
@@ -273,8 +281,9 @@ void TradeStateAsyncCallBack(uv_async_t *handle)
 
 void TradeStateTimerCallBack(uv_timer_t *handle)
 {
-	Isolate* isolate = Isolate::GetCurrent();
+	auto isolate = Isolate::GetCurrent();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	auto data = (TradeStateNotifyData *)handle->data;
 
@@ -295,10 +304,10 @@ void TradeStateTimerCallBack(uv_timer_t *handle)
 
 	if (asyncNotCalled)
 	{
-		Handle<Value> argv[1];
-		argv[0] = Nan::TypeError("Async callback timeout.");
+		Local<Value> argv[1];
+		argv[0] = Nan::Error("Async callback timeout.");
 
-		Local<Function>::New(isolate, data->m_callback)->Call(isolate->GetCurrentContext()->Global(), 1, argv);
+		Local<Function>::New(isolate, data->m_callback)->Call(context, Null(isolate), 1, argv);
 
 		data->m_callback.Reset();
 
@@ -349,21 +358,22 @@ void TradeDialogNotify(CGA::cga_trade_dialog_t info)
 
 void TradeDialogAsyncCallBack(uv_async_t *handle)
 {
-	Isolate* isolate = Isolate::GetCurrent();
+	auto isolate = Isolate::GetCurrent();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	auto data = (TradeDialogNotifyData *)handle->data;
 
-	Handle<Value> argv[3];
+	Local<Value> argv[3];
 	Local<Value> nullValue = Nan::Null();
-	argv[0] = data->m_result ? nullValue : Nan::TypeError("Unknown exception.");
+	argv[0] = data->m_result ? nullValue : Nan::Error("Unknown exception.");
 	if (data->m_result)
 	{
 		argv[1] = Nan::New(data->m_info.name).ToLocalChecked();
 		argv[2] = Integer::New(isolate, data->m_info.level);
 	}
 
-	Local<Function>::New(isolate, data->m_callback)->Call(isolate->GetCurrentContext()->Global(), (data->m_result) ? 3 : 1, argv);
+	Local<Function>::New(isolate, data->m_callback)->Call(context, Null(isolate), (data->m_result) ? 3 : 1, argv);
 
 	data->m_callback.Reset();
 
@@ -375,8 +385,9 @@ void TradeDialogAsyncCallBack(uv_async_t *handle)
 
 void TradeDialogTimerCallBack(uv_timer_t *handle)
 {
-	Isolate* isolate = Isolate::GetCurrent();
+	auto isolate = Isolate::GetCurrent();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	auto data = (TradeDialogNotifyData *)handle->data;
 
@@ -397,10 +408,10 @@ void TradeDialogTimerCallBack(uv_timer_t *handle)
 
 	if (asyncNotCalled)
 	{
-		Handle<Value> argv[1];
-		argv[0] = Nan::TypeError("Async callback timeout.");
+		Local<Value> argv[1];
+		argv[0] = Nan::Error("Async callback timeout.");
 
-		Local<Function>::New(isolate, data->m_callback)->Call(isolate->GetCurrentContext()->Global(), 1, argv);
+		Local<Function>::New(isolate, data->m_callback)->Call(context, Null(isolate), 1, argv);
 
 		data->m_callback.Reset();
 
@@ -451,8 +462,9 @@ void TradeStuffsNotify(CGA::cga_trade_stuff_info_t info)
 
 void TradeStuffsAsyncCallBack(uv_async_t *handle)
 {
-	Isolate* isolate = Isolate::GetCurrent();
+	auto isolate = Isolate::GetCurrent();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	auto data = (TradeStuffsNotifyData *)handle->data;
 
@@ -460,7 +472,7 @@ void TradeStuffsAsyncCallBack(uv_async_t *handle)
 	{
 		if(data->m_info.type == TRADE_STUFFS_ITEM)
 		{
-			Handle<Value> argv[3];
+			Local<Value> argv[3];
 			Local<Value> nullValue = Nan::Null();
 			argv[0] = nullValue;
 			argv[1] = Nan::New(TRADE_STUFFS_ITEM);
@@ -468,108 +480,108 @@ void TradeStuffsAsyncCallBack(uv_async_t *handle)
 			for (size_t i = 0; i < data->m_info.items.size(); ++i)
 			{
 				Local<Object> obj = Object::New(isolate);				
-				obj->Set(String::NewFromUtf8(isolate, "name"), Nan::New(data->m_info.items[i].name).ToLocalChecked());
-				obj->Set(String::NewFromUtf8(isolate, "attr"), Nan::New(data->m_info.items[i].attr).ToLocalChecked());
-				obj->Set(String::NewFromUtf8(isolate, "itemid"), Integer::New(isolate, data->m_info.items[i].itemid));
-				obj->Set(String::NewFromUtf8(isolate, "count"), Integer::New(isolate, data->m_info.items[i].count));
-				obj->Set(String::NewFromUtf8(isolate, "pos"), Integer::New(isolate, data->m_info.items[i].pos));
-				obj->Set(String::NewFromUtf8(isolate, "level"), Integer::New(isolate, data->m_info.items[i].level));
-				obj->Set(String::NewFromUtf8(isolate, "type"), Integer::New(isolate, data->m_info.items[i].type));
-				arr->Set(i, obj);
+				obj->Set(context, String::NewFromUtf8(isolate, "name").ToLocalChecked(), Nan::New(data->m_info.items[i].name).ToLocalChecked());
+				obj->Set(context, String::NewFromUtf8(isolate, "attr").ToLocalChecked(), Nan::New(data->m_info.items[i].attr).ToLocalChecked());
+				obj->Set(context, String::NewFromUtf8(isolate, "itemid").ToLocalChecked(), Integer::New(isolate, data->m_info.items[i].itemid));
+				obj->Set(context, String::NewFromUtf8(isolate, "count").ToLocalChecked(), Integer::New(isolate, data->m_info.items[i].count));
+				obj->Set(context, String::NewFromUtf8(isolate, "pos").ToLocalChecked(), Integer::New(isolate, data->m_info.items[i].pos));
+				obj->Set(context, String::NewFromUtf8(isolate, "level").ToLocalChecked(), Integer::New(isolate, data->m_info.items[i].level));
+				obj->Set(context, String::NewFromUtf8(isolate, "type").ToLocalChecked(), Integer::New(isolate, data->m_info.items[i].type));
+				arr->Set(context, i, obj);
 			}
 			argv[2] = arr;
-			Local<Function>::New(isolate, data->m_callback)->Call(isolate->GetCurrentContext()->Global(), 3, argv);
+			Local<Function>::New(isolate, data->m_callback)->Call(context, Null(isolate), 3, argv);
 		}
 		else if(data->m_info.type == TRADE_STUFFS_PET)
 		{
-			Handle<Value> argv[2];
+			Local<Value> argv[2];
 			Local<Value> nullValue = Nan::Null();
 			argv[0] = nullValue;
 			argv[1] = Nan::New(TRADE_STUFFS_PET);
 			Local<Object> obj = Object::New(isolate);
-			obj->Set(String::NewFromUtf8(isolate, "index"), Integer::New(isolate, data->m_info.pet.index));
-			obj->Set(String::NewFromUtf8(isolate, "name"), Nan::New(data->m_info.pet.name).ToLocalChecked());
-			obj->Set(String::NewFromUtf8(isolate, "realname"), Nan::New(data->m_info.pet.realname).ToLocalChecked());
-			obj->Set(String::NewFromUtf8(isolate, "level"), Integer::New(isolate, data->m_info.pet.level));
-			obj->Set(String::NewFromUtf8(isolate, "race"), Integer::New(isolate, data->m_info.pet.race));
-			obj->Set(String::NewFromUtf8(isolate, "maxhp"), Integer::New(isolate, data->m_info.pet.maxhp));
-			obj->Set(String::NewFromUtf8(isolate, "maxmp"), Integer::New(isolate, data->m_info.pet.maxmp));
-			obj->Set(String::NewFromUtf8(isolate, "loyality"), Integer::New(isolate, data->m_info.pet.loyality));
-			obj->Set(String::NewFromUtf8(isolate, "skill_count"), Integer::New(isolate, data->m_info.pet.skill_count));
-			obj->Set(String::NewFromUtf8(isolate, "image_id"), Integer::New(isolate, data->m_info.pet.image_id));
+			obj->Set(context, String::NewFromUtf8(isolate, "index").ToLocalChecked(), Integer::New(isolate, data->m_info.pet.index));
+			obj->Set(context, String::NewFromUtf8(isolate, "name").ToLocalChecked(), Nan::New(data->m_info.pet.name).ToLocalChecked());
+			obj->Set(context, String::NewFromUtf8(isolate, "realname").ToLocalChecked(), Nan::New(data->m_info.pet.realname).ToLocalChecked());
+			obj->Set(context, String::NewFromUtf8(isolate, "level").ToLocalChecked(), Integer::New(isolate, data->m_info.pet.level));
+			obj->Set(context, String::NewFromUtf8(isolate, "race").ToLocalChecked(), Integer::New(isolate, data->m_info.pet.race));
+			obj->Set(context, String::NewFromUtf8(isolate, "maxhp").ToLocalChecked(), Integer::New(isolate, data->m_info.pet.maxhp));
+			obj->Set(context, String::NewFromUtf8(isolate, "maxmp").ToLocalChecked(), Integer::New(isolate, data->m_info.pet.maxmp));
+			obj->Set(context, String::NewFromUtf8(isolate, "loyality").ToLocalChecked(), Integer::New(isolate, data->m_info.pet.loyality));
+			obj->Set(context, String::NewFromUtf8(isolate, "skill_count").ToLocalChecked(), Integer::New(isolate, data->m_info.pet.skill_count));
+			obj->Set(context, String::NewFromUtf8(isolate, "image_id").ToLocalChecked(), Integer::New(isolate, data->m_info.pet.image_id));
 
 			Local<Object> objd = Object::New(isolate);
-			objd->Set(String::NewFromUtf8(isolate, "points_remain"), Integer::New(isolate, data->m_info.pet.detail.points_remain));
-			objd->Set(String::NewFromUtf8(isolate, "points_endurance"), Integer::New(isolate, data->m_info.pet.detail.points_endurance));
-			objd->Set(String::NewFromUtf8(isolate, "points_strength"), Integer::New(isolate, data->m_info.pet.detail.points_strength));
-			objd->Set(String::NewFromUtf8(isolate, "points_defense"), Integer::New(isolate, data->m_info.pet.detail.points_defense));
-			objd->Set(String::NewFromUtf8(isolate, "points_agility"), Integer::New(isolate, data->m_info.pet.detail.points_agility));
-			objd->Set(String::NewFromUtf8(isolate, "points_magical"), Integer::New(isolate, data->m_info.pet.detail.points_magical));
-			objd->Set(String::NewFromUtf8(isolate, "value_attack"), Integer::New(isolate, data->m_info.pet.detail.value_attack));
-			objd->Set(String::NewFromUtf8(isolate, "value_defensive"), Integer::New(isolate, data->m_info.pet.detail.value_defensive));
-			objd->Set(String::NewFromUtf8(isolate, "value_agility"), Integer::New(isolate, data->m_info.pet.detail.value_agility));
-			objd->Set(String::NewFromUtf8(isolate, "value_spirit"), Integer::New(isolate, data->m_info.pet.detail.value_spirit));
-			objd->Set(String::NewFromUtf8(isolate, "value_recovery"), Integer::New(isolate, data->m_info.pet.detail.value_recovery));
-			objd->Set(String::NewFromUtf8(isolate, "resist_poison"), Integer::New(isolate, data->m_info.pet.detail.resist_poison));
-			objd->Set(String::NewFromUtf8(isolate, "resist_sleep"), Integer::New(isolate, data->m_info.pet.detail.resist_sleep));
-			objd->Set(String::NewFromUtf8(isolate, "resist_medusa"), Integer::New(isolate, data->m_info.pet.detail.resist_medusa));
-			objd->Set(String::NewFromUtf8(isolate, "resist_drunk"), Integer::New(isolate, data->m_info.pet.detail.resist_drunk));
-			objd->Set(String::NewFromUtf8(isolate, "resist_chaos"), Integer::New(isolate, data->m_info.pet.detail.resist_chaos));
-			objd->Set(String::NewFromUtf8(isolate, "resist_forget"), Integer::New(isolate, data->m_info.pet.detail.resist_forget));
-			objd->Set(String::NewFromUtf8(isolate, "fix_critical"), Integer::New(isolate, data->m_info.pet.detail.fix_critical));
-			objd->Set(String::NewFromUtf8(isolate, "fix_strikeback"), Integer::New(isolate, data->m_info.pet.detail.fix_strikeback));
-			objd->Set(String::NewFromUtf8(isolate, "fix_accurancy"), Integer::New(isolate, data->m_info.pet.detail.fix_accurancy));
-			objd->Set(String::NewFromUtf8(isolate, "fix_dodge"), Integer::New(isolate, data->m_info.pet.detail.fix_dodge));
-			objd->Set(String::NewFromUtf8(isolate, "element_earth"), Integer::New(isolate, data->m_info.pet.detail.element_earth));
-			objd->Set(String::NewFromUtf8(isolate, "element_water"), Integer::New(isolate, data->m_info.pet.detail.element_water));
-			objd->Set(String::NewFromUtf8(isolate, "element_fire"), Integer::New(isolate, data->m_info.pet.detail.element_fire));
-			objd->Set(String::NewFromUtf8(isolate, "element_wind"), Integer::New(isolate, data->m_info.pet.detail.element_wind));
+			objd->Set(context, String::NewFromUtf8(isolate, "points_remain").ToLocalChecked(), Integer::New(isolate, data->m_info.pet.detail.points_remain));
+			objd->Set(context, String::NewFromUtf8(isolate, "points_endurance").ToLocalChecked(), Integer::New(isolate, data->m_info.pet.detail.points_endurance));
+			objd->Set(context, String::NewFromUtf8(isolate, "points_strength").ToLocalChecked(), Integer::New(isolate, data->m_info.pet.detail.points_strength));
+			objd->Set(context, String::NewFromUtf8(isolate, "points_defense").ToLocalChecked(), Integer::New(isolate, data->m_info.pet.detail.points_defense));
+			objd->Set(context, String::NewFromUtf8(isolate, "points_agility").ToLocalChecked(), Integer::New(isolate, data->m_info.pet.detail.points_agility));
+			objd->Set(context, String::NewFromUtf8(isolate, "points_magical").ToLocalChecked(), Integer::New(isolate, data->m_info.pet.detail.points_magical));
+			objd->Set(context, String::NewFromUtf8(isolate, "value_attack").ToLocalChecked(), Integer::New(isolate, data->m_info.pet.detail.value_attack));
+			objd->Set(context, String::NewFromUtf8(isolate, "value_defensive").ToLocalChecked(), Integer::New(isolate, data->m_info.pet.detail.value_defensive));
+			objd->Set(context, String::NewFromUtf8(isolate, "value_agility").ToLocalChecked(), Integer::New(isolate, data->m_info.pet.detail.value_agility));
+			objd->Set(context, String::NewFromUtf8(isolate, "value_spirit").ToLocalChecked(), Integer::New(isolate, data->m_info.pet.detail.value_spirit));
+			objd->Set(context, String::NewFromUtf8(isolate, "value_recovery").ToLocalChecked(), Integer::New(isolate, data->m_info.pet.detail.value_recovery));
+			objd->Set(context, String::NewFromUtf8(isolate, "resist_poison").ToLocalChecked(), Integer::New(isolate, data->m_info.pet.detail.resist_poison));
+			objd->Set(context, String::NewFromUtf8(isolate, "resist_sleep").ToLocalChecked(), Integer::New(isolate, data->m_info.pet.detail.resist_sleep));
+			objd->Set(context, String::NewFromUtf8(isolate, "resist_medusa").ToLocalChecked(), Integer::New(isolate, data->m_info.pet.detail.resist_medusa));
+			objd->Set(context, String::NewFromUtf8(isolate, "resist_drunk").ToLocalChecked(), Integer::New(isolate, data->m_info.pet.detail.resist_drunk));
+			objd->Set(context, String::NewFromUtf8(isolate, "resist_chaos").ToLocalChecked(), Integer::New(isolate, data->m_info.pet.detail.resist_chaos));
+			objd->Set(context, String::NewFromUtf8(isolate, "resist_forget").ToLocalChecked(), Integer::New(isolate, data->m_info.pet.detail.resist_forget));
+			objd->Set(context, String::NewFromUtf8(isolate, "fix_critical").ToLocalChecked(), Integer::New(isolate, data->m_info.pet.detail.fix_critical));
+			objd->Set(context, String::NewFromUtf8(isolate, "fix_strikeback").ToLocalChecked(), Integer::New(isolate, data->m_info.pet.detail.fix_strikeback));
+			objd->Set(context, String::NewFromUtf8(isolate, "fix_accurancy").ToLocalChecked(), Integer::New(isolate, data->m_info.pet.detail.fix_accurancy));
+			objd->Set(context, String::NewFromUtf8(isolate, "fix_dodge").ToLocalChecked(), Integer::New(isolate, data->m_info.pet.detail.fix_dodge));
+			objd->Set(context, String::NewFromUtf8(isolate, "element_earth").ToLocalChecked(), Integer::New(isolate, data->m_info.pet.detail.element_earth));
+			objd->Set(context, String::NewFromUtf8(isolate, "element_water").ToLocalChecked(), Integer::New(isolate, data->m_info.pet.detail.element_water));
+			objd->Set(context, String::NewFromUtf8(isolate, "element_fire").ToLocalChecked(), Integer::New(isolate, data->m_info.pet.detail.element_fire));
+			objd->Set(context, String::NewFromUtf8(isolate, "element_wind").ToLocalChecked(), Integer::New(isolate, data->m_info.pet.detail.element_wind));
 			
-			obj->Set(String::NewFromUtf8(isolate, "detail"), objd);
+			obj->Set(context, String::NewFromUtf8(isolate, "detail").ToLocalChecked(), objd);
 
 			argv[2] = obj;
 
-			Local<Function>::New(isolate, data->m_callback)->Call(isolate->GetCurrentContext()->Global(), 3, argv);
+			Local<Function>::New(isolate, data->m_callback)->Call(context, Null(isolate), 3, argv);
 		}
 		else if (data->m_info.type == TRADE_STUFFS_PETSKILL) 
 		{
-			Handle<Value> argv[3];
+			Local<Value> argv[3];
 			Local<Value> nullValue = Nan::Null();
 			argv[0] = nullValue;
 			argv[1] = Nan::New(TRADE_STUFFS_PETSKILL);
 
 			Local<Object> obj = Object::New(isolate);
-			obj->Set(String::NewFromUtf8(isolate, "index"), Integer::New(isolate, data->m_info.petskills.index));
+			obj->Set(context, String::NewFromUtf8(isolate, "index").ToLocalChecked(), Integer::New(isolate, data->m_info.petskills.index));
 			Local<Array> arr = Array::New(isolate);
 			for (size_t i = 0; i < data->m_info.petskills.skills.size(); ++i)
 			{
-				arr->Set(i, Nan::New(data->m_info.petskills.skills[i]).ToLocalChecked());
+				arr->Set(context, i, Nan::New(data->m_info.petskills.skills[i]).ToLocalChecked());
 			}
-			obj->Set(String::NewFromUtf8(isolate, "skills"), arr);
+			obj->Set(context, String::NewFromUtf8(isolate, "skills").ToLocalChecked(), arr);
 			argv[2] = obj;
 
-			Local<Function>::New(isolate, data->m_callback)->Call(isolate->GetCurrentContext()->Global(), 3, argv);
+			Local<Function>::New(isolate, data->m_callback)->Call(context, Null(isolate), 3, argv);
 		}
 		else if(data->m_info.type == TRADE_STUFFS_GOLD)
 		{
-			Handle<Value> argv[3];
+			Local<Value> argv[3];
 			Local<Value> nullValue = Nan::Null();
 
 			argv[0] = nullValue;
 			argv[1] = Nan::New(TRADE_STUFFS_GOLD);
 			argv[2] = Integer::New(isolate, data->m_info.gold);
-			Local<Function>::New(isolate, data->m_callback)->Call(isolate->GetCurrentContext()->Global(), 3, argv);
+			Local<Function>::New(isolate, data->m_callback)->Call(context, Null(isolate), 3, argv);
 		} else {
-			Handle<Value> argv[1];
-			argv[0] = Nan::TypeError("Unknown exception.");
-			Local<Function>::New(isolate, data->m_callback)->Call(isolate->GetCurrentContext()->Global(), 1, argv);
+			Local<Value> argv[1];
+			argv[0] = Nan::Error("Unknown exception.");
+			Local<Function>::New(isolate, data->m_callback)->Call(context, Null(isolate), 1, argv);
 		}
 	}
 	else
 	{
-		Handle<Value> argv[1];
-		argv[0] = Nan::TypeError("Unknown exception.");
-		Local<Function>::New(isolate, data->m_callback)->Call(isolate->GetCurrentContext()->Global(), 1, argv);
+		Local<Value> argv[1];
+		argv[0] = Nan::Error("Unknown exception.");
+		Local<Function>::New(isolate, data->m_callback)->Call(context, Null(isolate), 1, argv);
 	}
 
 	data->m_callback.Reset();
@@ -582,8 +594,9 @@ void TradeStuffsAsyncCallBack(uv_async_t *handle)
 
 void TradeStuffsTimerCallBack(uv_timer_t *handle)
 {
-	Isolate* isolate = Isolate::GetCurrent();
+	auto isolate = Isolate::GetCurrent();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	auto data = (TradeStuffsNotifyData *)handle->data;
 
@@ -604,10 +617,10 @@ void TradeStuffsTimerCallBack(uv_timer_t *handle)
 
 	if (asyncNotCalled)
 	{
-		Handle<Value> argv[1];
-		argv[0] = Nan::TypeError("Async callback timeout.");
+		Local<Value> argv[1];
+		argv[0] = Nan::Error("Async callback timeout.");
 
-		Local<Function>::New(isolate, data->m_callback)->Call(isolate->GetCurrentContext()->Global(), 1, argv);
+		Local<Function>::New(isolate, data->m_callback)->Call(context, Null(isolate), 1, argv);
 
 		data->m_callback.Reset();
 
@@ -658,29 +671,30 @@ void PlayerMenuNotify(CGA::cga_player_menu_items_t players)
 
 void PlayerMenuAsyncCallBack(uv_async_t *handle)
 {
-	Isolate* isolate = Isolate::GetCurrent();
+	auto isolate = Isolate::GetCurrent();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	auto data = (PlayerMenuNotifyData *)handle->data;
 
-	Handle<Value> argv[2];
+	Local<Value> argv[2];
 	Local<Value> nullValue = Nan::Null();
-	argv[0] = data->m_result ? nullValue : Nan::TypeError("Unknown exception.");
+	argv[0] = data->m_result ? nullValue : Nan::Error("Unknown exception.");
 	if (data->m_result)
 	{
 		Local<Array> arr = Array::New(isolate);
 		for (size_t i = 0; i < data->m_players.size(); ++i)
 		{
 			Local<Object> obj = Object::New(isolate);
-			obj->Set(String::NewFromUtf8(isolate, "name"), Nan::New(data->m_players[i].name).ToLocalChecked());
-			obj->Set(String::NewFromUtf8(isolate, "color"), Integer::New(isolate, data->m_players[i].color));
-			obj->Set(String::NewFromUtf8(isolate, "index"), Integer::New(isolate, data->m_players[i].index));
-			arr->Set(i, obj);
+			obj->Set(context, String::NewFromUtf8(isolate, "name").ToLocalChecked(), Nan::New(data->m_players[i].name).ToLocalChecked());
+			obj->Set(context, String::NewFromUtf8(isolate, "color").ToLocalChecked(), Integer::New(isolate, data->m_players[i].color));
+			obj->Set(context, String::NewFromUtf8(isolate, "index").ToLocalChecked(), Integer::New(isolate, data->m_players[i].index));
+			arr->Set(context, i, obj);
 		}
 		argv[1] = arr;
 	}
 
-	Local<Function>::New(isolate, data->m_callback)->Call(isolate->GetCurrentContext()->Global(), (data->m_result) ? 2 : 1, argv);
+	Local<Function>::New(isolate, data->m_callback)->Call(context, Null(isolate), (data->m_result) ? 2 : 1, argv);
 
 	data->m_callback.Reset();
 
@@ -692,8 +706,9 @@ void PlayerMenuAsyncCallBack(uv_async_t *handle)
 
 void PlayerMenuTimerCallBack(uv_timer_t *handle)
 {
-	Isolate* isolate = Isolate::GetCurrent();
+	auto isolate = Isolate::GetCurrent();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	auto data = (PlayerMenuNotifyData *)handle->data;
 
@@ -714,10 +729,10 @@ void PlayerMenuTimerCallBack(uv_timer_t *handle)
 
 	if (asyncNotCalled)
 	{
-		Handle<Value> argv[1];
-		argv[0] = Nan::TypeError("Async callback timeout.");
+		Local<Value> argv[1];
+		argv[0] = Nan::Error("Async callback timeout.");
 
-		Local<Function>::New(isolate, data->m_callback)->Call(isolate->GetCurrentContext()->Global(), 1, argv);
+		Local<Function>::New(isolate, data->m_callback)->Call(context, Null(isolate), 1, argv);
 
 		data->m_callback.Reset();
 
@@ -768,35 +783,36 @@ void UnitMenuNotify(CGA::cga_unit_menu_items_t units)
 
 void UnitMenuAsyncCallBack(uv_async_t *handle)
 {
-	Isolate* isolate = Isolate::GetCurrent();
+	auto isolate = Isolate::GetCurrent();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	auto data = (UnitMenuNotifyData *)handle->data;
 
-	Handle<Value> argv[2];
+	Local<Value> argv[2];
 	Local<Value> nullValue = Nan::Null();
-	argv[0] = data->m_result ? nullValue : Nan::TypeError("Unknown exception.");
+	argv[0] = data->m_result ? nullValue : Nan::Error("Unknown exception.");
 	if (data->m_result)
 	{
 		Local<Array> arr = Array::New(isolate);
 		for (size_t i = 0; i < data->m_units.size(); ++i)
 		{
 			Local<Object> obj = Object::New(isolate);
-			obj->Set(String::NewFromUtf8(isolate, "name"), Nan::New(data->m_units[i].name).ToLocalChecked());
-			obj->Set(String::NewFromUtf8(isolate, "level"), Integer::New(isolate, data->m_units[i].level));
-			obj->Set(String::NewFromUtf8(isolate, "health"), Integer::New(isolate, data->m_units[i].health));
-			obj->Set(String::NewFromUtf8(isolate, "hp"), Integer::New(isolate, data->m_units[i].hp));
-			obj->Set(String::NewFromUtf8(isolate, "maxhp"), Integer::New(isolate, data->m_units[i].maxhp));
-			obj->Set(String::NewFromUtf8(isolate, "mp"), Integer::New(isolate, data->m_units[i].mp));
-			obj->Set(String::NewFromUtf8(isolate, "maxmp"), Integer::New(isolate, data->m_units[i].maxmp));
-			obj->Set(String::NewFromUtf8(isolate, "color"), Integer::New(isolate, data->m_units[i].color));
-			obj->Set(String::NewFromUtf8(isolate, "index"), Integer::New(isolate, data->m_units[i].index));
-			arr->Set(i, obj);
+			obj->Set(context, String::NewFromUtf8(isolate, "name").ToLocalChecked(), Nan::New(data->m_units[i].name).ToLocalChecked());
+			obj->Set(context, String::NewFromUtf8(isolate, "level").ToLocalChecked(), Integer::New(isolate, data->m_units[i].level));
+			obj->Set(context, String::NewFromUtf8(isolate, "health").ToLocalChecked(), Integer::New(isolate, data->m_units[i].health));
+			obj->Set(context, String::NewFromUtf8(isolate, "hp").ToLocalChecked(), Integer::New(isolate, data->m_units[i].hp));
+			obj->Set(context, String::NewFromUtf8(isolate, "maxhp").ToLocalChecked(), Integer::New(isolate, data->m_units[i].maxhp));
+			obj->Set(context, String::NewFromUtf8(isolate, "mp").ToLocalChecked(), Integer::New(isolate, data->m_units[i].mp));
+			obj->Set(context, String::NewFromUtf8(isolate, "maxmp").ToLocalChecked(), Integer::New(isolate, data->m_units[i].maxmp));
+			obj->Set(context, String::NewFromUtf8(isolate, "color").ToLocalChecked(), Integer::New(isolate, data->m_units[i].color));
+			obj->Set(context, String::NewFromUtf8(isolate, "index").ToLocalChecked(), Integer::New(isolate, data->m_units[i].index));
+			arr->Set(context, i, obj);
 		}
 		argv[1] = arr;
 	}
 
-	Local<Function>::New(isolate, data->m_callback)->Call(isolate->GetCurrentContext()->Global(), (data->m_result) ? 2 : 1, argv);
+	Local<Function>::New(isolate, data->m_callback)->Call(context, Null(isolate), (data->m_result) ? 2 : 1, argv);
 
 	data->m_callback.Reset();
 
@@ -808,8 +824,9 @@ void UnitMenuAsyncCallBack(uv_async_t *handle)
 
 void UnitMenuTimerCallBack(uv_timer_t *handle)
 {
-	Isolate* isolate = Isolate::GetCurrent();
+	auto isolate = Isolate::GetCurrent();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	auto data = (UnitMenuNotifyData *)handle->data;
 
@@ -830,10 +847,10 @@ void UnitMenuTimerCallBack(uv_timer_t *handle)
 
 	if (asyncNotCalled)
 	{
-		Handle<Value> argv[1];
-		argv[0] = Nan::TypeError("Async callback timeout.");
+		Local<Value> argv[1];
+		argv[0] = Nan::Error("Async callback timeout.");
 
-		Local<Function>::New(isolate, data->m_callback)->Call(isolate->GetCurrentContext()->Global(), 1, argv);
+		Local<Function>::New(isolate, data->m_callback)->Call(context, Null(isolate), 1, argv);
 
 		data->m_callback.Reset();
 
@@ -846,16 +863,19 @@ void UnitMenuTimerCallBack(uv_timer_t *handle)
 
 void UseItem(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
-	Isolate* isolate = info.GetIsolate();
+	auto isolate = info.GetIsolate();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
-	if (info.Length() < 1) {
-		Nan::ThrowTypeError("Arg[0] must be itempos.");
+	if (info.Length() < 1 || !info[0]->IsInt32()) {
+		Nan::ThrowTypeError("Arg[0] must be integer.");
 		return;
 	}
 
-	int itempos = (int)info[0]->IntegerValue();
+	int itempos = (int)info[0]->Int32Value(context).ToChecked();
+
 	bool bResult = false;
+
 	if (!g_CGAInterface->UseItem(itempos, bResult))
 	{
 		Nan::ThrowError("RPC Invocation failed.");
@@ -866,29 +886,33 @@ void UseItem(const Nan::FunctionCallbackInfo<v8::Value>& info)
 
 void MoveItem(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
-	Isolate* isolate = info.GetIsolate();
+	auto isolate = info.GetIsolate();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	if (info.Length() < 1 || !info[0]->IsInt32()) {
-		Nan::ThrowTypeError("Arg[0] must be srcpos.");
+		Nan::ThrowTypeError("Arg[0] must be integer.");
 		return;
 	}
 	
 	if (info.Length() < 2 || !info[1]->IsInt32()) {
-		Nan::ThrowTypeError("Arg[1] must be dstpos.");
+		Nan::ThrowTypeError("Arg[1] must be integer.");
 		return;
 	}
 	
 	if (info.Length() < 3 || !info[2]->IsInt32()) {
-		Nan::ThrowTypeError("Arg[2] must be count.");
+		Nan::ThrowTypeError("Arg[2] must be integer.");
 		return;
 	}
 
-	int itempos = (int)info[0]->IntegerValue();
-	int dstpos = (int)info[1]->IntegerValue();
-	int count = (int)info[2]->IntegerValue();
+	int itempos = info[0]->Int32Value(context).ToChecked();
+
+	int dstpos = info[1]->Int32Value(context).ToChecked();
+
+	int count = info[2]->Int32Value(context).ToChecked();
 	
 	bool bResult = false;
+
 	if (!g_CGAInterface->MoveItem(itempos, dstpos, count, bResult))
 	{
 		Nan::ThrowError("RPC Invocation failed.");
@@ -899,21 +923,22 @@ void MoveItem(const Nan::FunctionCallbackInfo<v8::Value>& info)
 
 void MovePet(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
-	Isolate* isolate = info.GetIsolate();
+	auto isolate = info.GetIsolate();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	if (info.Length() < 1 || !info[0]->IsInt32()) {
-		Nan::ThrowTypeError("Arg[0] must be srcpos.");
+		Nan::ThrowTypeError("Arg[0] must be integer.");
 		return;
 	}
 
 	if (info.Length() < 2 || !info[1]->IsInt32()) {
-		Nan::ThrowTypeError("Arg[1] must be dstpos.");
+		Nan::ThrowTypeError("Arg[1] must be integer.");
 		return;
 	}
 
-	int srcpos = (int)info[0]->IntegerValue();
-	int dstpos = (int)info[1]->IntegerValue();
+	int srcpos = info[0]->Int32Value(context).ToChecked();
+	int dstpos = info[1]->Int32Value(context).ToChecked();
 
 	bool bResult = false;
 	if (!g_CGAInterface->MovePet(srcpos, dstpos, bResult))
@@ -926,21 +951,22 @@ void MovePet(const Nan::FunctionCallbackInfo<v8::Value>& info)
 
 void MoveGold(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
-	Isolate* isolate = info.GetIsolate();
+	auto isolate = info.GetIsolate();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	if (info.Length() < 1 || !info[0]->IsInt32()) {
-		Nan::ThrowTypeError("Arg[0] must be gold.");
+		Nan::ThrowTypeError("Arg[0] must be integer.");
 		return;
 	}
 
 	if (info.Length() < 2 || !info[1]->IsInt32()) {
-		Nan::ThrowTypeError("Arg[1] must be opt.");
+		Nan::ThrowTypeError("Arg[1] must be integer.");
 		return;
 	}
 
-	int gold = (int)info[0]->IntegerValue();
-	int opt = (int)info[1]->IntegerValue();
+	int gold = info[0]->Int32Value(context).ToChecked();
+	int opt = info[1]->Int32Value(context).ToChecked();
 
 	bool bResult = false;
 	if (!g_CGAInterface->MoveGold(gold, opt, bResult))
@@ -953,17 +979,19 @@ void MoveGold(const Nan::FunctionCallbackInfo<v8::Value>& info)
 
 void AsyncWaitPlayerMenu(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
-	Isolate* isolate = info.GetIsolate();
+	auto isolate = info.GetIsolate();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	int timeout = 3000;
 	if (info.Length() < 1 || !info[0]->IsFunction()) {
-		Nan::ThrowTypeError("Arg[0] must be a function.");
+		Nan::ThrowTypeError("Arg[0] must be function.");
 		return;
 	}
-	if (info.Length() >= 2 && !info[1]->IsUndefined()) 
+
+	if (info.Length() >= 2 && info[1]->IsInt32()) 
 	{
-		timeout = (int)info[1]->IntegerValue();
+		timeout = info[1]->Int32Value(context).ToChecked();
 		if (timeout < 0)
 			timeout = 0;
 	}
@@ -1002,24 +1030,23 @@ void AsyncWaitPlayerMenu(const Nan::FunctionCallbackInfo<v8::Value>& info)
 
 void PlayerMenuSelect(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
-	Isolate* isolate = info.GetIsolate();
+	auto isolate = info.GetIsolate();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	if (info.Length() < 1) {
-		Nan::ThrowTypeError("Arg[0] must be menu index.");
+		Nan::ThrowTypeError("Arg[0] must be integer.");
 		return;
 	}
 
-	int menuindex = (int)info[0]->IntegerValue();
+	int menuindex = info[0]->Int32Value(context).ToChecked();
 
 	std::string menustring;
 
-	if (info.Length() >= 2) {
-		if (info[1]->IsString())
-		{
-			v8::String::Utf8Value str(info[0]->ToString());
-			menustring.assign(*str);
-		}
+	if (info.Length() >= 2 && info[1]->IsString())
+	{
+		v8::String::Utf8Value str(isolate, info[1]->ToString(context).ToLocalChecked());
+		menustring = *str;
 	}
 
 	bool bResult = false;
@@ -1034,17 +1061,18 @@ void PlayerMenuSelect(const Nan::FunctionCallbackInfo<v8::Value>& info)
 
 void AsyncWaitUnitMenu(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
-	Isolate* isolate = info.GetIsolate();
+	auto isolate = info.GetIsolate();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	int timeout = 3000;
 	if (info.Length() < 1 || !info[0]->IsFunction()) {
 		Nan::ThrowTypeError("Arg[0] must be a function.");
 		return;
 	}
-	if (info.Length() >= 2 && !info[1]->IsUndefined()) 
+	if (info.Length() >= 2 && info[1]->IsInt32()) 
 	{
-		timeout = (int)info[1]->IntegerValue();
+		timeout = info[1]->Int32Value(context).ToChecked();
 		if (timeout < 0)
 			timeout = 0;
 	}
@@ -1083,16 +1111,19 @@ void AsyncWaitUnitMenu(const Nan::FunctionCallbackInfo<v8::Value>& info)
 
 void UnitMenuSelect(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
-	Isolate* isolate = info.GetIsolate();
+	auto isolate = info.GetIsolate();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
-	if (info.Length() < 1) {
-		Nan::ThrowTypeError("Arg[0] must be menu index.");
+	if (info.Length() < 1 || !info[0]->IsInt32()) {
+		Nan::ThrowTypeError("Arg[0] must be integer.");
 		return;
 	}
 
-	int menuindex = (int)info[0]->IntegerValue();
+	int menuindex = info[0]->Int32Value(context).ToChecked();
+
 	bool bResult = false;
+
 	if (!g_CGAInterface->UnitMenuSelect(menuindex, bResult))
 	{
 		Nan::ThrowError("RPC Invocation failed.");
@@ -1102,18 +1133,72 @@ void UnitMenuSelect(const Nan::FunctionCallbackInfo<v8::Value>& info)
 	info.GetReturnValue().Set(bResult);
 }
 
-void DoRequest(const Nan::FunctionCallbackInfo<v8::Value>& info)
+void UpgradePlayer(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
-	Isolate* isolate = info.GetIsolate();
+	auto isolate = info.GetIsolate();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
-	if (info.Length() < 1) {
-		Nan::ThrowTypeError("Arg[0] must be request type.");
+	if (info.Length() < 1 || !info[0]->IsInt32()) {
+		Nan::ThrowTypeError("Arg[0] must be integer.");
 		return;
 	}
 
-	int request_type = (int)info[0]->IntegerValue();
+	int attr = (int)info[0]->Int32Value(context).ToChecked();
+
+	if (!g_CGAInterface->UpgradePlayer(attr))
+	{
+		Nan::ThrowError("RPC Invocation failed.");
+		return;
+	}
+
+	info.GetReturnValue().Set(true);
+}
+
+void UpgradePet(const Nan::FunctionCallbackInfo<v8::Value>& info)
+{
+	auto isolate = info.GetIsolate();
+	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
+
+	if (info.Length() < 1 || !info[0]->IsInt32()) {
+		Nan::ThrowTypeError("Arg[0] must be integer.");
+		return;
+	}
+
+	if (info.Length() < 2 || !info[1]->IsInt32()) {
+		Nan::ThrowTypeError("Arg[1] must be integer.");
+		return;
+	}
+
+	int petid = info[0]->Int32Value(context).ToChecked();
+
+	int attr = info[1]->Int32Value(context).ToChecked();
+
+	if (!g_CGAInterface->UpgradePet(petid, attr))
+	{
+		Nan::ThrowError("RPC Invocation failed.");
+		return;
+	}
+
+	info.GetReturnValue().Set(true);
+}
+
+void DoRequest(const Nan::FunctionCallbackInfo<v8::Value>& info)
+{
+	auto isolate = info.GetIsolate();
+	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
+
+	if (info.Length() < 1 || !info[0]->IsInt32()) {
+		Nan::ThrowTypeError("Arg[0] must be integer.");
+		return;
+	}
+
+	int request_type = info[0]->Int32Value(context).ToChecked();
+
 	bool result = false;
+
 	if (!g_CGAInterface->DoRequest(request_type, result))
 	{
 		Nan::ThrowError("RPC Invocation failed.");
@@ -1125,22 +1210,26 @@ void DoRequest(const Nan::FunctionCallbackInfo<v8::Value>& info)
 
 void EnableFlags(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
-	Isolate* isolate = info.GetIsolate();
+	auto isolate = info.GetIsolate();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
-	if (info.Length() < 1) {
-		Nan::ThrowTypeError("Arg[0] must be type.");
+	if (info.Length() < 1 || !info[0]->IsInt32()) {
+		Nan::ThrowTypeError("Arg[0] must be integer.");
 		return;
 	}
 	
-	if (info.Length() < 2) {
+	if (info.Length() < 2 || !info[1]->IsBoolean()) {
 		Nan::ThrowTypeError("Arg[1] must be boolean.");
 		return;
 	}
 
-	int type = (int)info[0]->IntegerValue();
-	bool enable = info[1]->BooleanValue();
+	int type = info[0]->Int32Value(context).ToChecked();
+
+	bool enable = info[1]->BooleanValue(isolate);
+
 	bool result = false;
+
 	if (!g_CGAInterface->EnableFlags(type, enable, result))
 	{
 		Nan::ThrowError("RPC Invocation failed.");
@@ -1152,60 +1241,87 @@ void EnableFlags(const Nan::FunctionCallbackInfo<v8::Value>& info)
 
 void TradeAddStuffs(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
-	Isolate* isolate = info.GetIsolate();
+	auto isolate = info.GetIsolate();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	if (info.Length() < 1 || !info[0]->IsArray()) {
-		Nan::ThrowTypeError("Arg[0] must be item object array.");
+		Nan::ThrowTypeError("Arg[0] must be array.");
 		return;
 	}
 	
-	if (info.Length() < 2 || !info[0]->IsArray()) {
-		Nan::ThrowTypeError("Arg[1] must be pet id array.");
+	if (info.Length() < 2 || !info[1]->IsArray()) {
+		Nan::ThrowTypeError("Arg[1] must be array.");
 		return;
 	}
 	
-	if (info.Length() < 3) {
-		Nan::ThrowTypeError("Arg[2] must be gold.");
+	if (info.Length() < 3 || !info[2]->IsInt32()) {
+		Nan::ThrowTypeError("Arg[2] must be integer.");
 		return;
 	}
 
-	Local<Object> objarr = Local<Object>::Cast(info[0]);
-	uint32_t length = objarr->Get(Nan::New("length").ToLocalChecked())->Uint32Value();
-
-	Local<Array> arr = Local<Array>::Cast(info[0]);
 	CGA::cga_sell_items_t items;
-	for (uint32_t i = 0; i < length; ++i)
-	{
-		Local<Object> obj = Local<Object>::Cast(arr->Get(i));
-		Local<Value> obj_itemid = obj->Get(Nan::New("itemid").ToLocalChecked());
-		Local<Value> obj_itempos = obj->Get(Nan::New("itempos").ToLocalChecked());
-		Local<Value> obj_count = obj->Get(Nan::New("count").ToLocalChecked());
-		int itemid = 0;
-		int itempos = 0;
-		int count = 0;
-		if(!obj_itemid->IsUndefined())
-			itemid = (int)obj_itemid->IntegerValue();
-		if (!obj_itempos->IsUndefined())
-			itempos = (int)obj_itempos->IntegerValue();
-		if (!obj_count->IsUndefined())
-			count = (int)obj_count->IntegerValue();
-		if (count > 0)
-			items.emplace_back(itemid, itempos, count);
-	}
-	
-	Local<Object> objarr2 = Local<Object>::Cast(info[1]);
-	uint32_t length2 = objarr2->Get(Nan::New("length").ToLocalChecked())->Uint32Value();
-
-	Local<Array> arr2 = Local<Array>::Cast(info[1]);
 	CGA::cga_sell_pets_t pets;
-	for (uint32_t i = 0; i < length2; ++i)
+
 	{
-		auto val = (int)Local<Value>::Cast(arr2->Get(i))->IntegerValue();
-		pets.emplace_back(val);
+		Local<Array> arr = Local<Array>::Cast(info[0]);
+		uint32_t length = arr->Length();
+
+		for (uint32_t i = 0; i < length; ++i)
+		{
+			auto element = arr->Get(context, i);
+			if (!element.IsEmpty() && element.ToLocalChecked()->IsObject())
+			{
+				int itemid = -1;
+				int itempos = -1;
+				int count = 0;
+
+				Local<Object> obj = Local<Object>::Cast(element.ToLocalChecked());
+
+				auto obj_itemid = obj->Get(context, String::NewFromUtf8(isolate, "itemid").ToLocalChecked());
+
+				if (!obj_itemid.IsEmpty() && obj_itemid.ToLocalChecked()->IsInt32())
+				{
+					itemid = obj_itemid.ToLocalChecked()->Int32Value(context).ToChecked();
+				}
+
+				auto obj_itempos = obj->Get(context, String::NewFromUtf8(isolate, "itempos").ToLocalChecked());
+
+				if (!obj_itempos.IsEmpty() && obj_itempos.ToLocalChecked()->IsInt32())
+				{
+					itempos = obj_itempos.ToLocalChecked()->Int32Value(context).ToChecked();
+				}
+
+				auto obj_count = obj->Get(context, String::NewFromUtf8(isolate, "count").ToLocalChecked());
+
+				if (!obj_count.IsEmpty() && obj_count.ToLocalChecked()->IsInt32())
+				{
+					count = obj_count.ToLocalChecked()->Int32Value(context).ToChecked();
+				}
+
+				if (count > 0)
+					items.emplace_back(itemid, itempos, count);
+			}
+		}
+	}
+
+	{
+
+		Local<Array> arr = Local<Array>::Cast(info[1]);
+		uint32_t length = arr->Length();
+		for (uint32_t i = 0; i < length; ++i)
+		{
+			auto element = arr->Get(context, i);
+			if (!element.IsEmpty() && element.ToLocalChecked()->IsInt32())
+			{
+				int petid = element.ToLocalChecked()->Int32Value(context).ToChecked();
+				pets.emplace_back(petid);
+			}
+		}
 	}
 	
-	int gold = (int)info[2]->IntegerValue();
+	int gold = info[2]->Int32Value(context).ToChecked();
+
 	if (!g_CGAInterface->TradeAddStuffs(items, pets, gold))
 	{
 		Nan::ThrowError("RPC Invocation failed.");
@@ -1215,17 +1331,18 @@ void TradeAddStuffs(const Nan::FunctionCallbackInfo<v8::Value>& info)
 
 void AsyncWaitTradeStuffs(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
-	Isolate* isolate = info.GetIsolate();
+	auto isolate = info.GetIsolate();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	int timeout = 3000;
 	if (info.Length() < 1 || !info[0]->IsFunction()) {
-		Nan::ThrowTypeError("Arg[0] must be a function.");
+		Nan::ThrowTypeError("Arg[0] must be function.");
 		return;
 	}
-	if (info.Length() >= 2 && !info[1]->IsUndefined()) 
+	if (info.Length() >= 2 && info[1]->IsInt32()) 
 	{
-		timeout = (int)info[1]->IntegerValue();
+		timeout = info[1]->Int32Value(context).ToChecked();
 		if (timeout < 0)
 			timeout = 0;
 	}
@@ -1264,17 +1381,18 @@ void AsyncWaitTradeStuffs(const Nan::FunctionCallbackInfo<v8::Value>& info)
 
 void AsyncWaitTradeDialog(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
-	Isolate* isolate = info.GetIsolate();
+	auto isolate = info.GetIsolate();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	int timeout = 3000;
 	if (info.Length() < 1 || !info[0]->IsFunction()) {
-		Nan::ThrowTypeError("Arg[0] must be a function.");
+		Nan::ThrowTypeError("Arg[0] must be function.");
 		return;
 	}
-	if (info.Length() >= 2 && !info[1]->IsUndefined())
+	if (info.Length() >= 2 && info[1]->IsInt32())
 	{
-		timeout = (int)info[1]->IntegerValue();
+		timeout = (int)info[1]->Int32Value(context).ToChecked();
 		if (timeout < 0)
 			timeout = 0;
 	}
@@ -1314,17 +1432,18 @@ void AsyncWaitTradeDialog(const Nan::FunctionCallbackInfo<v8::Value>& info)
 
 void AsyncWaitTradeState(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
-	Isolate* isolate = info.GetIsolate();
+	auto isolate = info.GetIsolate();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	int timeout = 3000;
 	if (info.Length() < 1 || !info[0]->IsFunction()) {
-		Nan::ThrowTypeError("Arg[0] must be a function.");
+		Nan::ThrowTypeError("Arg[0] must be function.");
 		return;
 	}
-	if (info.Length() >= 2 && !info[1]->IsUndefined())
+	if (info.Length() >= 2 && info[1]->IsInt32())
 	{
-		timeout = (int)info[1]->IntegerValue();
+		timeout = info[1]->Int32Value(context).ToChecked();
 		if (timeout < 0)
 			timeout = 0;
 	}

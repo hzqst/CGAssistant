@@ -57,6 +57,8 @@ AutoBattleForm::AutoBattleForm(CBattleWorker *worker, CPlayerWorker *pworker, QW
     s_BattleCondType[BattleCond_Type_EnemyAllHp] = tr("Enemy All HP");
     s_BattleCondType[BattleCond_Type_EnemyLevel] = tr("Enemy Level");
     s_BattleCondType[BattleCond_Type_EnemyAvgLevel] = tr("Enemy Average Level");
+    s_BattleCondType[BattleCond_Type_InventoryItem] = tr("Inventoty Item");
+    s_BattleCondType[BattleCond_Type_TeammateCount] = tr("Teammate Count");
 
     s_BattlePlayerActionString[BattlePlayerAction_Ignore] = tr("Ignore");
     s_BattlePlayerActionString[BattlePlayerAction_Attack] = tr("Attack");
@@ -136,6 +138,7 @@ AutoBattleForm::AutoBattleForm(CBattleWorker *worker, CPlayerWorker *pworker, QW
     connect(ui->checkBox_highSpeed, SIGNAL(stateChanged(int)), m_worker, SLOT(OnSetHighSpeed(int)), Qt::ConnectionType::QueuedConnection);
     connect(ui->checkBox_firstRoundNoDelay, SIGNAL(stateChanged(int)), m_worker, SLOT(OnSetFRND(int)), Qt::ConnectionType::QueuedConnection);
     connect(ui->checkBox_levelOneProtect, SIGNAL(stateChanged(int)), m_worker, SLOT(OnSetLv1Protect(int)), Qt::ConnectionType::QueuedConnection);
+    connect(ui->checkBox_bossProtect, SIGNAL(stateChanged(int)), m_worker, SLOT(OnSetBOSSProtect(int)), Qt::ConnectionType::QueuedConnection);
     connect(ui->checkBox_lockCountdown, SIGNAL(stateChanged(int)), m_worker, SLOT(OnSetLockCountdown(int)), Qt::ConnectionType::QueuedConnection);
     connect(ui->checkBox_showHPMP, SIGNAL(stateChanged(int)), pworker, SLOT(OnSetShowHPMP(int)), Qt::ConnectionType::QueuedConnection);
     connect(ui->checkBox_petDoubleAction, SIGNAL(stateChanged(int)), m_worker, SLOT(OnSetPetDoubleAction(int)), Qt::ConnectionType::QueuedConnection);
@@ -156,6 +159,7 @@ void AutoBattleForm::SyncAutoBattleWorker()
     m_worker->m_bHighSpeed = ui->checkBox_highSpeed->isChecked();
     m_worker->m_bFirstRoundNoDelay = ui->checkBox_firstRoundNoDelay->isChecked();
     m_worker->m_bLevelOneProtect = ui->checkBox_levelOneProtect->isChecked();
+    m_worker->m_bBOSSProtect = ui->checkBox_bossProtect->isChecked();
     m_worker->m_bLockCountdown = ui->checkBox_lockCountdown->isChecked();
     m_worker->m_iDelayFrom = ui->horizontalSlider_delayFrom->value();
     m_worker->m_iDelayTo = ui->horizontalSlider_delayTo->value();
@@ -264,6 +268,7 @@ void AutoBattleForm::on_comboBox_condition_type_currentIndexChanged(int index)
     switch(index)
     {
     case BattleCond_Type_Round:
+    case BattleCond_Type_TeammateCount:
     case BattleCond_Type_EnemyCount:
     case BattleCond_Type_EnemySingleRowCount:
     case BattleCond_Type_PlayerHp:
@@ -280,7 +285,7 @@ void AutoBattleForm::on_comboBox_condition_type_currentIndexChanged(int index)
         for(int i = 0;i < BattleCond_NumRel_Max; ++i)
             ui->comboBox_condition_relation->addItem(s_BattleCondRelationNumber[i]);
 
-        if(index == BattleCond_Type_Round || index == BattleCond_Type_EnemyCount || index == BattleCond_Type_EnemySingleRowCount)
+        if(index == BattleCond_Type_Round || index == BattleCond_Type_EnemyCount || index == BattleCond_Type_TeammateCount || index == BattleCond_Type_EnemySingleRowCount)
         {
             for(int i = 1;i <= 10; ++i)
                 ui->comboBox_condition_value->addItem(tr("%1").arg(i));
@@ -296,6 +301,7 @@ void AutoBattleForm::on_comboBox_condition_type_currentIndexChanged(int index)
         break;
     }
     case BattleCond_Type_EnemyUnit:
+    case BattleCond_Type_InventoryItem:
     {
         for(int i = 0;i < BattleCond_StrRel_Max; ++i)
             ui->comboBox_condition_relation->addItem(s_BattleCondRelationString[i]);
@@ -337,6 +343,7 @@ void AutoBattleForm::on_comboBox_condition2_type_currentIndexChanged(int index)
     {
     case BattleCond_Type_Round:
     case BattleCond_Type_EnemyCount:
+    case BattleCond_Type_TeammateCount:
     case BattleCond_Type_EnemySingleRowCount:
     case BattleCond_Type_PlayerHp:
     case BattleCond_Type_PlayerMp:
@@ -352,7 +359,7 @@ void AutoBattleForm::on_comboBox_condition2_type_currentIndexChanged(int index)
         for(int i = 0;i < BattleCond_NumRel_Max; ++i)
             ui->comboBox_condition2_relation->addItem(s_BattleCondRelationNumber[i]);
 
-        if(index == BattleCond_Type_Round || index == BattleCond_Type_EnemyCount || index == BattleCond_Type_EnemySingleRowCount)
+        if(index == BattleCond_Type_Round || index == BattleCond_Type_EnemyCount || index == BattleCond_Type_TeammateCount || index == BattleCond_Type_EnemySingleRowCount)
         {
             for(int i = 1;i <= 10; ++i)
                 ui->comboBox_condition2_value->addItem(tr("%1").arg(i));
@@ -368,6 +375,7 @@ void AutoBattleForm::on_comboBox_condition2_type_currentIndexChanged(int index)
         break;
     }
     case BattleCond_Type_EnemyUnit:
+    case BattleCond_Type_InventoryItem:
     {
         for(int i = 0;i < BattleCond_StrRel_Max; ++i)
             ui->comboBox_condition2_relation->addItem(s_BattleCondRelationString[i]);
@@ -453,6 +461,12 @@ void AutoBattleForm::on_comboBox_playerAction_currentIndexChanged(int index)
         ui->comboBox_playerActionValue->addItem(tr("Recall"), QVariant(1));
         ui->comboBox_playerActionValue->addItem(tr("Pet with highest lv"), QVariant(2));
         ui->comboBox_playerActionValue->addItem(tr("Pet with highest hp"), QVariant(3));
+        ui->comboBox_playerActionValue->addItem(tr("Pet with highest mp"), QVariant(4));
+        ui->comboBox_playerActionValue->addItem(tr("Pet with highest loyalty"), QVariant(5));
+        ui->comboBox_playerActionValue->addItem(tr("Pet with lowest lv"), QVariant(6));
+        ui->comboBox_playerActionValue->addItem(tr("Pet with lowest hp"), QVariant(7));
+        ui->comboBox_playerActionValue->addItem(tr("Pet with lowest mp"), QVariant(8));
+        ui->comboBox_playerActionValue->addItem(tr("Pet with lowest loyalty"), QVariant(9));
         if(m_PetList.data())
         {
             for(int i = 0;i < m_PetList->size(); ++i)
@@ -656,6 +670,7 @@ void AutoBattleForm::on_pushButton_add_clicked()
         }
 
         case BattleCond_Type_EnemyCount:
+        case BattleCond_Type_TeammateCount:
         case BattleCond_Type_EnemySingleRowCount:
         {
             int relation = ui->comboBox_condition_relation->currentIndex();
@@ -667,7 +682,9 @@ void AutoBattleForm::on_pushButton_add_clicked()
                 {
                     if(condType == BattleCond_Type_EnemyCount && value >= 0 && value <= 10)
                         pCondition = new CBattleCondition_EnemyCount(relation, value);
-                    if(condType == BattleCond_Type_EnemySingleRowCount && value >= 0 && value <= 10)
+                    else if(condType == BattleCond_Type_TeammateCount && value >= 0 && value <= 10)
+                        pCondition = new CBattleCondition_TeammateCount(relation, value);
+                    else if(condType == BattleCond_Type_EnemySingleRowCount && value >= 0 && value <= 10)
                         pCondition = new CBattleCondition_EnemySingleRowCount(relation, value);
                 }
             }
@@ -743,6 +760,18 @@ void AutoBattleForm::on_pushButton_add_clicked()
             }
             break;
         }
+        case BattleCond_Type_InventoryItem:
+        {
+            int relation = ui->comboBox_condition_relation->currentIndex();
+            if(relation >= 0 && relation < BattleCond_StrRel_Max)
+            {
+                QString name = ui->comboBox_condition_value->currentText();
+                if(!name.isEmpty())
+                    pCondition = new CBattleCondition_InventoryItem(relation, name);
+
+            }
+            break;
+        }
         case BattleCond_Type_Round:
         {
             int relation = ui->comboBox_condition_relation->currentIndex();
@@ -805,6 +834,8 @@ void AutoBattleForm::on_pushButton_add_clicked()
         }
 
         case BattleCond_Type_EnemyCount:
+        case BattleCond_Type_TeammateCount:
+        case BattleCond_Type_EnemySingleRowCount:
         {
             int relation = ui->comboBox_condition2_relation->currentIndex();
             if(relation >= 0 && relation < BattleCond_NumRel_Max)
@@ -815,7 +846,9 @@ void AutoBattleForm::on_pushButton_add_clicked()
                 {
                     if(condType == BattleCond_Type_EnemyCount && value >= 0 && value <= 10)
                         pCondition2 = new CBattleCondition_EnemyCount(relation, value);
-                    if(condType == BattleCond_Type_EnemySingleRowCount && value >= 0 && value <= 10)
+                    else if(condType == BattleCond_Type_TeammateCount && value >= 0 && value <= 10)
+                        pCondition2 = new CBattleCondition_EnemyCount(relation, value);
+                    else if(condType == BattleCond_Type_EnemySingleRowCount && value >= 0 && value <= 10)
                         pCondition2 = new CBattleCondition_EnemySingleRowCount(relation, value);
                 }
             }
@@ -887,6 +920,18 @@ void AutoBattleForm::on_pushButton_add_clicked()
                 QString name = ui->comboBox_condition2_value->currentText();
                 if(!name.isEmpty())
                     pCondition2 = new CBattleCondition_EnemyUnit(relation, name);
+
+            }
+            break;
+        }
+        case BattleCond_Type_InventoryItem:
+        {
+            int relation = ui->comboBox_condition2_relation->currentIndex();
+            if(relation >= 0 && relation < BattleCond_StrRel_Max)
+            {
+                QString name = ui->comboBox_condition2_value->currentText();
+                if(!name.isEmpty())
+                    pCondition2 = new CBattleCondition_InventoryItem(relation, name);
 
             }
             break;
@@ -996,18 +1041,9 @@ void AutoBattleForm::on_pushButton_add_clicked()
     }
     case BattlePlayerAction_UseItem:
     {
-        bool bValue = false;
-        int itemId = ui->comboBox_playerActionValue->currentData().toInt(&bValue);
-        if(bValue)
-        {
-            pPlayerAction = new CBattleAction_PlayerUseItem(itemId);
-        }
-        else
-        {
-            QString itemName = ui->comboBox_playerActionValue->currentText();
-            if(!itemName.isEmpty())
-                pPlayerAction = new CBattleAction_PlayerUseItem(itemName);
-        }
+        QString itemName = ui->comboBox_playerActionValue->currentText();
+        if(!itemName.isEmpty())
+            pPlayerAction = new CBattleAction_PlayerUseItem(itemName);
         break;
     }
     case BattlePlayerAction_LogBack:
@@ -1269,148 +1305,153 @@ bool AutoBattleForm::ParseBattleSettings(const QJsonValue &val)
 
     auto obj = val.toObject();
 
-    ui->checkBox_showHPMP->setChecked(obj.take("showhpmp").toBool());
-    ui->checkBox_highSpeed->setChecked(obj.take("highspeed").toBool());
-    ui->checkBox_autoBattle->setChecked(obj.take("autobattle").toBool());
-    ui->checkBox_lockCountdown->setChecked(obj.take("lockcd").toBool());
-    ui->checkBox_levelOneProtect->setChecked(obj.take("lv1prot").toBool());
-    ui->checkBox_firstRoundNoDelay->setChecked(obj.take("r1nodelay").toBool());
-    ui->checkBox_petDoubleAction->setChecked(obj.take("pet2action").toBool());
-    ui->checkBox_playerForceAction->setChecked(obj.take("playerforceaction").toBool());
-    ui->horizontalSlider_delayFrom->setValue(obj.take("delayfrom").toInt());
-    ui->horizontalSlider_delayTo->setValue(obj.take("delayto").toInt());
+    if(obj.contains("showhpmp"))
+        ui->checkBox_showHPMP->setChecked(obj.take("showhpmp").toBool());
 
-    m_model->removeRows(0, m_model->rowCount());
+    if(obj.contains("highspeed"))
+        ui->checkBox_highSpeed->setChecked(obj.take("highspeed").toBool());
 
-    auto list = obj.take("list");
-    if(list.isArray()){
-        auto arr = list.toArray();
-        for (auto i = 0;i < arr.size(); ++i){
-            auto setting = arr[i].toObject();
+    if(obj.contains("autobattle"))
+        ui->checkBox_autoBattle->setChecked(obj.take("autobattle").toBool());
 
-            {
-                auto conditionTypeId = setting.take("condition").toInt();
-                auto conditionRelId = setting.take("conditionrel").toInt();
-                auto conditionValue = setting.take("conditionval").toString();
-                ui->comboBox_condition_type->setCurrentIndex(conditionTypeId);
-                on_comboBox_condition_type_currentIndexChanged(ui->comboBox_condition_type->currentIndex());
-                ui->comboBox_condition_relation->setCurrentIndex(conditionRelId);
+    if(obj.contains("lockcd"))
+        ui->checkBox_lockCountdown->setChecked(obj.take("lockcd").toBool());
 
-                ui->comboBox_condition_value->setCurrentText(conditionValue);
-                if(ui->comboBox_condition_type->currentIndex() == BattleCond_Type_TeammateDebuff){
-                    using namespace CGA;
-                    if(conditionValue.toInt() == FL_DEBUFF_SLEEP)
-                        ui->comboBox_condition_value->setCurrentIndex(0);
-                    else if(conditionValue.toInt() == FL_DEBUFF_MEDUSA)
-                        ui->comboBox_condition_value->setCurrentIndex(1);
-                    else if(conditionValue.toInt() == FL_DEBUFF_DRUNK)
-                        ui->comboBox_condition_value->setCurrentIndex(2);
-                    else if(conditionValue.toInt() == FL_DEBUFF_CHAOS)
-                        ui->comboBox_condition_value->setCurrentIndex(3);
-                    else if(conditionValue.toInt() == FL_DEBUFF_FORGET)
-                        ui->comboBox_condition_value->setCurrentIndex(4);
-                    else if(conditionValue.toInt() == FL_DEBUFF_POISON)
-                        ui->comboBox_condition_value->setCurrentIndex(5);
-                    else if(conditionValue.toInt() == FL_DEBUFF_ANY)
-                        ui->comboBox_condition_value->setCurrentIndex(6);
+    if(obj.contains("lv1prot"))
+        ui->checkBox_levelOneProtect->setChecked(obj.take("lv1prot").toBool());
+
+    if(obj.contains("bossprot"))
+        ui->checkBox_bossProtect->setChecked(obj.take("bossprot").toBool());
+
+    if(obj.contains("r1nodelay"))
+        ui->checkBox_firstRoundNoDelay->setChecked(obj.take("r1nodelay").toBool());
+
+    if(obj.contains("pet2action"))
+        ui->checkBox_petDoubleAction->setChecked(obj.take("pet2action").toBool());
+
+    if(obj.contains("playerforceaction"))
+        ui->checkBox_playerForceAction->setChecked(obj.take("playerforceaction").toBool());
+
+    if(obj.contains("delayfrom"))
+        ui->horizontalSlider_delayFrom->setValue(obj.take("delayfrom").toInt());
+
+    if(obj.contains("delayto"))
+        ui->horizontalSlider_delayTo->setValue(obj.take("delayto").toInt());
+
+    if(obj.contains("list")){
+
+        m_model->removeRows(0, m_model->rowCount());
+        auto list = obj.take("list");
+        if(list.isArray()){
+            auto arr = list.toArray();
+            for (auto i = 0;i < arr.size(); ++i){
+                auto setting = arr[i].toObject();
+
+                {
+                    auto conditionTypeId = setting.take("condition").toInt();
+                    auto conditionRelId = setting.take("conditionrel").toInt();
+                    auto conditionValue = setting.take("conditionval").toString();
+                    ui->comboBox_condition_type->setCurrentIndex(conditionTypeId);
+                    on_comboBox_condition_type_currentIndexChanged(ui->comboBox_condition_type->currentIndex());
+                    ui->comboBox_condition_relation->setCurrentIndex(conditionRelId);
+
+                    ui->comboBox_condition_value->setCurrentText(conditionValue);
+                    if(ui->comboBox_condition_type->currentIndex() == BattleCond_Type_TeammateDebuff){
+                        using namespace CGA;
+                        if(conditionValue.toInt() == FL_DEBUFF_SLEEP)
+                            ui->comboBox_condition_value->setCurrentIndex(0);
+                        else if(conditionValue.toInt() == FL_DEBUFF_MEDUSA)
+                            ui->comboBox_condition_value->setCurrentIndex(1);
+                        else if(conditionValue.toInt() == FL_DEBUFF_DRUNK)
+                            ui->comboBox_condition_value->setCurrentIndex(2);
+                        else if(conditionValue.toInt() == FL_DEBUFF_CHAOS)
+                            ui->comboBox_condition_value->setCurrentIndex(3);
+                        else if(conditionValue.toInt() == FL_DEBUFF_FORGET)
+                            ui->comboBox_condition_value->setCurrentIndex(4);
+                        else if(conditionValue.toInt() == FL_DEBUFF_POISON)
+                            ui->comboBox_condition_value->setCurrentIndex(5);
+                        else if(conditionValue.toInt() == FL_DEBUFF_ANY)
+                            ui->comboBox_condition_value->setCurrentIndex(6);
+                    }
                 }
-            }
 
-            if(setting.find("condition2") != setting.end()){
-                auto condition2TypeId = setting.take("condition2").toInt();
-                auto condition2RelId = setting.take("condition2rel").toInt();
-                auto condition2Value = setting.take("condition2val").toString();
-                ui->comboBox_condition2_type->setCurrentIndex(condition2TypeId);
-                on_comboBox_condition2_type_currentIndexChanged(ui->comboBox_condition2_type->currentIndex());
-                ui->comboBox_condition2_relation->setCurrentIndex(condition2RelId);
+                if(setting.find("condition2") != setting.end()){
+                    auto condition2TypeId = setting.take("condition2").toInt();
+                    auto condition2RelId = setting.take("condition2rel").toInt();
+                    auto condition2Value = setting.take("condition2val").toString();
+                    ui->comboBox_condition2_type->setCurrentIndex(condition2TypeId);
+                    on_comboBox_condition2_type_currentIndexChanged(ui->comboBox_condition2_type->currentIndex());
+                    ui->comboBox_condition2_relation->setCurrentIndex(condition2RelId);
 
-                ui->comboBox_condition2_value->setCurrentText(condition2Value);
-                if(ui->comboBox_condition2_type->currentIndex() == BattleCond_Type_TeammateDebuff){
-                    using namespace CGA;
-                    if(condition2Value.toInt() == FL_DEBUFF_SLEEP)
-                        ui->comboBox_condition2_value->setCurrentIndex(0);
-                    else if(condition2Value.toInt() == FL_DEBUFF_MEDUSA)
-                        ui->comboBox_condition2_value->setCurrentIndex(1);
-                    else if(condition2Value.toInt() == FL_DEBUFF_DRUNK)
-                        ui->comboBox_condition2_value->setCurrentIndex(2);
-                    else if(condition2Value.toInt() == FL_DEBUFF_CHAOS)
-                        ui->comboBox_condition2_value->setCurrentIndex(3);
-                    else if(condition2Value.toInt() == FL_DEBUFF_FORGET)
-                        ui->comboBox_condition2_value->setCurrentIndex(4);
-                    else if(condition2Value.toInt() == FL_DEBUFF_POISON)
-                        ui->comboBox_condition2_value->setCurrentIndex(5);
-                    else if(condition2Value.toInt() == FL_DEBUFF_ANY)
-                        ui->comboBox_condition2_value->setCurrentIndex(6);
+                    ui->comboBox_condition2_value->setCurrentText(condition2Value);
+                    if(ui->comboBox_condition2_type->currentIndex() == BattleCond_Type_TeammateDebuff){
+                        using namespace CGA;
+                        if(condition2Value.toInt() == FL_DEBUFF_SLEEP)
+                            ui->comboBox_condition2_value->setCurrentIndex(0);
+                        else if(condition2Value.toInt() == FL_DEBUFF_MEDUSA)
+                            ui->comboBox_condition2_value->setCurrentIndex(1);
+                        else if(condition2Value.toInt() == FL_DEBUFF_DRUNK)
+                            ui->comboBox_condition2_value->setCurrentIndex(2);
+                        else if(condition2Value.toInt() == FL_DEBUFF_CHAOS)
+                            ui->comboBox_condition2_value->setCurrentIndex(3);
+                        else if(condition2Value.toInt() == FL_DEBUFF_FORGET)
+                            ui->comboBox_condition2_value->setCurrentIndex(4);
+                        else if(condition2Value.toInt() == FL_DEBUFF_POISON)
+                            ui->comboBox_condition2_value->setCurrentIndex(5);
+                        else if(condition2Value.toInt() == FL_DEBUFF_ANY)
+                            ui->comboBox_condition2_value->setCurrentIndex(6);
+                    }
                 }
+
+                auto playerActionId = setting.take("playeraction").toInt();
+
+                if(playerActionId == BattlePlayerAction_ChangePet || playerActionId == BattlePlayerAction_UseItem){
+                    ui->comboBox_playerAction->setCurrentIndex(playerActionId);
+                    on_comboBox_playerAction_currentIndexChanged(ui->comboBox_playerAction->currentIndex());
+                    auto playerActionValue = setting.take("playeractionval").toString();
+                    ui->comboBox_playerActionValue->setCurrentText(playerActionValue);
+                } else if(playerActionId == BattlePlayerAction_Skill) {
+                    auto playerSkillName = setting.take("playerskillname").toString();
+                    auto playerSkillLevel = setting.take("playerskilllevel").toInt();
+                    ui->comboBox_playerAction->setCurrentText(playerSkillName);
+                    ui->comboBox_playerActionValue->clear();
+                    ui->comboBox_playerActionValue->addItem(tr("Lv Max"), QVariant(0));
+                    for(auto lv = 1; lv <= 10; ++lv)
+                        ui->comboBox_playerActionValue->addItem(tr("Lv %1").arg(lv), QVariant(lv));
+                    ui->comboBox_playerActionValue->setCurrentIndex(playerSkillLevel);
+                    ui->comboBox_playerTarget->setEnabled(true);
+                } else {
+                    ui->comboBox_playerAction->setCurrentIndex(playerActionId);
+                    on_comboBox_playerAction_currentIndexChanged(ui->comboBox_playerAction->currentIndex());
+                }
+
+                auto playerTargetId = setting.take("playertarget").toInt();
+                auto playerTargetSel = setting.take("playertargetsel").toInt();
+                ui->comboBox_playerTarget->setCurrentIndex(playerTargetId);
+                on_comboBox_playerTarget_currentIndexChanged(ui->comboBox_playerTarget->currentIndex());
+                ui->comboBox_playerTargetSelect->setCurrentIndex(playerTargetSel);
+
+                auto petActionId = setting.take("petaction").toInt();
+
+                if(petActionId == BattlePetAction_Skill){
+                    auto petSkillName = setting.take("petskillname").toString();
+                    ui->comboBox_petAction->setCurrentText(petSkillName);
+                    on_comboBox_petAction_currentIndexChanged(BattlePetAction_Skill);
+                }
+                else
+                {
+                    ui->comboBox_petAction->setCurrentIndex(petActionId);
+                    on_comboBox_petAction_currentIndexChanged(ui->comboBox_petAction->currentIndex());
+                }
+
+                auto petTargetId = setting.take("pettarget").toInt();
+                auto petTargetSel = setting.take("pettargetsel").toInt();
+                ui->comboBox_petTarget->setCurrentIndex(petTargetId);
+                on_comboBox_petTarget_currentIndexChanged(ui->comboBox_petTarget->currentIndex());
+                ui->comboBox_petTargetSelect->setCurrentIndex(petTargetSel);
+
+                ui->pushButton_add->click();
             }
-
-            auto playerActionId = setting.take("playeraction").toInt();
-
-            if(playerActionId == BattlePlayerAction_ChangePet || playerActionId == BattlePlayerAction_UseItem){
-                ui->comboBox_playerAction->setCurrentIndex(playerActionId);
-                on_comboBox_playerAction_currentIndexChanged(ui->comboBox_playerAction->currentIndex());
-                auto playerActionValue = setting.take("playeractionval").toString();
-                ui->comboBox_playerActionValue->setCurrentText(playerActionValue);
-            } else if(playerActionId == BattlePlayerAction_Skill) {
-                auto playerSkillName = setting.take("playerskillname").toString();
-                auto playerSkillLevel = setting.take("playerskilllevel").toInt();
-                ui->comboBox_playerAction->setCurrentText(playerSkillName);
-                ui->comboBox_playerActionValue->clear();
-                ui->comboBox_playerActionValue->addItem(tr("Lv Max"), QVariant(0));
-                for(auto lv = 1; lv <= 10; ++lv)
-                    ui->comboBox_playerActionValue->addItem(tr("Lv %1").arg(lv), QVariant(lv));
-                ui->comboBox_playerActionValue->setCurrentIndex(playerSkillLevel);
-                ui->comboBox_playerTarget->setEnabled(true);
-            } else {
-                ui->comboBox_playerAction->setCurrentIndex(playerActionId);
-                on_comboBox_playerAction_currentIndexChanged(ui->comboBox_playerAction->currentIndex());
-            }
-
-            auto playerTargetId = setting.take("playertarget").toInt();
-            auto playerTargetSel = setting.take("playertargetsel").toInt();
-            ui->comboBox_playerTarget->setCurrentIndex(playerTargetId);
-            on_comboBox_playerTarget_currentIndexChanged(ui->comboBox_playerTarget->currentIndex());
-            ui->comboBox_playerTargetSelect->setCurrentIndex(playerTargetSel);
-
-            auto petActionId = setting.take("petaction").toInt();
-
-            if(petActionId == BattlePetAction_Skill){
-                auto petSkillName = setting.take("petskillname").toString();
-                ui->comboBox_petAction->setCurrentText(petSkillName);
-                on_comboBox_petAction_currentIndexChanged(BattlePetAction_Skill);
-            }
-            else
-            {
-                ui->comboBox_petAction->setCurrentIndex(petActionId);
-                on_comboBox_petAction_currentIndexChanged(ui->comboBox_petAction->currentIndex());
-            }
-
-            auto petTargetId = setting.take("pettarget").toInt();
-            auto petTargetSel = setting.take("pettargetsel").toInt();
-            ui->comboBox_petTarget->setCurrentIndex(petTargetId);
-            on_comboBox_petTarget_currentIndexChanged(ui->comboBox_petTarget->currentIndex());
-            ui->comboBox_petTargetSelect->setCurrentIndex(petTargetSel);
-
-            /*auto petAction2Id = setting.take("petaction2").toInt();
-
-            if(petAction2Id == BattlePetAction_Skill){
-                auto petSkill2Name = setting.take("petskill2name").toString();
-                ui->comboBox_petAction_2->setCurrentText(petSkill2Name);
-                on_comboBox_petAction_2_currentIndexChanged(BattlePetAction_Skill);
-            }
-            else
-            {
-                ui->comboBox_petAction_2->setCurrentIndex(petAction2Id);
-                on_comboBox_petAction_2_currentIndexChanged(ui->comboBox_petAction_2->currentIndex());
-            }
-
-            auto petTarget2Id = setting.take("pettarget2").toInt();
-            auto petTarget2Sel = setting.take("pettarget2sel").toInt();
-            ui->comboBox_petTarget_2->setCurrentIndex(petTarget2Id);
-            on_comboBox_petTarget_2_currentIndexChanged(ui->comboBox_petTarget_2->currentIndex());
-            ui->comboBox_petTargetSelect_2->setCurrentIndex(petTarget2Sel);*/
-
-            ui->pushButton_add->click();
         }
     }
 
@@ -1425,6 +1466,7 @@ void AutoBattleForm::SaveBattleSettings(QJsonObject &obj)
     obj.insert("autobattle", ui->checkBox_autoBattle->isChecked());
     obj.insert("lockcd", ui->checkBox_lockCountdown->isChecked());
     obj.insert("lv1prot", ui->checkBox_levelOneProtect->isChecked());
+    obj.insert("bossprot", ui->checkBox_bossProtect->isChecked());
     obj.insert("r1nodelay", ui->checkBox_firstRoundNoDelay->isChecked());
     obj.insert("pet2action", ui->checkBox_petDoubleAction->isChecked());
     obj.insert("playerforceaction", ui->checkBox_playerForceAction->isChecked());
@@ -1454,7 +1496,7 @@ void AutoBattleForm::SaveBattleSettings(QJsonObject &obj)
         if(setting->GetPlayerActionTypeId() == BattlePlayerAction_ChangePet
                 || setting->GetPlayerActionTypeId() == BattlePlayerAction_UseItem){
             QString actionVauleStr;
-            setting->GetPlayerActionName(actionVauleStr);
+            setting->GetPlayerActionName(actionVauleStr, true);
             row.insert("playeractionval", actionVauleStr);
         } else if(setting->GetPlayerActionTypeId() == BattlePlayerAction_Skill){
             row.insert("playerskillname", setting->GetPlayerSkillName());

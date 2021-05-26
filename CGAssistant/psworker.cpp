@@ -1,4 +1,6 @@
 #include <QTimer>
+#include <QJsonDocument>
+#include <QJsonObject>
 #include "psworker.h"
 #include "../CGALib/gameinterface.h"
 
@@ -8,9 +10,10 @@ extern CGA::CGAInterface *g_CGAInterface;
 
 Q_DECLARE_METATYPE(CProcessItemList)
 
-CRetryAttachProcessTimer::CRetryAttachProcessTimer(quint32 ProcessId, QObject *parent) : QTimer(parent)
+CRetryAttachProcessTimer::CRetryAttachProcessTimer(quint32 ProcessId, quint32 ThreadId, QObject *parent) : QTimer(parent)
 {
     m_ProcessId = ProcessId;
+    m_ThreadId = ThreadId;
     m_retry = 0;
 }
 
@@ -26,11 +29,17 @@ CProcessWorker::CProcessWorker(QObject *parent) : QObject(parent)
 
     m_AttachMutex = NULL;
     m_AttachHwnd = 0;
+    m_AttachGamePort = 0;
     m_AutoAttachPID = 0;
     m_AutoAttachTID = 0;
     m_LastGameAnimTick = 0;
     m_AnimTickFreezeTime = 0;
-    m_MaxFreezeTime = 15;
+    m_MaxFreezeTime = 30;
+}
+
+quint32 CProcessWorker::GetAttachedHwnd()
+{
+    return (quint32)m_AttachHwnd;
 }
 
 bool CProcessWorker::IsProcessAttached(quint32 ProcessId)
@@ -98,7 +107,7 @@ bool CProcessWorker::ReadSharedData(quint32 ProcessId, int &port, quint32 &hWnd)
     HANDLE hDataLock = OpenMutexW(MUTEX_ALL_ACCESS, FALSE, szLockName);
     if(hDataLock)
     {
-        if(WAIT_OBJECT_0 == WaitForSingleObject(hDataLock, 0))
+        if(WAIT_OBJECT_0 == WaitForSingleObject(hDataLock, 500))
         {
             WCHAR szMappingName[32];
             wsprintfW(szMappingName, L"CGASharedData_%d", ProcessId);
@@ -137,7 +146,7 @@ void CProcessWorker::OnRetryAttachProcess()
         {
             timer->stop();
             timer->deleteLater();
-            NotifyAttachProcessFailed(timer->m_ProcessId, -2, tr("Timeout for reading shared data."));
+            NotifyAttachProcessFailed(timer->m_ProcessId, timer->m_ThreadId, -2, tr("Timeout for reading shared data."));
             return;
         }
         else
@@ -147,39 +156,41 @@ void CProcessWorker::OnRetryAttachProcess()
     } else {
         timer->stop();
         timer->deleteLater();
-        ConnectToServer(timer->m_ProcessId, port, hwnd);
+        ConnectToServer(timer->m_ProcessId, timer->m_ThreadId, port, hwnd);
     }
 }
 
-void CProcessWorker::ConnectToServer(quint32 ProcessId, int port, quint32 hwnd)
+void CProcessWorker::ConnectToServer(quint32 ProcessId, quint32 ThreadId, int port, quint32 hwnd)
 {
-    if(!CreateAttachMutex(ProcessId))
+    if(!CreateAttachMutex(ProcessId, ThreadId))
         return;
 
     if(g_CGAInterface->Connect(port))
     {
-        g_CGAInterface->GetNextAnimTickCount(m_LastGameAnimTick);
-        g_CGAInterface->RegisterServerShutdownNotify(std::bind(&CProcessWorker::NotifyServerShutdown, this, std::placeholders::_1));
-        NotifyAttachProcessOk(ProcessId, port, hwnd);
-        QTimer::singleShot(100, this, SLOT(OnQueueQueryProcess()));
         m_AttachHwnd = (HWND)hwnd;
+        m_AttachGamePort = port;
+        g_CGAInterface->GetNextAnimTickCount(m_LastGameAnimTick);
+        //g_CGAInterface->RegisterServerShutdownNotify(std::bind(&CProcessWorker::NotifyServerShutdown, this, std::placeholders::_1));
+        NotifyAttachProcessOk(ProcessId, ThreadId, port, hwnd);
+        QTimer::singleShot(100, this, SLOT(OnQueueQueryProcess()));
     }
     else
     {
         Disconnect();
-        NotifyAttachProcessFailed(ProcessId, -3, tr("Could not connect to local RPC server."));
+        NotifyAttachProcessFailed(ProcessId, ThreadId, -3, tr("Could not connect to local RPC server."));
     }
 }
 
 void CProcessWorker::Disconnect()
 {
     g_CGAInterface->Disconnect();
-
     if(m_AttachMutex != NULL)
     {
         CloseHandle(m_AttachMutex);
         m_AttachMutex = NULL;
     }
+    m_AttachHwnd = NULL;
+    m_AttachGamePort = 0;
 }
 
 void CProcessWorker::OnAutoAttachProcess(quint32 ProcessId, quint32 ThreadId)
@@ -198,10 +209,10 @@ void CProcessWorker::OnQueueAttachProcess(quint32 ProcessId, quint32 ThreadId, q
         QString errorString;
         if(!InjectByMsgHook(ThreadId, hWnd, dllPath, errorCode, errorString))
         {
-            NotifyAttachProcessFailed(ProcessId, errorCode, errorString);
+            NotifyAttachProcessFailed(ProcessId, ThreadId, errorCode, errorString);
             return;
         }
-        CRetryAttachProcessTimer *timer = new CRetryAttachProcessTimer(ProcessId, this);
+        CRetryAttachProcessTimer *timer = new CRetryAttachProcessTimer(ProcessId, ThreadId, this);
         connect(timer,SIGNAL(timeout()),this,SLOT(OnRetryAttachProcess()));
         timer->start( 500 );
     }
@@ -209,21 +220,22 @@ void CProcessWorker::OnQueueAttachProcess(quint32 ProcessId, quint32 ThreadId, q
     {
         //Already attached to game
         Disconnect();
-
-        ConnectToServer(ProcessId, port, hwnd);
+        ConnectToServer(ProcessId, ThreadId, port, hwnd);
     }
 }
 
-bool CProcessWorker::CreateAttachMutex(quint32 ProcessId)
+bool CProcessWorker::CreateAttachMutex(quint32 ProcessId, quint32 ThreadId)
 {
     WCHAR szMutex[32];
     wsprintfW(szMutex, L"CGAAttachMutex_%d", ProcessId);
-    m_AttachMutex = CreateMutexW(NULL, TRUE, szMutex);
-    if(m_AttachMutex == NULL && GetLastError() == ERROR_ALREADY_EXISTS)
+    auto AttachMutex = CreateMutexW(NULL, TRUE, szMutex);
+    if(AttachMutex == NULL)
     {
-        NotifyAttachProcessFailed(ProcessId, -4, tr("Game already attached by other instance of CGAssistant."));
+        NotifyAttachProcessFailed(ProcessId, ThreadId, -4, tr("Game already attached by another instance of CGAssistant."));
         return false;
     }
+
+    m_AttachMutex = AttachMutex;
     return true;
 }
 
@@ -265,8 +277,36 @@ void CProcessWorker::OnNotifyFillMaxFreezeTime(int freezetime)
     m_MaxFreezeTime = freezetime;
 }
 
+void CProcessWorker::OnKillProcess()
+{
+    if(!m_AttachHwnd)
+        return;
+
+    if(!IsWindow(m_AttachHwnd))
+        return;
+
+    DWORD pid, tid;
+    tid = GetWindowThreadProcessId(m_AttachHwnd, &pid);
+    if(!pid || !tid){
+        return;
+    }
+
+    HANDLE ProcessHandle = OpenProcess(PROCESS_TERMINATE, FALSE, pid);
+    if(ProcessHandle)
+    {
+        if(STATUS_SUCCESS == NtTerminateProcess(ProcessHandle, 0))
+        {
+            Disconnect();
+        }
+        CloseHandle(ProcessHandle);
+    }
+}
+
 void CProcessWorker::OnCheckFreezeProcess()
 {
+    if(!m_AttachHwnd)
+        return;
+
     if(!IsWindow(m_AttachHwnd))
         return;
 
@@ -274,6 +314,7 @@ void CProcessWorker::OnCheckFreezeProcess()
     tid = GetWindowThreadProcessId(m_AttachHwnd, &pid);
     if(!pid || !tid){
         m_AttachHwnd = NULL;
+        m_AttachGamePort = 0;
         return;
     }
 
@@ -308,11 +349,32 @@ void CProcessWorker::OnCheckFreezeProcess()
         {
             if(STATUS_SUCCESS == NtTerminateProcess(ProcessHandle, 0))
             {
-                m_AttachHwnd = NULL;
+                Disconnect();
             }
             CloseHandle(ProcessHandle);
         }
     }
+}
+
+void CProcessWorker::OnHttpGetGameProcInfo(QJsonDocument *doc)
+{
+    QJsonObject obj;
+
+    ULONG pid, tid;
+    if(m_AttachHwnd && IsWindow(m_AttachHwnd) && (tid = GetWindowThreadProcessId(m_AttachHwnd, &pid)) != 0)
+    {
+        obj.insert("errcode", 0);
+        obj.insert("pid", (int)pid);
+        obj.insert("tid", (int)tid);
+        obj.insert("gameport", (int)m_AttachGamePort);
+        obj.insert("hwnd", (int)m_AttachHwnd);
+    }
+    else
+    {
+        obj.insert("errcode", 1);
+        obj.insert("message", tr("not attached to any game process yet."));
+    }
+    doc->setObject(obj);
 }
 
 bool IsProcessThreadPresent(quint32 ProcessId, quint32 ThreadId)

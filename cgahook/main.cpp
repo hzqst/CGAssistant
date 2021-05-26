@@ -1,5 +1,6 @@
 #include <Windows.h>
 #include <stdlib.h>
+#include <detours.h>
 #include "gameservice.h"
 
 DWORD WINAPI CGAServerThread(LPVOID);
@@ -16,6 +17,14 @@ HANDLE g_hFileMapping = NULL;
 HANDLE g_hPortMutex;
 HANDLE g_hDataLock = NULL;
 HANDLE g_hServreThread = NULL;
+char g_BasicWindowTitle[256] = {0};
+
+HMODULE g_hCGAModule = NULL;
+WCHAR g_szCGAModulePath[1024] = {0};
+
+using typeCreateMutexA = decltype(CreateMutexA);
+
+typeCreateMutexA *g_pfnCreateMutexA;
 
 LPCWSTR ExtractFileName(LPCWSTR szPath)
 {
@@ -29,6 +38,16 @@ LPCWSTR ExtractFileName(LPCWSTR szPath)
 			return &szPath[i + 1];
 	}
 	return szPath;
+}
+
+LRESULT UpdateGameWindowTitle(VOID)
+{
+	char szNewTitle[256] = { 0 };
+	if (g_CGAService.IsInGame() && g_CGAService.GetPlayerName() && g_CGAService.GetPlayerName()[0])
+		_snprintf(szNewTitle, 256, "%s CGA [%s] (%dÏß) #%d", g_BasicWindowTitle, g_CGAService.GetPlayerName(), g_CGAService.GetServerIndex(), g_MainPort - CGA_PORT_BASE + 1);
+	else
+		_snprintf(szNewTitle, 256, "%s CGA #%d", g_BasicWindowTitle, g_MainPort - CGA_PORT_BASE + 1);
+	return DefWindowProcA(g_MainHwnd, WM_SETTEXT, NULL, (LPARAM)szNewTitle);
 }
 
 LRESULT CALLBACK NewWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
@@ -72,9 +91,8 @@ LRESULT CALLBACK NewWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
 	{
 		if (g_MainPort)
 		{
-			char szTitle[64] = { 0 };
-			_snprintf(szTitle, 64, "%s CGA #%d", (const char *)lParam, g_MainPort - CGA_PORT_BASE + 1);
-			return DefWindowProcA(g_MainHwnd, message, NULL, (LPARAM)szTitle);
+			strcpy(g_BasicWindowTitle, (const char *)lParam);
+			return UpdateGameWindowTitle();
 		}
 		break;
 	}
@@ -129,6 +147,9 @@ LRESULT CALLBACK NewWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
 		return 1;
 	case WM_CGA_GET_PETS_INFO:
 		g_CGAService.WM_GetPetsInfo((CGA::cga_pets_info_t *)wParam);
+		return 1;
+	case WM_CGA_GET_BANK_PETS_INFO:
+		g_CGAService.WM_GetBankPetsInfo((CGA::cga_pets_info_t *)wParam);
 		return 1;
 	case WM_CGA_GET_SKILL_INFO:
 		g_CGAService.WM_GetSkillInfo(wParam, (CGA::cga_skill_info_t *)lParam);
@@ -231,21 +252,42 @@ LRESULT CALLBACK NewWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
 	case WM_CGA_GET_TILE_TABLE:
 		g_CGAService.WM_GetMapTileTable(wParam ? true : false, (CGA::cga_map_cells_t *)lParam);
 		return 1;
+	case WM_CGA_UPGRADE_PLAYER:
+		g_CGAService.WM_UpgradePlayer((int)wParam);
+		return 1;
+	case WM_CGA_UPGRADE_PET:
+		g_CGAService.WM_UpgradePet((int)wParam, (int)lParam);
+		return 1;
+	case WM_CGA_CHANGE_NICK_NAME:
+		return g_CGAService.WM_ChangeNickName((const char *)wParam);
+	case WM_CGA_CHANGE_TITLE_NAME:
+		return g_CGAService.WM_ChangeTitleName((int)wParam);
+	case WM_CGA_CHANGE_PERS_DESC:
+		g_CGAService.WM_ChangePersDesc((CGA::cga_pers_desc_t *)wParam);
+		return 1;
+	case WM_CGA_CHANGE_PET_NAME:
+		return g_CGAService.WM_ChangePetName((int)wParam, (const char *)lParam);
+	case WM_CGA_GET_CARDS_INFO:
+		g_CGAService.WM_GetCardsInfo((CGA::cga_cards_info_t *)wParam);
+		return 1;
 	case WM_KEYDOWN:
-		switch (wParam)
+		if (GetForegroundWindow() == g_MainHwnd)
 		{
-		case VK_F1:
-			g_CGAService.WM_LogBack();
-			return 1;
-		case VK_F2:
-			g_CGAService.WM_LogOut();
-			return 1;
-		case VK_F3:
-			g_CGAService.WM_ForceMove(g_CGAService.GetMouseOrientation(), true);
-			return 1;
-		case VK_F4:
-			g_CGAService.AddAllTradeItems();
-			return 1;
+			switch (wParam)
+			{
+			case VK_F1:
+				g_CGAService.WM_LogBack();
+				return 1;
+			case VK_F2:
+				g_CGAService.WM_LogOut();
+				return 1;
+			case VK_F3:
+				g_CGAService.WM_ForceMove(g_CGAService.GetMouseOrientation(), true);
+				return 1;
+			case VK_F4:
+				g_CGAService.AddAllTradeItems();
+				return 1;
+			}
 		}
 	}
 
@@ -299,6 +341,9 @@ LRESULT CALLBACK NewWndProcPOLCN(HWND hWnd, UINT message, WPARAM wParam, LPARAM 
 
 void InitializeHooks(int ThreadId, HWND hWnd, CGA::game_type type)
 {
+	if (g_MainThreadId && g_MainThreadId != ThreadId)
+		return;
+
 	g_MainThreadId = ThreadId;
 	g_MainHwnd = hWnd;
 
@@ -306,7 +351,7 @@ void InitializeHooks(int ThreadId, HWND hWnd, CGA::game_type type)
 
 	g_CGAService.Initialize(type);
 
-	if (hWnd)
+	if (hWnd && !g_OldProc)
 	{
 		g_OldProc = (WNDPROC)GetWindowLongPtrA(hWnd, GWL_WNDPROC);
 		SetWindowLongPtrA(hWnd, GWL_WNDPROC, (LONG_PTR)(type == CGA::game_type::polcn ? NewWndProcPOLCN : NewWndProc));
@@ -322,28 +367,71 @@ extern "C"
 		PMSG pMsg = (PMSG)lParam;
 		if (Code == HC_ACTION && pMsg->hwnd != NULL && !g_MainHwnd)
 		{
-			WCHAR szClass[256];
-			if (GetClassNameW(pMsg->hwnd, szClass, 256))
+			char szClass[256];
+			if (GetClassNameA(pMsg->hwnd, szClass, 256))
 			{
 				WCHAR szModulePath[MAX_PATH];
 				GetModuleFileNameW(NULL, szModulePath, MAX_PATH);
 				LPCWSTR pModuleName = ExtractFileName(szModulePath);
-				if (!_wcsicmp(pModuleName, L"cg_se_3000.exe") && !wcscmp(szClass, L"Ä§Á¦±¦±´"))
+				if (!_wcsicmp(pModuleName, L"cg_se_3000.exe") && !strcmp(szClass, "Ä§Á¦±¦±´"))
 				{
 					InitializeHooks(GetCurrentThreadId(), pMsg->hwnd, CGA::cg_se_3000);
 				}
-				else if (!_wcsicmp(pModuleName, L"cg_item_6000.exe") && !wcscmp(szClass, L"Ä§Á¦±¦±´"))
+				else if (!_wcsicmp(pModuleName, L"cg_item_6000.exe") && !strcmp(szClass, "Ä§Á¦±¦±´"))
 				{
 					InitializeHooks(GetCurrentThreadId(), pMsg->hwnd, CGA::cg_item_6000);
+				}
+				else if (!_wcsicmp(pModuleName, L"cg_se_6000.exe") && !strcmp(szClass, "Ä§Á¦±¦±´"))
+				{
+					//InitializeHooks(GetCurrentThreadId(), pMsg->hwnd, CGA::cg_se_6000);
 				}
 				else if (!_wcsicmp(pModuleName, L"POLCN_Launcher.exe"))
 				{
 					InitializeHooks(GetCurrentThreadId(), pMsg->hwnd, CGA::polcn);
-				}				
+				}
 			}
 		}
 		return CallNextHookEx(NULL, Code, wParam, lParam);
 	}
+}
+
+extern "C"
+{
+	NTSYSAPI ULONG NTAPI RtlWalkFrameChain(
+		OUT PVOID *Callers,
+		IN ULONG Count,
+		IN ULONG Flags
+	);
+}
+
+HANDLE WINAPI NewCreateMutexA_PatchGame(LPSECURITY_ATTRIBUTES lpMutexAttributes, BOOL bInitialOwner, LPCSTR lpName)
+{
+	if (!lpMutexAttributes && bInitialOwner == 1 && lpName)
+	{
+		//Patch se_6000 windowed bug
+		if (g_CGAService.m_game_type == CGA::cg_se_6000)
+		{
+			bool bLegitCaller = false;
+			PVOID callers[16];
+			ULONG caller_count = RtlWalkFrameChain(callers, _countof(callers), 0);
+			for (ULONG i = 0; i < caller_count; ++i)
+			{
+				if (callers[i] == (PVOID)(g_CGAService.m_ImageBase + 0x51F60))
+				{
+					bLegitCaller = true;
+					break;
+				}
+			}
+			if (bLegitCaller)
+			{
+				DWORD oldProtect;
+				VirtualProtect((void *)(g_CGAService.m_ImageBase + 0x3BAD3), 1, PAGE_EXECUTE_READWRITE, &oldProtect);
+				memcpy((void *)(g_CGAService.m_ImageBase + 0x3BAD3), "\xEB", 1);
+				VirtualProtect((void *)(g_CGAService.m_ImageBase + 0x3BAD3), 1, oldProtect, &oldProtect);
+			}
+		}
+	}
+	return g_pfnCreateMutexA(lpMutexAttributes, bInitialOwner, lpName);
 }
 
 int WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpReserved)
@@ -353,6 +441,9 @@ int WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpReserved)
 		WCHAR szModulePath[MAX_PATH];
 		GetModuleFileNameW(NULL, szModulePath, MAX_PATH);
 		LPCWSTR pModuleName = ExtractFileName(szModulePath);
+
+		g_hCGAModule = (HMODULE)hinstDLL;
+		GetModuleFileNameW(g_hCGAModule, g_szCGAModulePath, 1024);
 
 		if (!_wcsicmp(pModuleName, L"POLCN_Launcher.exe"))
 		{
@@ -365,6 +456,17 @@ int WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpReserved)
 			}
 
 			InitializeHooks(GetCurrentThreadId(), NULL, CGA::polcn);
+		}
+		else if (!_wcsicmp(pModuleName, L"cg_se_6000.exe"))//Patch se_6000 windowed bug
+		{
+			g_pfnCreateMutexA = (typeCreateMutexA *)GetProcAddress(GetModuleHandleA("kernel32.dll"), "CreateMutexA");
+
+			g_CGAService.m_ImageBase = (ULONG_PTR)GetModuleHandleA(NULL);
+			g_CGAService.m_game_type = CGA::cg_se_6000;
+
+			DetourTransactionBegin();
+			DetourAttach(&(void *&)g_pfnCreateMutexA, ::NewCreateMutexA_PatchGame);
+			DetourTransactionCommit();
 		}
 	}
 	return TRUE;

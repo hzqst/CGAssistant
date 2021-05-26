@@ -1,5 +1,7 @@
 #pragma once 
 
+void UpgradePlayer(const Nan::FunctionCallbackInfo<v8::Value>& info);
+void UpgradePet(const Nan::FunctionCallbackInfo<v8::Value>& info);
 void ChangePetState(const Nan::FunctionCallbackInfo<v8::Value>& info);
 void DropPet(const Nan::FunctionCallbackInfo<v8::Value>& info);
 void DropItem(const Nan::FunctionCallbackInfo<v8::Value>& info);

@@ -26,7 +26,9 @@
 #define BattleCond_Type_EnemyAllHp 16
 #define BattleCond_Type_Round 17
 #define BattleCond_Type_DoubleAction 18
-#define BattleCond_Type_Max 19
+#define BattleCond_Type_InventoryItem 19
+#define BattleCond_Type_TeammateCount 20
+#define BattleCond_Type_Max 21
 
 #define BattleCond_NumRel_EGT 0
 #define BattleCond_NumRel_GT 1
@@ -101,7 +103,7 @@ class CBattleAction
 {
 public:
     virtual int GetActionTypeId() = 0;
-    virtual void GetActionName(QString &str) = 0;
+    virtual void GetActionName(QString &str, bool config) = 0;
     virtual int GetTargetFlags(CGA_BattleContext_t &context) = 0;
     virtual bool DoAction(int target, int defaultTarget, CGA_BattleContext_t &context) = 0;
 protected:
@@ -148,6 +150,23 @@ protected:
     int m_relation;
     int m_value;
 };
+
+class CBattleCondition_TeammateCount : public CBattleCondition
+{
+public:
+    CBattleCondition_TeammateCount(int relation, int value);
+    virtual void GetConditionValue(QString &str) {
+        str = QString::number(m_value);
+    }
+    virtual int GetConditionRelId() { return m_relation; }
+    virtual int GetConditionTypeId() {return BattleCond_Type_TeammateCount;}
+    virtual void GetConditionName(QString &str);
+    virtual bool Check(CGA_BattleContext_t &context, int &conditionTarget);
+protected:
+    int m_relation;
+    int m_value;
+};
+
 
 class CBattleCondition_EnemySingleRowCount : public CBattleCondition
 {
@@ -285,6 +304,8 @@ public:
     CBattleCondition_EnemyMultiTargetHp(int relation, int value, bool percentage);
     virtual void GetConditionValue(QString &str) {
         str = QString::number(m_value);
+        if(m_percentage)
+           str += QLatin1String("%");
     }
     virtual int GetConditionRelId() { return m_relation; }
     virtual int GetConditionTypeId() {return BattleCond_Type_EnemyMultiTargetHp;}
@@ -302,6 +323,8 @@ public:
     CBattleCondition_TeammateMultiTargetHp(int relation, int value, bool percentage);
     virtual void GetConditionValue(QString &str) {
         str = QString::number(m_value);
+        if(m_percentage)
+           str += QLatin1String("%");
     }
     virtual int GetConditionRelId() { return m_relation; }
     virtual int GetConditionTypeId() {return BattleCond_Type_TeammateMultiTargetHp;}
@@ -319,6 +342,8 @@ public:
     CBattleCondition_EnemyAllHp(int relation, int value, bool percentage);
     virtual void GetConditionValue(QString &str) {
         str = QString::number(m_value);
+        if(m_percentage)
+           str += QLatin1String("%");
     }
     virtual int GetConditionRelId() { return m_relation; }
     virtual int GetConditionTypeId() {return BattleCond_Type_EnemyAllHp;}
@@ -336,6 +361,8 @@ public:
     CBattleCondition_TeammateAllHp(int relation, int value, bool percentage);
     virtual void GetConditionValue(QString &str) {
         str = QString::number(m_value);
+        if(m_percentage)
+           str += QLatin1String("%");
     }
     virtual int GetConditionRelId() { return m_relation; }
     virtual int GetConditionTypeId() {return BattleCond_Type_TeammateAllHp;}
@@ -442,11 +469,28 @@ protected:
     int m_value;
 };
 
+class CBattleCondition_InventoryItem : public CBattleCondition
+{
+public:
+    CBattleCondition_InventoryItem(int relation, QString &itemName);
+    virtual void GetConditionValue(QString &str) {
+        str = m_ItemName;
+    }
+    virtual int GetConditionRelId() { return m_relation; }
+    virtual int GetConditionTypeId() {return BattleCond_Type_InventoryItem;}
+    virtual void GetConditionName(QString &str);
+    virtual bool Check(CGA_BattleContext_t &context, int &conditionTarget);
+
+protected:
+    int m_relation;
+    QString m_ItemName;
+};
+
 class CBattleAction_PlayerAttack : public CBattleAction
 {
 public:
     virtual int GetActionTypeId() {return BattlePlayerAction_Attack;}
-    virtual void GetActionName(QString &str);
+    virtual void GetActionName(QString &str, bool config);
     virtual bool DoAction(int target, int defaultTarget, CGA_BattleContext_t &context);
     virtual int GetTargetFlags(CGA_BattleContext_t &context){
         return FL_SKILL_SINGLE | FL_SKILL_TO_PET | FL_SKILL_TO_TEAMMATE | FL_SKILL_TO_ENEMY | FL_SKILL_FRONT_ONLY | FL_SKILL_SELECT_TARGET;
@@ -457,7 +501,7 @@ class CBattleAction_PlayerGuard : public CBattleAction
 {
 public:
     virtual int GetActionTypeId() {return BattlePlayerAction_Guard;}
-    virtual void GetActionName(QString &str);
+    virtual void GetActionName(QString &str, bool config);
     virtual bool DoAction(int target, int defaultTarget, CGA_BattleContext_t &context);
     virtual int GetTargetFlags(CGA_BattleContext_t &context){
         return 0;
@@ -468,7 +512,7 @@ class CBattleAction_PlayerEscape : public CBattleAction
 {
 public:
     virtual int GetActionTypeId() {return BattlePlayerAction_Escape;}
-    virtual void GetActionName(QString &str);
+    virtual void GetActionName(QString &str, bool config);
     virtual bool DoAction(int target, int defaultTarget, CGA_BattleContext_t &context);
     virtual int GetTargetFlags(CGA_BattleContext_t &context){
         return 0;
@@ -479,7 +523,7 @@ class CBattleAction_PlayerExchangePosition : public CBattleAction
 {
 public:
     virtual int GetActionTypeId() {return BattlePlayerAction_ExchangePosition;}
-    virtual void GetActionName(QString &str);
+    virtual void GetActionName(QString &str, bool config);
     virtual bool DoAction(int target, int defaultTarget, CGA_BattleContext_t &context);
     virtual int GetTargetFlags(CGA_BattleContext_t &context){
         return 0;
@@ -492,7 +536,7 @@ public:
     CBattleAction_PlayerChangePet(int type);
     CBattleAction_PlayerChangePet(QString &petname);
     virtual int GetActionTypeId() {return BattlePlayerAction_ChangePet;}
-    virtual void GetActionName(QString &str);
+    virtual void GetActionName(QString &str, bool config);
     virtual bool DoAction(int target, int defaultTarget, CGA_BattleContext_t &context);
     virtual int GetTargetFlags(CGA_BattleContext_t &context){
         return 0;
@@ -507,7 +551,7 @@ class CBattleAction_PlayerSkillAttack : public CBattleAction
 public:
     CBattleAction_PlayerSkillAttack(QString &skillName, int skillLevel);
      virtual int GetActionTypeId() {return BattlePlayerAction_Skill;}
-    virtual void GetActionName(QString &str);
+    virtual void GetActionName(QString &str, bool config);
     virtual bool DoAction(int target, int defaultTarget, CGA_BattleContext_t &context);
     virtual QString GetSkillName(){return m_SkillName; }
     virtual int GetSkillLevel(){return m_SkillLevel; }
@@ -524,9 +568,8 @@ class CBattleAction_PlayerUseItem : public CBattleAction
 {
 public:
     CBattleAction_PlayerUseItem(QString &itemName);
-    CBattleAction_PlayerUseItem(int itemId);
     virtual int GetActionTypeId() {return BattlePlayerAction_UseItem;}
-    virtual void GetActionName(QString &str);
+    virtual void GetActionName(QString &str, bool config);
     virtual bool DoAction(int target, int defaultTarget, CGA_BattleContext_t &context);
     virtual int GetTargetFlags(CGA_BattleContext_t &context){
         return FL_SKILL_SINGLE | FL_SKILL_TO_PET | FL_SKILL_TO_SELF | FL_SKILL_TO_TEAMMATE | FL_SKILL_SELECT_TARGET;
@@ -536,6 +579,7 @@ private:
 protected:
     QString m_ItemName;//item name or #id
     int m_ItemId;
+    int m_ItemType;
 };
 
 class CBattleAction_PlayerLogBack : public CBattleAction
@@ -543,7 +587,7 @@ class CBattleAction_PlayerLogBack : public CBattleAction
 public:
     CBattleAction_PlayerLogBack();
     virtual int GetActionTypeId() {return BattlePlayerAction_LogBack;}
-    virtual void GetActionName(QString &str);
+    virtual void GetActionName(QString &str, bool config);
     virtual bool DoAction(int target, int defaultTarget, CGA_BattleContext_t &context);
     virtual int GetTargetFlags(CGA_BattleContext_t &context){
         return 0;
@@ -555,7 +599,7 @@ class CBattleAction_PlayerRebirth : public CBattleAction
 public:
     CBattleAction_PlayerRebirth();
     virtual int GetActionTypeId() {return BattlePlayerAction_Rebirth;}
-    virtual void GetActionName(QString &str);
+    virtual void GetActionName(QString &str, bool config);
     virtual bool DoAction(int target, int defaultTarget, CGA_BattleContext_t &context);
     virtual int GetTargetFlags(CGA_BattleContext_t &context){
         return 0;
@@ -567,7 +611,7 @@ class CBattleAction_PlayerDoNothing : public CBattleAction
 public:
     CBattleAction_PlayerDoNothing();
     virtual int GetActionTypeId() {return BattlePlayerAction_DoNothing;}
-    virtual void GetActionName(QString &str);
+    virtual void GetActionName(QString &str, bool config);
     virtual bool DoAction(int target, int defaultTarget, CGA_BattleContext_t &context);
     virtual int GetTargetFlags(CGA_BattleContext_t &context){
         return 0;
@@ -580,7 +624,7 @@ public:
     CBattleAction_PetSkillAttack(QString &skillName);
 
     virtual int GetActionTypeId() {return BattlePetAction_Skill;}
-    virtual void GetActionName(QString &str);
+    virtual void GetActionName(QString &str, bool config);
     virtual bool DoAction(int target, int defaultTarget, CGA_BattleContext_t &context);
     virtual QString GetSkillName(){return m_SkillName; }
     virtual int GetTargetFlags(CGA_BattleContext_t &context);
@@ -662,10 +706,10 @@ public:
     virtual int GetCondition2TypeId();
     virtual void GetCondition2Value(QString &str);
 
-    virtual void GetPlayerActionName(QString &str);
+    virtual void GetPlayerActionName(QString &str, bool config);
     virtual void GetPlayerTargetName(QString &str);
 
-    virtual void GetPetActionName(QString &str);
+    virtual void GetPetActionName(QString &str, bool config);
     virtual void GetPetTargetName(QString &str);
 
     //virtual void GetPetAction2Name(QString &str);
@@ -797,7 +841,7 @@ class CBattleWorker : public QObject
 public:
     CBattleWorker();
 private:
-    bool CheckLevelOneProtect();
+    bool CheckProtect();
 private slots:
     void GetBattleUnits();
     void OnPerformanceBattle();
@@ -807,10 +851,11 @@ public slots:
     void OnNotifyGetSkillsInfo(QSharedPointer<CGA_SkillList_t> skills);
     void OnNotifyGetPetsInfo(QSharedPointer<CGA_PetList_t> pets);
     void OnNotifyGetItemsInfo(QSharedPointer<CGA_ItemList_t> items);
-    void OnNotifyAttachProcessOk(quint32 ProcessId, quint32 port, quint32 hWnd);
+    void OnNotifyAttachProcessOk(quint32 ProcessId, quint32 ThreadId, quint32 port, quint32 hWnd);
     void OnSetAutoBattle(int state);
     void OnSetFRND(int state);
     void OnSetLv1Protect(int state);
+    void OnSetBOSSProtect(int state);
     void OnSetLockCountdown(int state);
     void OnSetNoSwitchAnim(int state);
     void OnSetDelayFrom(int val);
@@ -826,6 +871,7 @@ public:
     bool m_bHighSpeed;
     bool m_bFirstRoundNoDelay;
     bool m_bLevelOneProtect;
+    bool m_bBOSSProtect;
     bool m_bLockCountdown;
     bool m_bShowHPMP;
     bool m_bPetDoubleAction;

@@ -10,6 +10,9 @@
     <height>414</height>
    </rect>
   </property>
+  <property name="acceptDrops">
+   <bool>true</bool>
+  </property>
   <property name="windowTitle">
    <string/>
   </property>
@@ -89,7 +92,23 @@
          </widget>
         </item>
         <item>
-         <widget class="QPushButton" name="pushButton_kill">
+         <widget class="QPushButton" name="pushButton_suspend">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="text">
+           <string>Suspend</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="pushButton_term">
           <property name="enabled">
            <bool>false</bool>
           </property>

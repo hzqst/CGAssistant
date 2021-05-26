@@ -39,12 +39,18 @@
     <ClCompile Include="server.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="Inject.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="gameservice.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="commandline.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="inject.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

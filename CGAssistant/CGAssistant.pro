@@ -4,15 +4,14 @@
 #
 #-------------------------------------------------
 
-QT       += core gui widgets
+QT       += core gui widgets sql network
 
 TARGET = CGAssistant
 TEMPLATE = app
-DESTDIR = ../build
 
-DEFINES += CGA_IMPORT
+DEFINES += CGA_IMPORT QHTTP_HAS_CLIENT
 
-TRANSLATIONS+=lang.ts
+TRANSLATIONS += lang.ts
 
 SOURCES += main.cpp\
         mainwindow.cpp \
@@ -31,7 +30,8 @@ SOURCES += main.cpp\
     itemtweaker.cpp \
     mapform.cpp \
     mypaintmap.cpp \
-    accountform.cpp
+    accountform.cpp \
+    chatform.cpp
 
 HEADERS  += mainwindow.h \
     scriptform.h \
@@ -49,7 +49,8 @@ HEADERS  += mainwindow.h \
     itemtweaker.h \
     mapform.h \
     mypaintmap.h \
-    accountform.h
+    accountform.h \
+    chatform.h
 
 FORMS    += mainwindow.ui \
     scriptform.ui \
@@ -58,23 +59,32 @@ FORMS    += mainwindow.ui \
     autobattleform.ui \
     itemform.ui \
     mapform.ui \
-    accountform.ui
+    accountform.ui \
+    chatform.ui \
+    chatform.ui
 
 RC_FILE += CGAssistant.rc
 
-INCLUDEPATH += "../boost_1_63_0"
+INCLUDEPATH += "../qhttp/src"
+INCLUDEPATH += "../boost"
 INCLUDEPATH += "../rest_rpc/iguana/third_party/msgpack/include"
 
 DISTFILES +=
 
-RESOURCES += \
-    resource.qrc
+RESOURCES += resource.qrc
 
 QMAKE_CXXFLAGS += /MP /Gm-
 QMAKE_CFLAGS += /MP /Gm-
 
-Release:LIBS += -L"../Release/" -lCGALib -lntdll
-Debug:LIBS += -L"../Debug/" -lCGALib -lntdll
-LIBS += -L"../boost_1_63_0/stage/lib"
+Release:LIBS += -L"../Release/"
+Debug:LIBS += -L"../Debug/"
+LIBS += -L"../boost/stage/lib"
+LIBS += -L"../qhttp/xbin"
 LIBS += -luser32
 LIBS += -lgdi32
+LIBS += -lntdll
+LIBS += -lqhttp
+LIBS += -lCGALib
+
+QMAKE_CXXFLAGS_RELEASE = $$QMAKE_CFLAGS_RELEASE_WITH_DEBUGINFO
+QMAKE_LFLAGS_RELEASE = $$QMAKE_LFLAGS_RELEASE_WITH_DEBUGINFO

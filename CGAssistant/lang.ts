@@ -53,31 +53,35 @@
     </message>
     <message>
         <source>POLCN_Launcher running with pid %1...</source>
-        <translation></translation>
+        <translation>拉起易玩通登录器，登录进程PID%1...</translation>
     </message>
     <message>
         <source>Get GID ok.
 </source>
-        <translation>获取子账号成功。</translation>
+        <translation>获取子账号成功。
+</translation>
     </message>
     <message>
         <source>Login refused by server.
 </source>
-        <translation>登录被服务器拒绝。</translation>
+        <translation>登录被服务器拒绝。
+</translation>
     </message>
     <message>
         <source>Fail to parse POLCN_Launcher output, missing &quot;result&quot;.
 </source>
-        <translation>解析登录器返回结果失败，缺少result字段。</translation>
+        <translation>解析登录器返回结果失败，缺少result字段。
+</translation>
     </message>
     <message>
         <source>Fail to parse POLCN_Launcher output.
 </source>
-        <translation>解析登录器返回结果失败。</translation>
+        <translation>解析登录器返回结果失败。
+</translation>
     </message>
     <message>
         <source>POLCN_Launcher finished with exitCode %1</source>
-        <translation type="unfinished"></translation>
+        <translation>登录器进程结束，退出代码%1</translation>
     </message>
     <message>
         <source>Querying GID list...</source>
@@ -85,7 +89,99 @@
     </message>
     <message>
         <source>Disable POLCN Updater</source>
-        <translation type="unfinished">禁用登录器更新</translation>
+        <translation>禁用登录器更新</translation>
+    </message>
+    <message>
+        <source>Waiting for CGAssistant pid #%1 to login...</source>
+        <translation>正在等待CGA进程PID#%1登录...</translation>
+    </message>
+    <message>
+        <source>Waiting for other CGAssistant to login...</source>
+        <translation>正在等待其他CGA进程登录...</translation>
+    </message>
+    <message>
+        <source>Auto-Login off.</source>
+        <translation>自动登录功能已关闭。</translation>
+    </message>
+    <message>
+        <source>Game-Login succeeded.
+</source>
+        <translation>游戏登录成功。
+</translation>
+    </message>
+    <message>
+        <source>Game-Login succeeded.</source>
+        <translation>游戏登录成功。</translation>
+    </message>
+    <message>
+        <source>Wait for game process to login...
+</source>
+        <translation>等待游戏进程登录中...
+</translation>
+    </message>
+    <message>
+        <source>Waiting for other CGAssistant to release POLCN login lock...</source>
+        <translation>正在等待其他CGA进程释放登录互斥锁...</translation>
+    </message>
+    <message>
+        <source>Failed to acquire POLCN login lock, error code %1...</source>
+        <translation>获取登录互斥锁失败，错误码%1...</translation>
+    </message>
+    <message>
+        <source>Failed to acquire POLCN login lock...</source>
+        <translation>获取登录互斥锁失败...</translation>
+    </message>
+    <message>
+        <source>json parse error</source>
+        <translation>json解析失败</translation>
+    </message>
+    <message>
+        <source>Auto Change Server</source>
+        <translation>自动换线</translation>
+    </message>
+    <message>
+        <source>Mouth</source>
+        <translation>嘴</translation>
+    </message>
+    <message>
+        <source>e.g. 0,10,0,0</source>
+        <translation>按地水火风的顺序填写：如0,10,0,0</translation>
+    </message>
+    <message>
+        <source>Eye</source>
+        <translation>眼</translation>
+    </message>
+    <message>
+        <source>Name</source>
+        <translation>名字</translation>
+    </message>
+    <message>
+        <source>e.g. 0,15,0,15,0</source>
+        <translation>按血攻防敏魔的顺序填写：如0,15,0,15,0</translation>
+    </message>
+    <message>
+        <source>Color</source>
+        <translation>颜色</translation>
+    </message>
+    <message>
+        <source>Elements</source>
+        <translation>初始水晶</translation>
+    </message>
+    <message>
+        <source>Points</source>
+        <translation>初始点数</translation>
+    </message>
+    <message>
+        <source>Create Character</source>
+        <translation>自动创建人物</translation>
+    </message>
+    <message>
+        <source>0,0,0,0</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>0,0,0,0,0</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -230,7 +326,7 @@ meet Lv1 enemy</source>
     </message>
     <message>
         <source>Teammate HP</source>
-        <translation>队友血量</translation>
+        <translation>己方血量</translation>
     </message>
     <message>
         <source>Enemy Unit</source>
@@ -262,7 +358,7 @@ meet Lv1 enemy</source>
     </message>
     <message>
         <source>Teammate</source>
-        <translation>队友</translation>
+        <translation>己方</translation>
     </message>
     <message>
         <source>Player</source>
@@ -342,7 +438,7 @@ meet Lv1 enemy</source>
     </message>
     <message>
         <source>Pet with highest hp</source>
-        <translation>血量最多的宠物</translation>
+        <translation>血量最高的宠物</translation>
     </message>
     <message>
         <source>Low HP Percentage</source>
@@ -370,7 +466,7 @@ meet Lv1 enemy</source>
     </message>
     <message>
         <source>Teammate Debuff</source>
-        <translation>队友异常状态</translation>
+        <translation>己方异常状态</translation>
     </message>
     <message>
         <source>Single Debuff</source>
@@ -426,11 +522,11 @@ meet Lv1 enemy</source>
     </message>
     <message>
         <source>Teammate MultiTarget HP</source>
-        <translation>队友T字形血量</translation>
+        <translation>己方T字形血量</translation>
     </message>
     <message>
         <source>Teammate All HP</source>
-        <translation>队友全体血量</translation>
+        <translation>己方全体血量</translation>
     </message>
     <message>
         <source>Enemy SingleRow Count</source>
@@ -454,7 +550,7 @@ meet Lv1 enemy</source>
     </message>
     <message>
         <source>Teammate MP</source>
-        <translation>队友蓝量</translation>
+        <translation>己方蓝量</translation>
     </message>
     <message>
         <source>Guard</source>
@@ -485,6 +581,43 @@ Action</source>
         <source>Player Force
 Action</source>
         <translation>人物强制行动</translation>
+    </message>
+    <message>
+        <source>Stop when 
+meet BOSS</source>
+        <translation>BOSS战停止</translation>
+    </message>
+    <message>
+        <source>Inventoty Item</source>
+        <translation>物品栏</translation>
+    </message>
+    <message>
+        <source>Pet with highest mp</source>
+        <translation>蓝量最高的宠物</translation>
+    </message>
+    <message>
+        <source>Pet with highest loyalty</source>
+        <translation>忠诚最高的宠物</translation>
+    </message>
+    <message>
+        <source>Pet with lowest lv</source>
+        <translation>等级最低的宠物</translation>
+    </message>
+    <message>
+        <source>Pet with lowest hp</source>
+        <translation>血量最低的宠物</translation>
+    </message>
+    <message>
+        <source>Pet with lowest mp</source>
+        <translation>蓝量最低的宠物</translation>
+    </message>
+    <message>
+        <source>Pet with lowest loyalty</source>
+        <translation>忠诚最低的宠物</translation>
+    </message>
+    <message>
+        <source>Teammate Count</source>
+        <translation>己方数量</translation>
     </message>
 </context>
 <context>
@@ -557,7 +690,78 @@ Action</source>
     </message>
     <message>
         <source>Game already attached by other instance of CGAssistant.</source>
-        <translation>游戏已经被另一个CGAssistant附加。</translation>
+        <translation type="vanished">游戏已经被另一个CGAssistant附加。</translation>
+    </message>
+    <message>
+        <source>not attached to any game process yet.</source>
+        <translation>未附加到任何游戏。</translation>
+    </message>
+    <message>
+        <source>Game already attached by another instance of CGAssistant.</source>
+        <translation>游戏已经被另一个CGASsistant附加。</translation>
+    </message>
+</context>
+<context>
+    <name>ChatForm</name>
+    <message>
+        <source>Form</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>[Enter] to send chat</source>
+        <translation>[回车] 发送聊天消息</translation>
+    </message>
+    <message>
+        <source>Display Time</source>
+        <translation>显示时间</translation>
+    </message>
+    <message>
+        <source>System Message</source>
+        <translation>系统消息</translation>
+    </message>
+    <message>
+        <source>My Chat Message</source>
+        <translation>自己的聊天消息</translation>
+    </message>
+    <message>
+        <source>Player Message</source>
+        <translation>玩家聊天消息</translation>
+    </message>
+    <message>
+        <source>NPC Message</source>
+        <translation>NPC消息</translation>
+    </message>
+    <message>
+        <source>Error: Failed to connect sqlite.
+Chat database will not work properly.</source>
+        <translation>连接数据库失败，消息数据库可能无法正常工作。</translation>
+    </message>
+    <message>
+        <source>Error: Failed to create table.
+Chat database will not work properly.</source>
+        <translation>创建表失败，消息数据库可能无法正常工作。</translation>
+    </message>
+    <message>
+        <source>Display Name</source>
+        <translation>显示名字</translation>
+    </message>
+    <message>
+        <source>Today Only</source>
+        <translation>只显示今天</translation>
+    </message>
+    <message>
+        <source>Error: Failed to create index for type.
+Chat database will not work properly.</source>
+        <translation>创建索引type失败，消息数据库可能无法正常工作。</translation>
+    </message>
+    <message>
+        <source>Error: Failed to create index for uploadtime.
+Chat database will not work properly.</source>
+        <translation>创建索引uploadtime失败，消息数据库可能无法正常工作。</translation>
+    </message>
+    <message>
+        <source>%1\chatdb\%2.db</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -686,29 +890,24 @@ Action</source>
         <translation>账号</translation>
     </message>
     <message>
-        <source>CGAssistant %1</source>
-        <translation type="unfinished"></translation>
+        <source>Chat</source>
+        <translation>消息</translation>
+    </message>
+    <message>
+        <source>CGAssistant [%1] (server %2)</source>
+        <translation>CGAssistant [%1] (%2线)</translation>
     </message>
     <message>
         <source>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:&apos;SimSun&apos;; font-size:9pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;唯一Q群 300303705&lt;/p&gt;
-&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;2019-12-20&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;修复刷十年戒指脚本的问题。&lt;/p&gt;
-&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;2019-12-14&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;快捷键F4取出所有物品修复会卡物品栏的问题。&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;采集和双百脚本的配置格式有修改，之前的老配置文件需要手动删除后重新生成。&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;修复某些练级脚本无限回补的问题。&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;采集插件增加狩猎。&lt;/p&gt;
-&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;2019-12-01&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;游戏内增加快捷键：&lt;/p&gt;
-&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;F1登出回城 F2登出服务器 F3穿墙(向鼠标指向方向) F4交易时一键取出所有物品&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;img src=&quot;:/logo.png&quot; /&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:16px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; line-height:160%; font-family:&apos;-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol,Liberation Sans,PingFang SC,Microsoft YaHei,Hiragino Sans GB,Wenquanyi Micro Hei,WenQuanYi Zen Hei,ST Heiti,SimHei,SimSun,WenQuanYi Zen Hei Sharp,sans-serif&apos;; font-size:16px; color:#40485b; background-color:#ffffff;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:16px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; line-height:160%; background-color:#ffffff;&quot;&gt;&lt;span style=&quot; font-family:&apos;-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol,Liberation Sans,PingFang SC,Microsoft YaHei,Hiragino Sans GB,Wenquanyi Micro Hei,WenQuanYi Zen Hei,ST Heiti,SimHei,SimSun,WenQuanYi Zen Hei Sharp,sans-serif&apos;; font-size:16px; color:#40485b; background-color:#ffffff;&quot;&gt;当前版本：2021-05-07&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:16px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; line-height:160%; background-color:#ffffff;&quot;&gt;&lt;span style=&quot; font-family:&apos;-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol,Liberation Sans,PingFang SC,Microsoft YaHei,Hiragino Sans GB,Wenquanyi Micro Hei,WenQuanYi Zen Hei,ST Heiti,SimHei,SimSun,WenQuanYi Zen Hei Sharp,sans-serif&apos;; font-size:16px; color:#40485b; background-color:#ffffff;&quot;&gt;下载最新版本：群号 300303705&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:16px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; line-height:160%; background-color:#ffffff;&quot;&gt;&lt;span style=&quot; font-family:&apos;-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol,Liberation Sans,PingFang SC,Microsoft YaHei,Hiragino Sans GB,Wenquanyi Micro Hei,WenQuanYi Zen Hei,ST Heiti,SimHei,SimSun,WenQuanYi Zen Hei Sharp,sans-serif&apos;; font-size:16px; color:#40485b; background-color:#ffffff;&quot;&gt;或 &lt;/span&gt;&lt;a href=&quot;https://github.com/hzqst/CGAssistantJS/issues&quot;&gt;&lt;span style=&quot; font-family:&apos;-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol,Liberation Sans,PingFang SC,Microsoft YaHei,Hiragino Sans GB,Wenquanyi Micro Hei,WenQuanYi Zen Hei,ST Heiti,SimHei,SimSun,WenQuanYi Zen Hei Sharp,sans-serif&apos;; font-size:16px; text-decoration: underline; color:#005980; background-color:transparent;&quot;&gt;https://github.com/hzqst/CGAssistantJS/&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:16px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; line-height:160%; background-color:#ffffff;&quot;&gt;&lt;a href=&quot;https://github.com/hzqst/CGAssistantJS/issues&quot;&gt;&lt;span style=&quot; font-family:&apos;-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol,Liberation Sans,PingFang SC,Microsoft YaHei,Hiragino Sans GB,Wenquanyi Micro Hei,WenQuanYi Zen Hei,ST Heiti,SimHei,SimSun,WenQuanYi Zen Hei Sharp,sans-serif&apos;; font-size:16px; text-decoration: underline; color:#005980; background-color:transparent;&quot;&gt;或 &lt;/span&gt;&lt;/a&gt;&lt;a href=&quot;https://gitee.com/hzqst/CGAssistantJS/issues&quot;&gt;&lt;span style=&quot; font-family:&apos;-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol,Liberation Sans,PingFang SC,Microsoft YaHei,Hiragino Sans GB,Wenquanyi Micro Hei,WenQuanYi Zen Hei,ST Heiti,SimHei,SimSun,WenQuanYi Zen Hei Sharp,sans-serif&apos;; font-size:16px; text-decoration: underline; color:#005980; background-color:transparent;&quot;&gt;https://gitee.com/hzqst/CGAssistantJS/&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -725,6 +924,29 @@ p, li { white-space: pre-wrap; }
     <message>
         <source>Download Map</source>
         <translation>下载地图</translation>
+    </message>
+    <message>
+        <source>Center Self</source>
+        <translation type="vanished">画面居中</translation>
+    </message>
+    <message>
+        <source>mouse click (%1, %2)</source>
+        <translation>鼠标点击(%1, %2)</translation>
+    </message>
+    <message>
+        <source>player at (%1, %2)</source>
+        <translation>玩家坐标(%1, %2)</translation>
+    </message>
+    <message>
+        <source>map index : %1</source>
+        <translation>地图序号: %1</translation>
+    </message>
+</context>
+<context>
+    <name>MyPaintMap</name>
+    <message>
+        <source>(%1, %2)</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -803,7 +1025,7 @@ p, li { white-space: pre-wrap; }
     </message>
     <message>
         <source>Frequence Move</source>
-        <translation>高速遇敌</translation>
+        <translation type="vanished">高速遇敌</translation>
     </message>
     <message>
         <source>Work Acc</source>
@@ -811,7 +1033,7 @@ p, li { white-space: pre-wrap; }
     </message>
     <message>
         <source>Work acceleration</source>
-        <translation>生产系工作加速</translation>
+        <translation type="vanished">生产系工作加速</translation>
     </message>
     <message>
         <source>Gather</source>
@@ -823,7 +1045,7 @@ p, li { white-space: pre-wrap; }
     </message>
     <message>
         <source>Move speed</source>
-        <translation>移动速度</translation>
+        <translation type="vanished">移动速度</translation>
     </message>
     <message>
         <source>Clock</source>
@@ -869,6 +1091,98 @@ error: %1</source>
     <message>
         <source>Save player settings</source>
         <translation>保存玩家配置</translation>
+    </message>
+    <message>
+        <source>Use Food</source>
+        <translation>人吃料理</translation>
+    </message>
+    <message>
+        <source>Pet Food</source>
+        <translation>宠吃料理</translation>
+    </message>
+    <message>
+        <source>Use Med</source>
+        <translation>人吃药水</translation>
+    </message>
+    <message>
+        <source>Pet Med</source>
+        <translation>宠吃药水</translation>
+    </message>
+    <message>
+        <source>Use Food At</source>
+        <translation>人料理蓝量</translation>
+    </message>
+    <message>
+        <source>Pet Food At</source>
+        <translation>宠料理蓝量</translation>
+    </message>
+    <message>
+        <source>Use Med At</source>
+        <translation>人血瓶血量</translation>
+    </message>
+    <message>
+        <source>Pet Med At</source>
+        <translation>宠血瓶血量</translation>
+    </message>
+    <message>
+        <source>json parse error</source>
+        <translation>json解析失败</translation>
+    </message>
+    <message>
+        <source>Automatically use food for player</source>
+        <translation>对玩家自动使用食物</translation>
+    </message>
+    <message>
+        <source>Automatically use food for pets</source>
+        <translation>对宠物自动使用食物</translation>
+    </message>
+    <message>
+        <source>Auto resupply when talking to nurse</source>
+        <translation>跟护士对话时自动补血</translation>
+    </message>
+    <message>
+        <source>Automatically use medicine for player</source>
+        <translation>对玩家自动使用药水</translation>
+    </message>
+    <message>
+        <source>Automatically use medicine for pets</source>
+        <translation>对宠物自动使用药水</translation>
+    </message>
+    <message>
+        <source>Disable animation for scene switching</source>
+        <translation>屏蔽场景切换的动画</translation>
+    </message>
+    <message>
+        <source>Share non-sensitive data to help CGAssistant works better</source>
+        <translation>将非敏感数据（如：深蓝线，随机NPC位置）分享给他人（注：此功能可能需要访问网络）</translation>
+    </message>
+    <message>
+        <source>Share data</source>
+        <translation>加入数据分享计划</translation>
+    </message>
+    <message>
+        <source>Use food for player under this condition</source>
+        <translation>在此条件下对自己使用食物</translation>
+    </message>
+    <message>
+        <source>Use food for pets under this condition</source>
+        <translation>在此条件下对宠物使用食物</translation>
+    </message>
+    <message>
+        <source>Use medicine for player under this condition</source>
+        <translation>在此条件下对自己使用药水</translation>
+    </message>
+    <message>
+        <source>Use medicine for pets under this condition</source>
+        <translation>在此条件下对宠物使用药水</translation>
+    </message>
+    <message>
+        <source>Craft acceleration</source>
+        <translation>制造加速</translation>
+    </message>
+    <message>
+        <source>Player movement speed</source>
+        <translation>移动速度修正</translation>
     </message>
 </context>
 <context>
@@ -923,7 +1237,7 @@ error: %1</source>
     </message>
     <message>
         <source>TeammateHP %1%2</source>
-        <translation>队友血量 %1%2</translation>
+        <translation>己方血量 %1%2</translation>
     </message>
     <message>
         <source>Enemy %1%2</source>
@@ -1011,7 +1325,7 @@ error: %1</source>
     </message>
     <message>
         <source>Teammate Debuff %1 %2</source>
-        <translation>队友异常状态 %1 %2</translation>
+        <translation>己方异常状态 %1 %2</translation>
     </message>
     <message>
         <source>Enemy MultiTarget Hp %1%2</source>
@@ -1055,7 +1369,7 @@ error: %1</source>
     </message>
     <message>
         <source>Teammate MultiTarget HP %1%2</source>
-        <translation>队友T字形血量 %1%2</translation>
+        <translation>己方T字形血量 %1%2</translation>
     </message>
     <message>
         <source>Enemy All HP %1%2</source>
@@ -1063,7 +1377,7 @@ error: %1</source>
     </message>
     <message>
         <source>Teammate All HP %1%2</source>
-        <translation>队友全体血量 %1%2</translation>
+        <translation>己方全体血量 %1%2</translation>
     </message>
     <message>
         <source>Enemy Level %1%2</source>
@@ -1075,7 +1389,7 @@ error: %1</source>
     </message>
     <message>
         <source>TeammateMP %1%2</source>
-        <translation>队友蓝量 %1%2</translation>
+        <translation>己方蓝量 %1%2</translation>
     </message>
     <message>
         <source>cg_item_6000</source>
@@ -1132,6 +1446,194 @@ error: %1</source>
     <message>
         <source>cg_item_6000 (WT)</source>
         <translation>道具 (网通)</translation>
+    </message>
+    <message>
+        <source>Navigation Failed</source>
+        <translation>寻路失败</translation>
+    </message>
+    <message>
+        <source> (%1, %2)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Use item id #%1</source>
+        <translation>使用ID为%1的物品</translation>
+    </message>
+    <message>
+        <source>Use item type @%1</source>
+        <translation>使用类型为%1的物品</translation>
+    </message>
+    <message>
+        <source>Inventory %1%2</source>
+        <translation>物品栏 %1%2</translation>
+    </message>
+    <message>
+        <source>Call pet with highest mana</source>
+        <translation>放出最高蓝量的宠物</translation>
+    </message>
+    <message>
+        <source>Call pet with highest loyalty</source>
+        <translation>放出最高忠诚的宠物</translation>
+    </message>
+    <message>
+        <source>Call pet with lowest level</source>
+        <translation>放出最低等级的宠物</translation>
+    </message>
+    <message>
+        <source>Call pet with lowest health</source>
+        <translation>放出最低血量的宠物</translation>
+    </message>
+    <message>
+        <source>Call pet with lowest mana</source>
+        <translation>放出最低蓝量的宠物</translation>
+    </message>
+    <message>
+        <source>Call pet with lowest loyalty</source>
+        <translation>放出最低忠诚的宠物</translation>
+    </message>
+    <message>
+        <source>TeammateCount %1%2</source>
+        <translation>己方数量 %1%2</translation>
+    </message>
+    <message>
+        <source>1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>3</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>4</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>5</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>bawu</source>
+        <translation>巴乌</translation>
+    </message>
+    <message>
+        <source>kazi</source>
+        <translation>卡兹</translation>
+    </message>
+    <message>
+        <source>xin</source>
+        <translation>辛</translation>
+    </message>
+    <message>
+        <source>tuobu</source>
+        <translation>托布</translation>
+    </message>
+    <message>
+        <source>kai</source>
+        <translation>凯</translation>
+    </message>
+    <message>
+        <source>feite</source>
+        <translation>菲特</translation>
+    </message>
+    <message>
+        <source>boke</source>
+        <translation>伯克</translation>
+    </message>
+    <message>
+        <source>wulu</source>
+        <translation>乌噜</translation>
+    </message>
+    <message>
+        <source>moeko</source>
+        <translation>萌子</translation>
+    </message>
+    <message>
+        <source>ami</source>
+        <translation>阿咪</translation>
+    </message>
+    <message>
+        <source>meigu</source>
+        <translation>梅古</translation>
+    </message>
+    <message>
+        <source>li</source>
+        <translation>丽</translation>
+    </message>
+    <message>
+        <source>kayi</source>
+        <translation>卡伊</translation>
+    </message>
+    <message>
+        <source>ailu</source>
+        <translation>艾露</translation>
+    </message>
+    <message>
+        <source>xiedi</source>
+        <translation>谢堤</translation>
+    </message>
+    <message>
+        <source>pite</source>
+        <translation>彼特</translation>
+    </message>
+    <message>
+        <source>zuozang</source>
+        <translation>左藏</translation>
+    </message>
+    <message>
+        <source>niersen</source>
+        <translation>尼尔森</translation>
+    </message>
+    <message>
+        <source>beidite</source>
+        <translation>贝堤特</translation>
+    </message>
+    <message>
+        <source>lansiluote</source>
+        <translation>兰斯洛特</translation>
+    </message>
+    <message>
+        <source>weisikaier</source>
+        <translation>威斯凯尔</translation>
+    </message>
+    <message>
+        <source>shala</source>
+        <translation>莎拉</translation>
+    </message>
+    <message>
+        <source>aya</source>
+        <translation>绫女</translation>
+    </message>
+    <message>
+        <source>fuerdiya</source>
+        <translation>福尔蒂雅</translation>
+    </message>
+    <message>
+        <source>xiala</source>
+        <translation>夏菈</translation>
+    </message>
+    <message>
+        <source>pingping</source>
+        <translation>萍萍</translation>
+    </message>
+    <message>
+        <source>geleisi</source>
+        <translation>葛蕾丝</translation>
+    </message>
+    <message>
+        <source>hemi</source>
+        <translation>荷蜜</translation>
+    </message>
+    <message>
+        <source>Highest Lv</source>
+        <translation>最高等级</translation>
+    </message>
+    <message>
+        <source>Lowest Lv</source>
+        <translation>最低等级</translation>
     </message>
 </context>
 <context>
@@ -1224,6 +1726,47 @@ error: %1</source>
     <message>
         <source>Soul Protect</source>
         <translation>掉魂停止脚本</translation>
+    </message>
+    <message>
+        <source>Navigation is unavailable while running other scripts.</source>
+        <translation>有脚本在运行时寻路功能暂时不可用。</translation>
+    </message>
+    <message>
+        <source>Suspend</source>
+        <translation>暂停</translation>
+    </message>
+    <message>
+        <source>Resume</source>
+        <translation>恢复</translation>
+    </message>
+    <message>
+        <source>Check &quot;chrome://inspect&quot; in chrome to debug the node process.</source>
+        <translation type="vanished">在Chrome浏览器中访问地址：chrome://inspect并添加对应调试端口即可开始调试</translation>
+    </message>
+    <message>
+        <source>
+Check &quot;chrome://inspect&quot; in chrome to debug the node process.</source>
+        <translation>在Chrome浏览器中访问地址：chrome://inspect并添加对应调试端口即可开始调试</translation>
+    </message>
+    <message>
+        <source>cannot load script since there is already one script running here.</source>
+        <translation type="vanished">脚本已经运行的情况下无法加载脚本</translation>
+    </message>
+    <message>
+        <source>script file not exists.</source>
+        <translation>脚本文件不存在</translation>
+    </message>
+    <message>
+        <source>script path cannot be empty.</source>
+        <translation>脚本路径不能为空</translation>
+    </message>
+    <message>
+        <source>json parse error</source>
+        <translation>json解析失败</translation>
+    </message>
+    <message>
+        <source>Auto Terminate</source>
+        <translation type="vanished">自动结束脚本</translation>
     </message>
 </context>
 </TS>

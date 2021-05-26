@@ -78,18 +78,19 @@ void BattleActionNotify(int flags)
 
 void BattleActionAsyncCallBack(uv_async_t *handle)
 {
-	Isolate* isolate = Isolate::GetCurrent();
+	auto isolate = Isolate::GetCurrent();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	auto data = (BattleActionNotifyData *)handle->data;
 
 	Local<Value> nullValue = Nan::Null();
-	Handle<Value> argv[2];
-	argv[0] = data->m_result ? nullValue : Nan::TypeError("Unknown exception.");
+	Local<Value> argv[2];
+	argv[0] = data->m_result ? nullValue : Nan::Error("Unknown exception.");
 	if (data->m_result)
 		argv[1] = Integer::New(isolate, data->m_flags);
 
-	Local<Function>::New(isolate, data->m_callback)->Call(isolate->GetCurrentContext()->Global(), (data->m_result) ? 2 : 1, argv);
+	Local<Function>::New(isolate, data->m_callback)->Call(context, Null(isolate),(data->m_result) ? 2 : 1, argv);
 
 	data->m_callback.Reset();
 
@@ -101,8 +102,9 @@ void BattleActionAsyncCallBack(uv_async_t *handle)
 
 void BattleActionTimerCallBack(uv_timer_t *handle)
 {
-	Isolate* isolate = Isolate::GetCurrent();
+	auto isolate = Isolate::GetCurrent();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	auto data = (BattleActionNotifyData *)handle->data;
 
@@ -123,10 +125,10 @@ void BattleActionTimerCallBack(uv_timer_t *handle)
 
 	if (asyncNotCalled)
 	{
-		Handle<Value> argv[1];
-		argv[0] = Nan::TypeError("Async callback timeout.");
+		Local<Value> argv[1];
+		argv[0] = Nan::Error("Async callback timeout.");
 
-		Local<Function>::New(isolate, data->m_callback)->Call(isolate->GetCurrentContext()->Global(), 1, argv);
+		Local<Function>::New(isolate, data->m_callback)->Call(context, Null(isolate), 1, argv);
 
 		data->m_callback.Reset();
 
@@ -139,17 +141,18 @@ void BattleActionTimerCallBack(uv_timer_t *handle)
 
 void AsyncWaitBattleAction(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
-	Isolate* isolate = info.GetIsolate();
+	auto isolate = info.GetIsolate();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	int timeout = 3000;
 	if (info.Length() < 1 || !info[0]->IsFunction()) {
 		Nan::ThrowTypeError("Arg[0] must be a function.");
 		return;
 	}
-	if (info.Length() >= 2 && !info[1]->IsUndefined())
+	if (info.Length() >= 2 && info[1]->IsInt32())
 	{
-		timeout = (int)info[1]->IntegerValue();
+		timeout = info[1]->Int32Value(context).ToChecked();
 		if (timeout < 0)
 			timeout = 0;
 	}
@@ -188,8 +191,9 @@ void AsyncWaitBattleAction(const Nan::FunctionCallbackInfo<v8::Value>& info)
 
 void GetBattleUnits(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
-	Isolate* isolate = info.GetIsolate();
+	auto isolate = info.GetIsolate();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	CGA::cga_battle_units_t myinfos;
 	if (!g_CGAInterface->GetBattleUnits(myinfos))
@@ -203,24 +207,25 @@ void GetBattleUnits(const Nan::FunctionCallbackInfo<v8::Value>& info)
 	{
 		Local<Object> obj = Object::New(isolate);
 		const CGA::cga_battle_unit_t &myinfo = myinfos.at(i);
-;		obj->Set(String::NewFromUtf8(isolate, "name"), Nan::New(myinfo.name).ToLocalChecked());
-		obj->Set(String::NewFromUtf8(isolate, "level"), Integer::New(isolate, myinfo.level));
-		obj->Set(String::NewFromUtf8(isolate, "modelid"), Integer::New(isolate, myinfo.modelid));
-		obj->Set(String::NewFromUtf8(isolate, "curhp"), Integer::New(isolate, myinfo.curhp));
-		obj->Set(String::NewFromUtf8(isolate, "maxhp"), Integer::New(isolate, myinfo.maxhp));
-		obj->Set(String::NewFromUtf8(isolate, "curmp"), Integer::New(isolate, myinfo.curmp));
-		obj->Set(String::NewFromUtf8(isolate, "maxmp"), Integer::New(isolate, myinfo.maxmp));
-		obj->Set(String::NewFromUtf8(isolate, "pos"), Integer::New(isolate, myinfo.pos));
-		obj->Set(String::NewFromUtf8(isolate, "flags"), Integer::New(isolate, myinfo.flags));
-		arr->Set(i, obj);
+;		obj->Set(context, String::NewFromUtf8(isolate, "name").ToLocalChecked(), Nan::New(myinfo.name).ToLocalChecked());
+		obj->Set(context, String::NewFromUtf8(isolate, "level").ToLocalChecked(), Integer::New(isolate, myinfo.level));
+		obj->Set(context, String::NewFromUtf8(isolate, "modelid").ToLocalChecked(), Integer::New(isolate, myinfo.modelid));
+		obj->Set(context, String::NewFromUtf8(isolate, "curhp").ToLocalChecked(), Integer::New(isolate, myinfo.curhp));
+		obj->Set(context, String::NewFromUtf8(isolate, "maxhp").ToLocalChecked(), Integer::New(isolate, myinfo.maxhp));
+		obj->Set(context, String::NewFromUtf8(isolate, "curmp").ToLocalChecked(), Integer::New(isolate, myinfo.curmp));
+		obj->Set(context, String::NewFromUtf8(isolate, "maxmp").ToLocalChecked(), Integer::New(isolate, myinfo.maxmp));
+		obj->Set(context, String::NewFromUtf8(isolate, "pos").ToLocalChecked(), Integer::New(isolate, myinfo.pos));
+		obj->Set(context, String::NewFromUtf8(isolate, "flags").ToLocalChecked(), Integer::New(isolate, myinfo.flags));
+		arr->Set(context, i, obj);
 	}
 	info.GetReturnValue().Set(arr);
 }
 
 void GetBattleContext(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
-	Isolate* isolate = info.GetIsolate();
+	auto isolate = info.GetIsolate();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	CGA::cga_battle_context_t ctx;
 	if (!g_CGAInterface->GetBattleContext(ctx))
@@ -230,30 +235,31 @@ void GetBattleContext(const Nan::FunctionCallbackInfo<v8::Value>& info)
 	}
 
 	Local<Object> obj = Object::New(isolate);
-	obj->Set(String::NewFromUtf8(isolate, "round_count"), Integer::New(isolate, ctx.round_count));
-	obj->Set(String::NewFromUtf8(isolate, "player_pos"), Integer::New(isolate, ctx.player_pos));
-	obj->Set(String::NewFromUtf8(isolate, "player_status"), Integer::New(isolate, ctx.player_status));
-	obj->Set(String::NewFromUtf8(isolate, "skill_performed"), Integer::New(isolate, ctx.skill_performed));
-	obj->Set(String::NewFromUtf8(isolate, "skill_allowbit"), Integer::New(isolate, ctx.skill_allowbit));
-	obj->Set(String::NewFromUtf8(isolate, "petskill_allowbit"), Integer::New(isolate, ctx.petskill_allowbit));
-	obj->Set(String::NewFromUtf8(isolate, "weapon_allowbit"), Integer::New(isolate, ctx.weapon_allowbit));
-	obj->Set(String::NewFromUtf8(isolate, "petid"), Integer::New(isolate, ctx.petid));
-	obj->Set(String::NewFromUtf8(isolate, "effect_flags"), Integer::New(isolate, ctx.effect_flags));
+	obj->Set(context, String::NewFromUtf8(isolate, "round_count").ToLocalChecked(), Integer::New(isolate, ctx.round_count));
+	obj->Set(context, String::NewFromUtf8(isolate, "player_pos").ToLocalChecked(), Integer::New(isolate, ctx.player_pos));
+	obj->Set(context, String::NewFromUtf8(isolate, "player_status").ToLocalChecked(), Integer::New(isolate, ctx.player_status));
+	obj->Set(context, String::NewFromUtf8(isolate, "skill_performed").ToLocalChecked(), Integer::New(isolate, ctx.skill_performed));
+	obj->Set(context, String::NewFromUtf8(isolate, "skill_allowbit").ToLocalChecked(), Integer::New(isolate, ctx.skill_allowbit));
+	obj->Set(context, String::NewFromUtf8(isolate, "petskill_allowbit").ToLocalChecked(), Integer::New(isolate, ctx.petskill_allowbit));
+	obj->Set(context, String::NewFromUtf8(isolate, "weapon_allowbit").ToLocalChecked(), Integer::New(isolate, ctx.weapon_allowbit));
+	obj->Set(context, String::NewFromUtf8(isolate, "petid").ToLocalChecked(), Integer::New(isolate, ctx.petid));
+	obj->Set(context, String::NewFromUtf8(isolate, "effect_flags").ToLocalChecked(), Integer::New(isolate, ctx.effect_flags));
 
 	info.GetReturnValue().Set(obj);
 }
 
 void BattleNormalAttack(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
-	Isolate* isolate = info.GetIsolate();
+	auto isolate = info.GetIsolate();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
-	if (info.Length() < 1) {
-		Nan::ThrowTypeError("Arg[0] must be target.");
+	if (info.Length() < 1 || !info[0]->IsInt32()) {
+		Nan::ThrowTypeError("Arg[0] must be integer.");
 		return;
 	}
 	
-	int target = (int)info[0]->IntegerValue();
+	int target = info[0]->Int32Value(context).ToChecked();
 	
 	bool bResult = false;
 	if (!g_CGAInterface->BattleNormalAttack(target, bResult))
@@ -266,29 +272,30 @@ void BattleNormalAttack(const Nan::FunctionCallbackInfo<v8::Value>& info)
 
 void BattleSkillAttack(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
-	Isolate* isolate = info.GetIsolate();
+	auto isolate = info.GetIsolate();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
-	if (info.Length() < 1) {
-		Nan::ThrowTypeError("Arg[0] must be skill pos.");
+	if (info.Length() < 1 || !info[0]->IsInt32()) {
+		Nan::ThrowTypeError("Arg[0] must be integer.");
 		return;
 	}
 	
-	if (info.Length() < 2) {
-		Nan::ThrowTypeError("Arg[1] must be skill level.");
+	if (info.Length() < 2 || !info[1]->IsInt32()) {
+		Nan::ThrowTypeError("Arg[1] must be integer.");
 		return;
 	}
 	
-	if (info.Length() < 3) {
-		Nan::ThrowTypeError("Arg[2] must be target.");
+	if (info.Length() < 3 || !info[2]->IsInt32()) {
+		Nan::ThrowTypeError("Arg[2] must be integer.");
 		return;
 	}
 	
-	int skillpos = (int)info[0]->IntegerValue();
-	int skilllevel = (int)info[1]->IntegerValue();
-	int target = (int)info[2]->IntegerValue();
+	int skillpos = info[0]->Int32Value(context).ToChecked();
+	int skilllevel = info[1]->Int32Value(context).ToChecked();
+	int target = info[2]->Int32Value(context).ToChecked();
 
-	bool packetOnly = (info.Length() >= 4 && info[3]->IsBoolean()) ? (int)info[3]->BooleanValue() : false;
+	bool packetOnly = (info.Length() >= 4 && info[3]->IsBoolean()) ? (int)info[3]->BooleanValue(isolate) : false;
 
 	bool bResult = false;
 	if (!g_CGAInterface->BattleSkillAttack(skillpos, skilllevel, target, packetOnly, bResult))
@@ -301,8 +308,9 @@ void BattleSkillAttack(const Nan::FunctionCallbackInfo<v8::Value>& info)
 
 void BattleRebirth(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
-	Isolate* isolate = info.GetIsolate();
+	auto isolate = info.GetIsolate();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	bool bResult = false;
 	if (!g_CGAInterface->BattleRebirth(bResult))
@@ -315,8 +323,9 @@ void BattleRebirth(const Nan::FunctionCallbackInfo<v8::Value>& info)
 
 void BattleGuard(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
-	Isolate* isolate = info.GetIsolate();
+	auto isolate = info.GetIsolate();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	bool bResult = false;
 	if (!g_CGAInterface->BattleGuard(bResult))
@@ -329,8 +338,9 @@ void BattleGuard(const Nan::FunctionCallbackInfo<v8::Value>& info)
 
 void BattleEscape(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
-	Isolate* isolate = info.GetIsolate();
+	auto isolate = info.GetIsolate();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	bool bResult = false;
 	if (!g_CGAInterface->BattleEscape(bResult))
@@ -343,8 +353,9 @@ void BattleEscape(const Nan::FunctionCallbackInfo<v8::Value>& info)
 
 void BattleDoNothing(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
-	Isolate* isolate = info.GetIsolate();
+	auto isolate = info.GetIsolate();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	bool bResult = false;
 	if (!g_CGAInterface->BattleDoNothing(bResult))
@@ -357,8 +368,9 @@ void BattleDoNothing(const Nan::FunctionCallbackInfo<v8::Value>& info)
 
 void BattleExchangePosition(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
-	Isolate* isolate = info.GetIsolate();
+	auto isolate = info.GetIsolate();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	bool bResult = false;
 	if (!g_CGAInterface->BattleExchangePosition(bResult))
@@ -371,15 +383,16 @@ void BattleExchangePosition(const Nan::FunctionCallbackInfo<v8::Value>& info)
 
 void BattleChangePet(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
-	Isolate* isolate = info.GetIsolate();
+	auto isolate = info.GetIsolate();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
-	if (info.Length() < 1) {
-		Nan::ThrowTypeError("Arg[0] must be pet id.");
+	if (info.Length() < 1 || !info[0]->IsInt32()) {
+		Nan::ThrowTypeError("Arg[0] must be integer");
 		return;
 	}
 	
-	int petid = (int)info[0]->IntegerValue();
+	int petid = info[0]->Int32Value(context).ToChecked();
 
 	bool bResult = false;
 	if (!g_CGAInterface->BattleChangePet(petid, bResult))
@@ -392,21 +405,22 @@ void BattleChangePet(const Nan::FunctionCallbackInfo<v8::Value>& info)
 
 void BattleUseItem(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
-	Isolate* isolate = info.GetIsolate();
+	auto isolate = info.GetIsolate();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
-	if (info.Length() < 1) {
-		Nan::ThrowTypeError("Arg[0] must be item pos.");
+	if (info.Length() < 1 || !info[0]->IsInt32()) {
+		Nan::ThrowTypeError("Arg[0] must be integer");
 		return;
 	}
 	
-	if (info.Length() < 1) {
-		Nan::ThrowTypeError("Arg[1] must be target.");
+	if (info.Length() < 2 || !info[1]->IsInt32()) {
+		Nan::ThrowTypeError("Arg[1] must be integer");
 		return;
 	}
 	
-	int itempos = (int)info[0]->IntegerValue();
-	int target = (int)info[1]->IntegerValue();
+	int itempos = info[0]->Int32Value(context).ToChecked();
+	int target = info[1]->Int32Value(context).ToChecked();
 
 	bool bResult = false;
 	if (!g_CGAInterface->BattleUseItem(itempos, target, bResult))
@@ -419,22 +433,23 @@ void BattleUseItem(const Nan::FunctionCallbackInfo<v8::Value>& info)
 
 void BattlePetSkillAttack(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
-	Isolate* isolate = info.GetIsolate();
+	auto isolate = info.GetIsolate();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	if (info.Length() < 1 || !info[0]->IsInt32()) {
-		Nan::ThrowTypeError("Arg[0] must be pet skill pos.");
+		Nan::ThrowTypeError("Arg[0] must be integer.");
 		return;
 	}
 	
 	if (info.Length() < 2 || !info[1]->IsInt32()) {
-		Nan::ThrowTypeError("Arg[1] must be target.");
+		Nan::ThrowTypeError("Arg[1] must be integer.");
 		return;
 	}
 
-	int skillpos = (int)info[0]->IntegerValue();
-	int target = (int)info[1]->IntegerValue();
-	bool packetOnly = (info.Length() >= 3 && info[2]->IsBoolean()) ?  (int)info[2]->BooleanValue() : false;
+	int skillpos = info[0]->Int32Value(context).ToChecked();
+	int target = info[1]->Int32Value(context).ToChecked();
+	bool packetOnly = (info.Length() >= 3 && info[2]->IsBoolean()) ?  (int)info[2]->BooleanValue(isolate) : false;
 
 	bool bResult = false;
 	if (!g_CGAInterface->BattlePetSkillAttack(skillpos, target, packetOnly, bResult))

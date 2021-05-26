@@ -15,6 +15,7 @@ void NPCDialogNotify(CGA::cga_npc_dialog_t dlg);
 void WorkingResultNotify(CGA::cga_working_result_t results);
 void ChatMsgNotify(CGA::cga_chat_msg_t msg);
 void DownloadMapNotify(CGA::cga_download_map_t msg);
+void ConnectionStateNotify(CGA::cga_conn_state_t msg);
 
 class ConnectWorkerData
 {
@@ -35,6 +36,13 @@ public:
 void ConnectWorker(uv_work_t* req)
 {
 	auto data = (ConnectWorkerData *)req->data;
+
+	if (g_CGAInterface->IsConnected())
+	{
+		data->m_result = true;
+		return;
+	}
+
 	data->m_result = g_CGAInterface->Connect(data->m_port);
 
 	if (data->m_result)
@@ -49,21 +57,23 @@ void ConnectWorker(uv_work_t* req)
 		g_CGAInterface->RegisterWorkingResultNotify(std::bind(&WorkingResultNotify, std::placeholders::_1));
 		g_CGAInterface->RegisterChatMsgNotify(std::bind(&ChatMsgNotify, std::placeholders::_1));
 		g_CGAInterface->RegisterDownloadMapNotify(std::bind(&DownloadMapNotify, std::placeholders::_1));
+		g_CGAInterface->RegisterConnectionStateNotify(std::bind(&ConnectionStateNotify, std::placeholders::_1));
 	}
 }
 
 void ConnectAfterWorker(uv_work_t* req, int status)
 {
-	Isolate* isolate = Isolate::GetCurrent();
+	auto isolate = Isolate::GetCurrent();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	auto data = (ConnectWorkerData *)req->data;
 
 	Local<Value> nullValue = Nan::Null();
-	Handle<Value> argv[1];
-	argv[0] = data->m_result ? nullValue : Nan::TypeError("Unknown exception.");
+	Local<Value> argv[1];
+	argv[0] = data->m_result ? nullValue : Nan::Error("Unknown exception.");
 
-	Local<Function>::New(isolate, data->m_callback)->Call(isolate->GetCurrentContext()->Global(), 1, argv);
+	Local<Function>::New(isolate, data->m_callback)->Call(context, Null(isolate), 1, argv);
 	data->m_callback.Reset();
 
 	delete data;
@@ -71,23 +81,25 @@ void ConnectAfterWorker(uv_work_t* req, int status)
 
 void AsyncConnect(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
-	Isolate* isolate = info.GetIsolate();
+	auto isolate = info.GetIsolate();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
-	if (info.Length() < 1) {
-		Nan::ThrowTypeError("Arg[0] must be a port number.");
+	if (info.Length() < 1 || !info[0]->IsInt32()) {
+		Nan::ThrowTypeError("Arg[0] must be integer.");
 		return;
 	}
 	if (info.Length() < 2 || !info[1]->IsFunction()) {
-		Nan::ThrowTypeError("Arg[1] must be a function.");
+		Nan::ThrowTypeError("Arg[1] must be function.");
 		return;
 	}
+
 	if (g_CGAInterface->IsConnected()) {
 		info.GetReturnValue().Set(true);
 		return;
 	}
 
-	auto port = (int)info[0]->IntegerValue();
+	auto port = info[0]->Int32Value(context).ToChecked();
 	auto callback = Local<Function>::Cast(info[1]);
 
 	auto data = new ConnectWorkerData(port);
@@ -100,17 +112,22 @@ void Connect(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
 	Isolate* isolate = info.GetIsolate();
 	HandleScope handle_scope(isolate);
+	Local<Context> context = isolate->GetCurrentContext();
 
 	if (info.Length() < 1) {
 		Nan::ThrowTypeError("Arg[0] must be a port number.");
 		return;
 	}
+
 	if (g_CGAInterface->IsConnected()) {
 		info.GetReturnValue().Set(true);
 		return;
 	}
-	auto port = (int)info[0]->IntegerValue();
+
+	auto port = info[0]->Int32Value(context).ToChecked();
+
 	auto bResult = g_CGAInterface->Connect(port);
+
 	if (bResult)
 	{
 		g_CGAInterface->RegisterBattleActionNotify(std::bind(&BattleActionNotify, std::placeholders::_1));
@@ -124,5 +141,6 @@ void Connect(const Nan::FunctionCallbackInfo<v8::Value>& info)
 		g_CGAInterface->RegisterChatMsgNotify(std::bind(&ChatMsgNotify, std::placeholders::_1));
 		g_CGAInterface->RegisterDownloadMapNotify(std::bind(&DownloadMapNotify, std::placeholders::_1));
 	}
+
 	info.GetReturnValue().Set(bResult);
 }

@@ -76,26 +76,27 @@ void NPCDialogNotify(CGA::cga_npc_dialog_t dlg)
 
 void NPCDialogAsyncCallBack(uv_async_t *handle)
 {
-	Isolate* isolate = Isolate::GetCurrent();
+	auto isolate = Isolate::GetCurrent();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	auto data = (NPCDialogNotifyData *)handle->data;
 
-	Handle<Value> argv[2];
+	Local<Value> argv[2];
 	Local<Value> nullValue = Nan::Null();
-	argv[0] = data->m_result ? nullValue : Nan::TypeError("Unknown exception.");
+	argv[0] = data->m_result ? nullValue : Nan::Error("Unknown exception.");
 	if (data->m_result)
 	{
 		Local<Object> obj = Object::New(isolate);
-		obj->Set(String::NewFromUtf8(isolate, "type"), Integer::New(isolate, data->m_dlg.type));
-		obj->Set(String::NewFromUtf8(isolate, "options"), Integer::New(isolate, data->m_dlg.options));
-		obj->Set(String::NewFromUtf8(isolate, "dialog_id"), Integer::New(isolate, data->m_dlg.dialog_id));
-		obj->Set(String::NewFromUtf8(isolate, "npc_id"), Integer::New(isolate, data->m_dlg.npc_id));
-		obj->Set(String::NewFromUtf8(isolate, "message"), Nan::New(data->m_dlg.message).ToLocalChecked());
+		obj->Set(context, String::NewFromUtf8(isolate, "type").ToLocalChecked(), Integer::New(isolate, data->m_dlg.type));
+		obj->Set(context, String::NewFromUtf8(isolate, "options").ToLocalChecked(), Integer::New(isolate, data->m_dlg.options));
+		obj->Set(context, String::NewFromUtf8(isolate, "dialog_id").ToLocalChecked(), Integer::New(isolate, data->m_dlg.dialog_id));
+		obj->Set(context, String::NewFromUtf8(isolate, "npc_id").ToLocalChecked(), Integer::New(isolate, data->m_dlg.npc_id));
+		obj->Set(context, String::NewFromUtf8(isolate, "message").ToLocalChecked(), Nan::New(data->m_dlg.message).ToLocalChecked());
 		argv[1] = obj;
 	}
 
-	Local<Function>::New(isolate, data->m_callback)->Call(isolate->GetCurrentContext()->Global(), (data->m_result) ? 2 : 1, argv);
+	Local<Function>::New(isolate, data->m_callback)->Call(context, Null(isolate), (data->m_result) ? 2 : 1, argv);
 
 	data->m_callback.Reset();
 
@@ -107,8 +108,9 @@ void NPCDialogAsyncCallBack(uv_async_t *handle)
 
 void NPCDialogTimerCallBack(uv_timer_t *handle)
 {
-	Isolate* isolate = Isolate::GetCurrent();
+	auto isolate = Isolate::GetCurrent();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	auto data = (NPCDialogNotifyData *)handle->data;
 
@@ -129,10 +131,10 @@ void NPCDialogTimerCallBack(uv_timer_t *handle)
 
 	if (asyncNotCalled)
 	{
-		Handle<Value> argv[1];
-		argv[0] = Nan::TypeError("Async callback timeout.");
+		Local<Value> argv[1];
+		argv[0] = Nan::Error("Async callback timeout.");
 
-		Local<Function>::New(isolate, data->m_callback)->Call(isolate->GetCurrentContext()->Global(), 1, argv);
+		Local<Function>::New(isolate, data->m_callback)->Call(context, Null(isolate), 1, argv);
 
 		data->m_callback.Reset();
 
@@ -145,18 +147,19 @@ void NPCDialogTimerCallBack(uv_timer_t *handle)
 
 void AsyncWaitNPCDialog(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
-	Isolate* isolate = info.GetIsolate();
+	auto isolate = info.GetIsolate();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	int timeout = 3000;
 	if (info.Length() < 1 || !info[0]->IsFunction()) {
-		Nan::ThrowTypeError("Arg[0] must be a function.");
+		Nan::ThrowTypeError("Arg[0] must be function.");
 		return;
 	}
 
-	if (info.Length() >= 2 && !info[1]->IsUndefined())
+	if (info.Length() >= 2 && info[1]->IsInt32())
 	{
-		timeout = (int)info[1]->IntegerValue();
+		timeout = info[1]->Int32Value(context).ToChecked();
 		if (timeout < 0)
 			timeout = 0;
 	}
@@ -196,21 +199,22 @@ void AsyncWaitNPCDialog(const Nan::FunctionCallbackInfo<v8::Value>& info)
 
 void ClickNPCDialog(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
-	Isolate* isolate = info.GetIsolate();
+	auto isolate = info.GetIsolate();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
-	if (info.Length() < 1) {
-		Nan::ThrowTypeError("Arg[0] must be option.");
+	if (info.Length() < 1 && !info[0]->IsInt32()) {
+		Nan::ThrowTypeError("Arg[0] must be integr.");
 		return;
 	}
 
-	if (info.Length() < 2) {
-		Nan::ThrowTypeError("Arg[1] must be index.");
+	if (info.Length() < 2 && !info[1]->IsInt32()) {
+		Nan::ThrowTypeError("Arg[1] must be intger.");
 		return;
 	}
 
-	int option = (int)info[0]->IntegerValue();
-	int index = (int)info[1]->IntegerValue();
+	int option = info[0]->Int32Value(context).ToChecked();
+	int index = info[1]->Int32Value(context).ToChecked();
 	bool bResult = false;
 
 	if (!g_CGAInterface->ClickNPCDialog(option, index, bResult))
@@ -224,37 +228,56 @@ void ClickNPCDialog(const Nan::FunctionCallbackInfo<v8::Value>& info)
 
 void SellNPCStore(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
-	Isolate* isolate = info.GetIsolate();
+	auto isolate = info.GetIsolate();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	if (info.Length() < 1 || !info[0]->IsArray()) {
-		Nan::ThrowTypeError("Arg[0] must be an array.");
+		Nan::ThrowTypeError("Arg[0] must be array.");
 		return;
 	}
 
-	Local<Object> objarr = Local<Object>::Cast(info[0]);
-	uint32_t length = objarr->Get(Nan::New("length").ToLocalChecked())->Uint32Value();
-
-	Local<Array> arr = Local<Array>::Cast(info[0]);
 	bool bResult = false;
 	CGA::cga_sell_items_t items;
+
+	Local<Array> arr = Local<Array>::Cast(info[0]);
+	auto length = arr->Length();
+
 	for (uint32_t i = 0; i < length; ++i)
 	{
-		Local<Object> obj = Local<Object>::Cast(arr->Get(i));
-		Local<Value> obj_itemid = obj->Get(Nan::New("itemid").ToLocalChecked());
-		Local<Value> obj_itempos = obj->Get(Nan::New("itempos").ToLocalChecked());
-		Local<Value> obj_count = obj->Get(Nan::New("count").ToLocalChecked());
-		int itemid = 0;
-		int itempos = 0;
-		int count = 0;
-		if(!obj_itemid->IsUndefined())
-			itemid = (int)obj_itemid->IntegerValue();
-		if (!obj_itempos->IsUndefined())
-			itempos = (int)obj_itempos->IntegerValue();
-		if (!obj_count->IsUndefined())
-			count = (int)obj_count->IntegerValue();
-		if (count > 0)
-			items.emplace_back(itemid, itempos, count);
+		auto element = arr->Get(context, i);
+		if (!element.IsEmpty() && element.ToLocalChecked()->IsObject())
+		{
+			int itemid = -1;
+			int itempos = -1;
+			int count = 0;
+
+			auto obj = Local<Object>::Cast(element.ToLocalChecked());
+
+			auto obj_itemid = obj->Get(context, String::NewFromUtf8(isolate, "itemid").ToLocalChecked());
+
+			if (!obj_itemid.IsEmpty() && obj_itemid.ToLocalChecked()->IsInt32())
+			{
+				itemid = obj_itemid.ToLocalChecked()->Int32Value(context).ToChecked();
+			}
+
+			auto obj_itempos = obj->Get(context, String::NewFromUtf8(isolate, "itempos").ToLocalChecked());
+
+			if (!obj_itempos.IsEmpty() && obj_itempos.ToLocalChecked()->IsInt32())
+			{
+				itempos = obj_itempos.ToLocalChecked()->Int32Value(context).ToChecked();
+			}
+
+			auto obj_count = obj->Get(context, String::NewFromUtf8(isolate, "count").ToLocalChecked());
+
+			if (!obj_count.IsEmpty() && obj_count.ToLocalChecked()->IsInt32())
+			{
+				count = obj_count.ToLocalChecked()->Int32Value(context).ToChecked();
+			}
+
+			if (count > 0)
+				items.emplace_back(itemid, itempos, count);
+		}
 	}
 
 	if (!g_CGAInterface->SellNPCStore(items, bResult))
@@ -268,33 +291,48 @@ void SellNPCStore(const Nan::FunctionCallbackInfo<v8::Value>& info)
 
 void BuyNPCStore(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
-	Isolate* isolate = info.GetIsolate();
+	auto isolate = info.GetIsolate();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	if (info.Length() < 1 || !info[0]->IsArray()) {
-		Nan::ThrowTypeError("Arg[0] must be an array.");
+		Nan::ThrowTypeError("Arg[0] must be array.");
 		return;
 	}
 
-	Local<Object> objarr = Local<Object>::Cast(info[0]);
-	uint32_t length = objarr->Get(Nan::New("length").ToLocalChecked())->Uint32Value();
-
-	Local<Array> arr = Local<Array>::Cast(info[0]);
 	bool bResult = false;
 	CGA::cga_buy_items_t items;
+
+	Local<Array> arr = Local<Array>::Cast(info[0]);
+	auto length = arr->Length();
+
 	for (uint32_t i = 0; i < length; ++i)
 	{
-		Local<Object> obj = Local<Object>::Cast(arr->Get(i));
-		Local<Value> obj_index = obj->Get(Nan::New("index").ToLocalChecked());
-		Local<Value> obj_count = obj->Get(Nan::New("count").ToLocalChecked());
-		int index = 0;
-		int count = 0;
-		if (!obj_index->IsUndefined())
-			index = (int)obj_index->IntegerValue();
-		if (!obj_count->IsUndefined())
-			count = (int)obj_count->IntegerValue();
-		if (count > 0)
-			items.emplace_back(index, count);
+		auto element = arr->Get(context, i);
+		if (!element.IsEmpty() && element.ToLocalChecked()->IsObject())
+		{
+			int index = -1;
+			int count = 0;
+
+			auto obj = Local<Object>::Cast(element.ToLocalChecked());
+
+			auto obj_index = obj->Get(context, String::NewFromUtf8(isolate, "index").ToLocalChecked());
+
+			if (!obj_index.IsEmpty() && obj_index.ToLocalChecked()->IsInt32())
+			{
+				index = obj_index.ToLocalChecked()->Int32Value(context).ToChecked();
+			}
+
+			auto obj_count = obj->Get(context, String::NewFromUtf8(isolate, "count").ToLocalChecked());
+
+			if (!obj_count.IsEmpty() && obj_count.ToLocalChecked()->IsInt32())
+			{
+				count = obj_count.ToLocalChecked()->Int32Value(context).ToChecked();
+			}
+
+			if (count > 0)
+				items.emplace_back(index, count);
+		}
 	}
 
 	if (!g_CGAInterface->BuyNPCStore(items, bResult))

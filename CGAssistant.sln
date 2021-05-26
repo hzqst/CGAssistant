@@ -10,8 +10,6 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CGAHook", "cgahook\cgahook.
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CGALib", "CGALib\CGALib.vcxproj", "{85FCBAC1-6F19-4754-B277-97E6386F6D51}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CGAssistant", "CGAssistant\CGAssistant.vcxproj", "{74C8E26A-259F-31D8-BBC6-5976B698BC79}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -34,18 +32,11 @@ Global
 		{85FCBAC1-6F19-4754-B277-97E6386F6D51}.Release|x64.Build.0 = Release|x64
 		{85FCBAC1-6F19-4754-B277-97E6386F6D51}.Release|x86.ActiveCfg = Release|Win32
 		{85FCBAC1-6F19-4754-B277-97E6386F6D51}.Release|x86.Build.0 = Release|Win32
-		{74C8E26A-259F-31D8-BBC6-5976B698BC79}.Debug|x64.ActiveCfg = Debug|Win32
-		{74C8E26A-259F-31D8-BBC6-5976B698BC79}.Debug|x86.ActiveCfg = Debug|Win32
-		{74C8E26A-259F-31D8-BBC6-5976B698BC79}.Debug|x86.Build.0 = Debug|Win32
-		{74C8E26A-259F-31D8-BBC6-5976B698BC79}.Release|x64.ActiveCfg = Release|Win32
-		{74C8E26A-259F-31D8-BBC6-5976B698BC79}.Release|x86.ActiveCfg = Release|Win32
-		{74C8E26A-259F-31D8-BBC6-5976B698BC79}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {0EECE82D-A01A-4BB1-BAC8-82E7A2E6B666}
-		Qt5Version = Qt5.7.0 32
+		SolutionGuid = {F9CBF3AE-0632-40B4-AC2C-33F38BF74A61}
 	EndGlobalSection
 EndGlobal

@@ -1,0 +1,146 @@
+name: MSBuild
+
+on: [push]
+
+env:
+  # Path to the solution file relative to the root of the project.
+  SOLUTION_FILE_PATH: .
+
+  # Configuration type to build.
+  # You can convert this to a build matrix if you need coverage of multiple configuration types.
+  # https://docs.github.com/actions/learn-github-actions/managing-complex-workflows#using-a-build-matrix
+  BUILD_CONFIGURATION: Release
+
+jobs:
+  build:
+    runs-on: windows-latest
+    if: github.repository == 'hzqst/CGAssistant'
+
+    steps:
+    - uses: actions/checkout@v2
+      
+    - name: Initialize dependencies
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      run: git submodule update --init --recursive
+
+    - name: Initialize qhttp
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      run: |
+        cd qhttp
+        mkdir 3rdparty
+        cd 3rdparty
+        git clone https://github.com/nodejs/http-parser.git
+      shell: cmd
+
+    - name: Initialize boost
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      run: |
+        cd boost
+        bootstrap.bat
+      shell: cmd
+
+    - name: Add MSBuild to PATH
+      uses: microsoft/setup-msbuild@v1
+      with:
+        vs-version: 
+
+    - name: Install Qt
+      uses: jurplel/install-qt-action@v2.13.0
+      with:
+        version: 5.15.0
+        host: windows
+        target: desktop
+        arch: win32_msvc2019
+        install-deps: # optional, default is true
+        modules: # optional
+        cached: false # ${{ steps.cache-qt.outputs.cache-hit }}
+        tools : 'tools_qtcreator,4.,qt.tools.qtcreator'
+
+    - name: Build boost
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      run: |
+        for /f "usebackq tokens=*" %%i in (`vswhere -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath`) do (
+          set InstallDir=%%i
+        )
+        if exist "%InstallDir%\Common7\Tools\vsdevcmd.bat" (  
+          "%InstallDir%\Common7\Tools\vsdevcmd.bat" -arch=x86 -winsdk=10.0.17763.0
+          cd boost
+          b2 --toolset=msvc-14.2 --with-date_time --with-thread --with-container --with-system --with-locale --with-serialization --with-regex --stagedir="stage" link=static variant=release stage
+          b2 --toolset=msvc-14.2 --with-date_time --with-thread --with-container --with-system --with-locale --with-serialization --with-regex --stagedir="stage" runtime-link=static link=static variant=release address-model=32 stage
+        )
+      shell: cmd
+
+    - name: Build CGAHook
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      run: MSBuild.exe CGAssistant.sln /t:CGAHook /p:Configuration=Release /p:Platform="x86" /p:PlatformToolset=v142
+
+    - name: Build qhttp
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      run: |
+        for /f "usebackq tokens=*" %%i in (`vswhere -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath`) do (
+          set InstallDir=%%i
+        )
+        if exist "%InstallDir%\Common7\Tools\vsdevcmd.bat" (  
+          "%InstallDir%\Common7\Tools\vsdevcmd.bat" -arch=x86 -winsdk=10.0.17763.0
+          cd qhttp
+          qmake qhttp.pro -spec win32-msvc "CONFIG+=32bit" "CONFIG+=qtquickcompiler" "INCLUDEPATH+=%GITHUB_WORKSPACE%\winsdk\Include\10.0.17763.0\ucrt" "LIBS += -L%GITHUB_WORKSPACE%\winsdk\Lib\10.0.17763.0\um\x86" "LIBS += -L%GITHUB_WORKSPACE%\winsdk\Lib\10.0.17763.0\ucrt\x86"
+          "${{env.IQTA_TOOLS}}\QtCreator\bin\jom.exe" -f MakeFile qmake_all
+          "${{env.IQTA_TOOLS}}\QtCreator\bin\jom.exe"
+          copy "%GITHUB_WORKSPACE%\qhttp\xbin\qhttp.dll" "%GITHUB_WORKSPACE%\build\"
+        )
+      shell: cmd
+
+    - name: Build CGAssistant
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      run: |
+        for /f "usebackq tokens=*" %%i in (`vswhere -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath`) do (
+          set InstallDir=%%i
+        )
+        if exist "%InstallDir%\Common7\Tools\vsdevcmd.bat" (          
+          "%InstallDir%\Common7\Tools\vsdevcmd.bat" -arch=x86 -winsdk=10.0.17763.0
+          cd CGAssistant
+          qmake CGAssistant.pro -spec win32-msvc "CONFIG+=32bit" "CONFIG+=qtquickcompiler" "INCLUDEPATH+=%GITHUB_WORKSPACE%\winsdk\Include\10.0.17763.0\ucrt" "LIBS += -L%GITHUB_WORKSPACE%\winsdk\Lib\10.0.17763.0\um\x86" "LIBS += -L%GITHUB_WORKSPACE%\winsdk\Lib\10.0.17763.0\ucrt\x86"
+          "${{env.IQTA_TOOLS}}\QtCreator\bin\jom.exe" -f MakeFile qmake_all
+          "${{env.IQTA_TOOLS}}\QtCreator\bin\jom.exe"
+          copy "%GITHUB_WORKSPACE%\CGassistant\release\CGassistant.exe" "%GITHUB_WORKSPACE%\build\"
+        )
+      shell: cmd
+
+    - name: Setup node environment
+      uses: actions/setup-node@v2
+      with:
+        node-version: '14.16'
+        architecture: 'x86'
+
+    - name: Install node-gyp
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      run: npm install -g node-gyp
+
+    - name: Build node-gyp
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      run: build-nodegyp.bat
+      shell: cmd
+
+    - name: Deploy qt and msvc redistribution
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      run: windeploy.bat
+      shell: cmd
+ 
+    - name: Checkout CGAssistantJS
+      uses: actions/checkout@v2 
+      with:
+        repository: 'hzqst/CGAssistantJS'
+        path: 'CGAssistantJS'
+        ssh-key: '${{ secrets.CGASSISTANTJS_PK }}'
+
+    - name: Upload binaries for CGAssistantJS
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      run: |
+        xcopy "build" "CGAssistantJS" /y /e
+        cd CGAssistantJS
+        git add -A
+        git config --global user.name "Git Actions (Bot)"
+        git config --global user.email "113660872@qq.com"
+        git commit -m "Update binaries by %GITHUB_ACTOR% from commit SHA %GITHUB_SHA% "
+        git push
+      shell: cmd

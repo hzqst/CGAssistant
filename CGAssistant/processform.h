@@ -26,8 +26,7 @@ private slots:
 
 public slots:
     void OnCloseWindow();
-    void OnNotifyAttachProcessOk(quint32 ProcessId, quint32 port, quint32 hwnd);
-    void OnNotifyAttachProcessFailed(quint32 ProcessId, int errorCode, QString errorString);
+    void OnNotifyAttachProcessFailed(quint32 ProcessId, quint32 ThreadId, int errorCode, QString errorString);
     void OnNotifyQueryProcess(CProcessItemList list);
     void OnNotifyChangeWindow(Qt::WindowStates st);
 signals:
@@ -36,7 +35,6 @@ private:
     CProcessWorker *m_worker;
     Ui::ProcessForm *ui;
     CProcessTableModel *m_model;
-    HWND m_hwnd;
     bool m_sync;
 };
 

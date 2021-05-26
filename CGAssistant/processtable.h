@@ -14,7 +14,7 @@ class CProcessTableModel : public QAbstractTableModel
     Q_OBJECT
 public:
     //impl
-    explicit CProcessTableModel(QObject *parent = Q_NULLPTR);
+    explicit CProcessTableModel(QObject *parent = Q_NULLPTR, CProcessWorker *work = NULL);
     int rowCount(const QModelIndex &parent = QModelIndex()) const;
     int columnCount(const QModelIndex &parent = QModelIndex()) const;
     QModelIndex index(int row, int column, const QModelIndex &parent = QModelIndex()) const;
@@ -31,7 +31,7 @@ private:
     CProcessItemList m_List;
     QStringList m_HeaderString;
 public:
-    quint32 m_AttachHwnd;
+    CProcessWorker *m_worker;
 };
 
 #endif // PROCESSTABLE_H

@@ -1,7 +1,7 @@
 /*********************************************************************
  * NAN - Native Abstractions for Node.js
  *
- * Copyright (c) 2017 NAN contributors
+ * Copyright (c) 2018 NAN contributors
  *
  * MIT License <https://github.com/nodejs/nan/blob/master/LICENSE.md>
  ********************************************************************/
@@ -41,60 +41,12 @@ class MaybeLocal {
 
   template<typename S>
   inline v8::Local<S> FromMaybe(v8::Local<S> default_value) const {
-    return IsEmpty() ? default_value : val_;
+    return IsEmpty() ? default_value : v8::Local<S>(val_);
   }
 
  private:
   v8::Local<T> val_;
 };
-
-template<typename T>
-class Maybe {
- public:
-  inline bool IsNothing() const { return !has_value_; }
-  inline bool IsJust() const { return has_value_; }
-
-  inline T FromJust() const {
-#if defined(V8_ENABLE_CHECKS)
-    assert(IsJust() && "FromJust is Nothing");
-#endif  // V8_ENABLE_CHECKS
-    return value_;
-  }
-
-  inline T FromMaybe(const T& default_value) const {
-    return has_value_ ? value_ : default_value;
-  }
-
-  inline bool operator==(const Maybe &other) const {
-    return (IsJust() == other.IsJust()) &&
-        (!IsJust() || FromJust() == other.FromJust());
-  }
-
-  inline bool operator!=(const Maybe &other) const {
-    return !operator==(other);
-  }
-
- private:
-  Maybe() : has_value_(false) {}
-  explicit Maybe(const T& t) : has_value_(true), value_(t) {}
-  bool has_value_;
-  T value_;
-
-  template<typename U>
-  friend Maybe<U> Nothing();
-  template<typename U>
-  friend Maybe<U> Just(const U& u);
-};
-
-template<typename T>
-inline Maybe<T> Nothing() {
-  return Maybe<T>();
-}
-
-template<typename T>
-inline Maybe<T> Just(const T& t) {
-  return Maybe<T>(t);
-}
 
 inline
 MaybeLocal<v8::String> ToDetailString(v8::Handle<v8::Value> val) {
@@ -148,7 +100,18 @@ inline Maybe<bool> Set(
   return Just<bool>(obj->Set(index, value));
 }
 
-inline Maybe<bool> ForceSet(
+#include "nan_define_own_property_helper.h"  // NOLINT(build/include)
+
+inline Maybe<bool> DefineOwnProperty(
+    v8::Handle<v8::Object> obj
+  , v8::Handle<v8::String> key
+  , v8::Handle<v8::Value> value
+  , v8::PropertyAttribute attribs = v8::None) {
+  v8::PropertyAttribute current = obj->GetPropertyAttributes(key);
+  return imp::DefineOwnPropertyHelper(current, obj, key, value, attribs);
+}
+
+NAN_DEPRECATED inline Maybe<bool> ForceSet(
     v8::Handle<v8::Object> obj
   , v8::Handle<v8::Value> key
   , v8::Handle<v8::Value> value

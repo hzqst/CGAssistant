@@ -10,7 +10,7 @@
 		"../rest_rpc/spdlog/include/",
 		"../rest_rpc/iguana/",
 		"../rest_rpc/iguana/third_party/msgpack/include/",
-		"../boost_1_63_0/"
+		"../boost/"
       ],
 	  
 	  "conditions": [
@@ -41,8 +41,9 @@
                                         "LinkTimeCodeGeneration": 1,
                                         "LinkIncremental": 1,
                                         "AdditionalLibraryDirectories": [
+                                            "../../x64/Debug/",
 											"../../Debug/",
-                                            "../../boost_1_63_0/stage/lib"
+                                            "../../boost/stage/lib"
                                         ]
                                     }
                                 }
@@ -63,8 +64,9 @@
                                     "VCLinkerTool": {
                                         "LinkTimeCodeGeneration": 1,
                                         "AdditionalLibraryDirectories": [
+                                            "../../x64/Release/",
                                             "../../Release/",
-											"../../boost_1_63_0/stage/lib"
+											"../../boost/stage/lib"
                                         ]
                                     }
                                 }

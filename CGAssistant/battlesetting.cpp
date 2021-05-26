@@ -141,7 +141,7 @@ QVariant CBattleSettingModel::data(const QModelIndex &index, int role) const
             case 2:
             {
                 QString str;
-                item->GetPlayerActionName(str);
+                item->GetPlayerActionName(str, false);
                 return str;
             }
             case 3:
@@ -153,7 +153,7 @@ QVariant CBattleSettingModel::data(const QModelIndex &index, int role) const
             case 4:
             {
                 QString str;
-                item->GetPetActionName(str);
+                item->GetPetActionName(str, false);
                 return str;
             }
             case 5:

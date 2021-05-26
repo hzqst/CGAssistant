@@ -4,6 +4,16 @@
 #include <QMessageBox>
 #include <QTextEdit>
 #include <QTimer>
+#include <QDragEnterEvent>
+#include <QDropEvent>
+#include <QMimeData>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <intrin.h>
+
+
+#include "MINT.h"
+
 #include "../CGALib/gameinterface.h"
 
 extern CGA::CGAInterface *g_CGAInterface;
@@ -21,22 +31,57 @@ ScriptForm::ScriptForm(QWidget *parent) :
 
     m_bDebugging = false;
     m_bListening = false;
+    m_bNavigating = false;
+    m_bPathBegin = false;
+    m_bSuspending = false;
     m_port = 0;
 
-    m_node = new QProcess();
-    QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
-    env.insert("PATH", QDir::currentPath());
-    m_node->setProcessEnvironment(env);
+    m_node = new QProcess(this);
 
     connect(m_node, &QProcess::started, this, &ScriptForm::OnNodeStarted);
     connect(m_node, &QProcess::errorOccurred, this, &ScriptForm::OnNodeStartError);
-    connect(m_node, SIGNAL(readyReadStandardError()), this, SLOT(OnNodeReadyReadStdErr()));
-    connect(m_node, SIGNAL(readyReadStandardOutput()), this, SLOT(OnNodeReadyReadStdOut()));
+    connect(m_node, SIGNAL(readyRead()), this, SLOT(OnNodeReadyRead()));
     connect(m_node, SIGNAL(finished(int, QProcess::ExitStatus)), this, SLOT(OnNodeFinish(int, QProcess::ExitStatus)));
 
     QTimer *timer = new QTimer(this);
     connect(timer, SIGNAL(timeout()), this, SLOT(OnAutoRestart()));
     timer->start(1000);
+}
+
+void ScriptForm::dragEnterEvent(QDragEnterEvent *event)
+{
+    if (event->mimeData()->hasFormat("text/uri-list")) {
+        event->acceptProposedAction();
+    }
+}
+
+// 拖拽释放处理函数
+void ScriptForm::dropEvent(QDropEvent *event)
+{
+    QList<QUrl> urls = event->mimeData()->urls();
+    if (urls.isEmpty()) {
+        return;
+    }
+
+    QString filePath = urls.first().toLocalFile();
+    if (filePath.isEmpty()) {
+        return;
+    }
+
+    if(!ui->pushButton_term->isEnabled()){
+        QFile file(filePath);
+        if(file.exists())
+        {
+            m_scriptPath = filePath;
+            ui->label_status->setText(tr("Ready to launch"));
+            ui->pushButton_run->setEnabled(true);
+            ui->pushButton_debug->setEnabled(true);
+            ui->pushButton_term->setEnabled(false);
+            ui->lineEdit_scriptPath->setText(filePath);
+        } else {
+            QMessageBox::critical(this, tr("Error"), tr("Failed to load script file.\nerror: %1").arg(file.errorString()), QMessageBox::Ok, 0);
+        }
+    }
 }
 
 void ScriptForm::OnNodeStarted()
@@ -46,7 +91,7 @@ void ScriptForm::OnNodeStarted()
     } else {
         ui->label_status->setText(tr("Running with pid %1...").arg(m_node->processId()));
     }
-    ui->pushButton_kill->setEnabled(true);
+    ui->pushButton_term->setEnabled(true);
 }
 
 void ScriptForm::OnNodeStartError(QProcess::ProcessError error)
@@ -54,84 +99,97 @@ void ScriptForm::OnNodeStartError(QProcess::ProcessError error)
     ui->label_status->setText(tr("Failed to start node, error: %1").arg(m_node->errorString()));
     ui->pushButton_run->setEnabled(true);
     ui->pushButton_debug->setEnabled(true);
-    ui->pushButton_kill->setEnabled(false);
+    ui->pushButton_term->setEnabled(false);
 }
 
-void ScriptForm::OnNodeReadyReadStdOut()
+void ScriptForm::OnNodeReadyRead()
 {
     if(!m_bListening)
         return;
 
     if(!m_bDebugging)
     {
-        QString data = m_node->readAllStandardOutput();
+        QString data = m_node->readAll();
         m_output->moveCursor(QTextCursor::End);
         m_output->insertPlainText(data);
-    }
-    else {
-        QByteArray data = m_node->readAllStandardOutput();
-        QLatin1String pattern("Debugger listening on ws://");
-        qDebug(data.data());
-        int findStart = data.indexOf(pattern);
-        if(findStart != -1)
+
+        if(m_bNavigating)
         {
-            findStart += pattern.size();
-            int findEnd = data.indexOf(QLatin1String("\r\n"), findStart);
-            QString url = QLatin1String("chrome-devtools://devtools/bundled/js_app.html?experiments=true&v8only=true&ws=");
-            if(findEnd == -1)
-                url += data.mid(findStart);
+            if(!m_bPathBegin)
+            {
+                QLatin1String patternbegin("[PATH BEGIN]");
+                int findStart = data.indexOf(patternbegin);
+                if(findStart != -1){
+                    findStart += patternbegin.size();
+                    m_bPathBegin = true;
+                    QLatin1String patternend("[PATH END]");
+                    int findEnd = data.indexOf(patternend, findStart);
+                    if(findEnd != -1)
+                    {
+                        m_PathString += data.mid(findStart, findEnd-findStart);
+                        m_bPathBegin = false;
+                        ReportNavigatorPath(m_PathString);
+                    }
+                    else
+                    {
+                        m_PathString += data.mid(findStart);
+                    }
+                }
+            }
             else
-                url += data.mid(findStart, findEnd-findStart);
-
-            m_output->insertPlainText(QString("Visit %1").arg(url));
-
-            m_bListening = false;
-        }
-    }
-}
-
-void ScriptForm::OnNodeReadyReadStdErr()
-{
-    if(!m_bListening)
-        return;
-    if(m_bDebugging)
-    {
-        QByteArray data = m_node->readAllStandardError();
-        QLatin1String pattern("Debugger listening on ws://");
-
-        qDebug(data.data());
-        int findStart = data.indexOf(pattern);
-        if(findStart != -1)
-        {
-            findStart += pattern.size();
-            int findEnd = data.indexOf(QLatin1String("\r\n"), findStart);
-            QString url = QLatin1String("chrome-devtools://devtools/bundled/js_app.html?experiments=true&v8only=true&ws=");
-            if(findEnd == -1)
-                url += data.mid(findStart);
-            else
-                url += data.mid(findStart, findEnd-findStart);
-
-            m_output->insertPlainText(QString("Visit %1").arg(url));
-
-            m_bListening = false;
+            {
+                QLatin1String patternend("[PATH END]");
+                int findEnd = data.indexOf(patternend);
+                if(findEnd != -1)
+                {
+                    m_PathString += data.mid(0, findEnd);
+                    m_bPathBegin = false;
+                    ReportNavigatorPath(m_PathString);
+                }
+                else
+                {
+                    m_PathString += data;
+                }
+            }
         }
     }
     else
     {
-        QString data = m_node->readAllStandardError();
-        m_output->moveCursor(QTextCursor::End);
-        m_output->insertPlainText(data);
+        QByteArray data = m_node->readAll();
+        QLatin1String pattern("Debugger listening on ws://");
+
+        int findStart = data.indexOf(pattern);
+        if(findStart != -1)
+        {
+            m_output->moveCursor(QTextCursor::End);
+            m_output->insertPlainText(data);
+
+            m_output->moveCursor(QTextCursor::End);
+            m_output->insertPlainText(tr("\nCheck \"chrome://inspect\" in chrome to debug the node process."));
+
+            m_bListening = false;
+        }
     }
 }
 
 void ScriptForm::OnNodeFinish(int exitCode, QProcess::ExitStatus exitStatus)
 {
+    if(m_bNavigating)
+    {
+        ReportNavigatorFinish(exitCode);
+    }
+
+    m_bListening = false;
+    m_bNavigating = false;
+    m_bPathBegin = false;
+
     ui->label_status->setText(tr("Node finished with exitCode %1").arg(exitCode));
 
     ui->pushButton_load->setEnabled(true);
     ui->pushButton_run->setEnabled(true);
     ui->pushButton_debug->setEnabled(true);
-    ui->pushButton_kill->setEnabled(false);
+    ui->pushButton_term->setEnabled(false);
+    ui->pushButton_suspend->setEnabled(false);
 
     //restore everything...
     g_CGAInterface->FixMapWarpStuck(2);
@@ -144,8 +202,6 @@ void ScriptForm::OnCloseWindow()
         m_node->kill();
         m_node->waitForFinished();
     }
-    m_node->deleteLater();
-    m_node = NULL;
 }
 
 void ScriptForm::OnAutoRestart()
@@ -162,7 +218,11 @@ void ScriptForm::OnAutoRestart()
                 {
                     if(m_node->state() == QProcess::Running)
                     {
-                        on_pushButton_kill_clicked();
+                        on_pushButton_term_clicked();
+                        return;
+                    }
+                    else
+                    {
                         return;
                     }
                 }
@@ -170,7 +230,11 @@ void ScriptForm::OnAutoRestart()
                 {
                     if(m_node->state() == QProcess::Running)
                     {
-                        on_pushButton_kill_clicked();
+                        on_pushButton_term_clicked();
+                        return;
+                    }
+                    else
+                    {
                         return;
                     }
                 }
@@ -188,9 +252,9 @@ void ScriptForm::OnAutoRestart()
         }
         else
         {
-            if(m_node->state() == QProcess::Running)
+            if(/*ui->checkBox_autoterm->isChecked() && */m_node->state() == QProcess::Running)
             {
-                on_pushButton_kill_clicked();
+                on_pushButton_term_clicked();
                 return;
             }
         }
@@ -219,7 +283,7 @@ void ScriptForm::on_pushButton_load_clicked()
             ui->label_status->setText(tr("Ready to launch"));
             ui->pushButton_run->setEnabled(true);
             ui->pushButton_debug->setEnabled(true);
-            ui->pushButton_kill->setEnabled(false);
+            ui->pushButton_term->setEnabled(false);
             ui->lineEdit_scriptPath->setText(filePath);
         } else {
             QMessageBox::critical(this, tr("Error"), tr("Failed to load script file.\nerror: %1").arg(file.errorString()), QMessageBox::Ok, 0);
@@ -229,16 +293,21 @@ void ScriptForm::on_pushButton_load_clicked()
 
 void ScriptForm::on_pushButton_run_clicked()
 {
-    if(ui->pushButton_run->isEnabled() && m_node->state() != QProcess::Running){
+    int ingame = 0;
+    if(m_port && ui->pushButton_run->isEnabled() && m_node->state() != QProcess::Running && g_CGAInterface->IsInGame(ingame) && ingame){
         ui->pushButton_run->setEnabled(false);
         ui->pushButton_debug->setEnabled(false);
-        ui->pushButton_kill->setEnabled(false);
+        ui->pushButton_term->setEnabled(false);
         ui->pushButton_load->setEnabled(false);
+        ui->pushButton_suspend->setEnabled(true);
+        ui->pushButton_suspend->setText(tr("Suspend"));
 
         ui->label_status->setText(tr("Starting node..."));
 
         m_bDebugging = false;
         m_bListening = true;
+        m_bNavigating = false;
+        m_bPathBegin = false;
 
         m_output->clear();
 
@@ -246,44 +315,123 @@ void ScriptForm::on_pushButton_run_clicked()
         QFileInfo fileInfo(m_scriptPath);
 
         args.append(fileInfo.fileName());
-        if(m_port != 0)
-            args.append(QString::number(m_port));
+        args.append(QString::number(m_port));
+
+        QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
+
+        env.insert("CGA_GAME_PORT", qgetenv("CGA_GAME_PORT"));
+        env.insert("CGA_GUI_PORT", qgetenv("CGA_GUI_PORT"));
+        env.insert("CGA_GUI_PID", QString("%1").arg(GetCurrentProcessId()));
+        env.insert("NODE_SKIP_PLATFORM_CHECK", "1");
+        //env.insert("PATH", qgetenv("PATH")+";"+QDir::currentPath());
+        m_node->setProcessEnvironment(env);
 
         m_node->setWorkingDirectory(fileInfo.dir().absolutePath());
+        m_node->setProcessChannelMode(QProcess::ProcessChannelMode::MergedChannels);
         m_node->start("node.exe", args);
+    }
+}
+
+void ScriptForm::StopNavigatorScript()
+{
+    if(m_bNavigating)
+    {
+        on_pushButton_term_clicked();
+    }
+}
+
+void ScriptForm::RunNavigatorScript(int x, int y, int enter, QString *result)
+{
+    if(!m_bNavigating && !m_bListening && !m_bDebugging && m_node->state() != QProcess::Running){
+        QString filePath = QCoreApplication::applicationDirPath() + "/navigator.js";
+        m_scriptPath = filePath;
+        ui->label_status->setText(tr("Ready to launch"));
+        ui->lineEdit_scriptPath->setText(filePath);
+
+        ui->pushButton_run->setEnabled(false);
+        ui->pushButton_debug->setEnabled(false);
+        ui->pushButton_term->setEnabled(false);
+        ui->pushButton_load->setEnabled(false);
+        ui->pushButton_suspend->setEnabled(false);
+        ui->checkBox_autorestart->setChecked(false);
+
+        ui->label_status->setText(tr("Starting node..."));
+
+        m_bDebugging = false;
+        m_bListening = true;
+        m_bNavigating = true;
+        m_bPathBegin = false;
+        m_PathString = QString();
+
+        m_output->clear();
+
+        QStringList args;
+        QFileInfo fileInfo(m_scriptPath);
+
+        args.append(fileInfo.fileName());
+        args.append(QString::number(m_port));
+        args.append(QString::number(x));
+        args.append(QString::number(y));
+        args.append(QString::number(enter));
+
+        QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
+
+        env.insert("CGA_GAME_PORT", qgetenv("CGA_GAME_PORT"));
+        env.insert("CGA_GUI_PORT", qgetenv("CGA_GUI_PORT"));
+        env.insert("CGA_GUI_PID", QString("%1").arg(GetCurrentProcessId()));
+        env.insert("NODE_SKIP_PLATFORM_CHECK", "1");
+        m_node->setProcessEnvironment(env);
+
+        m_node->setWorkingDirectory(fileInfo.dir().absolutePath());
+        m_node->setProcessChannelMode(QProcess::ProcessChannelMode::MergedChannels);
+        m_node->start("node.exe", args);
+    } else {
+        *result = tr("Navigation is unavailable while running other scripts.");
     }
 }
 
 void ScriptForm::on_pushButton_debug_clicked()
 {
-    if(ui->pushButton_debug->isEnabled() && m_node->state() != QProcess::Running){
+    if(m_port && ui->pushButton_debug->isEnabled() && m_node->state() != QProcess::Running){
         ui->pushButton_run->setEnabled(false);
         ui->pushButton_debug->setEnabled(false);
-        ui->pushButton_kill->setEnabled(false);
+        ui->pushButton_term->setEnabled(false);
         ui->pushButton_load->setEnabled(false);
+        ui->pushButton_suspend->setEnabled(false);
 
         ui->label_status->setText(tr("Starting node in debug mode..."));
 
         m_bDebugging = true;
         m_bListening = true;
+        m_bNavigating = false;
+        m_bPathBegin = false;
 
         QStringList args;
         QFileInfo fileInfo(m_scriptPath);
 
         args.append("--inspect");
         args.append(fileInfo.fileName());
-        if(m_port != 0)
-            args.append(QString::number(m_port));
+        args.append(QString::number(m_port));
 
-        m_node->setWorkingDirectory(fileInfo.dir().absolutePath());
+        QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
+
+        env.insert("CGA_GAME_PORT", qgetenv("CGA_GAME_PORT"));
+        env.insert("CGA_GUI_PORT", qgetenv("CGA_GUI_PORT"));
+        env.insert("CGA_GUI_PID", QString("%1").arg(GetCurrentProcessId()));
+        env.insert("NODE_SKIP_PLATFORM_CHECK", "1");
+        m_node->setProcessEnvironment(env);
+
+        m_node->setWorkingDirectory(fileInfo.dir().absolutePath());        
+        m_node->setProcessChannelMode(QProcess::ProcessChannelMode::MergedChannels);
         m_node->start("node.exe", args);
     }
 }
 
-void ScriptForm::on_pushButton_kill_clicked()
+void ScriptForm::on_pushButton_term_clicked()
 {
-    if(ui->pushButton_kill->isEnabled() && m_node->state() == QProcess::Running){
-        ui->pushButton_kill->setEnabled(false);
+    if(ui->pushButton_term->isEnabled() && m_node->state() == QProcess::Running){
+
+        ui->pushButton_term->setEnabled(false);
 
         m_node->kill();
 
@@ -292,9 +440,12 @@ void ScriptForm::on_pushButton_kill_clicked()
     }
 }
 
-void ScriptForm::OnNotifyAttachProcessOk(quint32 ProcessId, quint32 port, quint32 hWnd)
+void ScriptForm::OnNotifyAttachProcessOk(quint32 ProcessId, quint32 ThreadId, quint32 port, quint32 hWnd)
 {
     m_port = port;
+
+    QByteArray qportString = QString("%1").arg(port).toLocal8Bit();
+    qputenv("CGA_GAME_PORT", qportString);
 }
 
 void ScriptForm::OnNotifyFillLoadScript(QString path, bool autorestart, bool injuryprot, bool soulprot)
@@ -308,7 +459,7 @@ void ScriptForm::OnNotifyFillLoadScript(QString path, bool autorestart, bool inj
             ui->label_status->setText(tr("Ready to launch"));
             ui->pushButton_run->setEnabled(true);
             ui->pushButton_debug->setEnabled(true);
-            ui->pushButton_kill->setEnabled(false);
+            ui->pushButton_term->setEnabled(false);
             ui->lineEdit_scriptPath->setText(path);
             on_pushButton_run_clicked();
         }
@@ -320,4 +471,117 @@ void ScriptForm::OnNotifyFillLoadScript(QString path, bool autorestart, bool inj
         ui->checkBox_injuryProt->setChecked(true);
     if(soulprot)
         ui->checkBox_soulProt->setChecked(true);
+}
+
+void ScriptForm::on_pushButton_suspend_clicked()
+{
+    if(ui->pushButton_suspend->isEnabled() && m_node->state() == QProcess::Running){
+
+        ui->pushButton_suspend->setEnabled(false);
+
+        bool bSuccess = false;
+
+        if(!m_bSuspending)
+        {
+            HANDLE ProcessHandle = OpenProcess(PROCESS_SUSPEND_RESUME, FALSE, (DWORD)m_node->processId());
+            if(ProcessHandle)
+            {
+                if(STATUS_SUCCESS == NtSuspendProcess(ProcessHandle))
+                {
+                    m_bSuspending = true;
+                    ui->pushButton_suspend->setText(tr("Resume"));
+                    ui->pushButton_suspend->setEnabled(true);
+                    bSuccess = true;
+
+                    g_CGAInterface->FixMapWarpStuck(2);
+                }
+                CloseHandle(ProcessHandle);
+            }
+        }
+        else
+        {
+            HANDLE ProcessHandle = OpenProcess(PROCESS_SUSPEND_RESUME, FALSE, (DWORD)m_node->processId());
+            if(ProcessHandle)
+            {
+                if(STATUS_SUCCESS == NtResumeProcess(ProcessHandle))
+                {
+                    m_bSuspending = false;
+                    ui->pushButton_suspend->setText(tr("Suspend"));
+                    ui->pushButton_suspend->setEnabled(true);
+                    bSuccess = true;
+                }
+                CloseHandle(ProcessHandle);
+            }
+        }
+
+        if(!bSuccess)
+        {
+            ui->pushButton_suspend->setEnabled(true);
+        }
+    }
+}
+
+void ScriptForm::OnHttpLoadScript(QString query, QByteArray postdata, QJsonDocument* doc)
+{
+    QJsonObject obj;
+
+    QJsonParseError err;
+    auto newdoc = QJsonDocument::fromJson(postdata, &err);
+    if(err.error == QJsonParseError::NoError && newdoc.isObject())
+    {
+       obj.insert("errcode", 0);
+       auto newobj = newdoc.object();
+       if(newobj.contains("path")){
+           auto qpath = newobj.take("path");
+           if(qpath.isString()){
+               auto path = qpath.toString();
+               if(!path.isEmpty())
+               {
+                   QFile file(path);
+                   if(file.exists())
+                   {
+                       m_scriptPath = path;
+                       ui->lineEdit_scriptPath->setText(path);
+                   }
+                   else
+                   {
+                       obj.insert("errcode", 3);
+                       obj.insert("message", tr("script file not exists."));
+                       goto end;
+                   }
+               }
+               else
+               {
+                   obj.insert("errcode", 4);
+                   obj.insert("message", tr("script path cannot be empty."));
+                   goto end;
+               }
+           }
+       }
+       if(newobj.contains("autorestart")){
+           auto qautorestart = newobj.take("autorestart");
+           if(qautorestart.isBool()){
+                ui->checkBox_autorestart->setChecked(qautorestart.toBool());
+           }
+       }
+       if(newobj.contains("injuryprot")){
+           auto qinjuryprot = newobj.take("injuryprot");
+           if(qinjuryprot.isBool()){
+                ui->checkBox_injuryProt->setChecked(qinjuryprot.toBool());
+           }
+       }
+       if(newobj.contains("soulprot")){
+           auto qsoulprot = newobj.take("soulprot");
+           if(qsoulprot.isBool()){
+                ui->checkBox_soulProt->setChecked(qsoulprot.toBool());
+           }
+       }
+    }
+    else
+    {
+       obj.insert("errcode", 1);
+       obj.insert("message", tr("json parse error"));
+    }
+end:
+   doc->setObject(obj);
 }

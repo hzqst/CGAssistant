@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>727</width>
-    <height>486</height>
+    <height>544</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -406,10 +406,6 @@
           </property>
          </widget>
         </item>
-       </layout>
-      </item>
-      <item>
-       <layout class="QHBoxLayout" name="horizontalLayout_6">
         <item>
          <widget class="QLabel" name="label_mp">
           <property name="sizePolicy">
@@ -457,7 +453,7 @@
        </layout>
       </item>
       <item>
-       <layout class="QHBoxLayout" name="horizontalLayout_7">
+       <layout class="QHBoxLayout" name="horizontalLayout_6">
         <item>
          <widget class="QLabel" name="label_xp">
           <property name="sizePolicy">
@@ -505,18 +501,18 @@
        </layout>
       </item>
       <item>
-       <layout class="QHBoxLayout" name="horizontalLayout_8">
+       <layout class="QHBoxLayout" name="horizontalLayout_7">
         <item>
          <widget class="QLabel" name="label_xp_remain">
           <property name="sizePolicy">
-           <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+           <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
           </property>
           <property name="minimumSize">
            <size>
-            <width>96</width>
+            <width>0</width>
             <height>0</height>
            </size>
           </property>
@@ -553,11 +549,39 @@
        </layout>
       </item>
       <item>
-       <layout class="QHBoxLayout" name="horizontalLayout_9">
+       <layout class="QHBoxLayout" name="horizontalLayout_9" stretch="0,0,0">
         <item>
-         <widget class="QCheckBox" name="checkBox_freqMove">
+         <widget class="QCheckBox" name="checkBox_useFood">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
+          <property name="toolTip">
+           <string>Automatically use food for player</string>
+          </property>
           <property name="text">
-           <string>Frequence Move</string>
+           <string>Use Food</string>
+          </property>
+          <property name="checkable">
+           <bool>true</bool>
+          </property>
+          <property name="tristate">
+           <bool>false</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QCheckBox" name="checkBox_petFood">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
+          <property name="toolTip">
+           <string>Automatically use food for pets</string>
+          </property>
+          <property name="text">
+           <string>Pet Food</string>
+          </property>
+          <property name="checkable">
+           <bool>true</bool>
           </property>
           <property name="tristate">
            <bool>false</bool>
@@ -566,6 +590,18 @@
         </item>
         <item alignment="Qt::AlignRight">
          <widget class="QCheckBox" name="checkBox_autoSupply">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="toolTip">
+           <string>Auto resupply when talking to nurse</string>
+          </property>
+          <property name="layoutDirection">
+           <enum>Qt::LeftToRight</enum>
+          </property>
           <property name="text">
            <string>Auto Supply</string>
           </property>
@@ -577,14 +613,179 @@
        </layout>
       </item>
       <item>
-       <layout class="QHBoxLayout" name="horizontalLayout_14">
+       <layout class="QHBoxLayout" name="horizontalLayout_14" stretch="0,0,0">
+        <item>
+         <widget class="QCheckBox" name="checkBox_useMed">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
+          <property name="toolTip">
+           <string>Automatically use medicine for player</string>
+          </property>
+          <property name="text">
+           <string>Use Med</string>
+          </property>
+          <property name="checkable">
+           <bool>true</bool>
+          </property>
+          <property name="tristate">
+           <bool>false</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QCheckBox" name="checkBox_petMed">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
+          <property name="toolTip">
+           <string>Automatically use medicine for pets</string>
+          </property>
+          <property name="text">
+           <string>Pet Med</string>
+          </property>
+          <property name="checkable">
+           <bool>true</bool>
+          </property>
+          <property name="tristate">
+           <bool>false</bool>
+          </property>
+         </widget>
+        </item>
         <item>
          <widget class="QCheckBox" name="checkBox_SwitchAnim">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="toolTip">
+           <string>Disable animation for scene switching</string>
+          </property>
+          <property name="layoutDirection">
+           <enum>Qt::LeftToRight</enum>
+          </property>
           <property name="text">
            <string>SwitchAnim off</string>
           </property>
           <property name="tristate">
            <bool>false</bool>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_15">
+        <item>
+         <widget class="QLabel" name="label_useFoodAt">
+          <property name="text">
+           <string>Use Food At</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QComboBox" name="comboBox_useFoodAt">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="toolTip">
+           <string>Use food for player under this condition</string>
+          </property>
+          <property name="editable">
+           <bool>true</bool>
+          </property>
+          <property name="currentText">
+           <string/>
+          </property>
+          <property name="currentIndex">
+           <number>-1</number>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="label_petFoodAt">
+          <property name="text">
+           <string>Pet Food At</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QComboBox" name="comboBox_petFoodAt">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="toolTip">
+           <string>Use food for pets under this condition</string>
+          </property>
+          <property name="editable">
+           <bool>true</bool>
+          </property>
+          <property name="currentText">
+           <string/>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_16">
+        <item>
+         <widget class="QLabel" name="label_useMedAt">
+          <property name="text">
+           <string>Use Med At</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QComboBox" name="comboBox_useMedAt">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="toolTip">
+           <string>Use medicine for player under this condition</string>
+          </property>
+          <property name="editable">
+           <bool>true</bool>
+          </property>
+          <property name="currentText">
+           <string/>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="label_petMedAt">
+          <property name="text">
+           <string>Pet Med At</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QComboBox" name="comboBox_petMedAt">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="toolTip">
+           <string>Use medicine for pets under this condition</string>
+          </property>
+          <property name="editable">
+           <bool>true</bool>
+          </property>
+          <property name="currentText">
+           <string/>
           </property>
          </widget>
         </item>
@@ -616,8 +817,11 @@
         </item>
         <item>
          <widget class="QSlider" name="horizontalSlider_workacc">
+          <property name="toolTip">
+           <string>Craft acceleration</string>
+          </property>
           <property name="statusTip">
-           <string>Work acceleration</string>
+           <string>Craft acceleration</string>
           </property>
           <property name="minimum">
            <number>10</number>
@@ -686,6 +890,9 @@
         </item>
         <item>
          <widget class="QSlider" name="horizontalSlider_workdelay">
+          <property name="toolTip">
+           <string>Gather duration</string>
+          </property>
           <property name="statusTip">
            <string>Gather duration</string>
           </property>
@@ -756,8 +963,11 @@
         </item>
         <item>
          <widget class="QSlider" name="horizontalSlider_movespd">
+          <property name="toolTip">
+           <string>Player movement speed</string>
+          </property>
           <property name="statusTip">
-           <string>Move speed</string>
+           <string>Player movement speed</string>
           </property>
           <property name="minimum">
            <number>1</number>
@@ -809,6 +1019,9 @@
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
+          </property>
+          <property name="toolTip">
+           <string/>
           </property>
           <property name="text">
            <string>Save</string>

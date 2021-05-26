@@ -77,44 +77,45 @@ void WorkingResultNotify(CGA::cga_working_result_t results)
 
 void WorkingResultAsyncCallBack(uv_async_t *handle)
 {
-	Isolate* isolate = Isolate::GetCurrent();
+	auto isolate = Isolate::GetCurrent();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	auto data = (WorkingResultNotifyData *)handle->data;
 
-	Handle<Value> argv[2];
+	Local<Value> argv[2];
 	Local<Value> nullValue = Nan::Null();
-	argv[0] = data->m_result ? nullValue : Nan::TypeError("Unknown exception.");
+	argv[0] = data->m_result ? nullValue : Nan::Error("Unknown exception.");
 	if (data->m_result)
 	{
 		Local<Object> obj = Object::New(isolate);
-		obj->Set(String::NewFromUtf8(isolate, "type"), Integer::New(isolate, data->m_results.type));
-		obj->Set(String::NewFromUtf8(isolate, "success"), Boolean::New(isolate, data->m_results.success));
-		obj->Set(String::NewFromUtf8(isolate, "levelup"), Boolean::New(isolate, data->m_results.success));
-		obj->Set(String::NewFromUtf8(isolate, "xp"), Integer::New(isolate, data->m_results.xp));		
-		obj->Set(String::NewFromUtf8(isolate, "endurance"), Integer::New(isolate, data->m_results.endurance));
-		obj->Set(String::NewFromUtf8(isolate, "skillful"), Integer::New(isolate, data->m_results.skillful));
-		obj->Set(String::NewFromUtf8(isolate, "intelligence"), Integer::New(isolate, data->m_results.intelligence));
+		obj->Set(context, String::NewFromUtf8(isolate, "type").ToLocalChecked(), Integer::New(isolate, data->m_results.type));
+		obj->Set(context, String::NewFromUtf8(isolate, "success").ToLocalChecked(), Boolean::New(isolate, data->m_results.success));
+		obj->Set(context, String::NewFromUtf8(isolate, "levelup").ToLocalChecked(), Boolean::New(isolate, data->m_results.success));
+		obj->Set(context, String::NewFromUtf8(isolate, "xp").ToLocalChecked(), Integer::New(isolate, data->m_results.xp));		
+		obj->Set(context, String::NewFromUtf8(isolate, "endurance").ToLocalChecked(), Integer::New(isolate, data->m_results.endurance));
+		obj->Set(context, String::NewFromUtf8(isolate, "skillful").ToLocalChecked(), Integer::New(isolate, data->m_results.skillful));
+		obj->Set(context, String::NewFromUtf8(isolate, "intelligence").ToLocalChecked(), Integer::New(isolate, data->m_results.intelligence));
 		switch (data->m_results.type)
 		{
 		case WORK_TYPE_GATHERING:
-			obj->Set(String::NewFromUtf8(isolate, "imgid"), Integer::New(isolate, data->m_results.imgid));
-			obj->Set(String::NewFromUtf8(isolate, "count"), Integer::New(isolate, data->m_results.count));
-			obj->Set(String::NewFromUtf8(isolate, "itemname"), Nan::New(data->m_results.name).ToLocalChecked());
+			obj->Set(context, String::NewFromUtf8(isolate, "imgid").ToLocalChecked(), Integer::New(isolate, data->m_results.imgid));
+			obj->Set(context, String::NewFromUtf8(isolate, "count").ToLocalChecked(), Integer::New(isolate, data->m_results.count));
+			obj->Set(context, String::NewFromUtf8(isolate, "itemname").ToLocalChecked(), Nan::New(data->m_results.name).ToLocalChecked());
 			break;
 		case WORK_TYPE_HEALING:
-			obj->Set(String::NewFromUtf8(isolate, "status"), Integer::New(isolate, data->m_results.status));
+			obj->Set(context, String::NewFromUtf8(isolate, "status").ToLocalChecked(), Integer::New(isolate, data->m_results.status));
 			break;
 		case WORK_TYPE_ASSESSING:
 			break;
 		case WORK_TYPE_CRAFTING:
-			obj->Set(String::NewFromUtf8(isolate, "imgid"), Integer::New(isolate, data->m_results.imgid));
+			obj->Set(context, String::NewFromUtf8(isolate, "imgid").ToLocalChecked(), Integer::New(isolate, data->m_results.imgid));
 			break;
 		}
 		argv[1] = obj;
 	}
 
-	Local<Function>::New(isolate, data->m_callback)->Call(isolate->GetCurrentContext()->Global(), (data->m_result) ? 2 : 1, argv);
+	Local<Function>::New(isolate, data->m_callback)->Call(context, Null(isolate), (data->m_result) ? 2 : 1, argv);
 
 	data->m_callback.Reset();
 
@@ -126,8 +127,9 @@ void WorkingResultAsyncCallBack(uv_async_t *handle)
 
 void WorkingResultTimerCallBack(uv_timer_t *handle)
 {
-	Isolate* isolate = Isolate::GetCurrent();
+	auto isolate = Isolate::GetCurrent();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	auto data = (WorkingResultNotifyData *)handle->data;
 
@@ -148,10 +150,10 @@ void WorkingResultTimerCallBack(uv_timer_t *handle)
 
 	if (asyncNotCalled)
 	{
-		Handle<Value> argv[1];
-		argv[0] = Nan::TypeError("Async callback timeout.");
+		Local<Value> argv[1];
+		argv[0] = Nan::Error("Async callback timeout.");
 
-		Local<Function>::New(isolate, data->m_callback)->Call(isolate->GetCurrentContext()->Global(), 1, argv);
+		Local<Function>::New(isolate, data->m_callback)->Call(context, Null(isolate), 1, argv);
 
 		data->m_callback.Reset();
 
@@ -164,17 +166,18 @@ void WorkingResultTimerCallBack(uv_timer_t *handle)
 
 void AsyncWaitWorkingResult(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
-	Isolate* isolate = info.GetIsolate();
+	auto isolate = info.GetIsolate();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	if (info.Length() < 1 || !info[0]->IsFunction()) {
-		Nan::ThrowTypeError("Arg[0] must be a function.");
+		Nan::ThrowTypeError("Arg[0] must be function.");
 		return;
 	}
 	int timeout = 3000;
-	if (info.Length() >= 2 && !info[1]->IsUndefined())
+	if (info.Length() >= 2 && info[1]->IsInt32())
 	{
-		timeout = (int)info[1]->IntegerValue();
+		timeout = info[1]->Int32Value(context).ToChecked();
 		if (timeout < 0)
 			timeout = 0;
 	}
@@ -214,24 +217,31 @@ void AsyncWaitWorkingResult(const Nan::FunctionCallbackInfo<v8::Value>& info)
 
 void StartWork(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
-	Isolate* isolate = info.GetIsolate();
+	auto isolate = info.GetIsolate();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
-	if (info.Length() < 1) {
-		Nan::ThrowTypeError("Arg[0] must be skill_index.");
+	if (info.Length() < 1 || !info[0]->IsInt32()) {
+		Nan::ThrowTypeError("Arg[0] must be integer.");
 		return;
 	}
-	if (info.Length() < 2) {
-		Nan::ThrowTypeError("Arg[1] must be sub_index.");
+	if (info.Length() < 2 || !info[1]->IsInt32()) {
+		Nan::ThrowTypeError("Arg[1] must be integer.");
 		return;
 	}
-	int skill_index = (int)info[0]->IntegerValue();
-	int sub_index = (int)info[1]->IntegerValue() & 0xFF;
-	if (info.Length() >= 3 && !info[2]->IsUndefined()) {
-		sub_index |= (info[2]->IntegerValue() & 0xFF) << 8;
+
+	int skill_index = info[0]->Int32Value(context).ToChecked();
+
+	int sub_index = info[1]->Int32Value(context).ToChecked() & 0xFF;
+
+	if (info.Length() >= 3 && info[2]->IsInt32())
+	{
+		int sub = info[2]->Int32Value(context).ToChecked();
+		sub_index |= (sub & 0xFF) << 8;
 	}
 	
 	bool result = false;
+
 	if (!g_CGAInterface->StartWork(skill_index, sub_index, result))
 	{
 		Nan::ThrowError("RPC Invocation failed.");
@@ -243,8 +253,9 @@ void StartWork(const Nan::FunctionCallbackInfo<v8::Value>& info)
 
 void GetCraftStatus(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
-	Isolate* isolate = info.GetIsolate();
+	auto isolate = info.GetIsolate();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	int status = 0;
 	if (!g_CGAInterface->GetCraftStatus(status))
@@ -258,8 +269,9 @@ void GetCraftStatus(const Nan::FunctionCallbackInfo<v8::Value>& info)
 
 void GetImmediateDoneWorkState(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
-	Isolate* isolate = info.GetIsolate();
+	auto isolate = info.GetIsolate();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	int state = 0;
 	if (!g_CGAInterface->GetImmediateDoneWorkState(state))
@@ -273,38 +285,44 @@ void GetImmediateDoneWorkState(const Nan::FunctionCallbackInfo<v8::Value>& info)
 
 void CraftItem(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
-	Isolate* isolate = info.GetIsolate();
+	auto isolate = info.GetIsolate();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
-	if (info.Length() < 1 || info[0]->IsUndefined()) {
-		Nan::ThrowTypeError("Arg[0] must be skill_index.");
+	if (info.Length() < 1 || !info[0]->IsInt32()) {
+		Nan::ThrowTypeError("Arg[0] must be integer.");
 		return;
 	}
-	if (info.Length() < 2 || info[1]->IsUndefined()) {
-		Nan::ThrowTypeError("Arg[1] must be subskill_index.");
+	if (info.Length() < 2 || !info[1]->IsInt32()) {
+		Nan::ThrowTypeError("Arg[1] must be integer.");
 		return;
 	}
-	if (info.Length() < 3 || info[2]->IsUndefined()) {
-		Nan::ThrowTypeError("Arg[2] must be sub_type.");
+	if (info.Length() < 3 || !info[2]->IsInt32()) {
+		Nan::ThrowTypeError("Arg[2] must be integer.");
 		return;
 	}
 	if (info.Length() < 4 || !info[3]->IsArray()) {
-		Nan::ThrowTypeError("Arg[4] must be itempos array.");
+		Nan::ThrowTypeError("Arg[4] must be array.");
 		return;
 	}
+	bool result = false;
 	CGA::cga_craft_item_t craft;
-	craft.skill_index = (int)info[0]->IntegerValue();
-	craft.subskill_index = (int)info[1]->IntegerValue();
-	craft.sub_type = (int)info[2]->IntegerValue();
+
+	craft.skill_index = info[0]->Int32Value(context).ToChecked();
+	craft.subskill_index = info[1]->Int32Value(context).ToChecked();
+	craft.sub_type = info[2]->Int32Value(context).ToChecked();
 	
-	Local<Array> arr = Local<Array>::Cast(info[3]);
-	for (uint32_t i = 0; i < min(arr->Length(), 6); ++i)
+	auto arr = Local<Array>::Cast(info[3]);
+	auto arraylength = arr->Length();
+	for (uint32_t i = 0; i < min(arraylength, 6); ++i)
 	{
-		Local<Value> v_itempos = arr->Get(i);
-		craft.itempos[i] = (int)v_itempos->IntegerValue();
+		auto v_itempos = arr->Get(context, i);
+		if (!v_itempos.IsEmpty() && v_itempos.ToLocalChecked()->IsInt32())
+		{
+			craft.itempos[i] = v_itempos.ToLocalChecked()->Int32Value(context).ToChecked();
+		}
 	}
 
-	bool result = false;
 	if (!g_CGAInterface->CraftItem(craft, result))
 	{
 		Nan::ThrowError("RPC Invocation failed.");
@@ -316,20 +334,21 @@ void CraftItem(const Nan::FunctionCallbackInfo<v8::Value>& info)
 
 void AssessItem(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
-	Isolate* isolate = info.GetIsolate();
+	auto isolate = info.GetIsolate();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
-	if (info.Length() < 1 || info[0]->IsUndefined()) {
-		Nan::ThrowTypeError("Arg[0] must be skill_index.");
+	if (info.Length() < 1 || !info[0]->IsInt32()) {
+		Nan::ThrowTypeError("Arg[0] must be integer.");
 		return;
 	}
-	if (info.Length() < 2 || info[1]->IsUndefined()) {
+	if (info.Length() < 2 || !info[1]->IsInt32()) {
 		Nan::ThrowTypeError("Arg[1] must be itempos.");
 		return;
 	}
 	CGA::cga_craft_item_t craft;
-	int skill_index = (int)info[0]->IntegerValue();
-	int itempos = (int)info[1]->IntegerValue();
+	int skill_index = info[0]->Int32Value(context).ToChecked();
+	int itempos = info[1]->Int32Value(context).ToChecked();
 
 	bool result = false;
 	if (!g_CGAInterface->AssessItem(skill_index, itempos, result))
@@ -343,15 +362,16 @@ void AssessItem(const Nan::FunctionCallbackInfo<v8::Value>& info)
 
 void SetImmediateDoneWork(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
-	Isolate* isolate = info.GetIsolate();
+	auto isolate = info.GetIsolate();
 	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	if (info.Length() < 1 || !info[0]->IsBoolean()) {
 		Nan::ThrowTypeError("Arg[0] must be boolean.");
 		return;
 	}
 	
-	bool enable = (int)info[0]->BooleanValue();
+	bool enable = info[0]->BooleanValue(isolate);
 
 	if (!g_CGAInterface->SetImmediateDoneWork(enable))
 	{
