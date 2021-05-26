@@ -5440,7 +5440,7 @@ void CGAService::WM_LogBack()
 	if (!IsInGame() || *g_logback)
 		return;
 
-	if (GetWorldStatus() == 10 && GetGameStatus() == 3)
+	if (GetWorldStatus() == 10 && (GetGameStatus() == 3 || GetGameStatus() == 4))
 	{
 		UI_HandleLogbackMouseEvent(8, 2);
 	}
