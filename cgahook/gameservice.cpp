@@ -5468,14 +5468,14 @@ void CGAService::WM_LogOut()
 
 	//UI_HandleLogoutMouseEvent(9, 2);
 	//COMMON_PlaySound(60, 320, 240);
-	if (GetWorldStatus() == 9 && GetGameStatus() == 3)
-	{
+	//if (GetWorldStatus() == 9 && GetGameStatus() == 3)
+	//{
 		*g_new_world_status_cgitem = 7;
-	}
-	else if (GetWorldStatus() == 10 && GetGameStatus() == 3)
-	{
-		*g_new_world_status_cgitem = 7;
-	}
+	//}
+	//else if (GetWorldStatus() == 10 && (GetGameStatus() == 3 || GetGameStatus() == 4))
+	//{
+	//	*g_new_world_status_cgitem = 7;
+	//}
 }
 
 bool CGAService::WM_UseItem(int itempos)
