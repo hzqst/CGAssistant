@@ -2411,7 +2411,8 @@ int CGAService::NewUI_SelectTradeAddStuffs(int a1, char a2)
 
 		for (size_t i = 0, j = 8; j < 28; ++j)
 		{
-			if ((*g_playerBase)->iteminfos[j].assess_flags & 1)
+			if ((*g_playerBase)->iteminfos[j].valid &&
+				((*g_playerBase)->iteminfos[j].assess_flags & 1) == 1)
 			{
 				UI_AddTradeItemArray(i, j);
 				i++;
