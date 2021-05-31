@@ -419,20 +419,20 @@ void AccountForm::OnNotifyConnectionState(int state, QString msg)
         m_login_failure ++;
         if(ui->checkBox_autoChangeServer->isChecked())
         {
-            if(m_login_failure > 8)
+            if(m_login_failure > 10)
             {
                 NotifyKillProcess();
             }
             else
             {
-                if(ui->comboBox_server->currentIndex() + 1 >= 8)
+                if(ui->comboBox_server->currentIndex() + 1 >= 10)
                     ui->comboBox_server->setCurrentIndex(0);
                 else
                     ui->comboBox_server->setCurrentIndex(ui->comboBox_server->currentIndex() + 1);
             }
         }
     }
-    else if(state == 1)
+    else if(state == 1 || state == 2)
     {
         m_login_failure = 0;
     }

@@ -2269,7 +2269,7 @@ int CGAService::NewUI_SelectCharacter(int index, int a2)
 			if (UI_IsCharacterPresent(index))
 			{
 				m_fakeCGSharedMem[0] = 0;
-				m_ui_auto_login = false;
+				//m_ui_auto_login = false;
 				m_ui_selectbigserver_click_index = -1;
 				m_ui_selectserver_click_index = -1;
 				m_ui_selectcharacter_click_index = -1;
@@ -2281,7 +2281,7 @@ int CGAService::NewUI_SelectCharacter(int index, int a2)
 				if (m_ui_create_character)
 				{
 					m_fakeCGSharedMem[0] = 0;
-					m_ui_auto_login = false;
+					//m_ui_auto_login = false;
 					m_ui_selectbigserver_click_index = -1;
 					m_ui_selectserver_click_index = -1;
 					m_ui_selectcharacter_click_index = -1;
