@@ -12,6 +12,18 @@ extern CGA::CGAInterface *g_CGAInterface;
 
 bool IsProcessThreadPresent(quint32 ProcessId, quint32 ThreadId);
 
+typedef struct
+{
+    uint32_t cga_pid;
+    uint32_t polcn_pid;
+    char gid[128];
+}polcn_view_t;
+
+typedef struct
+{
+    char glt[128];
+}glt_view_t;
+
 AccountForm::AccountForm(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::AccountForm)
@@ -20,6 +32,9 @@ AccountForm::AccountForm(QWidget *parent) :
 
     m_polcn_lock = NULL;
     m_polcn_map = NULL;
+
+    m_glt_lock = NULL;
+    m_glt_map = NULL;
 
     m_POLCN = new QProcess();
     QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
@@ -106,6 +121,37 @@ AccountForm::~AccountForm()
     delete ui;
 }
 
+bool AccountForm::IsGltExpired()
+{
+    QString glt;
+
+    if(m_glt.isEmpty())
+        return true;
+
+    if(m_loginresult.elapsed() > 1000*60)
+        return true;
+
+    if(m_glt_map && m_glt_lock)
+    {
+        WaitForSingleObject(m_glt_lock, INFINITE);
+        auto glt_view = MapViewOfFile(m_glt_map, FILE_MAP_WRITE | FILE_MAP_READ, 0, 0, 0x1000 );
+        if(glt_view)
+        {
+            glt_view_t *view = (glt_view_t *)glt_view;
+
+            glt = QString(view->glt);
+
+            UnmapViewOfFile(glt_view);
+        }
+        ReleaseMutex(m_glt_lock);
+    }
+
+    if(0 != glt.compare(m_glt))
+        return true;
+
+    return false;
+}
+
 void AccountForm::OnAutoLogin()
 {
     if(m_loginquery.elapsed() > 15 * 1000)
@@ -171,7 +217,7 @@ void AccountForm::OnAutoLogin()
         {
             if((worldStatus == 2 && gameStatus == 1) || (worldStatus == 3 && gameStatus == 11))
             {
-                if(m_loginresult.elapsed() > 1000*60 || m_glt.isEmpty())
+                if(IsGltExpired())
                 {
                     on_pushButton_getgid_clicked();
                     return;
@@ -237,6 +283,34 @@ void AccountForm::OnPOLCNFinish(int exitCode, QProcess::ExitStatus exitStatus)
                 m_glt = obj.take("glt").toString();
                 m_loginresult.start();
 
+                if(!m_glt_lock)
+                {
+                    m_glt_lock = CreateMutexW(NULL, FALSE, L"CGAGltLock");
+                }
+
+                if(!m_glt_map)
+                {
+                    m_glt_map = CreateFileMappingW(INVALID_HANDLE_VALUE, NULL, PAGE_READWRITE, 0, 0x1000, L"CGAGltMap");
+                }
+
+                if(m_glt_map && m_glt_lock)
+                {
+                    WaitForSingleObject(m_glt_lock, INFINITE);
+                    auto glt_view = MapViewOfFile(m_glt_map, FILE_MAP_WRITE | FILE_MAP_READ, 0, 0, 0x1000 );
+                    if(glt_view)
+                    {
+                        glt_view_t *view = (glt_view_t *)glt_view;
+
+                        memset(view->glt, 0, sizeof(view->glt));
+
+                        strncpy(view->glt, m_glt.toLocal8Bit().data(), 127);
+                        view->glt[127] = 0;
+
+                        UnmapViewOfFile(glt_view);
+                    }
+                    ReleaseMutex(m_glt_lock);
+                }
+
                 ui->textEdit_output->setText(tr("Get GID ok.\n"));
                 ui->textEdit_output->append(m_StdOut);
 
@@ -275,12 +349,11 @@ void AccountForm::OnPOLCNFinish(int exitCode, QProcess::ExitStatus exitStatus)
     ui->label_status->setText(tr("POLCN_Launcher finished with exitCode %1").arg(exitCode));
 }
 
-bool IsProcessThreadPresent(quint32 ProcessId, quint32 ThreadId);
-
 bool AccountForm::QueryAccount(QString &label, QString &errorMsg)
 {
     if(m_POLCN->state() == QProcess::ProcessState::Running)
         return false;
+
     if(!m_polcn_lock)
     {
         m_polcn_lock = CreateMutexW(NULL, TRUE, L"CGAPolcnLock");
@@ -292,10 +365,11 @@ bool AccountForm::QueryAccount(QString &label, QString &errorMsg)
                 auto polcn_view = MapViewOfFile(polcn_map, FILE_MAP_WRITE | FILE_MAP_READ, 0, 0, 0x1000 );
                 if(polcn_view)
                 {
-                    uint32_t polcn_cga_pid = *(uint32_t *)((char *)polcn_view + 0);
+                    polcn_view_t *view = (polcn_view_t *)polcn_view;
 
                     label = tr("Waiting for other CGAssistant to login...");
-                    errorMsg = tr("Waiting for CGAssistant pid #%1 to login...").arg( polcn_cga_pid );
+                    errorMsg = tr("Waiting for other CGAssistant to login ...\nCGA_PID=#%1, POLCN_PID=#%2, GID=%3")
+                            .arg( view->cga_pid ).arg( view->polcn_pid ).arg( QString(view->gid) );
 
                     UnmapViewOfFile(polcn_view);
                 }
@@ -323,21 +397,6 @@ bool AccountForm::QueryAccount(QString &label, QString &errorMsg)
         }
     }
 
-    if(!m_polcn_map)
-    {
-        m_polcn_map = CreateFileMappingW(INVALID_HANDLE_VALUE, NULL, PAGE_READWRITE, 0, 0x1000, L"CGAPPolcnMap");
-    }
-
-    if(m_polcn_map)
-    {
-        auto polcn_view = MapViewOfFile(m_polcn_map, FILE_MAP_WRITE | FILE_MAP_READ, 0, 0, 0x1000 );
-        if(polcn_view)
-        {
-            *(uint32_t *)((char *)polcn_view + 0) = GetCurrentProcessId();
-            UnmapViewOfFile(polcn_view);
-        }
-    }
-
     m_loginquery = QTime::currentTime();
     m_StdOut.clear();
 
@@ -350,6 +409,31 @@ bool AccountForm::QueryAccount(QString &label, QString &errorMsg)
 
     m_POLCN->setNativeArguments(argstr);
     m_POLCN->start("POLCN_Launcher.exe");
+
+    if(!m_polcn_map)
+    {
+        m_polcn_map = CreateFileMappingW(INVALID_HANDLE_VALUE, NULL, PAGE_READWRITE, 0, 0x1000, L"CGAPPolcnMap");
+    }
+
+    if(m_polcn_map)
+    {
+        auto polcn_view = MapViewOfFile(m_polcn_map, FILE_MAP_WRITE | FILE_MAP_READ, 0, 0, 0x1000 );
+        if(polcn_view)
+        {
+            polcn_view_t *view = (polcn_view_t *)polcn_view;
+
+            view->cga_pid = (uint32_t)QApplication::applicationPid();
+            view->polcn_pid = (uint32_t)m_POLCN->processId();
+
+            memset(view->gid, 0, sizeof(view->gid));
+
+            strncpy(view->gid, ui->comboBox_gid->currentText().toLocal8Bit().data(), 127);
+            view->gid[127] = 0;
+
+            UnmapViewOfFile(polcn_view);
+        }
+    }
+
     return true;
 }
 

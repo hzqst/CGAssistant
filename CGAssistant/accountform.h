@@ -19,7 +19,7 @@ public:
     ~AccountForm();
 
     bool QueryAccount(QString &label, QString &errorMsg);
-
+    bool IsGltExpired();
 private slots:
     void OnPOLCNReadyReadStdOut();
     void OnPOLCNFinish(int exitCode, QProcess::ExitStatus exitStatus);
@@ -53,6 +53,8 @@ private:
     QTime m_loginresult;
     HANDLE m_polcn_lock;
     HANDLE m_polcn_map;
+    HANDLE m_glt_lock;
+    HANDLE m_glt_map;
     int m_login_failure;
 };
 

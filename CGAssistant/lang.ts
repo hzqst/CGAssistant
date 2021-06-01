@@ -93,7 +93,7 @@
     </message>
     <message>
         <source>Waiting for CGAssistant pid #%1 to login...</source>
-        <translation>正在等待CGA进程PID#%1登录...</translation>
+        <translation type="vanished">正在等待CGA进程PID#%1登录...</translation>
     </message>
     <message>
         <source>Waiting for other CGAssistant to login...</source>
@@ -182,6 +182,11 @@
     <message>
         <source>0,0,0,0,0</source>
         <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Waiting for other CGAssistant to login ...
+CGA_PID=#%1, POLCN_PID=#%2, GID=%3</source>
+        <translation>正在等待其他CGA进程登录...CGA进程PID=#%1,易玩通登录器PID=#%2,GID=%3</translation>
     </message>
 </context>
 <context>
@@ -713,55 +718,51 @@ meet BOSS</source>
     </message>
     <message>
         <source>Display Time</source>
-        <translation>显示时间</translation>
+        <translation type="vanished">显示时间</translation>
     </message>
     <message>
         <source>System Message</source>
-        <translation>系统消息</translation>
+        <translation type="vanished">系统消息</translation>
     </message>
     <message>
         <source>My Chat Message</source>
-        <translation>自己的聊天消息</translation>
+        <translation type="vanished">自己的聊天消息</translation>
     </message>
     <message>
         <source>Player Message</source>
-        <translation>玩家聊天消息</translation>
+        <translation type="vanished">玩家聊天消息</translation>
     </message>
     <message>
         <source>NPC Message</source>
-        <translation>NPC消息</translation>
+        <translation type="vanished">NPC消息</translation>
     </message>
     <message>
         <source>Error: Failed to connect sqlite.
 Chat database will not work properly.</source>
-        <translation>连接数据库失败，消息数据库可能无法正常工作。</translation>
+        <translation type="vanished">连接数据库失败，消息数据库可能无法正常工作。</translation>
     </message>
     <message>
         <source>Error: Failed to create table.
 Chat database will not work properly.</source>
-        <translation>创建表失败，消息数据库可能无法正常工作。</translation>
+        <translation type="vanished">创建表失败，消息数据库可能无法正常工作。</translation>
     </message>
     <message>
         <source>Display Name</source>
-        <translation>显示名字</translation>
+        <translation type="vanished">显示名字</translation>
     </message>
     <message>
         <source>Today Only</source>
-        <translation>只显示今天</translation>
+        <translation type="vanished">只显示今天</translation>
     </message>
     <message>
         <source>Error: Failed to create index for type.
 Chat database will not work properly.</source>
-        <translation>创建索引type失败，消息数据库可能无法正常工作。</translation>
+        <translation type="vanished">创建索引type失败，消息数据库可能无法正常工作。</translation>
     </message>
     <message>
         <source>Error: Failed to create index for uploadtime.
 Chat database will not work properly.</source>
-        <translation>创建索引uploadtime失败，消息数据库可能无法正常工作。</translation>
-    </message>
-    <message>
-        <source>%1\chatdb\%2.db</source>
-        <translation type="unfinished"></translation>
+        <translation type="vanished">创建索引uploadtime失败，消息数据库可能无法正常工作。</translation>
     </message>
 </context>
 <context>
@@ -904,7 +905,7 @@ p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:&apos;SimSun&apos;; font-size:9pt; font-weight:400; font-style:normal;&quot;&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;img src=&quot;:/logo.png&quot; /&gt;&lt;/p&gt;
 &lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:16px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; line-height:160%; font-family:&apos;-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol,Liberation Sans,PingFang SC,Microsoft YaHei,Hiragino Sans GB,Wenquanyi Micro Hei,WenQuanYi Zen Hei,ST Heiti,SimHei,SimSun,WenQuanYi Zen Hei Sharp,sans-serif&apos;; font-size:16px; color:#40485b; background-color:#ffffff;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:16px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; line-height:160%; background-color:#ffffff;&quot;&gt;&lt;span style=&quot; font-family:&apos;-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol,Liberation Sans,PingFang SC,Microsoft YaHei,Hiragino Sans GB,Wenquanyi Micro Hei,WenQuanYi Zen Hei,ST Heiti,SimHei,SimSun,WenQuanYi Zen Hei Sharp,sans-serif&apos;; font-size:16px; color:#40485b; background-color:#ffffff;&quot;&gt;当前版本：2021-05-07&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:16px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; line-height:160%; background-color:#ffffff;&quot;&gt;&lt;span style=&quot; font-family:&apos;-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol,Liberation Sans,PingFang SC,Microsoft YaHei,Hiragino Sans GB,Wenquanyi Micro Hei,WenQuanYi Zen Hei,ST Heiti,SimHei,SimSun,WenQuanYi Zen Hei Sharp,sans-serif&apos;; font-size:16px; color:#40485b; background-color:#ffffff;&quot;&gt;当前版本：2021-06-01&lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:16px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; line-height:160%; background-color:#ffffff;&quot;&gt;&lt;span style=&quot; font-family:&apos;-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol,Liberation Sans,PingFang SC,Microsoft YaHei,Hiragino Sans GB,Wenquanyi Micro Hei,WenQuanYi Zen Hei,ST Heiti,SimHei,SimSun,WenQuanYi Zen Hei Sharp,sans-serif&apos;; font-size:16px; color:#40485b; background-color:#ffffff;&quot;&gt;下载最新版本：群号 300303705&lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:16px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; line-height:160%; background-color:#ffffff;&quot;&gt;&lt;span style=&quot; font-family:&apos;-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol,Liberation Sans,PingFang SC,Microsoft YaHei,Hiragino Sans GB,Wenquanyi Micro Hei,WenQuanYi Zen Hei,ST Heiti,SimHei,SimSun,WenQuanYi Zen Hei Sharp,sans-serif&apos;; font-size:16px; color:#40485b; background-color:#ffffff;&quot;&gt;或 &lt;/span&gt;&lt;a href=&quot;https://github.com/hzqst/CGAssistantJS/issues&quot;&gt;&lt;span style=&quot; font-family:&apos;-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol,Liberation Sans,PingFang SC,Microsoft YaHei,Hiragino Sans GB,Wenquanyi Micro Hei,WenQuanYi Zen Hei,ST Heiti,SimHei,SimSun,WenQuanYi Zen Hei Sharp,sans-serif&apos;; font-size:16px; text-decoration: underline; color:#005980; background-color:transparent;&quot;&gt;https://github.com/hzqst/CGAssistantJS/&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:16px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; line-height:160%; background-color:#ffffff;&quot;&gt;&lt;a href=&quot;https://github.com/hzqst/CGAssistantJS/issues&quot;&gt;&lt;span style=&quot; font-family:&apos;-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol,Liberation Sans,PingFang SC,Microsoft YaHei,Hiragino Sans GB,Wenquanyi Micro Hei,WenQuanYi Zen Hei,ST Heiti,SimHei,SimSun,WenQuanYi Zen Hei Sharp,sans-serif&apos;; font-size:16px; text-decoration: underline; color:#005980; background-color:transparent;&quot;&gt;或 &lt;/span&gt;&lt;/a&gt;&lt;a href=&quot;https://gitee.com/hzqst/CGAssistantJS/issues&quot;&gt;&lt;span style=&quot; font-family:&apos;-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol,Liberation Sans,PingFang SC,Microsoft YaHei,Hiragino Sans GB,Wenquanyi Micro Hei,WenQuanYi Zen Hei,ST Heiti,SimHei,SimSun,WenQuanYi Zen Hei Sharp,sans-serif&apos;; font-size:16px; text-decoration: underline; color:#005980; background-color:transparent;&quot;&gt;https://gitee.com/hzqst/CGAssistantJS/&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
@@ -1154,11 +1155,11 @@ error: %1</source>
     </message>
     <message>
         <source>Share non-sensitive data to help CGAssistant works better</source>
-        <translation>将非敏感数据（如：深蓝线，随机NPC位置）分享给他人（注：此功能可能需要访问网络）</translation>
+        <translation type="vanished">将非敏感数据（如：深蓝线，随机NPC位置）分享给他人（注：此功能可能需要访问网络）</translation>
     </message>
     <message>
         <source>Share data</source>
-        <translation>加入数据分享计划</translation>
+        <translation type="vanished">加入数据分享计划</translation>
     </message>
     <message>
         <source>Use food for player under this condition</source>
