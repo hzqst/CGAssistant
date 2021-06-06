@@ -5440,20 +5440,20 @@ void CGAService::WM_LogBack()
 	if (!IsInGame() || *g_logback)
 		return;
 
-	if (GetWorldStatus() == 10 && (GetGameStatus() == 3 || GetGameStatus() == 4))
+	/*if (GetWorldStatus() == 10 && (GetGameStatus() == 3 || GetGameStatus() == 4))
 	{
 		UI_HandleLogbackMouseEvent(8, 2);
 	}
 	else if (GetWorldStatus() == 9 && GetGameStatus() == 3)
-	{
+	{*/
 		if (m_game_type == cg_item_6000)
 			NET_WriteLogbackPacket_cgitem(*g_net_socket);
 		else if (m_game_type == cg_se_3000)
 			NET_WriteLogbackPacket_cgse(*g_net_buffer, *g_net_socket, net_header_logback);
 
-		COMMON_PlaySound(60, 320, 240);
-		*g_logback = 1;
-	}
+		//COMMON_PlaySound(60, 320, 240);
+		//*g_logback = 1;
+	//}
 }
 
 void CGAService::LogOut()
