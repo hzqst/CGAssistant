@@ -270,6 +270,9 @@ LRESULT CALLBACK NewWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
 	case WM_CGA_GET_CARDS_INFO:
 		g_CGAService.WM_GetCardsInfo((CGA::cga_cards_info_t *)wParam);
 		return 1;
+	case WM_CGA_PLAY_GESTURE:
+		g_CGAService.WM_PlayGesture((int)wParam);
+		return 1;
 	case WM_KEYDOWN:
 		if (GetForegroundWindow() == g_MainHwnd)
 		{

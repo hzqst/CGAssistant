@@ -692,6 +692,7 @@ namespace CGA
 
 		virtual void LoginGameServer(std::string gid, std::string glt, int serverid, int bigServerIndex, int serverIndex,int character);
 		virtual void CreateCharacter(cga_create_chara_t request);
+		virtual void PlayGesture(int index);
 	public:
 		int *g_server_time;
 		int *g_local_time;
@@ -981,6 +982,7 @@ namespace CGA
 		int(__cdecl *UI_SelectTradeAddStuffs)(int a1, char a2); 
 		int(__cdecl* UI_RemoveTradeItemArray)(int index);
 		int(__cdecl* UI_AddTradeItemArray)(int index, int itempos);
+		void(__cdecl* UI_PlayGesture)(int index);
 		void(__cdecl *UI_OpenTradeDialog)(const char *playerName, int playerLevel);
 		void(__cdecl *UI_SelectServer)();
 		int(__cdecl *UI_SelectCharacter)(int index, int a2);
@@ -1184,6 +1186,7 @@ namespace CGA
 		void WM_ChangePersDesc(cga_pers_desc_t *input);
 		bool WM_ChangeTitleName(int titleId);
 		bool WM_ChangePetName(int petId, const char *name);
+		void WM_PlayGesture(int index);
 
 		bool m_initialized;
 		bool m_btl_highspeed_enable;
@@ -1346,5 +1349,6 @@ namespace CGA
 #define WM_CGA_CHANGE_PERS_DESC WM_USER+10067
 #define WM_CGA_CHANGE_PET_NAME WM_USER+10068
 #define WM_CGA_GET_CARDS_INFO WM_USER+10069
+#define WM_CGA_PLAY_GESTURE WM_USER+10070
 
 #define CGA_PORT_BASE 4396

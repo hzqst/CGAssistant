@@ -2896,6 +2896,7 @@ void CGAService::Initialize(game_type type)
 		UI_SelectTradeAddStuffs = CONVERT_GAMEVAR(int(__cdecl *)(int a1, char a2), 0xFA8D0);
 		UI_RemoveTradeItemArray = CONVERT_GAMEVAR(int(__cdecl*)(int), 0xF99C0);
 		UI_AddTradeItemArray = CONVERT_GAMEVAR(int(__cdecl*)(int, int), 0xF9970);
+		UI_PlayGesture = CONVERT_GAMEVAR(void(__cdecl*)(int), (0));
 
 		UI_SelectServer = CONVERT_GAMEVAR(void(__cdecl *)(), 0x8B820);
 		UI_SelectCharacter = CONVERT_GAMEVAR(int(__cdecl *)(int index, int a2), 0x8DBE0);
@@ -3184,6 +3185,7 @@ void CGAService::Initialize(game_type type)
 		UI_SelectTradeAddStuffs = CONVERT_GAMEVAR(int(__cdecl *)(int a1, char a2), 0xFA8D0);
 		UI_RemoveTradeItemArray = CONVERT_GAMEVAR(int(__cdecl*)(int) , 0xF99C0);
 		UI_AddTradeItemArray = CONVERT_GAMEVAR(int(__cdecl*)(int,int), 0xF9970);
+		UI_PlayGesture = CONVERT_GAMEVAR(void(__cdecl*)(int), (0x568120 - 0x400000));
 
 		UI_SelectServer = CONVERT_GAMEVAR(void(__cdecl *)(), 0x8B820);
 		UI_SelectCharacter = CONVERT_GAMEVAR(int(__cdecl *)(int index, int a2), 0x8DBE0);
@@ -5440,20 +5442,10 @@ void CGAService::WM_LogBack()
 	if (!IsInGame() || *g_logback)
 		return;
 
-	/*if (GetWorldStatus() == 10 && (GetGameStatus() == 3 || GetGameStatus() == 4))
-	{
-		UI_HandleLogbackMouseEvent(8, 2);
-	}
-	else if (GetWorldStatus() == 9 && GetGameStatus() == 3)
-	{*/
-		if (m_game_type == cg_item_6000)
-			NET_WriteLogbackPacket_cgitem(*g_net_socket);
-		else if (m_game_type == cg_se_3000)
-			NET_WriteLogbackPacket_cgse(*g_net_buffer, *g_net_socket, net_header_logback);
-
-		//COMMON_PlaySound(60, 320, 240);
-		//*g_logback = 1;
-	//}
+	if (m_game_type == cg_item_6000)
+		NET_WriteLogbackPacket_cgitem(*g_net_socket);
+	else if (m_game_type == cg_se_3000)
+		NET_WriteLogbackPacket_cgse(*g_net_buffer, *g_net_socket, net_header_logback);
 }
 
 void CGAService::LogOut()
@@ -7098,6 +7090,16 @@ void CGAService::LoginGameServer(std::string gid, std::string glt, int serverid,
 		m_ui_selectserver_click_index = serverIndex;
 		m_ui_selectcharacter_click_index = character;
 	}
+}
+
+void CGAService::WM_PlayGesture(int index)
+{
+	UI_PlayGesture(index);
+}
+
+void CGAService::PlayGesture(int index)
+{
+	SendMessageA(g_MainHwnd, WM_CGA_PLAY_GESTURE, index, 0);
 }
 
 void CGAService::WM_SendClientLogin(const char *acc, const char *pwd, int gametype)
