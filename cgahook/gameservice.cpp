@@ -5442,10 +5442,15 @@ void CGAService::WM_LogBack()
 	if (!IsInGame() || *g_logback)
 		return;
 
+	if (GetWorldStatus() == 10)
+		*g_game_status_cgitem = 7;
+
 	if (m_game_type == cg_item_6000)
 		NET_WriteLogbackPacket_cgitem(*g_net_socket);
 	else if (m_game_type == cg_se_3000)
 		NET_WriteLogbackPacket_cgse(*g_net_buffer, *g_net_socket, net_header_logback);
+
+	*g_logback = 1;
 }
 
 void CGAService::LogOut()
