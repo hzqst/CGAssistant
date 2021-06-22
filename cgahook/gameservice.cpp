@@ -293,11 +293,7 @@ VOID CGAService::NewSleep(_In_ DWORD dwMilliseconds)
 {
 	if (m_game_type == game_type::polcn)
 	{
-		/*if (m_POLCNLoginTick && GetTickCount64() - m_POLCNLoginTick > 1000 * 15)
-		{
-			NtTerminateProcess((HANDLE)-1, 0);
-			return;
-		}*/
+
 	}
 	else
 	{
@@ -476,8 +472,6 @@ int __fastcall NewCWnd_MessageBoxA(void *pthis, int dummy, LPCSTR str, LPCSTR ti
 {
 	using namespace rapidjson;
 
-	WriteLog("MessageBoxA %s %s\n", str, title);
-
 	Document doc;
 
 	doc.SetObject();
@@ -500,7 +494,6 @@ int __fastcall NewCWnd_MessageBoxA(void *pthis, int dummy, LPCSTR str, LPCSTR ti
 	puts(sb.GetString());
 	fflush(stdout);
 
-	WriteLog("NtTerminateProcess\n");
 	NtTerminateProcess((HANDLE)-1, 0);
 
 	return 0;
@@ -513,7 +506,6 @@ void *__fastcall NewCWnd_SetFocus(void *pthis, int dummy)
 
 int __fastcall NewCDialog_DoModal(void *pthis, int dummy)
 {
-	WriteLog("DoModal\n");
 	return 1;
 }
 
@@ -584,6 +576,45 @@ BOOL WINAPI NewCreateProcessA(
 	}
 
 	return r;
+}
+
+void *__cdecl NewConfigManager_GetConfig(void *a1, LPCSTR a2, void *a3, int a4)
+{
+	DWORD pStringManager = *(DWORD *)a3;
+
+	if (pStringManager < 0x1000)
+	{
+		using namespace rapidjson;
+
+		Document doc;
+
+		doc.SetObject();
+
+		Value result_s;
+		result_s.SetInt(-1);
+
+		doc.AddMember("result", result_s, doc.GetAllocator());
+
+		std::string msg = "Config [";
+		msg += a2;
+		msg += "] not found";
+
+		Value msg_s;
+		msg_s.SetString(msg.c_str(), msg.length(), doc.GetAllocator());
+
+		doc.AddMember("message", msg_s, doc.GetAllocator());
+
+		StringBuffer sb;
+		Writer<StringBuffer> writer(sb);
+		doc.Accept(writer);
+		puts(sb.GetString());
+		fflush(stdout);
+
+		NtTerminateProcess((HANDLE)-1, 0);
+		return NULL;
+	}
+
+	return g_CGAService.ConfigManager_GetConfig(a1, a2, a3, a4);
 }
 
 int __fastcall NewCMainDialog_OnInitDialog(void *pthis, int dummy)
@@ -3215,7 +3246,8 @@ void CGAService::Initialize(game_type type)
 		CWnd_MessageBoxA = (decltype(CWnd_MessageBoxA))GetProcAddress(LoadLibraryA("mfc71.dll"), (LPCSTR)4104);
 		CWnd_SetFocus = (decltype(CWnd_SetFocus))GetProcAddress(LoadLibraryA("mfc71.dll"), (LPCSTR)5833);
 		CDialog_DoModal = (decltype(CDialog_DoModal))GetProcAddress(LoadLibraryA("mfc71.dll"), (LPCSTR)2020);
-		LaunchGame =  CONVERT_GAMEVAR(decltype(LaunchGame), 0x6440);
+		LaunchGame = CONVERT_GAMEVAR(decltype(LaunchGame), 0x6440);
+		ConfigManager_GetConfig =  CONVERT_GAMEVAR(decltype(ConfigManager_GetConfig), 0x1400);
 		GoNext = CONVERT_GAMEVAR(decltype(GoNext), 0xB130);
 		CMainDialog_OnInitDialog = CONVERT_GAMEVAR(decltype(CMainDialog_OnInitDialog), 0x8730);
 		vce_manager_initialize = CONVERT_GAMEVAR(decltype(vce_manager_initialize), 0x1C990);
@@ -3242,6 +3274,7 @@ void CGAService::Initialize(game_type type)
 		DetourAttach(&(void *&)pfnSetForegroundWindow, ::NewSetForegroundWindow);
 		DetourAttach(&(void *&)pfnRegisterHotKey, ::NewRegisterHotKey);
 		DetourAttach(&(void *&)pfnCreateMutexA, ::NewCreateMutexA);
+		DetourAttach(&(void *&)ConfigManager_GetConfig, ::NewConfigManager_GetConfig);
 		DetourAttach(&(void *&)CMainDialog_OnInitDialog, ::NewCMainDialog_OnInitDialog);
 		DetourAttach(&(void *&)CWnd_ShowWindow, ::NewCWnd_ShowWindow);
 		DetourAttach(&(void *&)CWnd_MessageBoxA, ::NewCWnd_MessageBoxA);

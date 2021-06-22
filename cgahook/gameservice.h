@@ -1010,7 +1010,8 @@ namespace CGA
 		//40EA00
 		int(__fastcall *OnLoginResult)(void *pthis, int dummy, int a1, int result, const char *glt, int gltlength, char **gid_array, int gid_count, int *gid_status_array, int gid_status_count, int *gid_unk1_array, int gid_unk1_count, int *gid_unk2_array, int gid_unk2_count, int *gid_unk3_array, int gid_unk3_count, int a15, int card_point);
 		void(__fastcall *LaunchGame)(void *pthis, int);
-		void(__fastcall *GoNext)(void *pthis, int);
+		void(__fastcall *GoNext)(void *pthis, int); 
+		void *(__cdecl *ConfigManager_GetConfig)(void *a1, LPCSTR a2, void *a3, int a4);
 		//
 		void(__fastcall *vce_connect)(void *pthis, int, const char *ipaddr, u_short port);
 		void *(__fastcall *vce_manager_initialize)(void *pthis);
@@ -1020,6 +1021,7 @@ namespace CGA
 		int(__fastcall *CWnd_MessageBoxA)(void *pthis, LPCSTR, LPCSTR, int);
 		int(__fastcall *CDialog_DoModal)(void *pthis, int);
 		void *(__fastcall *CWnd_SetFocus)(void *pthis, int);
+		
 	
 		//476E28
 		void *g_AppInstance;
