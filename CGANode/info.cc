@@ -799,7 +799,7 @@ void GetPicBooksInfo(const Nan::FunctionCallbackInfo<v8::Value>& info)
 	for (size_t i = 0; i < myinfos.size(); ++i)
 	{
 		Local<Object> obj = Object::New(isolate);
-		const CGA::cga_card_info_t &myinfo = myinfos.at(i);
+		const CGA::cga_picbook_info_t &myinfo = myinfos.at(i);
 		obj->Set(context, String::NewFromUtf8(isolate, "can_catch").ToLocalChecked(), Integer::New(isolate, myinfo.can_catch));
 		obj->Set(context, String::NewFromUtf8(isolate, "card_type").ToLocalChecked(), Integer::New(isolate, myinfo.card_type));
 		obj->Set(context, String::NewFromUtf8(isolate, "race").ToLocalChecked(), Integer::New(isolate, myinfo.race));
