@@ -26,6 +26,7 @@ void GetBankGold(const Nan::FunctionCallbackInfo<v8::Value>& info);
 void IsPetValid(const Nan::FunctionCallbackInfo<v8::Value>& info);
 void GetPetInfo(const Nan::FunctionCallbackInfo<v8::Value>& info);
 void GetCardsInfo(const Nan::FunctionCallbackInfo<v8::Value>& info);
+void GetPicsInfo(const Nan::FunctionCallbackInfo<v8::Value>& info);
 void GetPetsInfo(const Nan::FunctionCallbackInfo<v8::Value>& info);
 void GetBankPetsInfo(const Nan::FunctionCallbackInfo<v8::Value>& info);
 void IsPetSkillValid(const Nan::FunctionCallbackInfo<v8::Value>& info);
