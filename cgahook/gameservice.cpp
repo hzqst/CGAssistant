@@ -3119,6 +3119,8 @@ void CGAService::Initialize(game_type type)
 		g_card_info = CONVERT_GAMEVAR(card_info_t *, 0x10C0A78 - 0x400000);//ok;
 		g_update_game_version_button = CONVERT_GAMEVAR(btn_rect_t *, 0x608FA0 - 0x400000);//ok;
 		g_game_version = CONVERT_GAMEVAR(int *, 0x9CFDBE - 0x400000);//ok;
+		g_picbook_info = CONVERT_GAMEVAR(void *, 0x11FBE54 - 0x400000);//ok;
+		g_picbook_maxcount = CONVERT_GAMEVAR(int *, 0xF11E08 - 0x400000);//ok;
 
 		Sys_CheckModify = CONVERT_GAMEVAR(char(__cdecl *)(const char *), 0x1BD030);//ok
 		COMMON_PlaySound = CONVERT_GAMEVAR(void(__cdecl *)(int, int, int), 0x1B1570);//ok
@@ -4017,6 +4019,39 @@ cga_subskills_info_t CGAService::GetSubSkillsInfo(int index)
 	return info;
 }
 
+void CGAService::WM_GetPicBooksInfo(cga_picbooks_info_t *info)
+{
+	if (!IsInGame())
+		return;
+
+	auto picbook_base = (picbook_info_t *)((char *)g_picbook_info + 0xA000 * (*g_local_player_index));
+
+	for (int i = 0; i < *g_picbook_maxcount; ++i)
+	{
+		if (picbook_base[i].valid)
+		{
+			info->emplace_back(
+				picbook_base[i].can_catch,
+				picbook_base[i].card_type,
+				picbook_base[i].race,
+				picbook_base[i].index,
+				picbook_base[i].image_id,
+				picbook_base[i].rate_endurance,
+				picbook_base[i].rate_strength,
+				picbook_base[i].rate_defense,
+				picbook_base[i].rate_agility,
+				picbook_base[i].rate_magical,
+				picbook_base[i].element_earth,
+				picbook_base[i].element_water,
+				picbook_base[i].element_fire,
+				picbook_base[i].element_wind,
+				picbook_base[i].skill_slots,
+				boost::locale::conv::to_utf<char>(picbook_base[i].name, "GBK")
+			);
+		}
+	}
+}
+
 void CGAService::WM_GetCardsInfo(cga_cards_info_t *info)
 {
 	if (!IsInGame())
@@ -4036,6 +4071,15 @@ void CGAService::WM_GetCardsInfo(cga_cards_info_t *info)
 			);
 		}
 	}
+}
+
+cga_picbooks_info_t CGAService::GetPicBooksInfo()
+{
+	cga_picbooks_info_t info;
+
+	SendMessageA(g_MainHwnd, WM_CGA_GET_PICBOOKS_INFO, (WPARAM)&info, 0);
+
+	return info;
 }
 
 cga_cards_info_t CGAService::GetCardsInfo()

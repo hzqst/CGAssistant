@@ -1790,6 +1790,86 @@ namespace msgpack {
 				}
 			};
 
+			//cga_picbook_info_t
+
+			template<>
+			struct convert<cga_picbook_info_t> {
+				msgpack::object const& operator()(msgpack::object const& o, cga_picbook_info_t& v) const {
+					if (o.type != msgpack::type::ARRAY) throw msgpack::type_error();
+					if (o.via.array.size != 16) throw msgpack::type_error();
+
+					v.can_catch = o.via.array.ptr[0].as<int>();
+					v.card_type = o.via.array.ptr[1].as<int>();
+					v.race = o.via.array.ptr[2].as<int>();
+					v.index = o.via.array.ptr[3].as<int>();
+					v.image_id = o.via.array.ptr[4].as<int>();
+					v.rate_endurance = o.via.array.ptr[5].as<int>();
+					v.rate_strength = o.via.array.ptr[6].as<int>();
+					v.rate_defense = o.via.array.ptr[7].as<int>();
+					v.rate_agility = o.via.array.ptr[8].as<int>();
+					v.rate_magical = o.via.array.ptr[9].as<int>();
+					v.element_earth = o.via.array.ptr[10].as<int>();
+					v.element_water = o.via.array.ptr[11].as<int>();
+					v.element_fire = o.via.array.ptr[12].as<int>();
+					v.element_wind = o.via.array.ptr[13].as<int>();
+					v.skill_slots = o.via.array.ptr[14].as<int>();
+					v.name = o.via.array.ptr[15].as<std::string>();
+
+					return o;
+				}
+			};
+
+			template<>
+			struct pack<cga_picbook_info_t> {
+				template <typename Stream>
+				packer<Stream>& operator()(msgpack::packer<Stream>& o, cga_picbook_info_t const& v) const {
+					// packing member variables as an array.
+					o.pack_array(16);
+					o.pack(v.can_catch);
+					o.pack(v.card_type);
+					o.pack(v.race);
+					o.pack(v.index);
+					o.pack(v.image_id);
+					o.pack(v.rate_endurance);
+					o.pack(v.rate_strength);
+					o.pack(v.rate_defense);
+					o.pack(v.rate_agility);
+					o.pack(v.rate_magical);
+					o.pack(v.element_earth);
+					o.pack(v.element_water);
+					o.pack(v.element_fire);
+					o.pack(v.element_wind);
+					o.pack(v.skill_slots);
+					o.pack(v.name);
+					return o;
+				}
+			};
+
+			template <>
+			struct object_with_zone<cga_picbook_info_t> {
+				void operator()(msgpack::object::with_zone& o, cga_picbook_info_t const& v) const {
+					o.type = type::ARRAY;
+					o.via.array.size = 16;
+					o.via.array.ptr = static_cast<msgpack::object*>(o.zone.allocate_align(sizeof(msgpack::object) * o.via.array.size));
+					o.via.array.ptr[0] = msgpack::object(v.can_catch, o.zone);
+					o.via.array.ptr[1] = msgpack::object(v.card_type, o.zone);
+					o.via.array.ptr[2] = msgpack::object(v.race, o.zone);
+					o.via.array.ptr[3] = msgpack::object(v.index, o.zone);
+					o.via.array.ptr[4] = msgpack::object(v.image_id, o.zone);
+					o.via.array.ptr[5] = msgpack::object(v.rate_endurance, o.zone);
+					o.via.array.ptr[6] = msgpack::object(v.rate_strength, o.zone);
+					o.via.array.ptr[7] = msgpack::object(v.rate_defense, o.zone);
+					o.via.array.ptr[8] = msgpack::object(v.rate_agility, o.zone);
+					o.via.array.ptr[9] = msgpack::object(v.rate_magical, o.zone);
+					o.via.array.ptr[10] = msgpack::object(v.element_earth, o.zone);
+					o.via.array.ptr[11] = msgpack::object(v.element_water, o.zone);
+					o.via.array.ptr[12] = msgpack::object(v.element_fire, o.zone);
+					o.via.array.ptr[13] = msgpack::object(v.element_wind, o.zone);
+					o.via.array.ptr[14] = msgpack::object(v.skill_slots, o.zone);
+					o.via.array.ptr[15] = msgpack::object(v.name, o.zone);
+				}
+			};
+
 		} // namespace adaptor
 	} // MSGPACK_API_VERSION_NAMESPACE(MSGPACK_DEFAULT_API_NS)
 } // namespace msgpack

@@ -783,6 +783,44 @@ void GetCardsInfo(const Nan::FunctionCallbackInfo<v8::Value>& info)
 	info.GetReturnValue().Set(arr);
 }
 
+void GetPicBooksInfo(const Nan::FunctionCallbackInfo<v8::Value>& info)
+{
+	auto isolate = info.GetIsolate();
+	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
+
+	CGA::cga_picbooks_info_t myinfos;
+	if (!g_CGAInterface->GetPicBooksInfo(myinfos))
+	{
+		Nan::ThrowError("RPC Invocation failed.");
+		return;
+	}
+	Local<Array> arr = Array::New(isolate);
+	for (size_t i = 0; i < myinfos.size(); ++i)
+	{
+		Local<Object> obj = Object::New(isolate);
+		const CGA::cga_card_info_t &myinfo = myinfos.at(i);
+		obj->Set(context, String::NewFromUtf8(isolate, "can_catch").ToLocalChecked(), Integer::New(isolate, myinfo.can_catch));
+		obj->Set(context, String::NewFromUtf8(isolate, "card_type").ToLocalChecked(), Integer::New(isolate, myinfo.card_type));
+		obj->Set(context, String::NewFromUtf8(isolate, "race").ToLocalChecked(), Integer::New(isolate, myinfo.race));
+		obj->Set(context, String::NewFromUtf8(isolate, "index").ToLocalChecked(), Integer::New(isolate, myinfo.index));
+		obj->Set(context, String::NewFromUtf8(isolate, "image_id").ToLocalChecked(), Integer::New(isolate, myinfo.image_id));
+		obj->Set(context, String::NewFromUtf8(isolate, "rate_endurance").ToLocalChecked(), Integer::New(isolate, myinfo.rate_endurance));
+		obj->Set(context, String::NewFromUtf8(isolate, "rate_strength").ToLocalChecked(), Integer::New(isolate, myinfo.rate_strength));
+		obj->Set(context, String::NewFromUtf8(isolate, "rate_defense").ToLocalChecked(), Integer::New(isolate, myinfo.rate_defense));
+		obj->Set(context, String::NewFromUtf8(isolate, "rate_agility").ToLocalChecked(), Integer::New(isolate, myinfo.rate_agility));
+		obj->Set(context, String::NewFromUtf8(isolate, "rate_magical").ToLocalChecked(), Integer::New(isolate, myinfo.rate_magical));
+		obj->Set(context, String::NewFromUtf8(isolate, "element_earth").ToLocalChecked(), Integer::New(isolate, myinfo.element_earth));
+		obj->Set(context, String::NewFromUtf8(isolate, "element_water").ToLocalChecked(), Integer::New(isolate, myinfo.element_water));
+		obj->Set(context, String::NewFromUtf8(isolate, "element_fire").ToLocalChecked(), Integer::New(isolate, myinfo.element_fire));
+		obj->Set(context, String::NewFromUtf8(isolate, "element_wind").ToLocalChecked(), Integer::New(isolate, myinfo.element_wind));
+		obj->Set(context, String::NewFromUtf8(isolate, "skill_slots").ToLocalChecked(), Integer::New(isolate, myinfo.skill_slots));		
+		obj->Set(context, String::NewFromUtf8(isolate, "name").ToLocalChecked(), Nan::New(myinfo.name).ToLocalChecked());
+		arr->Set(context, i, obj);
+	}
+	info.GetReturnValue().Set(arr);
+}
+
 void GetPetsInfo(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
 	auto isolate = info.GetIsolate();

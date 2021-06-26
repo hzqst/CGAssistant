@@ -565,6 +565,28 @@ namespace CGA
 
 	static_assert(sizeof(login_character_t) == 148, "Size check");
 
+	typedef struct picbook_info_s
+	{
+		char valid; //0x0000 
+		char can_catch; //0x0001 0=不可捕捉，1=可以捕捉
+		char card_type; //0x0002 0=无，1=银卡，2=金卡
+		char race; //0x0003 种族
+		int index; //0x0004 
+		int image_id; //0x0008 
+		int rate_endurance; //0x000C 0=半颗星，3=2颗星，5=3颗星，9=5颗星
+		int rate_strength; //0x0010 
+		int rate_defense; //0x0014 
+		int rate_agility; //0x0018 
+		int rate_magical; //0x001C 
+		int element_earth; //0x0020 
+		int element_water; //0x0024 
+		int element_fire; //0x0028 
+		int element_wind; //0x002C 
+		int skill_slots; //0x0030 技能栏
+		char name[76]; //0xE6CE0C 
+	}picbook_info_t; //Size=0x0080
+
+	static_assert(sizeof(picbook_info_t) == 128, "Size check");
 
 #pragma pack()
 
@@ -595,6 +617,7 @@ namespace CGA
 		virtual cga_skills_info_t GetSkillsInfo();
 		virtual cga_subskill_info_t GetSubSkillInfo(int index, int stage);
 		virtual cga_subskills_info_t GetSubSkillsInfo(int index);
+		virtual cga_picbooks_info_t GetPicBooksInfo();
 		virtual cga_cards_info_t GetCardsInfo();
 		virtual bool IsPetValid(int petid);
 		virtual cga_pet_info_t GetPetInfo(int index);
@@ -876,6 +899,8 @@ namespace CGA
 		card_info_t *g_card_info;
 		btn_rect_t *g_update_game_version_button;
 		int *g_game_version;
+		void *g_picbook_info;
+		int *g_picbook_maxcount;
 	public:
 		char(__cdecl *Sys_CheckModify)(const char *a1);
 		void(__cdecl *COMMON_PlaySound)(int a1, int a2, int a3);
@@ -1146,6 +1171,7 @@ namespace CGA
 		void WM_GetSubSkillInfo(int index, int stage, cga_subskill_info_t *info);
 		void WM_GetSubSkillsInfo(int index, cga_subskills_info_t *info);
 		void WM_GetCardsInfo(cga_cards_info_t *info);
+		void WM_GetPicBooksInfo(cga_picbooks_info_t *info);
 		void WM_GetPetInfo(int index, cga_pet_info_t *info);
 		void WM_GetPetsInfo(cga_pets_info_t *info);
 		void WM_GetBankPetsInfo(cga_pets_info_t *info);
@@ -1352,5 +1378,6 @@ namespace CGA
 #define WM_CGA_CHANGE_PET_NAME WM_USER+10068
 #define WM_CGA_GET_CARDS_INFO WM_USER+10069
 #define WM_CGA_PLAY_GESTURE WM_USER+10070
+#define WM_CGA_GET_PICBOOKS_INFO WM_USER+10071
 
 #define CGA_PORT_BASE 4396

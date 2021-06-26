@@ -940,6 +940,51 @@ namespace CGA
 
 	typedef std::vector<cga_card_info_t> cga_cards_info_t;
 
+	typedef struct cga_picbook_info_s
+	{
+		cga_picbook_info_s()
+		{
+			can_catch = 0; //0x0001 0=不可捕捉，1=可以捕捉
+			card_type = 0; //0x0002 0=无，1=银卡，2=金卡
+			race = 0; //0x0003 种族
+			index = 0; //0x0004 
+			image_id = 0; //0x0008 
+			rate_endurance = 0; //0x000C 0=半颗星，3=2颗星，5=3颗星，9=5颗星
+			rate_strength = 0; //0x0010 
+			rate_defense = 0; //0x0014 
+			rate_agility = 0; //0x0018 
+			rate_magical = 0; //0x001C 
+			element_earth = 0; //0x0020 
+			element_water = 0; //0x0024 
+			element_fire = 0; //0x0028 
+			element_wind = 0; //0x002C 
+			skill_slots = 0; //0x0030 技能栏
+		}
+		cga_picbook_info_s(int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11, int a12, int a13, int a14, int a15, const std::string &a16)
+			: can_catch(a1), card_type(a2), race(a3), index(a4), image_id(a5), rate_endurance(a6), rate_strength(a7), rate_defense(a8), rate_agility(a9), rate_magical(a10), 
+			element_earth(a11), element_water(a12), element_fire(a13), element_wind(a14), skill_slots(a15), name(a16)
+		{
+		}
+		int can_catch; //0x0001 0=不可捕捉，1=可以捕捉
+		int card_type; //0x0002 0=无，1=银卡，2=金卡
+		int race; //0x0003 种族
+		int index; //0x0004 
+		int image_id; //0x0008 
+		int rate_endurance; //0x000C 0=半颗星，3=2颗星，5=3颗星，9=5颗星
+		int rate_strength; //0x0010 
+		int rate_defense; //0x0014 
+		int rate_agility; //0x0018 
+		int rate_magical; //0x001C 
+		int element_earth; //0x0020 
+		int element_water; //0x0024 
+		int element_fire; //0x0028 
+		int element_wind; //0x002C 
+		int skill_slots; //0x0030 技能栏
+		std::string name;
+	}cga_picbook_info_t;
+
+	typedef std::vector<cga_picbook_info_t> cga_picbooks_info_t;
+
 #define TRADE_STUFFS_ITEM 1
 #define TRADE_STUFFS_PET 2
 #define TRADE_STUFFS_PETSKILL 3
@@ -1048,6 +1093,7 @@ namespace CGA
 		virtual bool GetSubSkillInfo(int id, int stage, cga_subskill_info_t &info) = 0;
 		virtual bool GetSubSkillsInfo(int id, cga_subskills_info_t &info) = 0;
 
+		virtual bool GetPicBooksInfo(cga_picbooks_info_t &info) = 0;
 		virtual bool GetCardsInfo(cga_cards_info_t &info) = 0;
 		virtual bool IsItemValid(int itempos, bool &valid) = 0;
 		virtual bool GetItemInfo(int itempos, cga_item_info_t &info) = 0;
