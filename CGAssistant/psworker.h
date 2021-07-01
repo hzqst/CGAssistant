@@ -48,7 +48,7 @@ public slots:
     void OnCheckFreezeProcess();
     void OnKillProcess();
     void OnAutoAttachProcess(quint32 ProcessId, quint32 ThreadId);
-    void OnNotifyFillMaxFreezeTime(int freezetime);
+    void OnNotifyFillStaticSettings(int freezetime, int chatmaxlines);
     void OnHttpGetGameProcInfo(QJsonDocument *doc);
 private slots:
     void OnRetryAttachProcess();

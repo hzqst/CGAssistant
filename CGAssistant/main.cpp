@@ -102,6 +102,10 @@ int main(int argc, char *argv[])
 
     QCommandLineOption killfreeze("killfreeze", "", "killfreeze", "60");
 
+    QCommandLineOption consolemaxlines("consolemaxlines", "", "consolemaxlines", "100");
+
+    QCommandLineOption chatmaxlines("chatmaxlines", "", "chatmaxlines", "100");
+
     QCommandLineParser parser;
 
     parser.setSingleDashWordOptionMode(QCommandLineParser::ParseAsLongOptions);
@@ -131,6 +135,8 @@ int main(int argc, char *argv[])
     parser.addOption(soulprotect);
     parser.addOption(loadsettings);
     parser.addOption(killfreeze);
+    parser.addOption(consolemaxlines);
+    parser.addOption(chatmaxlines);
     parser.process(a);
 
     QTranslator translator;
@@ -267,11 +273,12 @@ int main(int argc, char *argv[])
     w.NotifyFillLoadScript(parser.value(loadscript),
                            parser.isSet(scriptautorestart) ? true : false,
                            parser.isSet(injuryprotect) ? true : false,
-                           parser.isSet(soulprotect) ? true : false);
+                           parser.isSet(soulprotect) ? true : false,
+                           parser.value(consolemaxlines).toInt() );
 
     w.NotifyFillLoadSettings(parser.value(loadsettings));
 
-    w.NotifyFillMaxFreezeTime(parser.value(killfreeze).toInt());
+    w.NotifyFillMaxFreezeTime(parser.value(killfreeze).toInt(), parser.value(chatmaxlines).toInt());
 
     return a.exec();
 }

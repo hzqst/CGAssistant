@@ -10,6 +10,8 @@ ChatForm::ChatForm(QWidget *parent) :
     ui(new Ui::ChatForm)
 {
     ui->setupUi(this);
+
+    m_ChatMaxLines = 100;
 }
 
 ChatForm::~ChatForm()
@@ -19,7 +21,7 @@ ChatForm::~ChatForm()
 
 void ChatForm::on_lineEdit_returnPressed()
 {
-    auto saystring = ui->lineEdit->text()./*toLocal8Bit().*/toStdString();
+    auto saystring = ui->lineEdit->text().toStdString();
     int ingame = 0;
     if(g_CGAInterface->IsInGame(ingame) && ingame){
         g_CGAInterface->SayWords(saystring, 0, 3, 1);
@@ -31,6 +33,12 @@ void ChatForm::on_lineEdit_returnPressed()
 void ChatForm::OnNotifyGetPlayerInfo(QSharedPointer<CGA_PlayerInfo_t> player)
 {
     m_player = player;
+}
+
+
+void ChatForm::OnNotifyFillStaticSettings(int freezetime, int chatmaxlines)
+{
+    m_ChatMaxLines = chatmaxlines;
 }
 
 void ChatForm::OnNotifyChatMsg(int unitid, QString msg, int size, int color)
@@ -98,6 +106,16 @@ void ChatForm::OnNotifyChatMsg(int unitid, QString msg, int size, int color)
         else
         {
             line.append(QString("%1: %2<br>").arg(name).arg(msg));
+        }
+
+        if(m_ChatMaxLines > 0){
+            while(ui->textEdit_chat->document()->lineCount() > m_ChatMaxLines)
+            {
+                QTextCursor txtcur = ui->textEdit_chat->textCursor();
+                txtcur.movePosition(QTextCursor::Start);
+                txtcur.movePosition(QTextCursor::Down, QTextCursor::KeepAnchor);
+                txtcur.removeSelectedText();
+            }
         }
 
         ui->textEdit_chat->moveCursor(QTextCursor::End);

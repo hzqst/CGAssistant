@@ -79,7 +79,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(this, &MainWindow::NotifyFillAutoLogin, accountForm, &AccountForm::OnNotifyFillAutoLogin);
     connect(this, &MainWindow::NotifyFillLoadScript, scriptForm, &ScriptForm::OnNotifyFillLoadScript);
     connect(this, &MainWindow::NotifyFillLoadSettings, playerFrom, &PlayerForm::OnNotifyFillLoadSettings);
-    connect(this, &MainWindow::NotifyFillMaxFreezeTime, processWorker, &CProcessWorker::OnNotifyFillMaxFreezeTime);
+    connect(this, &MainWindow::NotifyFillStaticSettings, processWorker, &CProcessWorker::OnNotifyFillMaxFreezeTime);
 
     connect(playerWorker, &CPlayerWorker::NotifyGetSkillsInfo, autoBattleForm, &AutoBattleForm::OnNotifyGetSkillsInfo, Qt::ConnectionType::QueuedConnection);
     connect(playerWorker, &CPlayerWorker::NotifyGetPetsInfo, autoBattleForm, &AutoBattleForm::OnNotifyGetPetsInfo, Qt::ConnectionType::QueuedConnection);

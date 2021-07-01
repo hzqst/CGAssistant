@@ -20,6 +20,7 @@ public:
     ~ChatForm();
 
 public slots:
+    void OnNotifyFillStaticSettings(int freezetime, int chatmaxlines);
     void OnNotifyGetPlayerInfo(QSharedPointer<CGA_PlayerInfo_t> player);
     void OnNotifyChatMsg(int unitid, QString msg, int size, int color);
     bool ParseChatSettings(const QJsonValue &val);
@@ -31,6 +32,7 @@ private slots:
 private:
     Ui::ChatForm *ui;
     QSharedPointer<CGA_PlayerInfo_t> m_player;
+    int m_ChatMaxLines;
 };
 
 #endif // CHATFORM_H

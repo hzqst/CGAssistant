@@ -272,7 +272,7 @@ void CProcessWorker::OnQueueQueryProcess()
     NotifyQueryProcess(list);
 }
 
-void CProcessWorker::OnNotifyFillMaxFreezeTime(int freezetime)
+void CProcessWorker::OnNotifyFillStaticSettings(int freezetime, int chatmaxlines)
 {
     m_MaxFreezeTime = freezetime;
 }

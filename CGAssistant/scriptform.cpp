@@ -110,6 +110,17 @@ void ScriptForm::OnNodeReadyRead()
     if(!m_bDebugging)
     {
         QString data = m_node->readAll();
+
+        if(m_ConsoleMaxLines > 0){
+            while(m_output->document()->lineCount() > m_ConsoleMaxLines)
+            {
+                QTextCursor txtcur = m_output->textCursor();
+                txtcur.movePosition(QTextCursor::Start);
+                txtcur.movePosition(QTextCursor::Down, QTextCursor::KeepAnchor);
+                txtcur.removeSelectedText();
+            }
+        }
+
         m_output->moveCursor(QTextCursor::End);
         m_output->insertPlainText(data);
 
@@ -448,7 +459,7 @@ void ScriptForm::OnNotifyAttachProcessOk(quint32 ProcessId, quint32 ThreadId, qu
     qputenv("CGA_GAME_PORT", qportString);
 }
 
-void ScriptForm::OnNotifyFillLoadScript(QString path, bool autorestart, bool injuryprot, bool soulprot)
+void ScriptForm::OnNotifyFillLoadScript(QString path, bool autorestart, bool injuryprot, bool soulprot, int consolemaxlines)
 {
     if(!path.isEmpty())
     {
@@ -471,6 +482,8 @@ void ScriptForm::OnNotifyFillLoadScript(QString path, bool autorestart, bool inj
         ui->checkBox_injuryProt->setChecked(true);
     if(soulprot)
         ui->checkBox_soulProt->setChecked(true);
+
+    m_ConsoleMaxLines = consolemaxlines;
 }
 
 void ScriptForm::on_pushButton_suspend_clicked()

@@ -24,11 +24,15 @@
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="label_chat">
-       <property name="text">
-        <string>[Enter] to send chat</string>
-       </property>
-      </widget>
+      <layout class="QHBoxLayout" name="horizontalLayout_3">
+       <item>
+        <widget class="QLabel" name="label_chat">
+         <property name="text">
+          <string>[Enter] to send chat</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
      </item>
      <item>
       <widget class="QLineEdit" name="lineEdit">
