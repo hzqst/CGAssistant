@@ -278,7 +278,7 @@ int main(int argc, char *argv[])
 
     w.NotifyFillLoadSettings(parser.value(loadsettings));
 
-    w.NotifyFillMaxFreezeTime(parser.value(killfreeze).toInt(), parser.value(chatmaxlines).toInt());
+    w.NotifyFillStaticSettings(parser.value(killfreeze).toInt(), parser.value(chatmaxlines).toInt());
 
     return a.exec();
 }
