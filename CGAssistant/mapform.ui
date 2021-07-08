@@ -72,6 +72,13 @@
       </widget>
      </item>
      <item>
+      <widget class="QLabel" name="label_key">
+       <property name="text">
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;S: Stop navigation&lt;/p&gt;&lt;p&gt;C: Center the map view&lt;/p&gt;&lt;p&gt;R: Reset the map view&lt;/p&gt;&lt;p&gt;G: Manual navigation by input&lt;/p&gt;&lt;p&gt;M1: Show NPCs&lt;/p&gt;&lt;p&gt;M2: Manual navigation by click&lt;/p&gt;&lt;p&gt;M3: Scaleup the map view&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       </property>
+      </widget>
+     </item>
+     <item>
       <widget class="QCheckBox" name="checkBox_showcrosshair">
        <property name="focusPolicy">
         <enum>Qt::StrongFocus</enum>

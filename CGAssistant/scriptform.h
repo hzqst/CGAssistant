@@ -4,6 +4,8 @@
 #include <QWidget>
 #include <QProcess>
 
+#include <QTime>
+
 namespace Ui {
 class ScriptForm;
 }
@@ -27,7 +29,7 @@ public slots:
     void on_pushButton_run_clicked();
     void on_pushButton_debug_clicked();
     void on_pushButton_term_clicked();
-    void OnNotifyFillLoadScript(QString path, bool autorestart, bool injuryprot, bool soulprot, int consolemaxlines);
+    void OnNotifyFillLoadScript(QString path, bool autorestart, bool freezestop, bool injuryprot, bool soulprot, int consolemaxlines);
     void RunNavigatorScript(int x, int y, int enter, QString *result);
     void StopNavigatorScript();
     void OnHttpLoadScript(QString query, QByteArray postdata, QJsonDocument* doc);
@@ -56,6 +58,11 @@ private:
     quint32 m_port;
 
     int m_ConsoleMaxLines;
+
+    int m_LastMapX;
+    int m_LastMapY;
+    int m_LastMapIndex;
+    QTime m_LastMapChange;
 };
 
 #endif // SCRIPTFORM_H

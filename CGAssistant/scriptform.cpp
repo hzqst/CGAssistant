@@ -251,6 +251,26 @@ void ScriptForm::OnAutoRestart()
                 }
             }
 
+            if(ui->checkBox_freezestop->isChecked())
+            {
+                int x, y, index1, index2, index3;
+                if(g_CGAInterface->GetMapXY(x, y) && g_CGAInterface->GetMapIndex(index1, index2, index3))
+                {
+                    if(x != m_LastMapX || y != m_LastMapY || index3 != m_LastMapIndex)
+                    {
+                        m_LastMapChange = QTime::currentTime();
+                    }
+                    else
+                    {
+                        if(m_LastMapChange.elapsed() > 60 * 1000)
+                        {
+                            on_pushButton_term_clicked();
+                            return;
+                        }
+                    }
+                }
+            }
+
             if(ui->checkBox_autorestart->isChecked() && m_node->state() != QProcess::Running && !m_scriptPath.isEmpty())
             {
                 int worldStatus = 0, gameStatus = 0;
@@ -397,7 +417,8 @@ void ScriptForm::RunNavigatorScript(int x, int y, int enter, QString *result)
         m_node->setProcessChannelMode(QProcess::ProcessChannelMode::MergedChannels);
         m_node->start("node.exe", args);
     } else {
-        *result = tr("Navigation is unavailable while running other scripts.");
+        if(result)
+            *result = tr("Navigation is unavailable while running other scripts.");
     }
 }
 
@@ -459,7 +480,7 @@ void ScriptForm::OnNotifyAttachProcessOk(quint32 ProcessId, quint32 ThreadId, qu
     qputenv("CGA_GAME_PORT", qportString);
 }
 
-void ScriptForm::OnNotifyFillLoadScript(QString path, bool autorestart, bool injuryprot, bool soulprot, int consolemaxlines)
+void ScriptForm::OnNotifyFillLoadScript(QString path, bool autorestart, bool freezestop, bool injuryprot, bool soulprot, int consolemaxlines)
 {
     if(!path.isEmpty())
     {
@@ -482,6 +503,8 @@ void ScriptForm::OnNotifyFillLoadScript(QString path, bool autorestart, bool inj
         ui->checkBox_injuryProt->setChecked(true);
     if(soulprot)
         ui->checkBox_soulProt->setChecked(true);
+    if(freezestop)
+        ui->checkBox_freezestop->setChecked(true);
 
     m_ConsoleMaxLines = consolemaxlines;
 }

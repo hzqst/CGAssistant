@@ -1,6 +1,7 @@
 #include "mypaintmap.h"
 #include <QPainter>
 #include <QBitmap>
+#include <QInputDialog>
 
 MyPaintMap::MyPaintMap(QWidget *parent) : QWidget (parent)
 {
@@ -33,6 +34,32 @@ void MyPaintMap::keyPressEvent(QKeyEvent *event)
     else if(event->key() == 'R')
     {
         m_bMoveCamera = false;
+    }
+    else if(event->key() == 'G')
+    {
+        bool isOK = false;
+        QString text = QInputDialog::getText(NULL, tr("Manual Navigation"),
+                                                           tr("Please input your target position"),
+                                                           QLineEdit::Normal,
+                                                           tr("format: 123, 456"),
+                                                           &isOK);
+
+        if(isOK)
+        {
+            QStringList targetpos = text.split(",");
+            if(targetpos.size() >= 2)
+            {
+                int x = targetpos[0].toInt(&isOK);
+                if(isOK)
+                {
+                    int y = targetpos[0].toInt(&isOK);
+                    if(isOK)
+                    {
+                        runNavigatorScript(x, y, 1, &m_naverror);
+                    }
+                }
+            }
+        }
     }
 }
 

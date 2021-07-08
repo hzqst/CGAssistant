@@ -150,6 +150,9 @@
          </spacer>
         </item>
         <item>
+         <layout class="QVBoxLayout" name="verticalLayout_6"/>
+        </item>
+        <item>
          <layout class="QVBoxLayout" name="verticalLayout_4">
           <property name="spacing">
            <number>6</number>
@@ -188,6 +191,19 @@
            <widget class="QCheckBox" name="checkBox_autorestart">
             <property name="text">
              <string>Auto Restart</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="checkBox_freezestop">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>Freeze Stop</string>
             </property>
            </widget>
           </item>
