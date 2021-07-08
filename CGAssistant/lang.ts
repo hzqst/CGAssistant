@@ -585,7 +585,7 @@ Action</source>
     <message>
         <source>Player Force
 Action</source>
-        <translation>人物强制行动</translation>
+        <translation type="vanished">人物强制行动</translation>
     </message>
     <message>
         <source>Stop when 
@@ -623,6 +623,10 @@ meet BOSS</source>
     <message>
         <source>Teammate Count</source>
         <translation>己方数量</translation>
+    </message>
+    <message>
+        <source>Beep when stop</source>
+        <translation>停止时响起提示音</translation>
     </message>
 </context>
 <context>
@@ -905,7 +909,7 @@ p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:&apos;SimSun&apos;; font-size:9pt; font-weight:400; font-style:normal;&quot;&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;img src=&quot;:/logo.png&quot; /&gt;&lt;/p&gt;
 &lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:16px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; line-height:160%; font-family:&apos;-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol,Liberation Sans,PingFang SC,Microsoft YaHei,Hiragino Sans GB,Wenquanyi Micro Hei,WenQuanYi Zen Hei,ST Heiti,SimHei,SimSun,WenQuanYi Zen Hei Sharp,sans-serif&apos;; font-size:16px; color:#40485b; background-color:#ffffff;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:16px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; line-height:160%; background-color:#ffffff;&quot;&gt;&lt;span style=&quot; font-family:&apos;-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol,Liberation Sans,PingFang SC,Microsoft YaHei,Hiragino Sans GB,Wenquanyi Micro Hei,WenQuanYi Zen Hei,ST Heiti,SimHei,SimSun,WenQuanYi Zen Hei Sharp,sans-serif&apos;; font-size:16px; color:#40485b; background-color:#ffffff;&quot;&gt;当前版本：2021-06-01&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:16px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; line-height:160%; background-color:#ffffff;&quot;&gt;&lt;span style=&quot; font-family:&apos;-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol,Liberation Sans,PingFang SC,Microsoft YaHei,Hiragino Sans GB,Wenquanyi Micro Hei,WenQuanYi Zen Hei,ST Heiti,SimHei,SimSun,WenQuanYi Zen Hei Sharp,sans-serif&apos;; font-size:16px; color:#40485b; background-color:#ffffff;&quot;&gt;当前版本：2021-07-01&lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:16px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; line-height:160%; background-color:#ffffff;&quot;&gt;&lt;span style=&quot; font-family:&apos;-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol,Liberation Sans,PingFang SC,Microsoft YaHei,Hiragino Sans GB,Wenquanyi Micro Hei,WenQuanYi Zen Hei,ST Heiti,SimHei,SimSun,WenQuanYi Zen Hei Sharp,sans-serif&apos;; font-size:16px; color:#40485b; background-color:#ffffff;&quot;&gt;下载最新版本：群号 300303705&lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:16px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; line-height:160%; background-color:#ffffff;&quot;&gt;&lt;span style=&quot; font-family:&apos;-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol,Liberation Sans,PingFang SC,Microsoft YaHei,Hiragino Sans GB,Wenquanyi Micro Hei,WenQuanYi Zen Hei,ST Heiti,SimHei,SimSun,WenQuanYi Zen Hei Sharp,sans-serif&apos;; font-size:16px; color:#40485b; background-color:#ffffff;&quot;&gt;或 &lt;/span&gt;&lt;a href=&quot;https://github.com/hzqst/CGAssistantJS/issues&quot;&gt;&lt;span style=&quot; font-family:&apos;-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol,Liberation Sans,PingFang SC,Microsoft YaHei,Hiragino Sans GB,Wenquanyi Micro Hei,WenQuanYi Zen Hei,ST Heiti,SimHei,SimSun,WenQuanYi Zen Hei Sharp,sans-serif&apos;; font-size:16px; text-decoration: underline; color:#005980; background-color:transparent;&quot;&gt;https://github.com/hzqst/CGAssistantJS/&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:16px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; line-height:160%; background-color:#ffffff;&quot;&gt;&lt;a href=&quot;https://github.com/hzqst/CGAssistantJS/issues&quot;&gt;&lt;span style=&quot; font-family:&apos;-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol,Liberation Sans,PingFang SC,Microsoft YaHei,Hiragino Sans GB,Wenquanyi Micro Hei,WenQuanYi Zen Hei,ST Heiti,SimHei,SimSun,WenQuanYi Zen Hei Sharp,sans-serif&apos;; font-size:16px; text-decoration: underline; color:#005980; background-color:transparent;&quot;&gt;或 &lt;/span&gt;&lt;/a&gt;&lt;a href=&quot;https://gitee.com/hzqst/CGAssistantJS/issues&quot;&gt;&lt;span style=&quot; font-family:&apos;-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol,Liberation Sans,PingFang SC,Microsoft YaHei,Hiragino Sans GB,Wenquanyi Micro Hei,WenQuanYi Zen Hei,ST Heiti,SimHei,SimSun,WenQuanYi Zen Hei Sharp,sans-serif&apos;; font-size:16px; text-decoration: underline; color:#005980; background-color:transparent;&quot;&gt;https://gitee.com/hzqst/CGAssistantJS/&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>

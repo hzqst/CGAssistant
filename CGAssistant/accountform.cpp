@@ -352,13 +352,17 @@ void AccountForm::OnPOLCNFinish(int exitCode, QProcess::ExitStatus exitStatus)
 bool AccountForm::QueryAccount(QString &label, QString &errorMsg)
 {
     if(m_POLCN->state() == QProcess::ProcessState::Running)
+    {
+        //qDebug("running");
         return false;
+    }
 
     if(!m_polcn_lock)
     {
         m_polcn_lock = CreateMutexW(NULL, TRUE, L"CGAPolcnLock");
         if(m_polcn_lock && GetLastError() == ERROR_ALREADY_EXISTS)
         {
+           // qDebug("lock1");
             auto polcn_map = CreateFileMappingW(INVALID_HANDLE_VALUE, NULL, PAGE_READWRITE, 0, 0x1000, L"CGAPPolcnMap");
             if(polcn_map)
             {
@@ -391,11 +395,15 @@ bool AccountForm::QueryAccount(QString &label, QString &errorMsg)
         }
         else if(!m_polcn_lock)
         {
+            //qDebug("lock2");
+
             label = tr("Failed to acquire POLCN login lock...");
             errorMsg = tr("Failed to acquire POLCN login lock, error code %1...").arg( GetLastError() );
             return false;
         }
     }
+
+    //qDebug("query");
 
     m_loginquery = QTime::currentTime();
     m_StdOut.clear();

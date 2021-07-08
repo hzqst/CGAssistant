@@ -5,6 +5,7 @@
 #include <QObject>
 #include <QSharedPointer>
 #include <QList>
+#include <QSound>
 #include "player.h"
 
 #define BattleCond_Type_Ignore 0
@@ -862,7 +863,7 @@ public slots:
     void OnSetDelayTo(int val);
     void OnSetHighSpeed(int val);
     void OnSetPetDoubleAction(int state);
-    void OnSetPlayerForceAction(int state);
+    void OnSetBeep(int state);
     void OnSyncList(CBattleSettingList list);
 signals:
     void NotifyBattleAction(int flags);
@@ -875,11 +876,12 @@ public:
     bool m_bLockCountdown;
     bool m_bShowHPMP;
     bool m_bPetDoubleAction;
-    bool m_bPlayerForceAction;
+    bool m_bBeep;
     bool m_bNoSwitchAnim;
     int m_iDelayFrom;
     int m_iDelayTo;
     uint64_t m_LastWarpMap202;
+    QSound *m_beep;
 private:
     CGA_BattleContext_t m_BattleContext;
     CBattleSettingList m_SettingList;

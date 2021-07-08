@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui widgets sql network
+QT       += core gui widgets sql network multimedia
 
 TARGET = CGAssistant
 TEMPLATE = app

@@ -1,5 +1,6 @@
 #include <QTimer>
 #include <QDateTime>
+#include <QSound>
 #include "battle.h"
 
 extern CGA::CGAInterface *g_CGAInterface;
@@ -1921,7 +1922,7 @@ bool CBattleAction_PlayerSkillAttack::DoAction(int target, int defaultTarget, CG
     if(context.m_bIsSkillPerformed == false && GetSkill(context, skill_pos, skill_level)){
         qDebug("BattleSkillAttack %d %d %d", skill_pos, skill_level, target);
         FixTarget(context, skill_pos, skill_level, target);
-        g_CGAInterface->BattleSkillAttack(skill_pos, skill_level, target, context.m_bIsPlayerForceAction ? true : false, result);
+        g_CGAInterface->BattleSkillAttack(skill_pos, skill_level, target, false, result);
     }
 
     if(!result){
@@ -3024,10 +3025,11 @@ CBattleWorker::CBattleWorker()
     m_bBOSSProtect = false;
     m_bNoSwitchAnim = false;
     m_bPetDoubleAction = false;
-    m_bPlayerForceAction = false;
+    m_bBeep = false;
     m_iDelayFrom = 0;
     m_iDelayTo = 0;
     m_LastWarpMap202 = 0;
+    m_beep = new QSound("./beep.wav");
 
     QTimer *timer = new QTimer(this);
     connect(timer, SIGNAL(timeout()), this, SLOT(OnLockCountdown()));
@@ -3647,7 +3649,7 @@ void CBattleWorker::OnNotifyBattleAction(int flags)
         m_BattleContext.m_bRoundZeroNotified = true;
 
     m_BattleContext.m_bIsPetDoubleAction = m_bPetDoubleAction;
-    m_BattleContext.m_bIsPlayerForceAction = m_bPlayerForceAction;
+    m_BattleContext.m_bIsPlayerForceAction = false;
 
     GetBattleUnits();
 
@@ -3657,6 +3659,12 @@ void CBattleWorker::OnNotifyBattleAction(int flags)
 
         if(CheckProtect()){
             //qDebug("Found Lv1 enemy, stopped.");
+            if(m_bBeep && m_beep)
+            {
+                m_beep->stop();
+                m_beep->setLoops(0);
+                m_beep->play();
+            }
             return;
         }
 
@@ -3744,9 +3752,9 @@ void CBattleWorker::OnSetPetDoubleAction(int state)
     m_bPetDoubleAction = state ? true : false;
 }
 
-void CBattleWorker::OnSetPlayerForceAction(int state)
+void CBattleWorker::OnSetBeep(int state)
 {
-    m_bPlayerForceAction = state ? true : false;
+    m_bBeep = state ? true : false;
 }
 
 void CBattleWorker::OnSetDelayFrom(int val)

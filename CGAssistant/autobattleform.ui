@@ -119,6 +119,25 @@ meet BOSS</string>
        </widget>
       </item>
       <item>
+       <widget class="QCheckBox" name="checkBox_beep">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="text">
+         <string>Beep when stop</string>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+        <property name="checked">
+         <bool>false</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QCheckBox" name="checkBox_lockCountdown">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -161,26 +180,6 @@ meet BOSS</string>
         <property name="text">
          <string>Pet Double
 Action</string>
-        </property>
-        <property name="checked">
-         <bool>false</bool>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QCheckBox" name="checkBox_playerForceAction">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="text">
-         <string>Player Force
-Action</string>
-        </property>
-        <property name="checkable">
-         <bool>true</bool>
         </property>
         <property name="checked">
          <bool>false</bool>
