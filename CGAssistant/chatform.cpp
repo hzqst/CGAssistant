@@ -108,19 +108,21 @@ void ChatForm::OnNotifyChatMsg(int unitid, QString msg, int size, int color)
             line.append(QString("%1: %2<br>").arg(name).arg(msg));
         }
 
+        QTextCursor txtcur = ui->textEdit_chat->textCursor();
+
         if(m_ChatMaxLines > 0){
-            while(ui->textEdit_chat->document()->lineCount() > m_ChatMaxLines)
+            //qDebug("doc %d max %d", ui->textEdit_chat->document()->lineCount(), m_ChatMaxLines);
+            if (ui->textEdit_chat->document()->lineCount() > m_ChatMaxLines)
             {
-                QTextCursor txtcur = ui->textEdit_chat->textCursor();
-                txtcur.movePosition(QTextCursor::Start);
-                txtcur.movePosition(QTextCursor::Down, QTextCursor::KeepAnchor);
+                txtcur.movePosition(QTextCursor::Start, QTextCursor::MoveAnchor);
+                txtcur.movePosition(QTextCursor::NextBlock, QTextCursor::KeepAnchor);
                 txtcur.removeSelectedText();
             }
         }
 
-        ui->textEdit_chat->moveCursor(QTextCursor::End);
-        ui->textEdit_chat->insertHtml(line);
-        ui->textEdit_chat->moveCursor(QTextCursor::End);
+        txtcur.movePosition(QTextCursor::End, QTextCursor::MoveAnchor);
+        txtcur.insertHtml(line);
+        txtcur.insertBlock();
     }
 }
 
