@@ -52,7 +52,7 @@ void MyPaintMap::keyPressEvent(QKeyEvent *event)
                 int x = targetpos[0].toInt(&isOK);
                 if(isOK)
                 {
-                    int y = targetpos[0].toInt(&isOK);
+                    int y = targetpos[1].toInt(&isOK);
                     if(isOK)
                     {
                         runNavigatorScript(x, y, 1, &m_naverror);
