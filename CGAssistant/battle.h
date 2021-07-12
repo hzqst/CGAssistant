@@ -5,7 +5,6 @@
 #include <QObject>
 #include <QSharedPointer>
 #include <QList>
-#include <QSound>
 #include "player.h"
 
 #define BattleCond_Type_Ignore 0
@@ -881,7 +880,6 @@ public:
     int m_iDelayFrom;
     int m_iDelayTo;
     uint64_t m_LastWarpMap202;
-    QSound *m_beep;
 private:
     CGA_BattleContext_t m_BattleContext;
     CBattleSettingList m_SettingList;

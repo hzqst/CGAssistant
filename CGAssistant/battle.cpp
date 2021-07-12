@@ -1,6 +1,8 @@
 #include <QTimer>
 #include <QDateTime>
-#include <QSound>
+#include <QCoreApplication>
+#include <Windows.h>
+
 #include "battle.h"
 
 extern CGA::CGAInterface *g_CGAInterface;
@@ -3029,7 +3031,6 @@ CBattleWorker::CBattleWorker()
     m_iDelayFrom = 0;
     m_iDelayTo = 0;
     m_LastWarpMap202 = 0;
-    m_beep = new QSound("./beep.wav");
 
     QTimer *timer = new QTimer(this);
     connect(timer, SIGNAL(timeout()), this, SLOT(OnLockCountdown()));
@@ -3659,11 +3660,11 @@ void CBattleWorker::OnNotifyBattleAction(int flags)
 
         if(CheckProtect()){
             //qDebug("Found Lv1 enemy, stopped.");
-            if(m_bBeep && m_beep)
+            if(m_bBeep)
             {
-                m_beep->stop();
-                m_beep->setLoops(0);
-                m_beep->play();
+                QString beep = QCoreApplication::applicationDirPath();
+                beep += "/beep.wav";
+                sndPlaySoundA(beep.toLocal8Bit().data(), SND_FILENAME | SND_ASYNC);
             }
             return;
         }

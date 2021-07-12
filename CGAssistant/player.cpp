@@ -68,8 +68,6 @@ CPlayerWorker::CPlayerWorker(QObject *parent) : QObject(parent)
     m_IsDownloadingMap = false;
     m_bShowHPMP = false;
     m_tabindex = 0;
-    m_LastUseItem = 0;
-    m_LastUseItemPlayerSelect = 0;
     m_LastUseItemTargetHP = 0;
     m_LastUseItemTargetMaxHP = 0;
     m_LastUseItemTargetMP = 0;
@@ -122,8 +120,7 @@ bool CPlayerWorker::OnEatItem(QSharedPointer<CGA_ItemList_t> items)
         return 0;
     };
 
-    //too fast?
-    if(QDateTime::currentMSecsSinceEpoch() < m_LastUseItem + 3000)
+    if(m_LastUseItemTime.elapsed() < 3000)
         return false;
 
     for(int i = 0;i < items->size(); ++i)
@@ -138,7 +135,7 @@ bool CPlayerWorker::OnEatItem(QSharedPointer<CGA_ItemList_t> items)
                     bool result = false;
                     if(g_CGAInterface->UseItem(item.pos, result) && result)
                     {
-                        m_LastUseItem = QDateTime::currentMSecsSinceEpoch();
+                        m_LastUseItemTime.restart();
 
                         CGA::cga_player_info_t info;
                         if(g_CGAInterface->GetPlayerInfo(info))
@@ -162,7 +159,7 @@ bool CPlayerWorker::OnEatItem(QSharedPointer<CGA_ItemList_t> items)
                             bool result = false;
                             if(g_CGAInterface->UseItem(item.pos, result) && result)
                             {
-                                m_LastUseItem = QDateTime::currentMSecsSinceEpoch();
+                                m_LastUseItemTime.restart();
 
                                 m_LastUseItemTargetHP = p.hp;
                                 m_LastUseItemTargetMaxHP = p.maxhp;
@@ -185,7 +182,7 @@ bool CPlayerWorker::OnEatItem(QSharedPointer<CGA_ItemList_t> items)
                     bool result = false;
                     if(g_CGAInterface->UseItem(item.pos, result) && result)
                     {
-                        m_LastUseItem = QDateTime::currentMSecsSinceEpoch();
+                        m_LastUseItemTime.restart();
 
                         CGA::cga_player_info_t info;
                         if(g_CGAInterface->GetPlayerInfo(info))
@@ -209,7 +206,7 @@ bool CPlayerWorker::OnEatItem(QSharedPointer<CGA_ItemList_t> items)
                             bool result = false;
                             if(g_CGAInterface->UseItem(item.pos, result) && result)
                             {
-                                m_LastUseItem = QDateTime::currentMSecsSinceEpoch();
+                                m_LastUseItemTime.restart();
 
                                 m_LastUseItemTargetHP = p.hp;
                                 m_LastUseItemTargetMaxHP = p.maxhp;
@@ -665,20 +662,20 @@ bool CPlayerWorker::NeedPetSupply(CGA::cga_pets_info_t &pets)
 
 void CPlayerWorker::OnNotifyPlayerMenu(QSharedPointer<CGA::cga_player_menu_items_t> menu)
 {
-    if((m_bUseMed || m_bUseFood || m_bPetMed || m_bPetFood) && QDateTime::currentMSecsSinceEpoch() < m_LastUseItem + 1500)
+    if((m_bUseMed || m_bUseFood || m_bPetMed || m_bPetFood) && m_LastUseItemTime.elapsed() < 1500)
     {
         bool result = false;
         std::string menustring;
         if(g_CGAInterface->PlayerMenuSelect(0, menustring, result))
         {
-            m_LastUseItemPlayerSelect = QDateTime::currentMSecsSinceEpoch();
+            m_LastUseItemPlayerSelectTime.restart();
         }
     }
 }
 
 void CPlayerWorker::OnNotifyUnitMenu(QSharedPointer<CGA::cga_unit_menu_items_t> menu)
 {
-    if((m_bUseMed || m_bUseFood || m_bPetMed || m_bPetFood) && QDateTime::currentMSecsSinceEpoch() < m_LastUseItemPlayerSelect + 1500)
+    if((m_bUseMed || m_bUseFood || m_bPetMed || m_bPetFood) && m_LastUseItemTime.elapsed() < 3000 && m_LastUseItemPlayerSelectTime.elapsed() < 1500)
     {
         for(size_t i = 0;i < menu->size(); ++i)
         {

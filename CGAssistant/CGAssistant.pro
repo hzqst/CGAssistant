@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui widgets sql network multimedia
+QT       += core gui widgets sql network
 
 TARGET = CGAssistant
 TEMPLATE = app
@@ -74,7 +74,10 @@ DISTFILES +=
 RESOURCES += resource.qrc
 
 QMAKE_CXXFLAGS += /MP /Gm-
+QMAKE_CXXFLAGS += /wd"4100"
+
 QMAKE_CFLAGS += /MP /Gm-
+QMAKE_CFLAGS += /wd"4100"
 
 Release:LIBS += -L"../Release/"
 Debug:LIBS += -L"../Debug/"
@@ -83,6 +86,7 @@ LIBS += -L"../qhttp/xbin"
 LIBS += -luser32
 LIBS += -lgdi32
 LIBS += -lntdll
+LIBS += -lwinmm
 LIBS += -lqhttp
 LIBS += -lCGALib
 

@@ -4,6 +4,7 @@
 #include <QList>
 #include <QVector>
 #include <QString>
+#include <QTime>
 #include <QSharedPointer>
 #include "../CGALib/gameinterface.h"
 
@@ -336,12 +337,12 @@ private:
     bool m_IsDownloadingMap;
     int m_tabindex;
 
-    uint64_t m_LastUseItem;
+    QTime m_LastUseItemTime;
+    QTime m_LastUseItemPlayerSelectTime;
     int m_LastUseItemTargetHP;
     int m_LastUseItemTargetMaxHP;
     int m_LastUseItemTargetMP;
     int m_LastUseItemTargetMaxMP;
-    uint64_t m_LastUseItemPlayerSelect;
 };
 
 #endif // PLAYER_H
