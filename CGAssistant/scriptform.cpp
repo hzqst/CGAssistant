@@ -379,10 +379,9 @@ void ScriptForm::StopNavigatorScript()
 
 void ScriptForm::UpdateGameTextUI(bool show)
 {
-    if(show)
+    if(show && m_scriptPath.size())
     {
-        QFileInfo fileInfo(m_PathString);
-
+        QFileInfo fileInfo(m_scriptPath);
         QString fileName = fileInfo.fileName();
         std::string path = fileName.toLocal8Bit().toStdString();
 

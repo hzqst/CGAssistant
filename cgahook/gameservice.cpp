@@ -5515,7 +5515,12 @@ void CGAService::SetGameTextUIEnabled(bool enable)
 
 void CGAService::SetGameTextUICurrentScript(const std::string &script)
 {
-	memcpy(m_GameTextUICurrentScript, script.data(), script.length() + 1);
+	size_t len = script.length() + 1;
+	if (len > 1023)
+		len = 1023;
+	memcpy(m_GameTextUICurrentScript, script.data(), len);
+
+	OutputDebugStringA(m_GameTextUICurrentScript);
 }
 
 int CGAService::GetBattleEndTick()
