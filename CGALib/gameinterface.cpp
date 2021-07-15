@@ -89,6 +89,7 @@ namespace CGAServiceProtocol
 	TIMAX_DEFINE_PROTOCOL(BattleDoNothing, bool());
 	TIMAX_DEFINE_PROTOCOL(BattleSetHighSpeedEnabled, void(bool));
 	TIMAX_DEFINE_PROTOCOL(SetGameTextUIEnabled, void(bool));
+	TIMAX_DEFINE_PROTOCOL(SetGameTextUICurrentScript, void(std::string));
 	TIMAX_DEFINE_PROTOCOL(GetBattleEndTick, int());
 	TIMAX_DEFINE_PROTOCOL(SetBattleEndTick, void(int));
 	TIMAX_DEFINE_PROTOCOL(SetWorkDelay, void(int));
@@ -1060,6 +1061,17 @@ namespace CGA
 			if (m_connected) {
 				try {
 					m_client.call(std::chrono::milliseconds(10000), m_endpoint, CGAServiceProtocol::SetGameTextUIEnabled, enable);
+					return true;
+				}
+				catch (timax::rpc::exception const &e) { if (e.get_error_code() != timax::rpc::error_code::TIMEOUT) m_connected = false; OutputDebugStringA("rpc exception from " __FUNCTION__); OutputDebugStringA(e.get_error_message().c_str()); }
+				catch (msgpack::parse_error &e) { OutputDebugStringA("parse exception from " __FUNCTION__); OutputDebugStringA(e.what()); }
+			}
+			return false;
+		}
+		virtual bool SetGameTextUICurrentScript(const std::string &script) {
+			if (m_connected) {
+				try {
+					m_client.call(std::chrono::milliseconds(10000), m_endpoint, CGAServiceProtocol::SetGameTextUICurrentScript, script);
 					return true;
 				}
 				catch (timax::rpc::exception const &e) { if (e.get_error_code() != timax::rpc::error_code::TIMEOUT) m_connected = false; OutputDebugStringA("rpc exception from " __FUNCTION__); OutputDebugStringA(e.get_error_message().c_str()); }

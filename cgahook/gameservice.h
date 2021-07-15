@@ -680,6 +680,7 @@ namespace CGA
 		virtual bool BattleDoNothing();
 		virtual void BattleSetHighSpeedEnabled(bool enable);
 		virtual void SetGameTextUIEnabled(bool enable);
+		virtual void SetGameTextUICurrentScript(const std::string &script);
 		virtual void ChangePersDesc(cga_pers_desc_t desc);
 		virtual bool ChangeNickName(std::string str);
 		virtual bool ChangeTitleName(int titleId);
@@ -1304,6 +1305,7 @@ namespace CGA
 		ULONG m_ImageSize;
 
 		char m_fakeCGSharedMem[1024];
+		char m_GameTextUICurrentScript[1024];
 	};
 }
 

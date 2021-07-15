@@ -3370,7 +3370,8 @@ void CGAService::Initialize(game_type type)
 		m_ui_selectserver_click_index = -1;
 		m_ui_selectserver_loop = false;
 		m_ui_selectcharacter_click_index = -1;
-		m_fakeCGSharedMem[0] = 0;
+		memset(m_fakeCGSharedMem, 0, sizeof(m_fakeCGSharedMem));
+		memset(m_GameTextUICurrentScript, 0, sizeof(m_GameTextUICurrentScript));
 		m_ui_auto_login = false;
 		m_ui_create_character = false;
 		m_run_game_pid = 0;
@@ -3646,7 +3647,6 @@ void CGAService::DrawCustomText()
 				if (*g_map_x_bottom <= *g_move_xdest && *g_move_xdest - *g_map_x_bottom < *g_map_x_size &&
 					*g_map_y_bottom <= *g_move_ydest && *g_move_ydest - *g_map_y_bottom < *g_map_y_size)
 				{
-
 					char buf[256];
 
 					int offsetX = *g_move_xdest - *g_map_x_bottom;
@@ -3672,6 +3672,23 @@ void CGAService::DrawCustomText()
 				}
 
 				y -= 64;
+
+				if (m_GameTextUICurrentScript[0])
+				{
+					int len = strlen(m_GameTextUICurrentScript);
+
+					ABC abc[1];
+					int width = 0;
+					for (int j = 0; j < len; ++j) {
+						GetCharABCWidthsA(hDC, m_GameTextUICurrentScript[j], m_GameTextUICurrentScript[j], abc);
+						width += abc[0].abcA + abc[0].abcB + abc[0].abcC;
+					}
+
+					SetTextColor(hDC, RGB(0, 0, 0));
+					TextOutA(hDC, x - width, y, m_GameTextUICurrentScript, len);
+					SetTextColor(hDC, RGB(255, 200, 0));
+					TextOutA(hDC, x - width - 1, y - 1, m_GameTextUICurrentScript, len);
+				}
 
 				pSurface->ReleaseDC(hDC);
 			}
@@ -5493,6 +5510,11 @@ void CGAService::BattleSetHighSpeedEnabled(bool enable)
 void CGAService::SetGameTextUIEnabled(bool enable)
 {
 	m_gametextui_enable = enable;
+}
+
+void CGAService::SetGameTextUICurrentScript(const std::string &script)
+{
+	memcpy(m_GameTextUICurrentScript, script.data(), script.length() + 1);
 }
 
 int CGAService::GetBattleEndTick()

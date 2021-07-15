@@ -259,6 +259,7 @@ DWORD WINAPI CGAServerThread(LPVOID)
 				server->register_handler("BattlePetSkillAttack", timax::bind(&CGAService::BattlePetSkillAttack, &g_CGAService));
 				server->register_handler("BattleSetHighSpeedEnabled", timax::bind(&CGAService::BattleSetHighSpeedEnabled, &g_CGAService));
 				server->register_handler("SetGameTextUIEnabled", timax::bind(&CGAService::SetGameTextUIEnabled, &g_CGAService));
+				server->register_handler("SetGameTextUICurrentScript", timax::bind(&CGAService::SetGameTextUICurrentScript, &g_CGAService));
 				server->register_handler("GetBattleEndTick", timax::bind(&CGAService::GetBattleEndTick, &g_CGAService));
 				server->register_handler("SetBattleEndTick", timax::bind(&CGAService::SetBattleEndTick, &g_CGAService));
 

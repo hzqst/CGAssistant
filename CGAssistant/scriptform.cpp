@@ -11,7 +11,6 @@
 #include <QJsonObject>
 #include <intrin.h>
 
-
 #include "MINT.h"
 
 #include "../CGALib/gameinterface.h"
@@ -35,6 +34,7 @@ ScriptForm::ScriptForm(QWidget *parent) :
     m_bPathBegin = false;
     m_bSuspending = false;
     m_port = 0;
+    m_ConsoleMaxLines = 100;
 
     m_node = new QProcess(this);
 
@@ -111,18 +111,20 @@ void ScriptForm::OnNodeReadyRead()
     {
         QString data = m_node->readAll();
 
+        QTextCursor txtcur = m_output->textCursor();
         if(m_ConsoleMaxLines > 0){
             while(m_output->document()->lineCount() > m_ConsoleMaxLines)
             {
-                QTextCursor txtcur = m_output->textCursor();
-                txtcur.movePosition(QTextCursor::Start);
-                txtcur.movePosition(QTextCursor::Down, QTextCursor::KeepAnchor);
+
+                txtcur.movePosition(QTextCursor::Start, QTextCursor::MoveAnchor);
+                txtcur.movePosition(QTextCursor::NextBlock, QTextCursor::KeepAnchor);
                 txtcur.removeSelectedText();
             }
         }
 
-        m_output->moveCursor(QTextCursor::End);
-        m_output->insertPlainText(data);
+        txtcur.movePosition(QTextCursor::End, QTextCursor::MoveAnchor);
+        txtcur.insertText(data);
+        txtcur.insertBlock();
 
         if(m_bNavigating)
         {
@@ -201,6 +203,8 @@ void ScriptForm::OnNodeFinish(int exitCode, QProcess::ExitStatus exitStatus)
     ui->pushButton_debug->setEnabled(true);
     ui->pushButton_term->setEnabled(false);
     ui->pushButton_suspend->setEnabled(false);
+
+    UpdateGameTextUI(false);
 
     //restore everything...
     g_CGAInterface->FixMapWarpStuck(2);
@@ -360,6 +364,8 @@ void ScriptForm::on_pushButton_run_clicked()
         m_node->setWorkingDirectory(fileInfo.dir().absolutePath());
         m_node->setProcessChannelMode(QProcess::ProcessChannelMode::MergedChannels);
         m_node->start("node.exe", args);
+
+        UpdateGameTextUI(true);
     }
 }
 
@@ -368,6 +374,23 @@ void ScriptForm::StopNavigatorScript()
     if(m_bNavigating)
     {
         on_pushButton_term_clicked();
+    }
+}
+
+void ScriptForm::UpdateGameTextUI(bool show)
+{
+    if(show)
+    {
+        QFileInfo fileInfo(m_PathString);
+
+        QString fileName = fileInfo.fileName();
+        std::string path = fileName.toLocal8Bit().toStdString();
+
+        g_CGAInterface->SetGameTextUICurrentScript(path);
+    }
+    else
+    {
+        g_CGAInterface->SetGameTextUICurrentScript("");
     }
 }
 
@@ -416,6 +439,8 @@ void ScriptForm::RunNavigatorScript(int x, int y, int enter, QString *result)
         m_node->setWorkingDirectory(fileInfo.dir().absolutePath());
         m_node->setProcessChannelMode(QProcess::ProcessChannelMode::MergedChannels);
         m_node->start("node.exe", args);
+
+        UpdateGameTextUI(true);
     } else {
         if(result)
             *result = tr("Navigation is unavailable while running other scripts.");
@@ -456,6 +481,8 @@ void ScriptForm::on_pushButton_debug_clicked()
         m_node->setWorkingDirectory(fileInfo.dir().absolutePath());        
         m_node->setProcessChannelMode(QProcess::ProcessChannelMode::MergedChannels);
         m_node->start("node.exe", args);
+
+        UpdateGameTextUI(true);
     }
 }
 
@@ -524,6 +551,7 @@ void ScriptForm::on_pushButton_suspend_clicked()
             {
                 if(STATUS_SUCCESS == NtSuspendProcess(ProcessHandle))
                 {
+                    UpdateGameTextUI(false);
                     m_bSuspending = true;
                     ui->pushButton_suspend->setText(tr("Resume"));
                     ui->pushButton_suspend->setEnabled(true);
@@ -541,6 +569,7 @@ void ScriptForm::on_pushButton_suspend_clicked()
             {
                 if(STATUS_SUCCESS == NtResumeProcess(ProcessHandle))
                 {
+                    UpdateGameTextUI(true);
                     m_bSuspending = false;
                     ui->pushButton_suspend->setText(tr("Suspend"));
                     ui->pushButton_suspend->setEnabled(true);

@@ -19,6 +19,7 @@ public:
     ~ScriptForm();
     virtual void dragEnterEvent(QDragEnterEvent *event);
     virtual void dropEvent(QDropEvent *event);
+    void UpdateGameTextUI(bool show);
 signals:
     void ReportNavigatorPath(QString json);
     void ReportNavigatorFinish(int exitCode);

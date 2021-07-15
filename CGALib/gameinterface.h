@@ -1157,6 +1157,7 @@ namespace CGA
 		virtual bool BattleDoNothing(bool &result) = 0;
 		virtual bool BattleSetHighSpeedEnabled(bool enable) = 0;
 		virtual bool SetGameTextUIEnabled(bool enable) = 0;
+		virtual bool SetGameTextUICurrentScript(const std::string &script) = 0;
 		virtual bool GetBattleEndTick(int &msec) = 0;
 		virtual bool SetBattleEndTick(int msec) = 0;
 		virtual bool SetWorkDelay(int delay) = 0;
