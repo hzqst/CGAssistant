@@ -256,6 +256,27 @@ void IsUIDialogPresent(const Nan::FunctionCallbackInfo<v8::Value>& info)
 	info.GetReturnValue().Set(present);
 }
 
+void SetGameTextUIEnabled(const Nan::FunctionCallbackInfo<v8::Value>& info)
+{
+	auto isolate = info.GetIsolate();
+	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
+
+	if (info.Length() < 1 || !info[0]->IsBoolean()) {
+		Nan::ThrowTypeError("Arg[0] must be boolean.");
+		return;
+	}
+
+	bool enable = info[0]->BooleanValue(isolate);
+	if (!g_CGAInterface->SetGameTextUIEnabled(enable))
+	{
+		Nan::ThrowError("RPC Invocation failed.");
+		return;
+	}
+
+	info.GetReturnValue().Set(true);
+}
+
 void IsSkillValid(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
 	auto isolate = info.GetIsolate();

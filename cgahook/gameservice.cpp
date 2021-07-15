@@ -3330,7 +3330,7 @@ void CGAService::Initialize(game_type type)
 			CLIP_CHARACTER_PRECIS, DEFAULT_QUALITY,
 			FF_MODERN, L"ËÎÌו");
 
-		m_btl_showhpmp_enable = false;
+		m_gametextui_enable = false;
 		m_btl_highspeed_enable = false;
 
 		for (int i = 0; i < 20; ++i)
@@ -3393,7 +3393,7 @@ void CGAService::Initialize(game_type type)
 			CLIP_CHARACTER_PRECIS, DEFAULT_QUALITY,
 			FF_MODERN, L"ËÎÌו");
 
-		m_btl_showhpmp_enable = false;
+		m_gametextui_enable = false;
 		m_btl_highspeed_enable = false;
 
 		for (int i = 0; i < 20; ++i)
@@ -3577,12 +3577,12 @@ void CGAService::DrawCustomText()
 		NET_ParseBattlePackets(m_btl_delayanimpacket.a1, "M|END|");
 	}
 
-	if (m_btl_showhpmp_enable)
+	if (m_gametextui_enable && GetForegroundWindow() == g_MainHwnd)
 	{
-		LPDIRECTDRAWSURFACE pSurface = GetDirectDrawBackSurface();
-
 		if (GetWorldStatus() == 10)
 		{
+			auto pSurface = GetDirectDrawBackSurface();
+
 			HDC hDC;
 			if (S_OK == pSurface->GetDC(&hDC))
 			{
@@ -3630,26 +3630,24 @@ void CGAService::DrawCustomText()
 				pSurface->ReleaseDC(hDC);
 			}
 		}
-	}
-
-	if (m_btl_showhpmp_enable)
-	{
-		if (GetWorldStatus() == 9 && GetGameStatus() == 3)
+		else if (GetWorldStatus() == 9 && GetGameStatus() == 3)
 		{
-			LPDIRECTDRAWSURFACE pSurface = GetDirectDrawBackSurface();
+			auto pSurface = GetDirectDrawBackSurface();
+
 			HDC hDC;
 			if (S_OK == pSurface->GetDC(&hDC))
 			{
 				SetBkMode(hDC, TRANSPARENT);
 				SelectObject(hDC, g_CGAService.m_hFont);
 
+				int x = 640 - 16;
+				int y = 480 - 64;
+
 				if (*g_map_x_bottom <= *g_move_xdest && *g_move_xdest - *g_map_x_bottom < *g_map_x_size &&
 					*g_map_y_bottom <= *g_move_ydest && *g_move_ydest - *g_map_y_bottom < *g_map_y_size)
 				{
-					int x = 640 - 16;
-					int y = 480 - 64;
 
-					char buf[1024];
+					char buf[256];
 
 					int offsetX = *g_move_xdest - *g_map_x_bottom;
 					int offsetY = *g_move_ydest - *g_map_y_bottom;
@@ -3672,6 +3670,8 @@ void CGAService::DrawCustomText()
 					SetTextColor(hDC, RGB(255, 200, 0));
 					TextOutA(hDC, x - width - 1, y - 1, buf, len);
 				}
+
+				y -= 64;
 
 				pSurface->ReleaseDC(hDC);
 			}
@@ -5490,9 +5490,9 @@ void CGAService::BattleSetHighSpeedEnabled(bool enable)
 	m_btl_highspeed_enable = enable;
 }
 
-void CGAService::BattleSetShowHPMPEnabled(bool enable)
+void CGAService::SetGameTextUIEnabled(bool enable)
 {
-	m_btl_showhpmp_enable = enable;
+	m_gametextui_enable = enable;
 }
 
 int CGAService::GetBattleEndTick()

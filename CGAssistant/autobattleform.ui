@@ -154,22 +154,6 @@ meet BOSS</string>
        </widget>
       </item>
       <item>
-       <widget class="QCheckBox" name="checkBox_showHPMP">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="text">
-         <string>Show HP and MP</string>
-        </property>
-        <property name="checked">
-         <bool>false</bool>
-        </property>
-       </widget>
-      </item>
-      <item>
        <widget class="QCheckBox" name="checkBox_petDoubleAction">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -728,7 +712,6 @@ Action</string>
   <tabstop>checkBox_firstRoundNoDelay</tabstop>
   <tabstop>checkBox_levelOneProtect</tabstop>
   <tabstop>checkBox_lockCountdown</tabstop>
-  <tabstop>checkBox_showHPMP</tabstop>
   <tabstop>horizontalSlider_delayFrom</tabstop>
   <tabstop>horizontalSlider_delayTo</tabstop>
   <tabstop>comboBox_condition_type</tabstop>

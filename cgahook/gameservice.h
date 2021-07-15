@@ -679,7 +679,7 @@ namespace CGA
 		virtual bool BattlePetSkillAttack(int skillpos, int target, bool packetOnly);
 		virtual bool BattleDoNothing();
 		virtual void BattleSetHighSpeedEnabled(bool enable);
-		virtual void BattleSetShowHPMPEnabled(bool enable);
+		virtual void SetGameTextUIEnabled(bool enable);
 		virtual void ChangePersDesc(cga_pers_desc_t desc);
 		virtual bool ChangeNickName(std::string str);
 		virtual bool ChangeTitleName(int titleId);
@@ -1218,7 +1218,7 @@ namespace CGA
 
 		bool m_initialized;
 		bool m_btl_highspeed_enable;
-		bool m_btl_showhpmp_enable;
+		bool m_gametextui_enable;
 		bool m_btl_double_action;
 		bool m_btl_pet_skill_packet_send;
 		struct

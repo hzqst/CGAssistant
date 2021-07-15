@@ -65,6 +65,8 @@ PlayerForm::PlayerForm(CPlayerWorker *worker, CBattleWorker *bworker, QWidget *p
     connect(ui->checkBox_useMed, SIGNAL(stateChanged(int)), m_worker, SLOT(OnSetUseMed(int)), Qt::QueuedConnection);
     connect(ui->checkBox_petFood, SIGNAL(stateChanged(int)), m_worker, SLOT(OnSetPetFood(int)), Qt::QueuedConnection);
     connect(ui->checkBox_petMed, SIGNAL(stateChanged(int)), m_worker, SLOT(OnSetPetMed(int)), Qt::QueuedConnection);
+    connect(ui->checkBox_GameTextUI, SIGNAL(stateChanged(int)), m_worker, SLOT(OnSetGameTextUI(int)), Qt::QueuedConnection);
+    connect(ui->checkBox_AntiAFKKick, SIGNAL(stateChanged(int)), m_worker, SLOT(OnSetAntiAFKKick(int)), Qt::QueuedConnection);
     connect(ui->comboBox_useFoodAt, SIGNAL(currentTextChanged(QString)), m_worker, SLOT(OnSetUseFoodAt(QString)), Qt::QueuedConnection);
     connect(ui->comboBox_useMedAt, SIGNAL(currentTextChanged(QString)), m_worker, SLOT(OnSetUseMedAt(QString)), Qt::QueuedConnection);
     connect(ui->comboBox_petFoodAt, SIGNAL(currentTextChanged(QString)), m_worker, SLOT(OnSetPetFoodAt(QString)), Qt::QueuedConnection);

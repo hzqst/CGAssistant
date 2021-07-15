@@ -88,7 +88,7 @@ namespace CGAServiceProtocol
 	TIMAX_DEFINE_PROTOCOL(BattlePetSkillAttack, bool(int, int, bool));
 	TIMAX_DEFINE_PROTOCOL(BattleDoNothing, bool());
 	TIMAX_DEFINE_PROTOCOL(BattleSetHighSpeedEnabled, void(bool));
-	TIMAX_DEFINE_PROTOCOL(BattleSetShowHPMPEnabled, void(bool));
+	TIMAX_DEFINE_PROTOCOL(SetGameTextUIEnabled, void(bool));
 	TIMAX_DEFINE_PROTOCOL(GetBattleEndTick, int());
 	TIMAX_DEFINE_PROTOCOL(SetBattleEndTick, void(int));
 	TIMAX_DEFINE_PROTOCOL(SetWorkDelay, void(int));
@@ -1056,10 +1056,10 @@ namespace CGA
 			}
 			return false;
 		}
-		virtual bool BattleSetShowHPMPEnabled(bool enable) {
+		virtual bool SetGameTextUIEnabled(bool enable) {
 			if (m_connected) {
 				try {
-					m_client.call(std::chrono::milliseconds(10000), m_endpoint, CGAServiceProtocol::BattleSetShowHPMPEnabled, enable);
+					m_client.call(std::chrono::milliseconds(10000), m_endpoint, CGAServiceProtocol::SetGameTextUIEnabled, enable);
 					return true;
 				}
 				catch (timax::rpc::exception const &e) { if (e.get_error_code() != timax::rpc::error_code::TIMEOUT) m_connected = false; OutputDebugStringA("rpc exception from " __FUNCTION__); OutputDebugStringA(e.get_error_message().c_str()); }

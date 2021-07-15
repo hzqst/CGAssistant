@@ -1,6 +1,7 @@
 #pragma once 
 
 void IsUIDialogPresent(const Nan::FunctionCallbackInfo<v8::Value>& info);
+void SetGameTextUIEnabled(const Nan::FunctionCallbackInfo<v8::Value>& info);
 void IsInGame(const Nan::FunctionCallbackInfo<v8::Value>& info);
 void GetWorldStatus(const Nan::FunctionCallbackInfo<v8::Value>& info);
 void GetGameStatus(const Nan::FunctionCallbackInfo<v8::Value>& info);

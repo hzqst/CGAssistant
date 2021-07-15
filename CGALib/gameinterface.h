@@ -1156,7 +1156,7 @@ namespace CGA
 		virtual bool BattlePetSkillAttack(int skillpos, int target, bool packetOnly, bool &result) = 0;
 		virtual bool BattleDoNothing(bool &result) = 0;
 		virtual bool BattleSetHighSpeedEnabled(bool enable) = 0;
-		virtual bool BattleSetShowHPMPEnabled(bool enable) = 0;
+		virtual bool SetGameTextUIEnabled(bool enable) = 0;
 		virtual bool GetBattleEndTick(int &msec) = 0;
 		virtual bool SetBattleEndTick(int msec) = 0;
 		virtual bool SetWorkDelay(int delay) = 0;

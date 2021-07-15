@@ -47,6 +47,10 @@ CPlayerWorker::CPlayerWorker(QObject *parent) : QObject(parent)
     connect(timer4, SIGNAL(timeout()), this, SLOT(OnQueueDownloadMap()));
     timer4->start(500);
 
+    QTimer *timer5 = new QTimer(this);
+    connect(timer5, SIGNAL(timeout()), this, SLOT(OnQueueAntiAFKKick()));
+    timer5->start(60000);
+
     m_bUseFood = false;
     m_bUseMed = false;
     m_bPetFood = false;
@@ -66,7 +70,9 @@ CPlayerWorker::CPlayerWorker(QObject *parent) : QObject(parent)
     m_WorkDelay = 6500;
     m_bNoSwitchAnim = false;
     m_IsDownloadingMap = false;
-    m_bShowHPMP = false;
+    m_bGameTextUI = false;
+    m_bAntiAFKKick = false;
+
     m_tabindex = 0;
     m_LastUseItemTargetHP = 0;
     m_LastUseItemTargetMaxHP = 0;
@@ -89,7 +95,6 @@ void CPlayerWorker::OnSyncItemDroppers(CItemDropperList list)
 
 void CPlayerWorker::OnSyncItemTweakers(CItemTweakerList list)
 {
-    //qDebug("tweaker");
     m_ItemTweakers = list;
 }
 
@@ -269,6 +274,21 @@ void CPlayerWorker::OnDownloadMap(int xsize, int ysize)
     m_IsDownloadingMap = true;
 }
 
+
+void CPlayerWorker::OnQueueAntiAFKKick()
+{
+    if(!m_bAntiAFKKick)
+        return;
+
+    int ingame = 0;
+    bool connected = g_CGAInterface->IsConnected();
+    if(!connected || !g_CGAInterface->IsInGame(ingame) || !ingame)
+        return;
+
+    std::string empty;
+    g_CGAInterface->SayWords(empty, 0, 0, 0);
+}
+
 void CPlayerWorker::OnQueueDownloadMap()
 {
     if(!m_IsDownloadingMap)
@@ -379,8 +399,8 @@ void CPlayerWorker::OnQueueGetPlayerInfo()
         g_CGAInterface->SetMoveSpeed(m_MoveSpeed);
         g_CGAInterface->SetWorkDelay(m_WorkDelay);
         g_CGAInterface->SetWorkAcceleration(m_WorkAcc);
-        g_CGAInterface->SetNoSwitchAnim(m_bNoSwitchAnim);        
-        g_CGAInterface->BattleSetShowHPMPEnabled(m_bShowHPMP);
+        g_CGAInterface->SetNoSwitchAnim(m_bNoSwitchAnim);
+        g_CGAInterface->SetGameTextUIEnabled(m_bGameTextUI);
 
         int index1 = 0, index2 = 0, index3 = 0;
 
@@ -894,9 +914,14 @@ void CPlayerWorker::OnSetWorkAcc(int value)
     m_WorkAcc = value;
 }
 
-void CPlayerWorker::OnSetShowHPMP(int state)
+void CPlayerWorker::OnSetGameTextUI(int state)
 {
-    m_bShowHPMP = state ? true : false;
+    m_bGameTextUI = state ? true : false;
+}
+
+void CPlayerWorker::OnSetAntiAFKKick(int state)
+{
+    m_bAntiAFKKick = state ? true : false;
 }
 
 void CPlayerWorker::OnNotifyAttachProcessOk(quint32 ProcessId, quint32 ThreadId, quint32 port, quint32 hWnd)

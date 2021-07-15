@@ -384,6 +384,7 @@ void Init(v8::Local<v8::Object> exports) {
 	exports->Set(context, Nan::New("FixMapWarpStuck").ToLocalChecked(), Nan::New<v8::FunctionTemplate>(FixMapWarpStuck)->GetFunction(context).ToLocalChecked());
 	exports->Set(context, Nan::New("GetTeamPlayerInfo").ToLocalChecked(), Nan::New<v8::FunctionTemplate>(GetTeamPlayerInfo)->GetFunction(context).ToLocalChecked());
 	exports->Set(context, Nan::New("IsUIDialogPresent").ToLocalChecked(), Nan::New<v8::FunctionTemplate>(IsUIDialogPresent)->GetFunction(context).ToLocalChecked());
+	exports->Set(context, Nan::New("SetGameTextUIEnabled").ToLocalChecked(), Nan::New<v8::FunctionTemplate>(SetGameTextUIEnabled)->GetFunction(context).ToLocalChecked());
 	exports->Set(context, Nan::New("PlayGesture").ToLocalChecked(), Nan::New<v8::FunctionTemplate>(PlayGesture)->GetFunction(context).ToLocalChecked());
 	exports->Set(context, Nan::New("RequestDownloadMap").ToLocalChecked(), Nan::New<v8::FunctionTemplate>(RequestDownloadMap)->GetFunction(context).ToLocalChecked());
 	exports->Set(context, Nan::New("AsyncWaitBattleAction").ToLocalChecked(), Nan::New<v8::FunctionTemplate>(AsyncWaitBattleAction)->GetFunction(context).ToLocalChecked());

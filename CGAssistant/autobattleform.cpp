@@ -134,7 +134,6 @@ AutoBattleForm::AutoBattleForm(CBattleWorker *worker, CPlayerWorker *pworker, QW
     connect(ui->checkBox_levelOneProtect, SIGNAL(stateChanged(int)), m_worker, SLOT(OnSetLv1Protect(int)), Qt::ConnectionType::QueuedConnection);
     connect(ui->checkBox_bossProtect, SIGNAL(stateChanged(int)), m_worker, SLOT(OnSetBOSSProtect(int)), Qt::ConnectionType::QueuedConnection);
     connect(ui->checkBox_lockCountdown, SIGNAL(stateChanged(int)), m_worker, SLOT(OnSetLockCountdown(int)), Qt::ConnectionType::QueuedConnection);
-    connect(ui->checkBox_showHPMP, SIGNAL(stateChanged(int)), pworker, SLOT(OnSetShowHPMP(int)), Qt::ConnectionType::QueuedConnection);
     connect(ui->checkBox_petDoubleAction, SIGNAL(stateChanged(int)), m_worker, SLOT(OnSetPetDoubleAction(int)), Qt::ConnectionType::QueuedConnection);
     connect(ui->checkBox_beep, SIGNAL(stateChanged(int)), m_worker, SLOT(OnSetBeep(int)), Qt::ConnectionType::QueuedConnection);
     connect(ui->horizontalSlider_delayFrom, SIGNAL(valueChanged(int)), m_worker, SLOT(OnSetDelayFrom(int)), Qt::ConnectionType::QueuedConnection);

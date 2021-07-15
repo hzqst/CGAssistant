@@ -264,6 +264,7 @@ public slots:
     void OnQueueGetItemInfo();
     void OnQueueGetMapInfo();
     void OnQueueDownloadMap();
+    void OnQueueAntiAFKKick();
     void OnSyncItemDroppers(CItemDropperList list);
     void OnSyncItemTweakers(CItemTweakerList list);
     void OnQueueDropItem(int itempos, int itemid);
@@ -280,7 +281,8 @@ public slots:
     void OnSetPetMed(int state);
     void OnSetWorkAcc(int value);
     void OnSetNoSwitchAnim(int state);
-    void OnSetShowHPMP(int state);
+    void OnSetGameTextUI(int state);
+    void OnSetAntiAFKKick(int state);
     void OnDownloadMap(int xsize, int ysize);
     void OnTabChanged(int tabindex);
     void OnSetUseFoodAt(QString str);
@@ -326,7 +328,8 @@ private:
     int m_WorkAcc;
     bool m_bNoSwitchAnim;
     bool m_bHighSpeedBattle;
-    bool m_bShowHPMP;
+    bool m_bGameTextUI;
+    bool m_bAntiAFKKick;
     QSharedPointer<CGA_PlayerInfo_t> m_player;
     QSharedPointer<CGA_PetList_t> m_pets;
 
