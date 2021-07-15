@@ -266,6 +266,7 @@ int main(int argc, char *argv[])
                            parser.isSet(autologin) ? true : false,
                           parser.isSet(skipupdate) ? true : false,
                           parser.isSet(autochangeserver) ? true : false,
+                          parser.isSet(autokillgame) ? true : false,
                           parser.isSet(autocreatechara) ? true : false,
                           parser.value(createcharachara).toInt(),
                           parser.value(createcharaeye).toInt(),
