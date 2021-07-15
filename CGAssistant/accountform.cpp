@@ -530,7 +530,7 @@ void AccountForm::OnNotifyConnectionState(int state, QString msg)
 
 void AccountForm::OnNotifyFillAutoLogin(int game, QString user, QString pwd, QString gid,
                                         int bigserver, int server, int character,
-                                        bool autologin, bool skipupdate, bool autochangeserver,
+                                        bool autologin, bool skipupdate, bool autochangeserver,bool autokillgame,
                                         bool create_chara, int create_chara_chara, int create_chara_eye, int create_chara_mou, int create_chara_color,
                                         QString create_chara_points, QString create_chara_elements, QString create_chara_name)
 {
@@ -567,6 +567,9 @@ void AccountForm::OnNotifyFillAutoLogin(int game, QString user, QString pwd, QSt
 
     if(autochangeserver)
         ui->checkBox_autoChangeServer->setChecked(true);
+
+    if(autokillgame)
+        ui->checkBox_autoKillGame->setChecked(true);
 
     if(create_chara)
     {

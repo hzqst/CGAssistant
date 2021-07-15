@@ -72,6 +72,8 @@ int main(int argc, char *argv[])
 
     QCommandLineOption autochangeserver("autochangeserver");
 
+    QCommandLineOption autokillgame("autokillgame");
+
     QCommandLineOption autocreatechara("autocreatechara");
 
     QCommandLineOption createcharachara("createcharachara", "", "createcharachara");
@@ -122,6 +124,7 @@ int main(int argc, char *argv[])
     parser.addOption(autologin);
     parser.addOption(skipupdate);
     parser.addOption(autochangeserver);
+    parser.addOption(autokillgame);
     parser.addOption(autocreatechara);
     parser.addOption(createcharachara);
     parser.addOption(createcharaeye);
