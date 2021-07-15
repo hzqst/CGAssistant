@@ -839,7 +839,7 @@ void AutoBattleForm::on_pushButton_add_clicked()
                     if(condType == BattleCond_Type_EnemyCount && value >= 0 && value <= 10)
                         pCondition2 = new CBattleCondition_EnemyCount(relation, value);
                     else if(condType == BattleCond_Type_TeammateCount && value >= 0 && value <= 10)
-                        pCondition2 = new CBattleCondition_EnemyCount(relation, value);
+                        pCondition2 = new CBattleCondition_TeammateCount(relation, value);
                     else if(condType == BattleCond_Type_EnemySingleRowCount && value >= 0 && value <= 10)
                         pCondition2 = new CBattleCondition_EnemySingleRowCount(relation, value);
                 }
