@@ -3690,6 +3690,7 @@ void CGAService::DrawCustomText()
 					TextOutA(hDC, x - width - 1, y - 1, m_GameTextUICurrentScript, len);
 				}
 
+
 				pSurface->ReleaseDC(hDC);
 			}
 		}
