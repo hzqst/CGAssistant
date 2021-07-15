@@ -873,7 +873,6 @@ public:
     bool m_bLevelOneProtect;
     bool m_bBOSSProtect;
     bool m_bLockCountdown;
-    bool m_bShowHPMP;
     bool m_bPetDoubleAction;
     bool m_bBeep;
     bool m_bNoSwitchAnim;

@@ -382,6 +382,8 @@ void PlayerForm::SaveSettings(QJsonDocument &doc)
     player.insert("usemed", ui->checkBox_useMed->isChecked());
     player.insert("petfood", ui->checkBox_petFood->isChecked());
     player.insert("petmed", ui->checkBox_petMed->isChecked());
+    player.insert("gametextui", ui->checkBox_GameTextUI->isChecked());
+    player.insert("antiafkkick", ui->checkBox_AntiAFKKick->isChecked());
 
     player.insert("usefoodat", ui->comboBox_useFoodAt->currentText());
     player.insert("usemedat", ui->comboBox_useMedAt->currentText());
@@ -465,6 +467,11 @@ bool PlayerForm::ParsePlayerSettings(const QJsonValue &val)
     if(playerobj.contains("petmed"))
         ui->checkBox_petMed->setChecked(playerobj.take("petmed").toBool());
 
+    if(playerobj.contains("gametextui"))
+        ui->checkBox_GameTextUI->setChecked(playerobj.take("gametextui").toBool());
+
+    if(playerobj.contains("antiafkkick"))
+        ui->checkBox_GameTextUI->setChecked(playerobj.take("antiafkkick").toBool());
 
     if(playerobj.contains("usefoodat"))
         ui->comboBox_useFoodAt->setCurrentText(playerobj.take("usefoodat").toString());

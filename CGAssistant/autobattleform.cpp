@@ -156,7 +156,6 @@ void AutoBattleForm::SyncAutoBattleWorker()
     m_worker->m_bLockCountdown = ui->checkBox_lockCountdown->isChecked();
     m_worker->m_iDelayFrom = ui->horizontalSlider_delayFrom->value();
     m_worker->m_iDelayTo = ui->horizontalSlider_delayTo->value();
-    m_worker->m_bShowHPMP = ui->checkBox_showHPMP->isChecked();
     m_worker->m_bPetDoubleAction = ui->checkBox_petDoubleAction->isChecked();
 }
 
@@ -1298,9 +1297,6 @@ bool AutoBattleForm::ParseBattleSettings(const QJsonValue &val)
 
     auto obj = val.toObject();
 
-    if(obj.contains("showhpmp"))
-        ui->checkBox_showHPMP->setChecked(obj.take("showhpmp").toBool());
-
     if(obj.contains("highspeed"))
         ui->checkBox_highSpeed->setChecked(obj.take("highspeed").toBool());
 
@@ -1454,7 +1450,6 @@ bool AutoBattleForm::ParseBattleSettings(const QJsonValue &val)
 
 void AutoBattleForm::SaveBattleSettings(QJsonObject &obj)
 {
-    obj.insert("showhpmp", ui->checkBox_showHPMP->isChecked());
     obj.insert("highspeed", ui->checkBox_highSpeed->isChecked());
     obj.insert("autobattle", ui->checkBox_autoBattle->isChecked());
     obj.insert("lockcd", ui->checkBox_lockCountdown->isChecked());
