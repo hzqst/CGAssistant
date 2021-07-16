@@ -1305,7 +1305,7 @@ namespace CGA
 		ULONG m_ImageSize;
 
 		char m_fakeCGSharedMem[1024];
-		char m_GameTextUICurrentScript[1024];
+		WCHAR m_GameTextUICurrentScript[1024];
 	};
 }
 

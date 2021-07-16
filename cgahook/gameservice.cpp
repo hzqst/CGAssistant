@@ -3675,19 +3675,19 @@ void CGAService::DrawCustomText()
 
 				if (m_GameTextUICurrentScript[0])
 				{
-					int len = strlen(m_GameTextUICurrentScript);
+					int len = wcslen(m_GameTextUICurrentScript);
 
 					ABC abc[1];
 					int width = 0;
 					for (int j = 0; j < len; ++j) {
-						GetCharABCWidthsA(hDC, m_GameTextUICurrentScript[j], m_GameTextUICurrentScript[j], abc);
+						GetCharABCWidthsW(hDC, m_GameTextUICurrentScript[j], m_GameTextUICurrentScript[j], abc);
 						width += abc[0].abcA + abc[0].abcB + abc[0].abcC;
 					}
 
 					SetTextColor(hDC, RGB(0, 0, 0));
-					TextOutA(hDC, x - width, y, m_GameTextUICurrentScript, len);
+					TextOutW(hDC, x - width, y, m_GameTextUICurrentScript, len);
 					SetTextColor(hDC, RGB(255, 200, 0));
-					TextOutA(hDC, x - width - 1, y - 1, m_GameTextUICurrentScript, len);
+					TextOutW(hDC, x - width - 1, y - 1, m_GameTextUICurrentScript, len);
 				}
 
 
@@ -5515,10 +5515,13 @@ void CGAService::SetGameTextUIEnabled(bool enable)
 
 void CGAService::SetGameTextUICurrentScript(const std::string &script)
 {
-	size_t len = script.length() + 1;
-	if (len > 1023)
-		len = 1023;
-	memcpy(m_GameTextUICurrentScript, script.data(), len);
+	auto ustr = boost::locale::conv::utf_to_utf<wchar_t>(script);
+
+	size_t len = ustr.length();
+	if (len > _ARRAYSIZE(m_GameTextUICurrentScript) - 1)
+		len = _ARRAYSIZE(m_GameTextUICurrentScript) - 1;
+
+	memcpy(m_GameTextUICurrentScript, ustr.data(), len * sizeof(wchar_t));
 
 	//OutputDebugStringA(m_GameTextUICurrentScript);
 }

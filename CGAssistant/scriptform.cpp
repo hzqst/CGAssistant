@@ -383,7 +383,7 @@ void ScriptForm::UpdateGameTextUI(bool show)
     {
         QFileInfo fileInfo(m_scriptPath);
         QString fileName = fileInfo.fileName();
-        std::string path = fileName.toLocal8Bit().toStdString();
+        std::string path = fileName.toUtf8().toStdString();
 
         g_CGAInterface->SetGameTextUICurrentScript(path);
     }
