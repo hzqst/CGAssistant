@@ -5521,7 +5521,8 @@ void CGAService::SetGameTextUICurrentScript(const std::string &script)
 	if (len > _ARRAYSIZE(m_GameTextUICurrentScript) - 1)
 		len = _ARRAYSIZE(m_GameTextUICurrentScript) - 1;
 
-	memcpy(m_GameTextUICurrentScript, ustr.data(), len * sizeof(wchar_t));
+	
+	memcpy(m_GameTextUICurrentScript, ustr.data(), (len + 1) * sizeof(wchar_t));
 
 	//OutputDebugStringA(m_GameTextUICurrentScript);
 }
