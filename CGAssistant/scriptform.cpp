@@ -382,7 +382,7 @@ void ScriptForm::UpdateGameTextUI(bool show)
     if(show && m_scriptPath.size())
     {
         QFileInfo fileInfo(m_scriptPath);
-        QString fileName = fileInfo.fileName();
+        QString fileName = tr("Executing: %1").arg(fileInfo.fileName());
         std::string path = fileName.toUtf8().toStdString();
 
         g_CGAInterface->SetGameTextUICurrentScript(path);

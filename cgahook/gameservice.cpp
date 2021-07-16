@@ -3671,7 +3671,7 @@ void CGAService::DrawCustomText()
 					TextOutA(hDC, x - width - 1, y - 1, buf, len);
 				}
 
-				y -= 64;
+				y -= 32;
 
 				if (m_GameTextUICurrentScript[0])
 				{

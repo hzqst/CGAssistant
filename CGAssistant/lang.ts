@@ -1215,7 +1215,7 @@ error: %1</source>
     </message>
     <message>
         <source>Game TextUI</source>
-        <translation>游戏内文本</translation>
+        <translation>显示游戏内文本</translation>
     </message>
     <message>
         <source>Anti AFK Kick</source>
@@ -1808,6 +1808,10 @@ Check &quot;chrome://inspect&quot; in chrome to debug the node process.</source>
     <message>
         <source>Freeze Stop</source>
         <translation>60秒不动停止</translation>
+    </message>
+    <message>
+        <source>Executing: %1</source>
+        <translation>正在执行: %1</translation>
     </message>
 </context>
 </TS>
