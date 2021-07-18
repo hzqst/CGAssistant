@@ -78,6 +78,8 @@ CPlayerWorker::CPlayerWorker(QObject *parent) : QObject(parent)
     m_LastUseItemTargetMaxHP = 0;
     m_LastUseItemTargetMP = 0;
     m_LastUseItemTargetMaxMP = 0;
+    m_LastUseItemTime.start();
+    m_LastUseItemPlayerSelectTime.start();
 
     const ushort nurse_message[] = {35201,22238,22797,21527,65311,0};
 
