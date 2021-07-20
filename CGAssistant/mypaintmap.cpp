@@ -41,14 +41,27 @@ void MyPaintMap::keyPressEvent(QKeyEvent *event)
         QString text = QInputDialog::getText(NULL, tr("Manual Navigation"),
                                                            tr("Please input your target position"),
                                                            QLineEdit::Normal,
-                                                           tr("format: 123, 456"),
+                                                           tr("format: 123, 456 or 123 456"),
                                                            &isOK);
 
         if(isOK)
         {
             QStringList targetpos = text.split(",");
-            if(targetpos.size() >= 2)
+            if(targetpos.size() == 2)
             {
+                int x = targetpos[0].toInt(&isOK);
+                if(isOK)
+                {
+                    int y = targetpos[1].toInt(&isOK);
+                    if(isOK)
+                    {
+                        runNavigatorScript(x, y, 1, &m_naverror);
+                    }
+                }
+            }
+            else
+            {
+                targetpos = text.trimmed().split(" ");
                 int x = targetpos[0].toInt(&isOK);
                 if(isOK)
                 {

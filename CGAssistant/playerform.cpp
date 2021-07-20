@@ -471,7 +471,7 @@ bool PlayerForm::ParsePlayerSettings(const QJsonValue &val)
         ui->checkBox_GameTextUI->setChecked(playerobj.take("gametextui").toBool());
 
     if(playerobj.contains("antiafkkick"))
-        ui->checkBox_GameTextUI->setChecked(playerobj.take("antiafkkick").toBool());
+        ui->checkBox_AntiAFKKick->setChecked(playerobj.take("antiafkkick").toBool());
 
     if(playerobj.contains("usefoodat"))
         ui->comboBox_useFoodAt->setCurrentText(playerobj.take("usefoodat").toString());
