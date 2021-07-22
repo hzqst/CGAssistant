@@ -269,6 +269,8 @@ void ScriptForm::OnAutoRestart()
                         if(m_LastMapChange.elapsed() > 60 * 1000)
                         {
                             on_pushButton_term_clicked();
+
+                            g_CGAInterface->LogBack();
                             return;
                         }
                     }
