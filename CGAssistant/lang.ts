@@ -636,6 +636,26 @@ meet BOSS</source>
         <source>Beep when stop</source>
         <translation>停止时响起提示音</translation>
     </message>
+    <message>
+        <source>Teammate Unit</source>
+        <translation>己方单位</translation>
+    </message>
+    <message>
+        <source>Player Name</source>
+        <translation>玩家名称</translation>
+    </message>
+    <message>
+        <source>Player Job</source>
+        <translation>玩家职业</translation>
+    </message>
+    <message>
+        <source>Player Gold</source>
+        <translation>玩家金币</translation>
+    </message>
+    <message>
+        <source>Battle BGM</source>
+        <translation>战斗BGM</translation>
+    </message>
 </context>
 <context>
     <name>CBattleSettingModel</name>
@@ -979,7 +999,7 @@ p, li { white-space: pre-wrap; }
     </message>
     <message>
         <source>format: 123, 456 or 123 456</source>
-        <translation type="unfinished"></translation>
+        <translation>格式: 123, 456 或 123 456</translation>
     </message>
 </context>
 <context>
