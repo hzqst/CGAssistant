@@ -39,7 +39,7 @@ jobs:
     - name: Build boost
       working-directory: ${{env.GITHUB_WORKSPACE}}
       run: |
-        cd "${{env.Qt5_Dir}}/../../Tools/QtCreator/bin"
+        cd "${{env.Qt5_Dir}}/../../Tools/QtCreator/bin/jom"
         dir
 
 
