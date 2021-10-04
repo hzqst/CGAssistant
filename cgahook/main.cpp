@@ -276,6 +276,8 @@ LRESULT CALLBACK NewWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
 	case WM_CGA_GET_PICBOOKS_INFO:
 		g_CGAService.WM_GetPicBooksInfo((CGA::cga_picbooks_info_t *)wParam);
 		return 1;
+	case WM_CGA_DELETE_CARD:
+		return g_CGAService.WM_DeleteCard((int)wParam, lParam ? true : false);
 	case WM_KEYDOWN:
 		if (GetForegroundWindow() == g_MainHwnd)
 		{
@@ -381,7 +383,7 @@ extern "C"
 				LPCWSTR pModuleName = ExtractFileName(szModulePath);
 				if (!_wcsicmp(pModuleName, L"cg_se_3000.exe") && !strcmp(szClass, "Ä§Á¦±¦±´"))
 				{
-					InitializeHooks(GetCurrentThreadId(), pMsg->hwnd, CGA::cg_se_3000);
+					//InitializeHooks(GetCurrentThreadId(), pMsg->hwnd, CGA::cg_se_3000);
 				}
 				else if (!_wcsicmp(pModuleName, L"cg_item_6000.exe") && !strcmp(szClass, "Ä§Á¦±¦±´"))
 				{

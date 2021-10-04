@@ -1186,6 +1186,7 @@ namespace CGA
 		virtual bool CreateCharacter(const CGA::cga_create_chara_t &req) = 0;
 		virtual bool IsUIDialogPresent(int dialog, bool &result) = 0;
 		virtual bool PlayGesture(int index) = 0;
+		virtual bool DeleteCard(int index, bool packetonly, bool &result) = 0;
 
 		virtual bool RegisterServerShutdownNotify(const std::function<void(int)> &callback) = 0;
 		virtual bool RegisterBattleActionNotify(const std::function<void(int)> &callback) = 0;

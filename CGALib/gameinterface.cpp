@@ -114,6 +114,7 @@ namespace CGAServiceProtocol
 	TIMAX_DEFINE_PROTOCOL(GetNextAnimTickCount, double());
 	TIMAX_DEFINE_PROTOCOL(IsUIDialogPresent, bool(int));
 	TIMAX_DEFINE_PROTOCOL(PlayGesture, void(int));
+	TIMAX_DEFINE_PROTOCOL(DeleteCard, bool(int, bool));
 	TIMAX_DEFINE_PROTOCOL(LoginGameServer, void(std::string, std::string, int, int, int, int));
 	TIMAX_DEFINE_PROTOCOL(CreateCharacter, void(cga_create_chara_t));
 	TIMAX_DEFINE_FORWARD(NotifyServerShutdown, int);
@@ -1385,6 +1386,18 @@ namespace CGA
 			if (m_connected) {
 				try {
 					m_client.call(std::chrono::milliseconds(10000), m_endpoint, CGAServiceProtocol::PlayGesture, index);
+					return true;
+				}
+				catch (timax::rpc::exception const &e) { if (e.get_error_code() != timax::rpc::error_code::TIMEOUT) m_connected = false; OutputDebugStringA("rpc exception from " __FUNCTION__); OutputDebugStringA(e.get_error_message().c_str()); }
+				catch (msgpack::parse_error &e) { OutputDebugStringA("parse exception from " __FUNCTION__); OutputDebugStringA(e.what()); }
+			}
+			return false;
+		}
+		virtual bool DeleteCard(int index, bool packetonly, bool &result)
+		{
+			if (m_connected) {
+				try {
+					result = m_client.call(std::chrono::milliseconds(10000), m_endpoint, CGAServiceProtocol::DeleteCard, index, packetonly);
 					return true;
 				}
 				catch (timax::rpc::exception const &e) { if (e.get_error_code() != timax::rpc::error_code::TIMEOUT) m_connected = false; OutputDebugStringA("rpc exception from " __FUNCTION__); OutputDebugStringA(e.get_error_message().c_str()); }

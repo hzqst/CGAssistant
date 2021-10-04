@@ -3121,6 +3121,7 @@ void CGAService::Initialize(game_type type)
 		g_game_version = CONVERT_GAMEVAR(int *, 0x9CFDBE - 0x400000);//ok;
 		g_picbook_info = CONVERT_GAMEVAR(void *, 0x11FBE54 - 0x400000);//ok;
 		g_picbook_maxcount = CONVERT_GAMEVAR(int *, 0xF11E08 - 0x400000);//ok;
+		g_select_card = CONVERT_GAMEVAR(int *, 0xCB4198 - 0x400000);//ok;
 
 		Sys_CheckModify = CONVERT_GAMEVAR(char(__cdecl *)(const char *), 0x1BD030);//ok
 		COMMON_PlaySound = CONVERT_GAMEVAR(void(__cdecl *)(int, int, int), 0x1B1570);//ok
@@ -3185,6 +3186,7 @@ void CGAService::Initialize(game_type type)
 		NET_WriteChangeBattlePositionPacket_cgitem = CONVERT_GAMEVAR(void(__cdecl *)(int), 0x189470);
 		NET_WriteChangeTitleNamePacket_cgitem = CONVERT_GAMEVAR(void(__cdecl *)(int, int), 0x1891B0);
 		NET_WriteChangePetNamePacket_cgitem = CONVERT_GAMEVAR(void(__cdecl *)(int, int, const char *), 0x1894C0);
+		NET_WriteDeleteCardPacket_cgitem = CONVERT_GAMEVAR(void(__cdecl *)(int, int), 0x187E40);
 
 		Move_Player = CONVERT_GAMEVAR(void(__cdecl *)(), 0x98280);//ok
 		UI_HandleLogbackMouseEvent = CONVERT_GAMEVAR(int(__cdecl *)(int, char), 0xD2BF0);//ok
@@ -3219,6 +3221,7 @@ void CGAService::Initialize(game_type type)
 		UI_RemoveTradeItemArray = CONVERT_GAMEVAR(int(__cdecl*)(int) , 0xF99C0);
 		UI_AddTradeItemArray = CONVERT_GAMEVAR(int(__cdecl*)(int,int), 0xF9970);
 		UI_PlayGesture = CONVERT_GAMEVAR(void(__cdecl*)(int), (0x568120 - 0x400000));
+		UI_DeleteCard = CONVERT_GAMEVAR(int(__cdecl*)(), (0x4E6960 - 0x400000));
 
 		UI_SelectServer = CONVERT_GAMEVAR(void(__cdecl *)(), 0x8B820);
 		UI_SelectCharacter = CONVERT_GAMEVAR(int(__cdecl *)(int index, int a2), 0x8DBE0);
@@ -7214,6 +7217,30 @@ void CGAService::WM_PlayGesture(int index)
 void CGAService::PlayGesture(int index)
 {
 	SendMessageA(g_MainHwnd, WM_CGA_PLAY_GESTURE, index, 0);
+}
+
+bool CGAService::WM_DeleteCard(int index, bool packetonly)
+{
+	if (index >= 0 && index < 60 && g_card_info[index].valid)
+	{
+		if (packetonly)
+		{
+			NET_WriteDeleteCardPacket_cgitem(*g_net_socket, index);
+		}
+		else
+		{
+			*g_select_card = index;
+			UI_DeleteCard();
+		}
+		return true;
+	}
+
+	return false;
+}
+
+bool CGAService::DeleteCard(int index, bool packetonly)
+{
+	return SendMessageA(g_MainHwnd, WM_CGA_DELETE_CARD, index, packetonly ? 1 : 0) ? true : false;
 }
 
 void CGAService::WM_SendClientLogin(const char *acc, const char *pwd, int gametype)

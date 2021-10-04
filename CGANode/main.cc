@@ -189,6 +189,38 @@ void PlayGesture(const Nan::FunctionCallbackInfo<v8::Value>& info)
 	}
 }
 
+void DeleteCard(const Nan::FunctionCallbackInfo<v8::Value>& info)
+{
+	auto isolate = info.GetIsolate();
+	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
+
+	if (info.Length() < 1 || !info[0]->IsInt32()) {
+		Nan::ThrowTypeError("Arg[0] must be integer.");
+		return;
+	}
+
+	int index = info[0]->Int32Value(context).ToChecked();
+
+	bool packetonly = false;
+	if (info.Length() < 2 || !info[1]->IsBoolean()) {
+		
+	}
+	else
+	{
+		packetonly = info[1]->BooleanValue(isolate);
+	}
+
+	bool bResult = false;
+	if (!g_CGAInterface->DeleteCard(index, packetonly, bResult))
+	{
+		Nan::ThrowError("RPC Invocation failed.");
+		return;
+	}
+
+	info.GetReturnValue().Set(bResult);
+}
+
 void ChangePersDesc(const Nan::FunctionCallbackInfo<v8::Value>& info)
 {
 	auto isolate = info.GetIsolate();
@@ -386,6 +418,7 @@ void Init(v8::Local<v8::Object> exports) {
 	exports->Set(context, Nan::New("IsUIDialogPresent").ToLocalChecked(), Nan::New<v8::FunctionTemplate>(IsUIDialogPresent)->GetFunction(context).ToLocalChecked());
 	exports->Set(context, Nan::New("SetGameTextUIEnabled").ToLocalChecked(), Nan::New<v8::FunctionTemplate>(SetGameTextUIEnabled)->GetFunction(context).ToLocalChecked());
 	exports->Set(context, Nan::New("PlayGesture").ToLocalChecked(), Nan::New<v8::FunctionTemplate>(PlayGesture)->GetFunction(context).ToLocalChecked());
+	exports->Set(context, Nan::New("DeleteCard").ToLocalChecked(), Nan::New<v8::FunctionTemplate>(DeleteCard)->GetFunction(context).ToLocalChecked());
 	exports->Set(context, Nan::New("RequestDownloadMap").ToLocalChecked(), Nan::New<v8::FunctionTemplate>(RequestDownloadMap)->GetFunction(context).ToLocalChecked());
 	exports->Set(context, Nan::New("AsyncWaitBattleAction").ToLocalChecked(), Nan::New<v8::FunctionTemplate>(AsyncWaitBattleAction)->GetFunction(context).ToLocalChecked());
 	exports->Set(context, Nan::New("GetBattleUnits").ToLocalChecked(), Nan::New<v8::FunctionTemplate>(GetBattleUnits)->GetFunction(context).ToLocalChecked());

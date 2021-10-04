@@ -717,6 +717,7 @@ namespace CGA
 		virtual void LoginGameServer(std::string gid, std::string glt, int serverid, int bigServerIndex, int serverIndex,int character);
 		virtual void CreateCharacter(cga_create_chara_t request);
 		virtual void PlayGesture(int index);
+		virtual bool DeleteCard(int index, bool packetonly);
 	public:
 		int *g_server_time;
 		int *g_local_time;
@@ -902,6 +903,7 @@ namespace CGA
 		int *g_game_version;
 		void *g_picbook_info;
 		int *g_picbook_maxcount;
+		int *g_select_card;
 	public:
 		char(__cdecl *Sys_CheckModify)(const char *a1);
 		void(__cdecl *COMMON_PlaySound)(int a1, int a2, int a3);
@@ -975,6 +977,7 @@ namespace CGA
 		void(__cdecl *NET_WriteChangeBattlePositionPacket_cgitem)(int a1);
 		void(__cdecl *NET_WriteChangeTitleNamePacket_cgitem)(int a1, int titleId);
 		void(__cdecl *NET_WriteChangePetNamePacket_cgitem)(int a1, int petid, const char *petName);
+		void(__cdecl *NET_WriteDeleteCardPacket_cgitem)(int a1, int cardid);
 
 		void(__cdecl *NPC_ShowDialogInternal)(int type, int options, int dlgid, int objid, const char *message);
 		int(__cdecl *NPC_ClickDialog)(int option, int index, int a3, char a4);
@@ -1009,6 +1012,7 @@ namespace CGA
 		int(__cdecl* UI_RemoveTradeItemArray)(int index);
 		int(__cdecl* UI_AddTradeItemArray)(int index, int itempos);
 		void(__cdecl* UI_PlayGesture)(int index);
+		int(__cdecl* UI_DeleteCard)(void);
 		void(__cdecl *UI_OpenTradeDialog)(const char *playerName, int playerLevel);
 		void(__cdecl *UI_SelectServer)();
 		int(__cdecl *UI_SelectCharacter)(int index, int a2);
@@ -1216,6 +1220,7 @@ namespace CGA
 		bool WM_ChangeTitleName(int titleId);
 		bool WM_ChangePetName(int petId, const char *name);
 		void WM_PlayGesture(int index);
+		bool WM_DeleteCard(int index, bool packetonly);
 
 		bool m_initialized;
 		bool m_btl_highspeed_enable;
@@ -1381,5 +1386,6 @@ namespace CGA
 #define WM_CGA_GET_CARDS_INFO WM_USER+10069
 #define WM_CGA_PLAY_GESTURE WM_USER+10070
 #define WM_CGA_GET_PICBOOKS_INFO WM_USER+10071
+#define WM_CGA_DELETE_CARD WM_USER+10072
 
 #define CGA_PORT_BASE 4396
