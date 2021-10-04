@@ -59,6 +59,11 @@ AutoBattleForm::AutoBattleForm(CBattleWorker *worker, CPlayerWorker *pworker, QW
     s_BattleCondType[BattleCond_Type_EnemyAvgLevel] = tr("Enemy Average Level");
     s_BattleCondType[BattleCond_Type_InventoryItem] = tr("Inventoty Item");
     s_BattleCondType[BattleCond_Type_TeammateCount] = tr("Teammate Count");
+    s_BattleCondType[BattleCond_Type_TeammateUnit] = tr("Teammate Unit");
+    s_BattleCondType[BattleCond_Type_PlayerName] = tr("Player Name");
+    s_BattleCondType[BattleCond_Type_PlayerJob] = tr("Player Job");
+    s_BattleCondType[BattleCond_Type_PlayerGold] = tr("Player Gold");
+    s_BattleCondType[BattleCond_Type_BattleBGM] = tr("Battle BGM");
 
     s_BattlePlayerActionString[BattlePlayerAction_Ignore] = tr("Ignore");
     s_BattlePlayerActionString[BattlePlayerAction_Attack] = tr("Attack");
