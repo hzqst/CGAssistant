@@ -77,9 +77,7 @@ jobs:
     - name: Build qhttp
       working-directory: ${{env.GITHUB_WORKSPACE}}
       run: |
-        cd "${{env.Qt5_Dir}}/../../Tools/"
-        dir
-        cd "${{env.Qt5_Dir}}/../../Tools/QtCreator"
+        cd "${{env.Qt5_Dir}}/../../Tools/QtCreator/bin"
         dir
 
         for /f "usebackq tokens=*" %%i in (`vswhere -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath`) do (
