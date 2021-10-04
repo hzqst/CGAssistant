@@ -905,13 +905,25 @@ void AutoBattleForm::on_pushButton_add_clicked()
             break;
         }
         case BattleCond_Type_EnemyUnit:
+        case BattleCond_Type_TeammateUnit:
+        case BattleCond_Type_PlayerName:
+        case BattleCond_Type_PlayerJob:
         {
             int relation = ui->comboBox_condition2_relation->currentIndex();
             if(relation >= 0 && relation < BattleCond_StrRel_Max)
             {
                 QString name = ui->comboBox_condition2_value->currentText();
                 if(!name.isEmpty())
-                    pCondition2 = new CBattleCondition_EnemyUnit(relation, name);
+                {
+                    if(condType == BattleCond_Type_EnemyUnit)
+                         pCondition2 = new CBattleCondition_EnemyUnit(relation, name);
+                    else if(condType == BattleCond_Type_TeammateUnit)
+                         pCondition2 = new CBattleCondition_TeammateUnit(relation, name);
+                    else if(condType == BattleCond_Type_PlayerName)
+                        pCondition2 = new CBattleCondition_PlayerName(relation, name);
+                    else if(condType == BattleCond_Type_PlayerJob)
+                        pCondition2 = new CBattleCondition_PlayerJob(relation, name);
+                }
 
             }
             break;
@@ -929,14 +941,23 @@ void AutoBattleForm::on_pushButton_add_clicked()
             break;
         }
         case BattleCond_Type_Round:
+        case BattleCond_Type_PlayerGold:
+        case BattleCond_Type_BattleBGM:
         {
             int relation = ui->comboBox_condition2_relation->currentIndex();
             if(relation >= 0 && relation < BattleCond_NumRel_Max)
             {
                 bool bValue = false;
                 int value = ui->comboBox_condition2_value->currentText().toInt(&bValue);
-                if(bValue && value >= 0 && value <= 10)
-                    pCondition2 = new CBattleCondition_Round(relation, value);
+                if(bValue && value >= 0 && value <= 10000000)
+                {
+                    if(condType == BattleCond_Type_Round)
+                        pCondition2 = new CBattleCondition_Round(relation, value);
+                    else if(condType == BattleCond_Type_PlayerGold)
+                        pCondition2 = new CBattleCondition_PlayerGold(relation, value);
+                    else if(condType == BattleCond_Type_BattleBGM)
+                        pCondition2 = new CBattleCondition_BattleBGM(relation, value);
+                }
             }
             break;
         }

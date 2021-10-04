@@ -1284,6 +1284,35 @@ bool CBattleCondition_EnemyUnit::Check(CGA_BattleContext_t &context, int &condit
     return (m_relation == BattleCond_StrRel_NOT_CONTAIN) ? true : false;
 }
 
+CBattleCondition_TeammateUnit::CBattleCondition_TeammateUnit(int relation, QString &unitName)
+{
+    m_relation = relation;
+    m_UnitName = unitName;
+}
+
+void CBattleCondition_TeammateUnit::GetConditionName(QString &str)
+{
+    str = QObject::tr("Teammates %1%2").arg( s_BattleCondRelationString[m_relation], m_UnitName);
+}
+
+bool CBattleCondition_TeammateUnit::Check(CGA_BattleContext_t &context, int &conditionTarget)
+{
+    for(int i = 0;i < 0xA; ++i)
+    {
+        if(!context.m_UnitGroup[i].exist)
+            continue;
+        if(context.m_UnitGroup[i].name == m_UnitName){
+            if(m_relation == BattleCond_StrRel_CONTAIN){
+                conditionTarget = i;
+                return true;
+            } else if (m_relation == BattleCond_StrRel_NOT_CONTAIN){
+                return false;
+            }
+        }
+    }
+    return (m_relation == BattleCond_StrRel_NOT_CONTAIN) ? true : false;
+}
+
 CBattleCondition_Round::CBattleCondition_Round(int relation, int value)
 {
     m_relation = relation;
@@ -1589,6 +1618,164 @@ bool CBattleCondition_InventoryItem::Check(CGA_BattleContext_t &context, int &co
         }
     }
     return (m_relation == BattleCond_StrRel_NOT_CONTAIN) ? true : false;
+}
+
+CBattleCondition_PlayerName::CBattleCondition_PlayerName(int relation, QString &playerName)
+{
+    m_relation = relation;
+    m_PlayerName = playerName;
+}
+
+void CBattleCondition_PlayerName::GetConditionName(QString &str)
+{
+    str = QObject::tr("PlayerName %1%2").arg( s_BattleCondRelationString[m_relation], m_PlayerName);
+}
+
+bool CBattleCondition_PlayerName::Check(CGA_BattleContext_t &context, int &conditionTarget)
+{
+    if(context.m_PlayerInfo){
+        if(m_relation == BattleCond_StrRel_CONTAIN){
+            if(context.m_PlayerInfo->name.indexOf(m_PlayerName) >= 0)
+            {
+                 conditionTarget = context.m_iPlayerPosition;
+                return true;
+            }
+        }
+        else if(m_relation == BattleCond_StrRel_NOT_CONTAIN)
+        {
+            if(context.m_PlayerInfo->name.indexOf(m_PlayerName) < 0)
+            {
+                 conditionTarget = context.m_iPlayerPosition;
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+CBattleCondition_PlayerJob::CBattleCondition_PlayerJob(int relation, QString &playerJob)
+{
+    m_relation = relation;
+    m_PlayerJob = playerJob;
+}
+
+void CBattleCondition_PlayerJob::GetConditionName(QString &str)
+{
+    str = QObject::tr("PlayerJob %1%2").arg( s_BattleCondRelationString[m_relation], m_PlayerJob);
+}
+
+bool CBattleCondition_PlayerJob::Check(CGA_BattleContext_t &context, int &conditionTarget)
+{
+    if(context.m_PlayerInfo){
+        if(m_relation == BattleCond_StrRel_CONTAIN){
+            if(context.m_PlayerInfo->job.indexOf(m_PlayerJob) >= 0)
+            {
+                 conditionTarget = context.m_iPlayerPosition;
+                return true;
+            }
+        }
+        else if(m_relation == BattleCond_StrRel_NOT_CONTAIN)
+        {
+            if(context.m_PlayerInfo->job.indexOf(m_PlayerJob) < 0)
+            {
+                 conditionTarget = context.m_iPlayerPosition;
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+CBattleCondition_PlayerGold::CBattleCondition_PlayerGold(int relation, int value)
+{
+    m_relation = relation;
+    m_value = value;
+}
+
+void CBattleCondition_PlayerGold::GetConditionName(QString &str)
+{
+    str = QObject::tr("PlayerGold %1%2").arg(s_BattleCondRelationNumber[m_relation], QString::number(m_value));
+}
+
+bool CBattleCondition_PlayerGold::Check(CGA_BattleContext_t &context, int &conditionTarget)
+{
+    if(context.m_PlayerInfo)
+    {
+        int curv = context.m_PlayerInfo->gold;
+
+        switch (m_relation)
+        {
+        case BattleCond_NumRel_EGT:
+            if( curv >= m_value){
+                conditionTarget = context.m_iPlayerPosition;
+                return true;
+            }
+            break;
+        case BattleCond_NumRel_GT:
+            if( curv > m_value){
+                 conditionTarget = context.m_iPlayerPosition;
+                return true;
+            }
+            break;
+        case BattleCond_NumRel_ELT:
+            if( curv <= m_value){
+                 conditionTarget = context.m_iPlayerPosition;
+                return true;
+            }
+            break;
+        case BattleCond_NumRel_LT:
+            if( curv < m_value){
+                conditionTarget = context.m_iPlayerPosition;
+                return true;
+            }
+            break;
+        case BattleCond_NumRel_EQ:
+            if( curv == m_value){
+                conditionTarget = context.m_iPlayerPosition;
+                return true;
+            }
+            break;
+        case BattleCond_NumRel_NEQ:
+            if( curv != m_value){
+                conditionTarget = context.m_iPlayerPosition;
+                return true;
+            }
+            break;
+        }
+    }
+    return false;
+}
+
+CBattleCondition_BattleBGM::CBattleCondition_BattleBGM(int relation, int value)
+{
+    m_relation = relation;
+    m_value = value;
+}
+
+void CBattleCondition_BattleBGM::GetConditionName(QString &str)
+{
+    str = QObject::tr("BGM %1%2").arg(s_BattleCondRelationNumber[m_relation], QString::number(m_value));
+}
+
+bool CBattleCondition_BattleBGM::Check(CGA_BattleContext_t &context, int &conditionTarget)
+{
+    switch (m_relation)
+    {
+    case BattleCond_NumRel_EGT:
+        return context.m_iBGMIndex >= m_value;
+    case BattleCond_NumRel_GT:
+        return context.m_iBGMIndex > m_value;
+    case BattleCond_NumRel_ELT:
+        return context.m_iBGMIndex <= m_value;
+    case BattleCond_NumRel_LT:
+        return context.m_iBGMIndex < m_value;
+    case BattleCond_NumRel_EQ:
+        return context.m_iBGMIndex == m_value;
+    case BattleCond_NumRel_NEQ:
+        return context.m_iBGMIndex != m_value;
+    }
+
+    return false;
 }
 
 void CBattleAction_PlayerAttack::GetActionName(QString &str, bool config)
@@ -3580,6 +3767,11 @@ void CBattleWorker::OnNotifyGetItemsInfo(QSharedPointer<CGA_ItemList_t> items)
     m_BattleContext.m_Items = items;
 }
 
+void CBattleWorker::OnNotifyGetPlayerInfo(QSharedPointer<CGA_PlayerInfo_t> playerinfo)
+{
+    m_BattleContext.m_PlayerInfo = playerinfo;
+}
+
 bool CBattleWorker::CheckProtect()
 {
     if(m_bLevelOneProtect)
@@ -3592,8 +3784,7 @@ bool CBattleWorker::CheckProtect()
     }
     if(m_bBOSSProtect)
     {
-        int bgm = 0;
-        if(g_CGAInterface->GetBGMIndex(bgm) && bgm == 14)
+        if(m_BattleContext.m_iBGMIndex == 14)
         {
             return true;
         }
@@ -3635,6 +3826,9 @@ void CBattleWorker::OnNotifyBattleAction(int flags)
     m_BattleContext.m_iWeaponAllowBit = ctx.weapon_allowbit;
     m_BattleContext.m_iSkillAllowBit = ctx.skill_allowbit;
     m_BattleContext.m_iPetSkillAllowBit = ctx.petskill_allowbit;
+
+    m_BattleContext.m_iBGMIndex = -1;
+    g_CGAInterface->GetBGMIndex(m_BattleContext.m_iBGMIndex);
 
     if(m_BattleContext.m_iPlayerStatus != 1 && m_BattleContext.m_iPlayerStatus != 4)
      {

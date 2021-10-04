@@ -88,6 +88,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(playerWorker, &CPlayerWorker::NotifyGetSkillsInfo, battleWorker, &CBattleWorker::OnNotifyGetSkillsInfo, Qt::ConnectionType::QueuedConnection);
     connect(playerWorker, &CPlayerWorker::NotifyGetPetsInfo, battleWorker, &CBattleWorker::OnNotifyGetPetsInfo, Qt::ConnectionType::QueuedConnection);
     connect(playerWorker, &CPlayerWorker::NotifyGetItemsInfo, battleWorker, &CBattleWorker::OnNotifyGetItemsInfo, Qt::ConnectionType::QueuedConnection);
+    connect(playerWorker, &CPlayerWorker::NotifyGetPlayerInfo, battleWorker, &CBattleWorker::OnNotifyGetPlayerInfo, Qt::ConnectionType::QueuedConnection);
     connect(playerWorker, &CPlayerWorker::NotifyGetMapCellInfo, mapForm, &MapForm::OnNotifyGetMapCellInfo, Qt::ConnectionType::QueuedConnection);
     connect(playerWorker, &CPlayerWorker::NotifyGetMapInfo, mapForm, &MapForm::OnNotifyGetMapInfo, Qt::ConnectionType::QueuedConnection);
     connect(playerWorker, &CPlayerWorker::NotifyRefreshMapRegion, mapForm, &MapForm::OnNotifyRefreshMapRegion, Qt::ConnectionType::QueuedConnection);

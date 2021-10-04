@@ -28,7 +28,12 @@
 #define BattleCond_Type_DoubleAction 18
 #define BattleCond_Type_InventoryItem 19
 #define BattleCond_Type_TeammateCount 20
-#define BattleCond_Type_Max 21
+#define BattleCond_Type_TeammateUnit 21
+#define BattleCond_Type_PlayerName 22
+#define BattleCond_Type_PlayerJob 23
+#define BattleCond_Type_PlayerGold 24
+#define BattleCond_Type_BattleBGM 25
+#define BattleCond_Type_Max 26
 
 #define BattleCond_NumRel_EGT 0
 #define BattleCond_NumRel_GT 1
@@ -391,6 +396,23 @@ protected:
     QString m_UnitName;
 };
 
+class CBattleCondition_TeammateUnit : public CBattleCondition
+{
+public:
+    CBattleCondition_TeammateUnit(int relation, QString &unitName);
+    virtual void GetConditionValue(QString &str) {
+        str = m_UnitName;
+    }
+    virtual int GetConditionRelId() { return m_relation; }
+    virtual int GetConditionTypeId() {return BattleCond_Type_TeammateUnit;}
+    virtual void GetConditionName(QString &str);
+    virtual bool Check(CGA_BattleContext_t &context, int &conditionTarget);
+
+protected:
+    int m_relation;
+    QString m_UnitName;
+};
+
 class CBattleCondition_Round : public CBattleCondition
 {
 public:
@@ -484,6 +506,72 @@ public:
 protected:
     int m_relation;
     QString m_ItemName;
+};
+
+class CBattleCondition_PlayerName : public CBattleCondition
+{
+public:
+    CBattleCondition_PlayerName(int relation, QString &itemName);
+    virtual void GetConditionValue(QString &str) {
+        str = m_PlayerName;
+    }
+    virtual int GetConditionRelId() { return m_relation; }
+    virtual int GetConditionTypeId() {return BattleCond_Type_PlayerName;}
+    virtual void GetConditionName(QString &str);
+    virtual bool Check(CGA_BattleContext_t &context, int &conditionTarget);
+
+protected:
+    int m_relation;
+    QString m_PlayerName;
+};
+
+class CBattleCondition_PlayerJob : public CBattleCondition
+{
+public:
+    CBattleCondition_PlayerJob(int relation, QString &itemName);
+    virtual void GetConditionValue(QString &str) {
+        str = m_PlayerJob;
+    }
+    virtual int GetConditionRelId() { return m_relation; }
+    virtual int GetConditionTypeId() {return BattleCond_Type_PlayerJob;}
+    virtual void GetConditionName(QString &str);
+    virtual bool Check(CGA_BattleContext_t &context, int &conditionTarget);
+
+protected:
+    int m_relation;
+    QString m_PlayerJob;
+};
+
+class CBattleCondition_PlayerGold : public CBattleCondition
+{
+public:
+    CBattleCondition_PlayerGold(int relation, int value);
+    virtual void GetConditionValue(QString &str) {
+        str = QString::number(m_value);
+    }
+    virtual int GetConditionRelId() { return m_relation; }
+    virtual int GetConditionTypeId() {return BattleCond_Type_PlayerGold;}
+    virtual void GetConditionName(QString &str);
+    virtual bool Check(CGA_BattleContext_t &context, int &conditionTarget);
+protected:
+    int m_relation;
+    int m_value;
+};
+
+class CBattleCondition_BattleBGM : public CBattleCondition
+{
+public:
+    CBattleCondition_BattleBGM(int relation, int value);
+    virtual void GetConditionValue(QString &str) {
+        str = QString::number(m_value);
+    }
+    virtual int GetConditionRelId() { return m_relation; }
+    virtual int GetConditionTypeId() {return BattleCond_Type_BattleBGM;}
+    virtual void GetConditionName(QString &str);
+    virtual bool Check(CGA_BattleContext_t &context, int &conditionTarget);
+protected:
+    int m_relation;
+    int m_value;
 };
 
 class CBattleAction_PlayerAttack : public CBattleAction
@@ -817,6 +905,7 @@ typedef struct CGA_BattleContext_s
     int m_iPlayerStatus;
     int m_iPlayerPosition;
     int m_iRoundCount;
+    int m_iBGMIndex;
     int m_iLastRound;
     int m_iPetId;
     int m_iPetPosition;
@@ -832,6 +921,7 @@ typedef struct CGA_BattleContext_s
     QSharedPointer<CGA_SkillList_t> m_PlayerSkills;
     QSharedPointer<CGA_PetList_t> m_Pets;
     QSharedPointer<CGA_ItemList_t> m_Items;
+    QSharedPointer<CGA_PlayerInfo_t> m_PlayerInfo;
     CGA_BattleUnitGroup_t m_UnitGroup;
 }CGA_BattleContext_t;
 
@@ -851,6 +941,7 @@ public slots:
     void OnNotifyGetSkillsInfo(QSharedPointer<CGA_SkillList_t> skills);
     void OnNotifyGetPetsInfo(QSharedPointer<CGA_PetList_t> pets);
     void OnNotifyGetItemsInfo(QSharedPointer<CGA_ItemList_t> items);
+    void OnNotifyGetPlayerInfo(QSharedPointer<CGA_PlayerInfo_t> playerinfo);
     void OnNotifyAttachProcessOk(quint32 ProcessId, quint32 ThreadId, quint32 port, quint32 hWnd);
     void OnSetAutoBattle(int state);
     void OnSetFRND(int state);
