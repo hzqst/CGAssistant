@@ -24,6 +24,26 @@ jobs:
       with:
         vs-version: 
 
+    - name: Initialize dependencies
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      run: git submodule update --init --recursive
+
+    - name: Initialize qhttp
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      run: |
+        cd qhttp
+        mkdir 3rdparty
+        cd 3rdparty
+        git clone https://github.com/nodejs/http-parser.git
+      shell: cmd
+
+    - name: Initialize boost
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      run: |
+        cd boost
+        bootstrap.bat
+      shell: cmd
+
     - name: Install Qt
       uses: jurplel/install-qt-action@v2.13.0
       with:
@@ -39,10 +59,6 @@ jobs:
     - name: Build boost
       working-directory: ${{env.GITHUB_WORKSPACE}}
       run: |
-        cd "${{env.Qt5_Dir}}/../../Tools/QtCreator/bin/jom"
-        dir
-
-
         for /f "usebackq tokens=*" %%i in (`vswhere -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath`) do (
           set InstallDir=%%i
         )
@@ -68,8 +84,8 @@ jobs:
           "%InstallDir%\Common7\Tools\vsdevcmd.bat" -arch=x86 -winsdk=10.0.17763.0
           cd qhttp
           qmake qhttp.pro -spec win32-msvc "CONFIG+=32bit" "CONFIG+=qtquickcompiler" "INCLUDEPATH+=%GITHUB_WORKSPACE%\winsdk\Include\10.0.17763.0\ucrt" "LIBS += -L%GITHUB_WORKSPACE%\winsdk\Lib\10.0.17763.0\um\x86" "LIBS += -L%GITHUB_WORKSPACE%\winsdk\Lib\10.0.17763.0\ucrt\x86"
-          "${{env.Qt5_Dir}}/../../Tools/QtCreator/bin/jom.exe" -f MakeFile qmake_all
-          "${{env.Qt5_Dir}}/../../Tools/QtCreator/bin/jom.exe"
+          "${{env.Qt5_Dir}}/../../Tools/QtCreator/bin/jom/jom.exe" -f MakeFile qmake_all
+          "${{env.Qt5_Dir}}/../../Tools/QtCreator/bin/jom/jom.exe"
           copy "%GITHUB_WORKSPACE%\qhttp\xbin\qhttp.dll" "%GITHUB_WORKSPACE%\build\"
         )
       shell: cmd
@@ -84,8 +100,8 @@ jobs:
           "%InstallDir%\Common7\Tools\vsdevcmd.bat" -arch=x86 -winsdk=10.0.17763.0
           cd CGAssistant
           qmake CGAssistant.pro -spec win32-msvc "CONFIG+=32bit" "CONFIG+=qtquickcompiler" "INCLUDEPATH+=%GITHUB_WORKSPACE%\winsdk\Include\10.0.17763.0\ucrt" "LIBS += -L%GITHUB_WORKSPACE%\winsdk\Lib\10.0.17763.0\um\x86" "LIBS += -L%GITHUB_WORKSPACE%\winsdk\Lib\10.0.17763.0\ucrt\x86"
-          "${{env.Qt5_Dir}}/../../Tools/QtCreator/bin/jom.exe" -f MakeFile qmake_all
-          "${{env.Qt5_Dir}}/../../Tools/QtCreator/bin/jom.exe"
+          "${{env.Qt5_Dir}}/../../Tools/QtCreator/bin/jom/jom.exe" -f MakeFile qmake_all
+          "${{env.Qt5_Dir}}/../../Tools/QtCreator/bin/jom/jom.exe"
           copy "%GITHUB_WORKSPACE%\CGassistant\release\CGassistant.exe" "%GITHUB_WORKSPACE%\build\"
         )
       shell: cmd
