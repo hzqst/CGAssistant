@@ -84,8 +84,8 @@ jobs:
           "%InstallDir%\Common7\Tools\vsdevcmd.bat" -arch=x86 -winsdk=10.0.17763.0
           cd qhttp
           qmake qhttp.pro -spec win32-msvc "CONFIG+=32bit" "CONFIG+=qtquickcompiler" "INCLUDEPATH+=%GITHUB_WORKSPACE%\winsdk\Include\10.0.17763.0\ucrt" "LIBS += -L%GITHUB_WORKSPACE%\winsdk\Lib\10.0.17763.0\um\x86" "LIBS += -L%GITHUB_WORKSPACE%\winsdk\Lib\10.0.17763.0\ucrt\x86"
-          "${{env.IQTA_TOOLS}}\QtCreator\bin\jom.exe" -f MakeFile qmake_all
-          "${{env.IQTA_TOOLS}}\QtCreator\bin\jom.exe"
+          "${{env.Qt5_Dir}}/../../Tools/QtCreator/bin/jom.exe" -f MakeFile qmake_all
+          "${{env.Qt5_Dir}}/../../Tools/QtCreator/bin/jom.exe"
           copy "%GITHUB_WORKSPACE%\qhttp\xbin\qhttp.dll" "%GITHUB_WORKSPACE%\build\"
         )
       shell: cmd
@@ -100,8 +100,8 @@ jobs:
           "%InstallDir%\Common7\Tools\vsdevcmd.bat" -arch=x86 -winsdk=10.0.17763.0
           cd CGAssistant
           qmake CGAssistant.pro -spec win32-msvc "CONFIG+=32bit" "CONFIG+=qtquickcompiler" "INCLUDEPATH+=%GITHUB_WORKSPACE%\winsdk\Include\10.0.17763.0\ucrt" "LIBS += -L%GITHUB_WORKSPACE%\winsdk\Lib\10.0.17763.0\um\x86" "LIBS += -L%GITHUB_WORKSPACE%\winsdk\Lib\10.0.17763.0\ucrt\x86"
-          "${{env.IQTA_TOOLS}}\QtCreator\bin\jom.exe" -f MakeFile qmake_all
-          "${{env.IQTA_TOOLS}}\QtCreator\bin\jom.exe"
+          "${{env.IQTA_TOOLS}}/../../Tools/QtCreator/bin/jom.exe" -f MakeFile qmake_all
+          "${{env.IQTA_TOOLS}}/../../Tools/QtCreator/bin/jom.exe"
           copy "%GITHUB_WORKSPACE%\CGassistant\release\CGassistant.exe" "%GITHUB_WORKSPACE%\build\"
         )
       shell: cmd
