@@ -10,11 +10,11 @@ if exist "%InstallDir%\Common7\Tools\vsdevcmd.bat" (
 
     qmake qhttp.pro -spec win32-msvc "CONFIG+=qtquickcompiler"
 
-    jom -f MakeFile qmake_all
+    "D:/a/CGAssistant/Qt/Tools/QtCreator/bin/jom.exe" -f MakeFile qmake_all
 
-    jom
+    "D:/a/CGAssistant/Qt/Tools/QtCreator/bin/jom.exe"
 
-    jom clean
+    "D:/a/CGAssistant/Qt/Tools/QtCreator/bin/jom.exe" clean
 
     copy "xbin\qhttp.dll" "..\build\"
 )
