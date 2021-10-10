@@ -166,6 +166,8 @@ void GetPlayerInfo(const Nan::FunctionCallbackInfo<v8::Value>& info)
 	objd->Set(context, String::NewFromUtf8(isolate, "manu_skillful").ToLocalChecked(), Integer::New(isolate, myinfo.manu_skillful));
 	objd->Set(context, String::NewFromUtf8(isolate, "manu_intelligence").ToLocalChecked(), Integer::New(isolate, myinfo.manu_intelligence));
 	objd->Set(context, String::NewFromUtf8(isolate, "value_charisma").ToLocalChecked(), Integer::New(isolate, myinfo.value_charisma));
+	objd->Set(context, String::NewFromUtf8(isolate, "score").ToLocalChecked(), Integer::New(isolate, myinfo.score));
+	objd->Set(context, String::NewFromUtf8(isolate, "skillslots").ToLocalChecked(), Integer::New(isolate, myinfo.skillslots));
 
 	obj->Set(context, String::NewFromUtf8(isolate, "detail").ToLocalChecked(), objd);
 
@@ -733,6 +735,7 @@ void GetPetInfo(const Nan::FunctionCallbackInfo<v8::Value>& info)
 	obj->Set(context, String::NewFromUtf8(isolate, "level").ToLocalChecked(), Integer::New(isolate, myinfo.level));
 	obj->Set(context, String::NewFromUtf8(isolate, "race").ToLocalChecked(), Integer::New(isolate, myinfo.race));
 	obj->Set(context, String::NewFromUtf8(isolate, "loyality").ToLocalChecked(), Integer::New(isolate, myinfo.loyality));
+	obj->Set(context, String::NewFromUtf8(isolate, "skillslots").ToLocalChecked(), Integer::New(isolate, myinfo.skillslots));
 	obj->Set(context, String::NewFromUtf8(isolate, "health").ToLocalChecked(), Integer::New(isolate, myinfo.health));
 	obj->Set(context, String::NewFromUtf8(isolate, "hp").ToLocalChecked(), Integer::New(isolate, myinfo.hp));
 	obj->Set(context, String::NewFromUtf8(isolate, "maxhp").ToLocalChecked(), Integer::New(isolate, myinfo.maxhp));
@@ -864,6 +867,7 @@ void GetPetsInfo(const Nan::FunctionCallbackInfo<v8::Value>& info)
 		obj->Set(context, String::NewFromUtf8(isolate, "level").ToLocalChecked(), Integer::New(isolate, myinfo.level));
 		obj->Set(context, String::NewFromUtf8(isolate, "race").ToLocalChecked(), Integer::New(isolate, myinfo.race));
 		obj->Set(context, String::NewFromUtf8(isolate, "loyality").ToLocalChecked(), Integer::New(isolate, myinfo.loyality));
+		obj->Set(context, String::NewFromUtf8(isolate, "skillslots").ToLocalChecked(), Integer::New(isolate, myinfo.skillslots));
 		obj->Set(context, String::NewFromUtf8(isolate, "health").ToLocalChecked(), Integer::New(isolate, myinfo.health));
 		obj->Set(context, String::NewFromUtf8(isolate, "hp").ToLocalChecked(), Integer::New(isolate, myinfo.hp));
 		obj->Set(context, String::NewFromUtf8(isolate, "maxhp").ToLocalChecked(), Integer::New(isolate, myinfo.maxhp));

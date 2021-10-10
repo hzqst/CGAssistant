@@ -269,7 +269,7 @@ namespace CGA
 		char player_nick[17];//+273
 		char what[33];//+290
 		char what2[33];//+323
-		int skill_maxrows;//+356
+		int skillslots;//+356
 		int move_speed;//+360 int unk
 		int unk4;//+364
 		int image_id;//+368
@@ -408,15 +408,17 @@ namespace CGA
 		int element_wind;	//·ç0~100
 		int health;			//½¡¿µ 0=ÂÌ 100=ºì
 		pet_skill_t skills[10];
-		char unk[90];
-		short battle_flags;	//100A77A//+12110A2h
-		char realname[17];//Ë®Áúòá
+		char unk[84];
+		int skillslots;//6A4
+		short unk1;	//6A8
+		short battle_flags;	//6AA, 1 = ´ıÃü 2=Õ½¶· 3=xiuxi
+		char realname[17];//Ë®Áúòá 6AC
 		char name[19];
-		int unk2;
-		int walk;
+		int unk2;//6D0
+		int walk;//6D4
 	}pet_t;
 
-	static_assert(sizeof(pet_t) == 1752, "Size check");
+	static_assert(sizeof(pet_t) == 0x6D8, "Size check");
 
 	typedef struct short_pet_s
 	{

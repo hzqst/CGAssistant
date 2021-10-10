@@ -191,10 +191,12 @@ namespace CGA
 			manu_skillful = 0;
 			manu_intelligence = 0;
 			value_charisma = 0;
+			score = 0;
+			skillslots = 0;
 		}
 
-		cga_player_info_s(int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11, int a12, int a13, int a14, int a15, bool a16, bool a17, std::string &a18, std::string &a19, const cga_playerpet_detail_info_t &a20, int a21, int a22, int a23, int a24)
-			: hp(a1), maxhp(a2), mp(a3), maxmp(a4), xp(a5), maxxp(a6), health(a7), souls(a8), level(a9), gold(a10), unitid(a11), petid(a12), direction(a13), battle_position(a14), punchclock(a15), usingpunchclock(a16), petriding(a17), name(a18), job(a19), detail(a20), manu_endurance(a21), manu_skillful(a22), manu_intelligence(a23), value_charisma(a24)
+		cga_player_info_s(int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11, int a12, int a13, int a14, int a15, bool a16, bool a17, std::string &a18, std::string &a19, const cga_playerpet_detail_info_t &a20, int a21, int a22, int a23, int a24, int a25, int a26)
+			: hp(a1), maxhp(a2), mp(a3), maxmp(a4), xp(a5), maxxp(a6), health(a7), souls(a8), level(a9), gold(a10), unitid(a11), petid(a12), direction(a13), battle_position(a14), punchclock(a15), usingpunchclock(a16), petriding(a17), name(a18), job(a19), detail(a20), manu_endurance(a21), manu_skillful(a22), manu_intelligence(a23), value_charisma(a24), score(a25), skillslots(a26)
 		{
 
 		}
@@ -225,6 +227,8 @@ namespace CGA
 		int manu_skillful;
 		int manu_intelligence;
 		int value_charisma;
+		int score;
+		int skillslots;
 	}cga_player_info_t;
 
 	typedef struct cga_pet_info_s
@@ -247,12 +251,13 @@ namespace CGA
 			index = 0;
 		}
 		cga_pet_info_s(int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, 
-			int a11, int a12, int a13, int a14, std::string &a15, std::string &a16, const cga_playerpet_detail_info_t &a17)
+			int a11, int a12, int a13, int a14, int a15, std::string &a16, std::string &a17, const cga_playerpet_detail_info_t &a18)
 			: hp(a1), maxhp(a2), mp(a3), maxmp(a4), xp(a5), maxxp(a6), health(a7), level(a8), flags(a9), race(a10), 
-			loyality(a11), battle_flags(a12), state(a13), index(a14), name(a15), realname(a16), detail(a17)
+			loyality(a11), skillslots(a12), battle_flags(a13), state(a14), index(a15), name(a16), realname(a17), detail(a18)
 		{
 
 		}
+
 		int hp;
 		int maxhp;
 		int mp;
@@ -264,6 +269,7 @@ namespace CGA
 		int flags;
 		int race;
 		int loyality;
+		int skillslots;
 		int battle_flags;
 		int state;
 		int index;

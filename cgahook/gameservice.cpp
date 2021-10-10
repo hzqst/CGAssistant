@@ -3811,6 +3811,8 @@ void CGAService::WM_GetPlayerInfo(cga_player_info_t *info)
 	info->souls = (*g_playerBase)->souls;
 	info->level = (*g_playerBase)->level;
 	info->gold = (*g_playerBase)->gold;
+	info->score = (*g_playerBase)->score;
+	info->skillslots = (*g_playerBase)->skillslots;
 	info->unitid = (*g_playerBase)->unitid;
 	info->direction = ((*g_playerBase)->direction + 6) % 8;
 	info->petid = -1;
@@ -4145,6 +4147,7 @@ void CGAService::WM_GetPetInfo(int index, cga_pet_info_t *info)
 		info->flags = g_pet_base[index].flags;
 		info->race = g_pet_base[index].race;
 		info->loyality = g_pet_base[index].value_loyality;
+		info->skillslots = g_pet_base[index].skillslots;
 		info->battle_flags = g_pet_base[index].battle_flags;
 		info->state = g_pet_state[index] | (g_pet_base[index].walk ? 16 : 0);
 		info->index = index;
@@ -4191,6 +4194,7 @@ void CGAService::WM_GetPetInfo(int index, cga_pet_info_t *info)
 		info->flags = 0;
 		info->race = g_bank_pet_base[index - 100].race;
 		info->loyality = g_bank_pet_base[index - 100].value_loyality;
+		info->skillslots = g_bank_pet_base[index - 100].skill_slots;
 		info->battle_flags = 0;
 		info->state = 0;
 		info->index = index;
@@ -4255,6 +4259,7 @@ void CGAService::WM_GetPetsInfo(cga_pets_info_t *info)
 				g_pet_base[i].flags,
 				g_pet_base[i].race,
 				g_pet_base[i].value_loyality,
+				g_pet_base[i].skillslots,
 				g_pet_base[i].battle_flags,
 				g_pet_state[i] | (g_pet_base[i].walk ? 16 : 0),
 				i,
@@ -4322,6 +4327,7 @@ void CGAService::WM_GetBankPetsInfo(cga_pets_info_t *info)
 				0,
 				g_bank_pet_base[i - 100].race,
 				g_bank_pet_base[i - 100].value_loyality,
+				g_bank_pet_base[i - 100].skill_slots,
 				0,
 				0,
 				i,
