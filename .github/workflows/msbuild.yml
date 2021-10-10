@@ -17,12 +17,6 @@ jobs:
     if: github.repository == 'hzqst/CGAssistant'
 
     steps:
-    - name: Disable git compression
-      run: |
-        git config --global core.compression 0
-        git config --global protocol.version 1
-      shell: cmd
-
     - uses: actions/checkout@v2
       
     - name: Add MSBuild to PATH
@@ -131,7 +125,7 @@ jobs:
       shell: cmd
  
     - name: Checkout CGAssistantJS
-      uses: actions/checkout@v2 
+      uses: hzqst/checkout@v2 
       with:
         repository: 'hzqst/CGAssistantJS'
         path: 'CGAssistantJS'
