@@ -125,7 +125,7 @@ jobs:
       shell: cmd
  
     - name: Checkout CGAssistantJS
-      uses: hzqst/checkout
+      uses: hzqst/checkout@main
       with:
         repository: 'hzqst/CGAssistantJS'
         path: 'CGAssistantJS'
