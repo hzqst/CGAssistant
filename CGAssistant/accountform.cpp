@@ -510,13 +510,14 @@ void AccountForm::OnNotifyConnectionState(int state, QString msg)
     {
         m_login_failure ++;
 
-        if(ui->checkBox_autoChangeServer->isChecked())
+        if(ui->checkBox_autoChangeServer->isChecked() && ui->checkBox_autoLogin->isChecked())
         {
             if(ui->comboBox_server->currentIndex() + 1 >= 10)
                 ui->comboBox_server->setCurrentIndex(0);
             else
                 ui->comboBox_server->setCurrentIndex(ui->comboBox_server->currentIndex() + 1);
         }
+
         if(m_login_failure >= 10 && ui->checkBox_autoKillGame->isChecked())
         {
             NotifyKillProcess();
