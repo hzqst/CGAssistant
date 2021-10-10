@@ -935,6 +935,7 @@ void GetBankPetsInfo(const Nan::FunctionCallbackInfo<v8::Value>& info)
 		obj->Set(context, String::NewFromUtf8(isolate, "level").ToLocalChecked(), Integer::New(isolate, myinfo.level));
 		obj->Set(context, String::NewFromUtf8(isolate, "race").ToLocalChecked(), Integer::New(isolate, myinfo.race));
 		obj->Set(context, String::NewFromUtf8(isolate, "loyality").ToLocalChecked(), Integer::New(isolate, myinfo.loyality));
+		obj->Set(context, String::NewFromUtf8(isolate, "skillslots").ToLocalChecked(), Integer::New(isolate, myinfo.skillslots));
 		obj->Set(context, String::NewFromUtf8(isolate, "maxhp").ToLocalChecked(), Integer::New(isolate, myinfo.maxhp));
 		obj->Set(context, String::NewFromUtf8(isolate, "maxmp").ToLocalChecked(), Integer::New(isolate, myinfo.maxmp));
 		obj->Set(context, String::NewFromUtf8(isolate, "index").ToLocalChecked(), Integer::New(isolate, myinfo.index));
