@@ -193,10 +193,22 @@ namespace CGA
 			value_charisma = 0;
 			score = 0;
 			skillslots = 0;
+			use_title = 0;
 		}
 
-		cga_player_info_s(int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11, int a12, int a13, int a14, int a15, bool a16, bool a17, std::string &a18, std::string &a19, const cga_playerpet_detail_info_t &a20, int a21, int a22, int a23, int a24, int a25, int a26)
-			: hp(a1), maxhp(a2), mp(a3), maxmp(a4), xp(a5), maxxp(a6), health(a7), souls(a8), level(a9), gold(a10), unitid(a11), petid(a12), direction(a13), battle_position(a14), punchclock(a15), usingpunchclock(a16), petriding(a17), name(a18), job(a19), detail(a20), manu_endurance(a21), manu_skillful(a22), manu_intelligence(a23), value_charisma(a24), score(a25), skillslots(a26)
+		cga_player_info_s(int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, 
+			int a11, int a12, int a13, int a14, int a15, int a16, int a17, int a18, int a19, int a20, 
+			int a21, int a22,
+			bool a23, bool a24,
+			std::string &a25, std::string &a26, std::string &a27, const cga_playerpet_detail_info_t &a28)
+			:
+			hp(a1), maxhp(a2), mp(a3), maxmp(a4), xp(a5), maxxp(a6), 
+			health(a7), souls(a8), level(a9), gold(a10), score(a11), skillslots(a12), use_title(a13),
+			
+			unitid(a14), petid(a15), direction(a16), battle_position(a17), punchclock(a18), 
+			manu_endurance(a19), manu_skillful(a20), manu_intelligence(a21), value_charisma(a22),
+			usingpunchclock(a23), petriding(a24),
+			name(a25), job(a26), nick(a27), detail(a28)
 		{
 
 		}
@@ -207,28 +219,36 @@ namespace CGA
 		int maxmp;
 		int xp;
 		int maxxp;
+
 		int health;
 		int souls;
 		int level;
 		int gold;
+		int score;
+		int skillslots;
+		int use_title;
+
 		int unitid;
 		int petid;
 		int direction;
 		int battle_position;
 		int punchclock;
-		bool usingpunchclock;
-		bool petriding;
-		std::string name;
-		std::string job;
-		std::vector<std::string> titles;
-		cga_playerpet_detail_info_t detail;
-		cga_pers_desc_t persdesc;
+		
 		int manu_endurance;
 		int manu_skillful;
 		int manu_intelligence;
 		int value_charisma;
-		int score;
-		int skillslots;
+				
+		bool usingpunchclock;
+		bool petriding;
+
+		std::string name;
+		std::string job;
+		std::string nick;
+		cga_playerpet_detail_info_t detail;
+
+		std::vector<std::string> titles;
+		cga_pers_desc_t persdesc;
 	}cga_player_info_t;
 
 	typedef struct cga_pet_info_s
@@ -932,8 +952,8 @@ namespace CGA
 			avatar = 0;
 			server = 0;
 		}
-		cga_card_info_s(int a1, int a2, int a3, int a4, std::string &a5, std::string &a6)
-			: index(a1), level(a2), avatar(a3), server(a4), name(a5), title(a6)
+		cga_card_info_s(int a1, int a2, int a3, int a4, std::string &a5, std::string &a6, std::string &a7)
+			: index(a1), level(a2), avatar(a3), server(a4), name(a5), nickname(a6), familyname(a7)
 		{
 		}
 		int index;
@@ -941,7 +961,8 @@ namespace CGA
 		int avatar;
 		int server;
 		std::string name;
-		std::string title;
+		std::string nickname;
+		std::string familyname;
 	}cga_card_info_t;
 
 	typedef std::vector<cga_card_info_t> cga_cards_info_t;

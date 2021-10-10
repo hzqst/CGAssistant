@@ -3813,6 +3813,7 @@ void CGAService::WM_GetPlayerInfo(cga_player_info_t *info)
 	info->gold = (*g_playerBase)->gold;
 	info->score = (*g_playerBase)->score;
 	info->skillslots = (*g_playerBase)->skillslots;
+	info->use_title = (*g_playerBase)->use_title;
 	info->unitid = (*g_playerBase)->unitid;
 	info->direction = ((*g_playerBase)->direction + 6) % 8;
 	info->petid = -1;
@@ -3828,6 +3829,7 @@ void CGAService::WM_GetPlayerInfo(cga_player_info_t *info)
 		info->petriding = (*(DWORD *)(*(DWORD *)(*(DWORD *)g_pet_riding_stru + 0xC) + 0x38)) ? true : false;
 	info->name = boost::locale::conv::to_utf<char>(g_player_name, "GBK");
 	info->job = boost::locale::conv::to_utf<char>(g_job_name, "GBK");
+	info->nick = boost::locale::conv::to_utf<char>((*g_playerBase)->player_nick, "GBK");
 	for (size_t i = 0; i < 96; ++i)
 	{
 		if (*(g_title_table + 28 * i) != 0)
@@ -4090,7 +4092,8 @@ void CGAService::WM_GetCardsInfo(cga_cards_info_t *info)
 				g_card_info[i].avatar,
 				g_card_info[i].server,
 				boost::locale::conv::to_utf<char>(g_card_info[i].name, "GBK"),
-				boost::locale::conv::to_utf<char>(g_card_info[i].title, "GBK")
+				boost::locale::conv::to_utf<char>(g_card_info[i].nick, "GBK"),
+				boost::locale::conv::to_utf<char>(g_card_info[i].family, "GBK")
 			);
 		}
 	}
@@ -6044,7 +6047,7 @@ bool CGAService::WM_ChangeTitleName(int titleId)
 
 	for (size_t i = 0; i < 96; ++i)
 	{
-		if (i == titleId && *(g_title_table + 28 * i) != 0)
+		if (i == titleId && (*(g_title_table + 28 * i)) != 0)
 		{
 			NET_WriteChangeTitleNamePacket_cgitem(*g_net_socket, titleId);
 			return true;

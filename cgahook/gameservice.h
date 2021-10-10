@@ -198,8 +198,8 @@ namespace CGA
 		int level; //0x0008 
 		int avatar; //0x000C 
 		char name[17]; //0x98CE0C 
-		char title[17]; //0x98CE0C 
-		char unk2[66]; //0x98CE0C 
+		char nick[17]; //0x98CE0C 
+		char family[66]; //0x98CE0C 
 	}card_info_t;
 
 	static_assert(sizeof(card_info_t) == 116, "Size check");
@@ -263,7 +263,7 @@ namespace CGA
 		int health;//+236
 		int souls;//+240
 		int gold;//+244
-		int special_nick;//+248 //使用第几个称号
+		int use_title;//+248 //使用第几个称号
 		int score;//+252
 		char name[17];//+256
 		char player_nick[17];//+273
