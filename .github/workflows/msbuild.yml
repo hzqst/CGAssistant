@@ -63,7 +63,7 @@ jobs:
         if exist "%InstallDir%\Common7\Tools\vsdevcmd.bat" (  
           "%InstallDir%\Common7\Tools\vsdevcmd.bat" -arch=x86 -winsdk=10.0.17763.0
           cd boost
-          b2 --toolset=msvc-14.2 --with-date_time --with-thread --with-container --with-system --with-locale --with-serialization --with-regex --stagedir="stage" link=static variant=release stage
+          b2 --toolset=msvc-14.2 --with-date_time --with-thread --with-container --with-system --with-locale --with-serialization --with-regex --stagedir="stage" link=static variant=release address-model=32 stage
           b2 --toolset=msvc-14.2 --with-date_time --with-thread --with-container --with-system --with-locale --with-serialization --with-regex --stagedir="stage" runtime-link=static link=static variant=release address-model=32 stage
         )
       shell: cmd

@@ -3814,6 +3814,8 @@ void CGAService::WM_GetPlayerInfo(cga_player_info_t *info)
 	info->score = (*g_playerBase)->score;
 	info->skillslots = (*g_playerBase)->skillslots;
 	info->use_title = (*g_playerBase)->use_title;
+	info->avatar_id = (*g_playerBase)->avatar_id;
+	info->image_id = (*g_playerBase)->image_id;
 	info->unitid = (*g_playerBase)->unitid;
 	info->direction = ((*g_playerBase)->direction + 6) % 8;
 	info->petid = -1;

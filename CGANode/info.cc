@@ -124,6 +124,9 @@ void GetPlayerInfo(const Nan::FunctionCallbackInfo<v8::Value>& info)
 	obj->Set(context, String::NewFromUtf8(isolate, "skillslots").ToLocalChecked(), Integer::New(isolate, myinfo.skillslots));
 	obj->Set(context, String::NewFromUtf8(isolate, "use_title").ToLocalChecked(), Integer::New(isolate, myinfo.use_title));
 
+	obj->Set(context, String::NewFromUtf8(isolate, "avatar_id").ToLocalChecked(), Integer::New(isolate, myinfo.avatar_id));
+	obj->Set(context, String::NewFromUtf8(isolate, "image_id").ToLocalChecked(), Integer::New(isolate, myinfo.image_id));
+	
 	obj->Set(context, String::NewFromUtf8(isolate, "unitid").ToLocalChecked(), Integer::New(isolate, myinfo.unitid));
 	obj->Set(context, String::NewFromUtf8(isolate, "petid").ToLocalChecked(), Integer::New(isolate, myinfo.petid));
 	obj->Set(context, String::NewFromUtf8(isolate, "direction").ToLocalChecked(), Integer::New(isolate, myinfo.direction));

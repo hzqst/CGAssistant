@@ -182,6 +182,8 @@ namespace CGA
 			souls = 0;
 			level = 0;
 			gold = 0;
+			avatar_id = 0;
+			image_id = 0;
 			unitid = 0;
 			petid = -1;
 			punchclock = 0;
@@ -198,17 +200,18 @@ namespace CGA
 
 		cga_player_info_s(int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, 
 			int a11, int a12, int a13, int a14, int a15, int a16, int a17, int a18, int a19, int a20, 
-			int a21, int a22,
-			bool a23, bool a24,
-			std::string &a25, std::string &a26, std::string &a27, const cga_playerpet_detail_info_t &a28)
+			int a21, int a22, int a23, int a24,
+			bool a25, bool a26,
+			std::string &a27, std::string &a28, std::string &a29, const cga_playerpet_detail_info_t &a30)
 			:
 			hp(a1), maxhp(a2), mp(a3), maxmp(a4), xp(a5), maxxp(a6), 
 			health(a7), souls(a8), level(a9), gold(a10), score(a11), skillslots(a12), use_title(a13),
 			
-			unitid(a14), petid(a15), direction(a16), battle_position(a17), punchclock(a18), 
-			manu_endurance(a19), manu_skillful(a20), manu_intelligence(a21), value_charisma(a22),
-			usingpunchclock(a23), petriding(a24),
-			name(a25), job(a26), nick(a27), detail(a28)
+			avatar_id(a14), image_id(a15), unitid(a16), petid(a17), direction(a18), battle_position(a19), punchclock(a20),
+			manu_endurance(a21), manu_skillful(a22), manu_intelligence(a23), value_charisma(a24),
+
+			usingpunchclock(a25), petriding(a26),
+			name(a27), job(a28), nick(a29), detail(a30)
 		{
 
 		}
@@ -228,6 +231,8 @@ namespace CGA
 		int skillslots;
 		int use_title;
 
+		int avatar_id;
+		int image_id;
 		int unitid;
 		int petid;
 		int direction;
