@@ -720,6 +720,8 @@ namespace CGA
 		virtual void CreateCharacter(cga_create_chara_t request);
 		virtual void PlayGesture(int index);
 		virtual bool DeleteCard(int index, bool packetonly);
+		virtual bool SendMail(int index, const std::string &msg);
+		virtual bool SendPetMail(int index, int petid, int itemid, const std::string &msg);
 	public:
 		int *g_server_time;
 		int *g_local_time;
@@ -980,6 +982,8 @@ namespace CGA
 		void(__cdecl *NET_WriteChangeTitleNamePacket_cgitem)(int a1, int titleId);
 		void(__cdecl *NET_WriteChangePetNamePacket_cgitem)(int a1, int petid, const char *petName);
 		void(__cdecl *NET_WriteDeleteCardPacket_cgitem)(int a1, int cardid);
+		void(__cdecl *NET_WriteMailPacket_cgitem)(int a1, int cardid, const char *msg, int unk);
+		void(__cdecl *NET_WritePetMailPacket_cgitem)(int a1, int cardid, int petid, int itemid, const char *msg, int unk);
 
 		void(__cdecl *NPC_ShowDialogInternal)(int type, int options, int dlgid, int objid, const char *message);
 		int(__cdecl *NPC_ClickDialog)(int option, int index, int a3, char a4);
@@ -1223,6 +1227,8 @@ namespace CGA
 		bool WM_ChangePetName(int petId, const char *name);
 		void WM_PlayGesture(int index);
 		bool WM_DeleteCard(int index, bool packetonly);
+		bool WM_SendMail(int index, const char *msg);
+		bool WM_SendPetMail(int index, int petid, int itempos, const char *str);
 
 		bool m_initialized;
 		bool m_btl_highspeed_enable;
@@ -1389,5 +1395,7 @@ namespace CGA
 #define WM_CGA_PLAY_GESTURE WM_USER+10070
 #define WM_CGA_GET_PICBOOKS_INFO WM_USER+10071
 #define WM_CGA_DELETE_CARD WM_USER+10072
+#define WM_CGA_SEND_MAIL WM_USER+10073
+#define WM_CGA_SEND_PET_MAIL WM_USER+10074
 
 #define CGA_PORT_BASE 4396

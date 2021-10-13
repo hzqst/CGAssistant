@@ -1219,6 +1219,8 @@ namespace CGA
 		virtual bool IsUIDialogPresent(int dialog, bool &result) = 0;
 		virtual bool PlayGesture(int index) = 0;
 		virtual bool DeleteCard(int index, bool packetonly, bool &result) = 0;
+		virtual bool SendMail(int index, const std::string &msg, bool &result) = 0;
+		virtual bool SendPetMail(int index, int petid, int itempos, const std::string &msg, bool &result) = 0;
 
 		virtual bool RegisterServerShutdownNotify(const std::function<void(int)> &callback) = 0;
 		virtual bool RegisterBattleActionNotify(const std::function<void(int)> &callback) = 0;

@@ -278,6 +278,10 @@ LRESULT CALLBACK NewWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
 		return 1;
 	case WM_CGA_DELETE_CARD:
 		return g_CGAService.WM_DeleteCard((int)wParam, lParam ? true : false);
+	case WM_CGA_SEND_MAIL:
+		return g_CGAService.WM_SendMail((int)wParam, (const char *)lParam);
+	case WM_CGA_SEND_PET_MAIL:
+		return g_CGAService.WM_SendPetMail((int)(wParam & 0xFF), (int)((wParam >> 8) & 0xFF), (int)((wParam >> 16) & 0xFF), (const char *)lParam);
 	case WM_KEYDOWN:
 		if (GetForegroundWindow() == g_MainHwnd)
 		{

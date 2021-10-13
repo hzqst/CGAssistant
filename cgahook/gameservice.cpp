@@ -244,6 +244,76 @@ char *NET_EscapeStringEx(char *src)
 	return src;
 }
 
+char *NET_EscapeStringEx2(const char *str, char *dst, int maxlen)
+{
+	static char table[] = "n\nc,z|y\\";
+
+	int v4; // ST24_4
+	unsigned int j; // [esp+10h] [ebp-1Ch]
+	int v6; // [esp+14h] [ebp-18h]
+	signed int v7; // [esp+18h] [ebp-14h]
+	signed int v8; // [esp+1Ch] [ebp-10h]
+	signed int i; // [esp+20h] [ebp-Ch]
+	int k; // [esp+24h] [ebp-8h]
+	char v11; // [esp+2Bh] [ebp-1h]
+
+	v7 = strlen(str);
+	k = 0;
+	v6 = 0;
+	for (i = 0; i < v7; ++i)
+	{
+		if ((UCHAR)str[i] != (UCHAR)0xFF)
+		{
+			v11 = 0;
+			v8 = 0;
+			if (k + 1 >= maxlen)
+				break;
+			if (str[i] & 0x80)
+			{
+				if (k + 2 >= maxlen || k + 1 >= v6 + v7)
+				{
+					dst[k] = 0;
+					return dst;
+				}
+				dst[k] = str[i];
+				v4 = k + 1;
+				dst[v4] = str[++i];
+				k = v4 + 1;
+			}
+			else
+			{
+				for (j = 0; j < 4; ++j)
+				{
+					if (str[i] == table[2 * j])
+					{
+						v8 = 1;
+						v11 = table[2 * j + 1];
+						break;
+					}
+				}
+				if (v8 == 1)
+				{
+					if (k + 2 >= maxlen)
+					{
+						dst[k] = 0;
+						return dst;
+					}
+					dst[k] = '\\';
+					dst[k + 1] = v11;
+					k += 2;
+					++v6;
+				}
+				else
+				{
+					dst[k++] = str[i];
+				}
+			}
+		}
+	}
+	dst[k] = 0;
+	return dst;
+}
+
 void CGA_NotifyBattleAction(int flags);
 void CGA_NotifyPlayerMenu(const cga_player_menu_items_t &players);
 void CGA_NotifyUnitMenu(const cga_unit_menu_items_t &units);
@@ -3187,6 +3257,8 @@ void CGAService::Initialize(game_type type)
 		NET_WriteChangeTitleNamePacket_cgitem = CONVERT_GAMEVAR(void(__cdecl *)(int, int), 0x1891B0);
 		NET_WriteChangePetNamePacket_cgitem = CONVERT_GAMEVAR(void(__cdecl *)(int, int, const char *), 0x1894C0);
 		NET_WriteDeleteCardPacket_cgitem = CONVERT_GAMEVAR(void(__cdecl *)(int, int), 0x187E40);
+		NET_WriteMailPacket_cgitem = CONVERT_GAMEVAR(void(__cdecl *)(int a1, int cardid, const char *msg, int unk), 0x187C20);
+		NET_WritePetMailPacket_cgitem = CONVERT_GAMEVAR(void(__cdecl *)(int a1, int cardid, int petid, int itemid, const char *msg, int unk), 0x187D60);
 
 		Move_Player = CONVERT_GAMEVAR(void(__cdecl *)(), 0x98280);//ok
 		UI_HandleLogbackMouseEvent = CONVERT_GAMEVAR(int(__cdecl *)(int, char), 0xD2BF0);//ok
@@ -7252,6 +7324,62 @@ bool CGAService::WM_DeleteCard(int index, bool packetonly)
 bool CGAService::DeleteCard(int index, bool packetonly)
 {
 	return SendMessageA(g_MainHwnd, WM_CGA_DELETE_CARD, index, packetonly ? 1 : 0) ? true : false;
+}
+
+bool CGAService::WM_SendMail(int index, const char *str)
+{
+	if (!IsInGame())
+		return false;
+
+	if (index >= 0 && index < 60 && g_card_info[index].valid)
+	{
+		std::string msg = boost::locale::conv::from_utf<char>(str, "GBK");
+		
+		char buf[1024] = { 0 };
+		NET_EscapeStringEx2(msg.c_str(), buf, 1024);
+
+		NET_WriteMailPacket_cgitem(*g_net_socket, index, buf, 0);
+		return true;
+	}
+
+	return false;
+}
+
+bool CGAService::SendMail(int index, const std::string &msg)
+{
+	return SendMessageA(g_MainHwnd, WM_CGA_SEND_MAIL, (WPARAM)index, (LPARAM)msg.c_str()) ? true : false;
+}
+
+bool CGAService::WM_SendPetMail(int index, int petid, int itempos, const char *str)
+{
+	if (!IsInGame())
+		return false;
+
+	if (!IsPetValid(petid))
+		return false;
+
+	if (!IsItemValid(itempos))
+		return false;
+
+	if (index >= 0 && index < 60 && g_card_info[index].valid)
+	{
+		std::string msg = boost::locale::conv::from_utf<char>(str, "GBK");
+
+		char buf[600] = { 0 };
+		NET_EscapeStringEx2(msg.c_str(), buf, 600);
+
+		NET_WritePetMailPacket_cgitem(*g_net_socket, index, petid, itempos, buf, 0);
+		return true;
+	}
+
+	return false;
+}
+
+bool CGAService::SendPetMail(int index, int petid, int itemid, const std::string &msg)
+{
+	ULONG packed_arg = (index & 0xFF) | ((petid & 0xFF) << 8) | ((itemid & 0xFF) << 16);
+
+	return SendMessageA(g_MainHwnd, WM_CGA_SEND_PET_MAIL, (WPARAM)packed_arg, (LPARAM)msg.c_str()) ? true : false;
 }
 
 void CGAService::WM_SendClientLogin(const char *acc, const char *pwd, int gametype)

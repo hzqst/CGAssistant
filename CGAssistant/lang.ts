@@ -186,7 +186,7 @@
     <message>
         <source>Waiting for other CGAssistant to login ...
 CGA_PID=#%1, POLCN_PID=#%2, GID=%3</source>
-        <translation>正在等待其他CGA进程登录...CGA进程PID=#%1,易玩通登录器PID=#%2,GID=%3</translation>
+        <translation type="unfinished">正在等待其他CGA进程登录...\nCGA进程PID=#%1\n易玩通登录器PID=#%2,GID=%3</translation>
     </message>
     <message>
         <source>Auto ChangeServer</source>
