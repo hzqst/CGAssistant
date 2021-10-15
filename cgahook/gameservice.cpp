@@ -5956,20 +5956,22 @@ bool CGAService::BuyNPCStore(cga_buy_items_t items)
 
 bool CGAService::WM_PlayerMenuSelect(int menuindex, const char *menustring)
 {
+	auto menustring_gbk = boost::locale::conv::from_utf<char>(menustring, "GBK");
+
 	if (m_player_menu_type == PLAYER_MENU_HEAL)
 	{
 		m_player_menu_type = 0;
-		return UI_SelectHealPlayer(menuindex, menustring) ? true : false;
+		return UI_SelectHealPlayer(menuindex, menustring_gbk.c_str()) ? true : false;
 	}
 	else if (m_player_menu_type == PLAYER_MENU_ITEM)
 	{
 		m_player_menu_type = 0;
-		return UI_SelectItemPlayer(menuindex, menustring) ? true : false;
+		return UI_SelectItemPlayer(menuindex, menustring_gbk.c_str()) ? true : false;
 	}
 	else if (m_player_menu_type == PLAYER_MENU_TRADE)
 	{
 		m_player_menu_type = 0;
-		return UI_SelectTradePlayer(menuindex, menustring) ? true : false;
+		return UI_SelectTradePlayer(menuindex, menustring_gbk.c_str()) ? true : false;
 	}
 	return false;
 }
@@ -6080,7 +6082,12 @@ void CGAService::WM_SayWords(const char *str, int color, int range, int size)
 
 	std::string msg = "P|";
 
-	msg += boost::locale::conv::from_utf<char>(str, "GBK");
+	auto str_gbk = boost::locale::conv::from_utf<char>(str, "GBK");
+
+	char buf[1024] = { 0 };
+	NET_EscapeStringEx2(str_gbk.c_str(), buf, 1024);
+
+	msg += buf;
 
 	if(m_game_type == cg_item_6000)
 		NET_WriteSayWords_cgitem(*g_net_socket, g_player_xpos->decode(), g_player_ypos->decode(), msg.c_str(), color, range, size);
@@ -6097,18 +6104,18 @@ void CGAService::SayWords(std::string str, int color, int range, int size)
 
 bool CGAService::WM_ChangeNickName(const char *name)
 {
-	if (strlen(name) > 16)
-		return false;
+	auto name_gbk = boost::locale::conv::from_utf<char>(name, "GBK");
 
-	NET_WriteChangeNickNamePacket_cgitem(*g_net_socket, name);
+	char buf[128] = { 0 };
+	NET_EscapeStringEx2(name_gbk.c_str(), buf, 127);
+
+	NET_WriteChangeNickNamePacket_cgitem(*g_net_socket, buf);
 	return true;
 }
 
 bool CGAService::ChangeNickName(std::string name)
 {
-	auto textutf8 = boost::locale::conv::from_utf<char>(name, "GBK");
-
-	return SendMessageA(g_MainHwnd, WM_CGA_CHANGE_NICK_NAME, (WPARAM)textutf8.c_str(), (LPARAM)NULL) ? true : false;
+	return SendMessageA(g_MainHwnd, WM_CGA_CHANGE_NICK_NAME, (WPARAM)name.c_str(), (LPARAM)NULL) ? true : false;
 }
 
 bool CGAService::WM_ChangeTitleName(int titleId)
@@ -6140,13 +6147,11 @@ bool CGAService::WM_ChangePetName(int petId, const char *name)
 {
 	if (petId >= 0 && petId <= 4 && g_pet_base[petId].level)
 	{
-		auto str = boost::locale::conv::from_utf<char>(name, "GBK");
+		auto name_gbk = boost::locale::conv::from_utf<char>(name, "GBK");
 		
-		char buf[256] = {0};
-		strncpy(buf, str.c_str(), 255);
-		buf[255] = 0;
-
-		NET_EscapeStringEx(buf);
+		char buf[256] = { 0 };
+		NET_EscapeStringEx2(name_gbk.c_str(), buf, 256);
+	
 		NET_WriteChangePetNamePacket_cgitem(*g_net_socket, petId, buf);
 
 		return true;
@@ -6168,9 +6173,13 @@ void CGAService::WM_ChangePersDesc(cga_pers_desc_t *input)
 	
 	if (input->changeBits & 2)
 	{
-		auto str = boost::locale::conv::from_utf<char>(input->sellString, "GBK");
-		strncpy(g_pers_desc->sellString, str.c_str(), 255);
-		g_pers_desc->sellString[255] = 0;
+		auto str_gbk = boost::locale::conv::from_utf<char>(input->sellString, "GBK");
+		
+		char buf[256] = { 0 };
+		NET_EscapeStringEx2(str_gbk.c_str(), g_pers_desc->sellString, 256);
+
+		//strncpy(g_pers_desc->sellString, str.c_str(), 255);
+		//g_pers_desc->sellString[255] = 0;
 	}
 
 	if (input->changeBits & 4)
@@ -6180,9 +6189,13 @@ void CGAService::WM_ChangePersDesc(cga_pers_desc_t *input)
 
 	if (input->changeBits & 8)
 	{
-		auto str = boost::locale::conv::from_utf<char>(input->buyString, "GBK");
-		strncpy(g_pers_desc->buyString, str.c_str(), 255);
-		g_pers_desc->buyString[255] = 0;
+		auto str_gbk = boost::locale::conv::from_utf<char>(input->buyString, "GBK");
+		
+		char buf[256] = { 0 };
+		NET_EscapeStringEx2(str_gbk.c_str(), g_pers_desc->buyString, 256);
+		
+		//strncpy(g_pers_desc->buyString, str.c_str(), 255);
+		//g_pers_desc->buyString[255] = 0;
 	}
 
 	if (input->changeBits & 0x10)
@@ -6192,16 +6205,24 @@ void CGAService::WM_ChangePersDesc(cga_pers_desc_t *input)
 
 	if (input->changeBits & 0x20)
 	{
-		auto str = boost::locale::conv::from_utf<char>(input->wantString, "GBK");
-		strncpy(g_pers_desc->wantString, str.c_str(), 255);
-		g_pers_desc->wantString[255] = 0;
+		auto str_gbk = boost::locale::conv::from_utf<char>(input->wantString, "GBK");
+		
+		char buf[256] = { 0 };
+		NET_EscapeStringEx2(str_gbk.c_str(), g_pers_desc->wantString, 256);
+		
+		//strncpy(g_pers_desc->wantString, str.c_str(), 255);
+		//g_pers_desc->wantString[255] = 0;
 	}
 
 	if (input->changeBits & 0x40)
 	{
-		auto str = boost::locale::conv::from_utf<char>(input->descString, "GBK");
-		strncpy(g_pers_desc->descString, str.c_str(), 255);
-		g_pers_desc->descString[255] = 0;
+		auto str_gbk = boost::locale::conv::from_utf<char>(input->descString, "GBK");
+		
+		char buf[256] = { 0 };
+		NET_EscapeStringEx2(str_gbk.c_str(), g_pers_desc->descString, 256);
+		
+		//strncpy(g_pers_desc->descString, str.c_str(), 255);
+		//g_pers_desc->descString[255] = 0;
 	}
 
 	UI_UpdatePersDesc(0);
