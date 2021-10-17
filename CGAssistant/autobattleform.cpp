@@ -278,6 +278,8 @@ void AutoBattleForm::on_comboBox_condition_type_currentIndexChanged(int index)
     case BattleCond_Type_TeammateMultiTargetHp:
     case BattleCond_Type_EnemyAllHp:
     case BattleCond_Type_TeammateAllHp:
+    case BattleCond_Type_PlayerGold:
+    case BattleCond_Type_BattleBGM:
     {
         for(int i = 0;i < BattleCond_NumRel_Max; ++i)
             ui->comboBox_condition_relation->addItem(s_BattleCondRelationNumber[i]);
@@ -299,6 +301,9 @@ void AutoBattleForm::on_comboBox_condition_type_currentIndexChanged(int index)
     }
     case BattleCond_Type_EnemyUnit:
     case BattleCond_Type_InventoryItem:
+    case BattleCond_Type_TeammateUnit:
+    case BattleCond_Type_PlayerName:
+    case BattleCond_Type_PlayerJob:
     {
         for(int i = 0;i < BattleCond_StrRel_Max; ++i)
             ui->comboBox_condition_relation->addItem(s_BattleCondRelationString[i]);
