@@ -46,7 +46,14 @@ private slots:
     void on_tabWidget_currentChanged(int index);
     void OnNotifyGetPlayerInfo(QSharedPointer<CGA_PlayerInfo_t> player);
     void OnNotifyGetInfoFailed(bool bIsConnected, bool bIsInGame);
+    void OnNotifyLoginProgressStart();
+    void OnNotifyLoginProgressEnd();
 private:
+    bool m_bIsInLoginProgress;
+
+    QIcon m_base_icon;
+    QIcon m_login_icon;
+    QIcon m_notingame_icon;
 };
 
 #endif // MAINWINDOW_H

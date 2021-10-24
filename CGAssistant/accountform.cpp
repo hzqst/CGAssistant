@@ -187,6 +187,8 @@ void AccountForm::OnAutoLogin()
             CloseHandle(m_polcn_map);
             m_polcn_map = NULL;
         }
+
+        NotifyLoginProgressEnd();
         return;
     }
 
@@ -208,6 +210,8 @@ void AccountForm::OnAutoLogin()
                 CloseHandle(m_polcn_map);
                 m_polcn_map = NULL;
             }
+
+            NotifyLoginProgressEnd();
             return;
         }
 
@@ -245,6 +249,8 @@ void AccountForm::OnPOLCNStarted()
 {
      ui->label_status->setText(tr("POLCN_Launcher running with pid %1...").arg(m_POLCN->processId()));
      ui->textEdit_output->setText(tr("Querying GID list..."));
+
+     NotifyLoginProgressStart();
 }
 
 void AccountForm::OnPOLCNFinish(int exitCode, QProcess::ExitStatus exitStatus)

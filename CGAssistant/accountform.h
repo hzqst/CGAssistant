@@ -40,6 +40,8 @@ public slots:
 signals:
     void NotifyAutoAttachProcess(quint32 pid, quint32 tid);
     void NotifyKillProcess();
+    void NotifyLoginProgressStart();
+    void NotifyLoginProgressEnd();
 
 private:
     Ui::AccountForm *ui;

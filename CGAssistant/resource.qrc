@@ -3,5 +3,8 @@
         <file>PUK3.ico</file>
         <file>lang.qm</file>
         <file>logo.png</file>
+        <file>base_icon.png</file>
+        <file>login_icon.png</file>
+        <file>notingame_icon.png</file>
     </qresource>
 </RCC>

@@ -14,6 +14,12 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
 
+    m_bIsInLoginProgress = false;
+
+    m_base_icon = QIcon(":/base_icon.png");
+    m_login_icon = QIcon(":/login_icon.png");
+    m_notingame_icon = QIcon(":/notingame_icon.png");
+
     ui->setupUi(this);
 
     auto playerWorker = new CPlayerWorker();
@@ -105,6 +111,8 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(playerWorker, &CPlayerWorker::NotifyConnectionState, accountForm, &AccountForm::OnNotifyConnectionState, Qt::ConnectionType::QueuedConnection);
     connect(accountForm, &AccountForm::NotifyKillProcess, processWorker, &CProcessWorker::OnKillProcess);
     connect(accountForm, &AccountForm::NotifyAutoAttachProcess, processWorker, &CProcessWorker::OnAutoAttachProcess, Qt::QueuedConnection);
+    connect(accountForm, &AccountForm::NotifyLoginProgressStart, this, &MainWindow::OnNotifyLoginProgressStart, Qt::QueuedConnection);
+    connect(accountForm, &AccountForm::NotifyLoginProgressEnd, this, &MainWindow::OnNotifyLoginProgressEnd, Qt::QueuedConnection);
 
     connect(this, &MainWindow::HttpGetGameProcInfo, processWorker, &CProcessWorker::OnHttpGetGameProcInfo, Qt::DirectConnection);
     connect(this, &MainWindow::HttpGetSettings, playerFrom, &PlayerForm::OnHttpGetSettings);
@@ -152,10 +160,40 @@ void MainWindow::on_tabWidget_currentChanged(int index)
 void MainWindow::OnNotifyGetPlayerInfo(QSharedPointer<CGA_PlayerInfo_t> player)
 {
     if(player->serverindex != -1 && !player->name.isEmpty())
+    {
         setWindowTitle(tr("CGAssistant [%1] (server %2)").arg(player->name).arg(player->serverindex));
+        setWindowIcon(m_base_icon);
+    }
 }
 
 void MainWindow::OnNotifyGetInfoFailed(bool bIsConnected, bool bIsInGame)
 {
-    setWindowTitle(tr("CGAssistant"));
+    if(m_bIsInLoginProgress)
+    {
+        setWindowTitle(tr("CGAssistant (Login in progress...)"));
+        setWindowIcon(m_login_icon);
+    }
+    else
+    {
+        if(bIsConnected && !bIsInGame)
+        {
+            setWindowTitle(tr("CGAssistant (Game attached, Not in game)"));
+            setWindowIcon(m_notingame_icon);
+        }
+        else
+        {
+            setWindowTitle(tr("CGAssistant"));
+            setWindowIcon(m_base_icon);
+        }
+    }
+}
+
+void MainWindow::OnNotifyLoginProgressStart()
+{
+    m_bIsInLoginProgress = true;
+}
+
+void MainWindow::OnNotifyLoginProgressEnd()
+{
+    m_bIsInLoginProgress = false;
 }
