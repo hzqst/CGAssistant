@@ -165,6 +165,8 @@ void CProcessWorker::ConnectToServer(quint32 ProcessId, quint32 ThreadId, int po
     if(!CreateAttachMutex(ProcessId, ThreadId))
         return;
 
+    qDebug("ConnectToServer %d %d, port %d", ProcessId, ThreadId, port);
+
     if(g_CGAInterface->Connect(port))
     {
         m_AttachHwnd = (HWND)hwnd;
@@ -197,10 +199,14 @@ void CProcessWorker::OnAutoAttachProcess(quint32 ProcessId, quint32 ThreadId)
 {
     m_AutoAttachPID = ProcessId;
     m_AutoAttachTID = ThreadId;
+
+    qDebug("OnAutoAttachProcess %d %d", ProcessId, ThreadId);
 }
 
 void CProcessWorker::OnQueueAttachProcess(quint32 ProcessId, quint32 ThreadId, quint32 hWnd, QString dllPath)
 {
+    qDebug("OnQueueAttachProcess %d %d", ProcessId, ThreadId);
+
     int port = 0;
     quint32 hwnd = 0;
     if(!ReadSharedData(ProcessId, port, hwnd))
@@ -209,6 +215,7 @@ void CProcessWorker::OnQueueAttachProcess(quint32 ProcessId, quint32 ThreadId, q
         QString errorString;
         if(!InjectByMsgHook(ThreadId, hWnd, dllPath, errorCode, errorString))
         {
+            qDebug("OnQueueAttachProcess %d %d, failed to InjectByMsgHook", ProcessId, ThreadId);
             NotifyAttachProcessFailed(ProcessId, ThreadId, errorCode, errorString);
             return;
         }
@@ -218,6 +225,8 @@ void CProcessWorker::OnQueueAttachProcess(quint32 ProcessId, quint32 ThreadId, q
     }
     else
     {
+        qDebug("OnQueueAttachProcess %d %d, failed to ReadSharedData", ProcessId, ThreadId);
+
         //Already attached to game
         Disconnect();
         ConnectToServer(ProcessId, ThreadId, port, hwnd);
@@ -261,6 +270,7 @@ void CProcessWorker::OnQueueQueryProcess()
 
                 if(!attached && m_AutoAttachPID == pid && m_AutoAttachTID == tid){
                     OnQueueAttachProcess( (quint32)pid, (quint32)tid, (quint32)hWnd, QString("cgahook.dll") );
+
                     m_AutoAttachPID = 0;
                     m_AutoAttachTID = 0;
                 }
