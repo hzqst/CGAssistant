@@ -325,6 +325,7 @@ void AccountForm::OnPOLCNFinish(int exitCode, QProcess::ExitStatus exitStatus)
                     m_game_pid = (quint32)obj.take("game_pid").toInt();
                     m_game_tid = (quint32)obj.take("game_tid").toInt();
                     NotifyAutoAttachProcess(m_game_pid, m_game_tid);
+                    qDebug("NotifyAutoAttachProcess %d %d", m_game_pid, m_game_tid);
 
                     ui->textEdit_output->append(tr("Wait for game process to login...\n"));
                 }

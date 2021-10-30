@@ -269,6 +269,9 @@ void CProcessWorker::OnQueueQueryProcess()
                 list.append(item);
 
                 if(!attached && m_AutoAttachPID == pid && m_AutoAttachTID == tid){
+
+                    qDebug("OnQueueAttachProcess %d %d", (quint32)pid, (quint32)tid);
+
                     OnQueueAttachProcess( (quint32)pid, (quint32)tid, (quint32)hWnd, QString("cgahook.dll") );
 
                     m_AutoAttachPID = 0;
