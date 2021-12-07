@@ -52,7 +52,7 @@ jobs:
         install-deps: # optional, default is true
         modules: # optional
         cached: false # ${{ steps.cache-qt.outputs.cache-hit }}
-        tools : 'tools_qtcreator,5.,qt.tools.qtcreator'
+        tools : 'tools_qtcreator,6.,qt.tools.qtcreator'
 
     - name: Build boost
       working-directory: ${{env.GITHUB_WORKSPACE}}
