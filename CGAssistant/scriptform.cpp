@@ -2,7 +2,7 @@
 #include "ui_scriptform.h"
 #include <QFileDialog>
 #include <QMessageBox>
-#include <QTextEdit>
+#include <QPlainTextEdit>
 #include <QTimer>
 #include <QDragEnterEvent>
 #include <QDropEvent>
@@ -23,7 +23,7 @@ ScriptForm::ScriptForm(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    m_output = new QTextEdit(this);
+    m_output = new QPlainTextEdit(this);
     ui->verticalLayout_debug->addWidget(m_output);
     m_output->setReadOnly(true);
     m_output->show();
@@ -35,6 +35,7 @@ ScriptForm::ScriptForm(QWidget *parent) :
     m_bSuspending = false;
     m_port = 0;
     m_ConsoleMaxLines = 100;
+    m_output->setMaximumBlockCount(m_ConsoleMaxLines);
 
     m_node = new QProcess(this);
 
@@ -111,11 +112,11 @@ void ScriptForm::OnNodeReadyRead()
     {
         QString data = m_node->readAll();
 
-        QTextCursor txtcur = m_output->textCursor();
+        m_output->appendPlainText(data);
+        /*QTextCursor txtcur = m_output->textCursor();
         if(m_ConsoleMaxLines > 0){
             while(m_output->document()->lineCount() > m_ConsoleMaxLines)
             {
-
                 txtcur.movePosition(QTextCursor::Start, QTextCursor::MoveAnchor);
                 txtcur.movePosition(QTextCursor::NextBlock, QTextCursor::KeepAnchor);
                 txtcur.removeSelectedText();
@@ -124,7 +125,7 @@ void ScriptForm::OnNodeReadyRead()
 
         txtcur.movePosition(QTextCursor::End, QTextCursor::MoveAnchor);
         txtcur.insertText(data);
-        txtcur.insertBlock();
+        txtcur.insertBlock();*/
 
         if(m_bNavigating)
         {
@@ -174,11 +175,14 @@ void ScriptForm::OnNodeReadyRead()
         int findStart = data.indexOf(pattern);
         if(findStart != -1)
         {
-            m_output->moveCursor(QTextCursor::End);
-            m_output->insertPlainText(data);
+            //m_output->moveCursor(QTextCursor::End);
+            //m_output->insertPlainText(data);
 
-            m_output->moveCursor(QTextCursor::End);
-            m_output->insertPlainText(tr("\nCheck \"chrome://inspect\" in chrome to debug the node process."));
+            //m_output->moveCursor(QTextCursor::End);
+            //m_output->insertPlainText(tr("\nCheck \"chrome://inspect\" in chrome to debug the node process."));
+
+            m_output->appendPlainText(data);
+            m_output->appendPlainText(tr("\nCheck \"chrome://inspect\" in chrome to debug the node process."));
 
             m_bListening = false;
         }
@@ -538,6 +542,7 @@ void ScriptForm::OnNotifyFillLoadScript(QString path, bool autorestart, bool fre
         ui->checkBox_freezestop->setChecked(true);
 
     m_ConsoleMaxLines = consolemaxlines;
+    m_output->setMaximumBlockCount(m_ConsoleMaxLines);
 }
 
 void ScriptForm::on_pushButton_suspend_clicked()

@@ -12,6 +12,7 @@ ChatForm::ChatForm(QWidget *parent) :
     ui->setupUi(this);
 
     m_ChatMaxLines = 100;
+    ui->textEdit_chat->document()->setMaximumBlockCount(m_ChatMaxLines);
 }
 
 ChatForm::~ChatForm()
@@ -39,6 +40,7 @@ void ChatForm::OnNotifyGetPlayerInfo(QSharedPointer<CGA_PlayerInfo_t> player)
 void ChatForm::OnNotifyFillStaticSettings(int freezetime, int chatmaxlines)
 {
     m_ChatMaxLines = chatmaxlines;
+    ui->textEdit_chat->document()->setMaximumBlockCount(m_ChatMaxLines);
 }
 
 void ChatForm::OnNotifyChatMsg(int unitid, QString msg, int size, int color)
@@ -110,15 +112,14 @@ void ChatForm::OnNotifyChatMsg(int unitid, QString msg, int size, int color)
 
         QTextCursor txtcur = ui->textEdit_chat->textCursor();
 
-        if(m_ChatMaxLines > 0){
-            //qDebug("doc %d max %d", ui->textEdit_chat->document()->lineCount(), m_ChatMaxLines);
+        /*if(m_ChatMaxLines > 0){
             if (ui->textEdit_chat->document()->lineCount() > m_ChatMaxLines)
             {
                 txtcur.movePosition(QTextCursor::Start, QTextCursor::MoveAnchor);
                 txtcur.movePosition(QTextCursor::NextBlock, QTextCursor::KeepAnchor);
                 txtcur.removeSelectedText();
             }
-        }
+        }*/
 
         txtcur.movePosition(QTextCursor::End, QTextCursor::MoveAnchor);
         txtcur.insertHtml(line);

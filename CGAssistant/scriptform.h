@@ -10,6 +10,7 @@ namespace Ui {
 class ScriptForm;
 }
 class QTextEdit;
+class QPlainTextEdit;
 
 class ScriptForm : public QWidget
 {
@@ -45,7 +46,7 @@ private slots:
 
 private:
     Ui::ScriptForm *ui;
-    QTextEdit *m_output;
+    QPlainTextEdit *m_output;
     QString m_scriptPath;
     QString m_chromePath;
     QProcess *m_node;
