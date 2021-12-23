@@ -186,7 +186,7 @@
     <message>
         <source>Waiting for other CGAssistant to login ...
 CGA_PID=#%1, POLCN_PID=#%2, GID=%3</source>
-        <translation type="unfinished">正在等待其他CGA进程登录...\nCGA进程PID=#%1\n易玩通登录器PID=#%2,GID=%3</translation>
+        <translation>正在等待其他CGA进程登录...\nCGA进程PID=#%1\n易玩通登录器PID=#%2,GID=%3</translation>
     </message>
     <message>
         <source>Auto ChangeServer</source>
@@ -937,11 +937,19 @@ p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:&apos;SimSun&apos;; font-size:9pt; font-weight:400; font-style:normal;&quot;&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;img src=&quot;:/logo.png&quot; /&gt;&lt;/p&gt;
 &lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:16px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; line-height:160%; font-family:&apos;-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol,Liberation Sans,PingFang SC,Microsoft YaHei,Hiragino Sans GB,Wenquanyi Micro Hei,WenQuanYi Zen Hei,ST Heiti,SimHei,SimSun,WenQuanYi Zen Hei Sharp,sans-serif&apos;; font-size:16px; color:#40485b; background-color:#ffffff;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:16px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; line-height:160%; background-color:#ffffff;&quot;&gt;&lt;span style=&quot; font-family:&apos;-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol,Liberation Sans,PingFang SC,Microsoft YaHei,Hiragino Sans GB,Wenquanyi Micro Hei,WenQuanYi Zen Hei,ST Heiti,SimHei,SimSun,WenQuanYi Zen Hei Sharp,sans-serif&apos;; font-size:16px; color:#40485b; background-color:#ffffff;&quot;&gt;当前版本：2021-10-17&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:16px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; line-height:160%; background-color:#ffffff;&quot;&gt;&lt;span style=&quot; font-family:&apos;-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol,Liberation Sans,PingFang SC,Microsoft YaHei,Hiragino Sans GB,Wenquanyi Micro Hei,WenQuanYi Zen Hei,ST Heiti,SimHei,SimSun,WenQuanYi Zen Hei Sharp,sans-serif&apos;; font-size:16px; color:#40485b; background-color:#ffffff;&quot;&gt;当前版本：2021-12-07&lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:16px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; line-height:160%; background-color:#ffffff;&quot;&gt;&lt;span style=&quot; font-family:&apos;-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol,Liberation Sans,PingFang SC,Microsoft YaHei,Hiragino Sans GB,Wenquanyi Micro Hei,WenQuanYi Zen Hei,ST Heiti,SimHei,SimSun,WenQuanYi Zen Hei Sharp,sans-serif&apos;; font-size:16px; color:#40485b; background-color:#ffffff;&quot;&gt;下载最新版本：群号 300303705&lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:16px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; line-height:160%; background-color:#ffffff;&quot;&gt;&lt;span style=&quot; font-family:&apos;-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol,Liberation Sans,PingFang SC,Microsoft YaHei,Hiragino Sans GB,Wenquanyi Micro Hei,WenQuanYi Zen Hei,ST Heiti,SimHei,SimSun,WenQuanYi Zen Hei Sharp,sans-serif&apos;; font-size:16px; color:#40485b; background-color:#ffffff;&quot;&gt;或 &lt;/span&gt;&lt;a href=&quot;https://github.com/hzqst/CGAssistantJS/issues&quot;&gt;&lt;span style=&quot; font-family:&apos;-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol,Liberation Sans,PingFang SC,Microsoft YaHei,Hiragino Sans GB,Wenquanyi Micro Hei,WenQuanYi Zen Hei,ST Heiti,SimHei,SimSun,WenQuanYi Zen Hei Sharp,sans-serif&apos;; font-size:16px; text-decoration: underline; color:#005980; background-color:transparent;&quot;&gt;https://github.com/hzqst/CGAssistantJS/&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:16px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; line-height:160%; background-color:#ffffff;&quot;&gt;&lt;a href=&quot;https://github.com/hzqst/CGAssistantJS/issues&quot;&gt;&lt;span style=&quot; font-family:&apos;-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol,Liberation Sans,PingFang SC,Microsoft YaHei,Hiragino Sans GB,Wenquanyi Micro Hei,WenQuanYi Zen Hei,ST Heiti,SimHei,SimSun,WenQuanYi Zen Hei Sharp,sans-serif&apos;; font-size:16px; text-decoration: underline; color:#005980; background-color:transparent;&quot;&gt;或 &lt;/span&gt;&lt;/a&gt;&lt;a href=&quot;https://gitee.com/hzqst/CGAssistantJS/issues&quot;&gt;&lt;span style=&quot; font-family:&apos;-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol,Liberation Sans,PingFang SC,Microsoft YaHei,Hiragino Sans GB,Wenquanyi Micro Hei,WenQuanYi Zen Hei,ST Heiti,SimHei,SimSun,WenQuanYi Zen Hei Sharp,sans-serif&apos;; font-size:16px; text-decoration: underline; color:#005980; background-color:transparent;&quot;&gt;https://gitee.com/hzqst/CGAssistantJS/&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>CGAssistant (Login in progress...)</source>
+        <translation>CGAssistant (登录中...)</translation>
+    </message>
+    <message>
+        <source>CGAssistant (Game attached, Not in game)</source>
+        <translation>CGAssistant (游戏进程已附加，但未登入服务器)</translation>
     </message>
 </context>
 <context>
