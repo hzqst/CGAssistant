@@ -154,7 +154,13 @@ namespace CGA
 			return m_connected;
 		}
 		virtual void Disconnect() {
-			m_connected = false;;
+			m_connected = false;
+		}
+		virtual int GetPort() {
+			if (!m_connected)
+				retun 0;
+
+			return m_endpoint.port();
 		}
 		virtual bool Connect(int port) {
 			m_endpoint = timax::rpc::get_tcp_endpoint("127.0.0.1", port);

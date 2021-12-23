@@ -277,6 +277,21 @@ void CProcessWorker::OnQueueQueryProcess()
                     m_AutoAttachPID = 0;
                     m_AutoAttachTID = 0;
                 }
+
+                if(attached)
+                {
+                    int port = 0;
+                    quint32 hwnd = 0;
+
+                    if(ReadSharedData(pid, port, hwnd) && g_CGAInterface->IsConnected() && g_CGAInterface->GetPort() == port)
+                    {
+                        if(hwnd != GetAttachedHwnd()){
+                            qDebug("Should not connect to port %d, disconnect", port);
+                            g_CGAInterface->Disconnect();
+                        }
+                    }
+                }
+
             }
         }
     }

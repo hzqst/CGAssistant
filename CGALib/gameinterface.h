@@ -1100,6 +1100,7 @@ namespace CGA
 		virtual bool IsConnected() = 0;
 		virtual void Disconnect() = 0;
 		virtual bool Connect(int port) = 0;
+		virtual int GetPort() = 0;
 		virtual bool Initialize(cga_game_data_t &data) = 0;
 
 		virtual bool IsInGame(int &ingame) = 0;
