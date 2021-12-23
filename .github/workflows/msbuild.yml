@@ -17,7 +17,7 @@ jobs:
     if: github.repository == 'hzqst/CGAssistant'
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: hzqst/checkout@v2.3.4
       
     - name: Add MSBuild to PATH
       uses: microsoft/setup-msbuild@v1
@@ -52,7 +52,7 @@ jobs:
         install-deps: # optional, default is true
         modules: # optional
         cached: false # ${{ steps.cache-qt.outputs.cache-hit }}
-        tools : 'tools_qtcreator,5.,qt.tools.qtcreator'
+        tools : 'tools_qtcreator,6.,qt.tools.qtcreator'
 
     - name: Build boost
       working-directory: ${{env.GITHUB_WORKSPACE}}
