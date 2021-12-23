@@ -158,7 +158,7 @@ namespace CGA
 		}
 		virtual int GetPort() {
 			if (!m_connected)
-				retun 0;
+				return 0;
 
 			return m_endpoint.port();
 		}
