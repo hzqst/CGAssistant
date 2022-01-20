@@ -5656,7 +5656,10 @@ void CGAService::LogBack()
 
 void CGAService::WM_LogBack()
 {
-	if (!IsInGame() || *g_logback)
+	//if (!IsInGame() || *g_logback)
+	//	return;
+
+	if (!IsInGame())
 		return;
 
 	if (GetWorldStatus() == 10)
