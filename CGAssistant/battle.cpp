@@ -3964,6 +3964,9 @@ void CBattleWorker::OnSetBeep(int state)
 
 void CBattleWorker::OnSetWaitAfterBattle(int state)
 {
+    if(m_bWaitAfterBattle && !state){
+        g_CGAInterface->SetSwitchAnimForceWait(0, 0);
+    }
     m_bWaitAfterBattle = state ? true : false;
 }
 
