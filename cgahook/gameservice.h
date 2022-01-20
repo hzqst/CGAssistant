@@ -707,6 +707,7 @@ namespace CGA
 		virtual cga_team_players_t GetTeamPlayerInfo(void);
 		virtual void FixMapWarpStuck(int type);
 		virtual void SetNoSwitchAnim(bool enable);
+		virtual void SetSwitchAnimForceWait(int state, int ticks);
 		virtual void SetImmediateDoneWork(bool enable);
 		virtual int GetImmediateDoneWorkState(void);
 		virtual bool EnableFlags(int type, bool enable);
@@ -1265,6 +1266,9 @@ namespace CGA
 		int m_ui_craftdialog_additemcount;
 		int m_work_acceleration;
 		bool m_ui_noswitchanim;
+		int m_ui_switchanim_wait;
+		int m_ui_switchanim_endtick;
+		int m_ui_switchanim_waittick;
 		int m_player_menu_type;
 		int m_unit_menu_type;
 		bool m_work_immediate;

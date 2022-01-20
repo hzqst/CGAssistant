@@ -2184,6 +2184,25 @@ int __cdecl NewUI_HandleCraftItemButtonMouseEvent(int index, char flags)
 
 int CGAService::NewUI_PlaySwitchAnim(int a1, char a2, float a3)
 {
+	if (m_ui_switchanim_wait > 0)
+	{
+		if (m_ui_switchanim_endtick == 0)
+		{
+			m_ui_switchanim_endtick = GetTickCount() + m_ui_switchanim_waittick;
+		}
+		else
+		{
+			if (GetTickCount() > m_ui_switchanim_endtick)
+			{
+				m_ui_switchanim_endtick = 0;
+				if (m_ui_switchanim_wait == 1)
+					m_ui_switchanim_wait = 0;
+				return 1;
+			}
+		}
+		return 0;
+	}
+
 	if (m_ui_noswitchanim)
 	{
 		/*if (GetWorldStatus() == 10 && GetGameStatus() == 8)
@@ -3439,6 +3458,9 @@ void CGAService::Initialize(game_type type)
 		m_work_immediate_state = 0;
 		m_work_basedelay_enforced = 2000;
 		m_ui_noswitchanim = false;
+		m_ui_switchanim_wait = 0;
+		m_ui_switchanim_endtick = 0;
+		m_ui_switchanim_waittick = 0;
 		m_player_menu_type = 0;
 		m_unit_menu_type = 0;
 		m_ui_selectbigserver_click_index = -1;
@@ -7229,6 +7251,12 @@ void CGAService::FixMapWarpStuck(int type)
 void CGAService::SetNoSwitchAnim(bool enable)
 {
 	m_ui_noswitchanim = enable;
+}
+
+void CGAService::SetSwitchAnimForceWait(int state, int ticks)
+{
+	m_ui_switchanim_wait = state;
+	m_ui_switchanim_waittick = ticks;
 }
 
 void CGAService::SetImmediateDoneWork(bool enable)

@@ -280,6 +280,7 @@ DWORD WINAPI CGAServerThread(LPVOID)
 				server->register_handler("GetTeamPlayerInfo", timax::bind(&CGAService::GetTeamPlayerInfo, &g_CGAService));
 				server->register_handler("FixMapWarpStuck", timax::bind(&CGAService::FixMapWarpStuck, &g_CGAService));
 				server->register_handler("SetNoSwitchAnim", timax::bind(&CGAService::SetNoSwitchAnim, &g_CGAService));
+				server->register_handler("SetSwitchAnimForceWait", timax::bind(&CGAService::SetSwitchAnimForceWait, &g_CGAService));
 				server->register_handler("GetMoveHistory", timax::bind(&CGAService::GetMoveHistory, &g_CGAService));
 				server->register_handler("EnableFlags", timax::bind(&CGAService::EnableFlags, &g_CGAService));
 				server->register_handler("SetWindowResolution", timax::bind(&CGAService::SetWindowResolution, &g_CGAService));

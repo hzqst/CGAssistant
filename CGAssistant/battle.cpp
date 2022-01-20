@@ -3215,6 +3215,7 @@ CBattleWorker::CBattleWorker()
     m_bNoSwitchAnim = false;
     m_bPetDoubleAction = false;
     m_bBeep = false;
+    m_bWaitAfterBattle = false;
     m_iDelayFrom = 0;
     m_iDelayTo = 0;
     m_LastWarpMap202 = 0;
@@ -3809,6 +3810,13 @@ void CBattleWorker::OnNotifyBattleAction(int flags)
         m_BattleContext.m_bIsPlayerEscaped = false;
         return;
     }
+    else
+    {
+        if(m_bWaitAfterBattle)
+        {
+            g_CGAInterface->SetSwitchAnimForceWait(1, m_iDelayTo);
+        }
+    }
 
     int gameStatus = 0;
     if(!g_CGAInterface->GetGameStatus(gameStatus) && gameStatus != 10)
@@ -3865,11 +3873,12 @@ void CBattleWorker::OnNotifyBattleAction(int flags)
 
         if(m_bNoSwitchAnim && m_BattleContext.m_iLastRound != m_BattleContext.m_iRoundCount )
         {
-            int randDelay = qrand() * (m_iDelayTo - m_iDelayFrom) / RAND_MAX + m_iDelayFrom;
+            int randDelay = m_iDelayFrom;
+            /*int randDelay = qrand() * (m_iDelayTo - m_iDelayFrom) / RAND_MAX + m_iDelayFrom;
             if(randDelay < 1)
                 randDelay = 1;
             if(randDelay > 10000)
-                randDelay = 10000;
+                randDelay = 10000;*/
 
             if(!m_BattleContext.m_bRoundZeroNotified && m_BattleContext.m_iRoundCount == 1)
                 randDelay += 4000;
@@ -3878,11 +3887,12 @@ void CBattleWorker::OnNotifyBattleAction(int flags)
         }
         else if(((m_BattleContext.m_iRoundCount == 0 && !m_bFirstRoundNoDelay) || m_BattleContext.m_iRoundCount > 0) && m_BattleContext.m_iLastRound != m_BattleContext.m_iRoundCount)
         {
-            int randDelay = qrand() * (m_iDelayTo - m_iDelayFrom) / RAND_MAX + m_iDelayFrom;
+            int randDelay = m_iDelayFrom;
+            /*int randDelay = qrand() * (m_iDelayTo - m_iDelayFrom) / RAND_MAX + m_iDelayFrom;
             if(randDelay < 1)
                 randDelay = 1;
             if(randDelay > 10000)
-                randDelay = 10000;
+                randDelay = 10000;*/
 
             QTimer::singleShot( randDelay, this, SLOT(OnPerformanceBattle()) );
         }
@@ -3950,6 +3960,11 @@ void CBattleWorker::OnSetPetDoubleAction(int state)
 void CBattleWorker::OnSetBeep(int state)
 {
     m_bBeep = state ? true : false;
+}
+
+void CBattleWorker::OnSetWaitAfterBattle(int state)
+{
+    m_bWaitAfterBattle = state ? true : false;
 }
 
 void CBattleWorker::OnSetDelayFrom(int val)

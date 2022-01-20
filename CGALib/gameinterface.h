@@ -1211,6 +1211,7 @@ namespace CGA
 
 		virtual bool FixMapWarpStuck(int type) = 0;
 		virtual bool SetNoSwitchAnim(bool enable) = 0;
+		virtual bool SetSwitchAnimForceWait(int state, int ticks) = 0;
         virtual bool GetMoveHistory(std::vector<unsigned long> &v) = 0;
 		virtual bool SetWindowResolution(int w, int h) = 0;
 		virtual bool RequestDownloadMap(int xbottom, int ybottom, int xsize, int ysize) = 0;

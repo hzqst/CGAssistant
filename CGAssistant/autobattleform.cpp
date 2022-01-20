@@ -141,6 +141,7 @@ AutoBattleForm::AutoBattleForm(CBattleWorker *worker, CPlayerWorker *pworker, QW
     connect(ui->checkBox_lockCountdown, SIGNAL(stateChanged(int)), m_worker, SLOT(OnSetLockCountdown(int)), Qt::ConnectionType::QueuedConnection);
     connect(ui->checkBox_petDoubleAction, SIGNAL(stateChanged(int)), m_worker, SLOT(OnSetPetDoubleAction(int)), Qt::ConnectionType::QueuedConnection);
     connect(ui->checkBox_beep, SIGNAL(stateChanged(int)), m_worker, SLOT(OnSetBeep(int)), Qt::ConnectionType::QueuedConnection);
+    connect(ui->checkBox_waitAfterBattle, SIGNAL(stateChanged(int)), m_worker, SLOT(OnSetWaitAfterBattle(int)), Qt::ConnectionType::QueuedConnection);
     connect(ui->horizontalSlider_delayFrom, SIGNAL(valueChanged(int)), m_worker, SLOT(OnSetDelayFrom(int)), Qt::ConnectionType::QueuedConnection);
     connect(ui->horizontalSlider_delayTo, SIGNAL(valueChanged(int)), m_worker, SLOT(OnSetDelayTo(int)), Qt::ConnectionType::QueuedConnection);
     connect(m_model, SIGNAL(syncList(CBattleSettingList)), m_worker, SLOT(OnSyncList(CBattleSettingList)), Qt::ConnectionType::QueuedConnection);
@@ -1373,6 +1374,9 @@ bool AutoBattleForm::ParseBattleSettings(const QJsonValue &val)
     if(obj.contains("beep"))
         ui->checkBox_beep->setChecked(obj.take("beep").toBool());
 
+    if(obj.contains("waitafterbattle"))
+        ui->checkBox_waitAfterBattle->setChecked(obj.take("waitafterbattle").toBool());
+
     if(obj.contains("delayfrom"))
         ui->horizontalSlider_delayFrom->setValue(obj.take("delayfrom").toInt());
 
@@ -1510,6 +1514,7 @@ void AutoBattleForm::SaveBattleSettings(QJsonObject &obj)
     obj.insert("r1nodelay", ui->checkBox_firstRoundNoDelay->isChecked());
     obj.insert("pet2action", ui->checkBox_petDoubleAction->isChecked());
     obj.insert("beep", ui->checkBox_beep->isChecked());
+    obj.insert("waitafterbattle", ui->checkBox_waitAfterBattle->isChecked());
     obj.insert("delayfrom", ui->horizontalSlider_delayFrom->value());
     obj.insert("delayto", ui->horizontalSlider_delayTo->value());
 

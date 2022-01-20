@@ -108,6 +108,7 @@ namespace CGAServiceProtocol
 	TIMAX_DEFINE_PROTOCOL(GetTeamPlayerInfo, cga_team_players_t());
 	TIMAX_DEFINE_PROTOCOL(FixMapWarpStuck, void(int));
 	TIMAX_DEFINE_PROTOCOL(SetNoSwitchAnim, void(bool));
+	TIMAX_DEFINE_PROTOCOL(SetSwitchAnimForceWait, void(int, int));
 	TIMAX_DEFINE_PROTOCOL(GetMoveHistory, std::vector<DWORD>());
 	TIMAX_DEFINE_PROTOCOL(SetWindowResolution, void(int, int));
 	TIMAX_DEFINE_PROTOCOL(RequestDownloadMap, void(int, int, int, int));
@@ -1302,6 +1303,18 @@ namespace CGA
 				}
 				catch (timax::rpc::exception const &e) { if (e.get_error_code() != timax::rpc::error_code::TIMEOUT) m_connected = false; OutputDebugStringA("rpc exception from " __FUNCTION__); OutputDebugStringA(e.get_error_message().c_str()); }
 				catch (msgpack::parse_error &e) { OutputDebugStringA("parse exception from " __FUNCTION__); OutputDebugStringA(e.what()); }
+			}
+			return false;
+		}
+		virtual bool SetSwitchAnimForceWait(int state, int ticks)
+		{
+			if (m_connected) {
+				try {
+					m_client.call(std::chrono::milliseconds(10000), m_endpoint, CGAServiceProtocol::SetSwitchAnimForceWait, state, ticks);
+					return true;
+				}
+				catch (timax::rpc::exception const& e) { if (e.get_error_code() != timax::rpc::error_code::TIMEOUT) m_connected = false; OutputDebugStringA("rpc exception from " __FUNCTION__); OutputDebugStringA(e.get_error_message().c_str()); }
+				catch (msgpack::parse_error& e) { OutputDebugStringA("parse exception from " __FUNCTION__); OutputDebugStringA(e.what()); }
 			}
 			return false;
 		}

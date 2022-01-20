@@ -954,6 +954,7 @@ public slots:
     void OnSetHighSpeed(int val);
     void OnSetPetDoubleAction(int state);
     void OnSetBeep(int state);
+    void OnSetWaitAfterBattle(int state);
     void OnSyncList(CBattleSettingList list);
 signals:
     void NotifyBattleAction(int flags);
@@ -967,6 +968,7 @@ public:
     bool m_bPetDoubleAction;
     bool m_bBeep;
     bool m_bNoSwitchAnim;
+    bool m_bWaitAfterBattle;
     int m_iDelayFrom;
     int m_iDelayTo;
     uint64_t m_LastWarpMap202;
