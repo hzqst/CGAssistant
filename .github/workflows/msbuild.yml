@@ -39,7 +39,9 @@ jobs:
     - name: Test Qt
       working-directory: ${{env.GITHUB_WORKSPACE}}
       run: |
-        cd ${{env.Qt5_Dir}}/...
+        cd ${{env.Qt5_Dir}}/.../...
+        dir
+        cd ${{env.Qt5_Dir}}/.../.../Tools/
         dir
       shell: cmd
 
