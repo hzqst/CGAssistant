@@ -44,7 +44,7 @@ int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
 
-    qsrand(QTime(0,0,0).secsTo(QTime::currentTime()) + qrand());
+    qsrand(QTime(0,0,0).secsTo(QTime::currentTime()) + QCoreApplication::applicationPid());
 
     qputenv("CGA_DIR_PATH", QCoreApplication::applicationDirPath().toLocal8Bit());
 
