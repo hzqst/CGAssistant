@@ -24,6 +24,26 @@ jobs:
       with:
         vs-version: '[15.9,16.12)'
 
+    - name: Install Qt
+      uses: jurplel/install-qt-action@v2.13.0
+      with:
+        version: 5.15.0
+        host: windows
+        target: desktop
+        arch: win32_msvc2019
+        install-deps: # optional, default is true
+        modules: # optional
+        cached: false # ${{ steps.cache-qt.outputs.cache-hit }}
+        tools : 'tools_qtcreator,6.,qt.tools.qtcreator'
+        
+    - name: Test Qt
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      run: |
+        echo ${{env.Qt5_Dir}}
+        cd ${{env.Qt5_Dir}}
+        dir
+      shell: cmd
+
     - name: Initialize dependencies
       working-directory: ${{env.GITHUB_WORKSPACE}}
       run: git submodule update --init --recursive
@@ -43,18 +63,6 @@ jobs:
         cd boost
         bootstrap.bat
       shell: cmd
-
-    - name: Install Qt
-      uses: jurplel/install-qt-action@v2.13.0
-      with:
-        version: 5.15.0
-        host: windows
-        target: desktop
-        arch: win32_msvc2019
-        install-deps: # optional, default is true
-        modules: # optional
-        cached: false # ${{ steps.cache-qt.outputs.cache-hit }}
-        tools : 'tools_qtcreator,6.,qt.tools.qtcreator'
 
     - name: Build boost
       working-directory: ${{env.GITHUB_WORKSPACE}}
