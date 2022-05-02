@@ -30,7 +30,7 @@ This project is licensed under MIT License, however if it is otherwise stated be
 
 ## Build Requirement
 
-Visual Studio 2017 or 2019
+Visual Studio 2017
 
 Windows SDK 10 (the msvc projects uses Windows SDK version 10.0.17763.0, please redirect to your local version if you have installed a different version of Windows SDK)
 
