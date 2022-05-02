@@ -13,7 +13,7 @@ env:
 
 jobs:
   build:
-    runs-on: windows-latest
+    runs-on: windows-2019
     if: github.repository == 'hzqst/CGAssistant'
 
     steps:
@@ -22,7 +22,7 @@ jobs:
     - name: Add msbuild to PATH
       uses: microsoft/setup-msbuild@v1.1
       with:
-        vs-version: '[15.9,16.0)'
+        vs-version: '[15.9,16.12)'
 
     - name: Initialize dependencies
       working-directory: ${{env.GITHUB_WORKSPACE}}
