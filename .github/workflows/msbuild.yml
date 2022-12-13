@@ -34,7 +34,7 @@ jobs:
         install-deps: # optional, default is true
         modules: # optional
         cached: false # ${{ steps.cache-qt.outputs.cache-hit }}
-        tools : 'tools_qtcreator,7.,qt.tools.qtcreator'
+        tools : 'tools_qtcreator,9.,qt.tools.qtcreator'
         
     - name: Initialize dependencies
       working-directory: ${{env.GITHUB_WORKSPACE}}
