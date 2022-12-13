@@ -695,7 +695,7 @@
            </sizepolicy>
           </property>
           <property name="toolTip">
-           <string>Disable animation for scene switching</string>
+           <string>Game TextUI</string>
           </property>
           <property name="layoutDirection">
            <enum>Qt::LeftToRight</enum>
@@ -717,7 +717,7 @@
            </sizepolicy>
           </property>
           <property name="toolTip">
-           <string>Disable animation for scene switching</string>
+           <string>Anti AFK Kick</string>
           </property>
           <property name="layoutDirection">
            <enum>Qt::LeftToRight</enum>
