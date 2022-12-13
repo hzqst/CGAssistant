@@ -34,7 +34,7 @@ ScriptForm::ScriptForm(QWidget *parent) :
     m_bPathBegin = false;
     m_bSuspending = false;
     m_port = 0;
-    m_ConsoleMaxLines = 100;
+    m_ConsoleMaxLines = 200;
     m_output->setMaximumBlockCount(m_ConsoleMaxLines);
 
     m_node = new QProcess(this);
@@ -112,7 +112,10 @@ void ScriptForm::OnNodeReadyRead()
     {
         QString data = m_node->readAll();
 
-        m_output->appendPlainText(data);
+        //m_output->appendPlainText(data);
+        m_output->insertPlainText(data);
+        m_output->moveCursor(QTextCursor::End);
+
         /*QTextCursor txtcur = m_output->textCursor();
         if(m_ConsoleMaxLines > 0){
             while(m_output->document()->lineCount() > m_ConsoleMaxLines)

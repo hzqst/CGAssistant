@@ -246,71 +246,53 @@ char *NET_EscapeStringEx(char *src)
 
 char *NET_EscapeStringEx2(const char *str, char *dst, int maxlen)
 {
-	static char table[] = "n\nc,z|y\\";
+	int srclen;
+	int i;
+	int j;
+	char ch;
 
-	int v4; // ST24_4
-	unsigned int j; // [esp+10h] [ebp-1Ch]
-	int v6; // [esp+14h] [ebp-18h]
-	signed int v7; // [esp+18h] [ebp-14h]
-	signed int v8; // [esp+1Ch] [ebp-10h]
-	signed int i; // [esp+20h] [ebp-Ch]
-	int k; // [esp+24h] [ebp-8h]
-	char v11; // [esp+2Bh] [ebp-1h]
-
-	v7 = strlen(str);
-	k = 0;
-	v6 = 0;
-	for (i = 0; i < v7; ++i)
+	srclen = strlen(str);
+	for ( i = 0, j = 0; i < srclen && j < maxlen - 1; ++i)
 	{
 		if ((UCHAR)str[i] != (UCHAR)0xFF)
 		{
-			v11 = 0;
-			v8 = 0;
-			if (k + 1 >= maxlen)
-				break;
 			if (str[i] & 0x80)
 			{
-				if (k + 2 >= maxlen || k + 1 >= v6 + v7)
-				{
-					dst[k] = 0;
-					return dst;
-				}
-				dst[k] = str[i];
-				v4 = k + 1;
-				dst[v4] = str[++i];
-				k = v4 + 1;
+				if (j + 1 == maxlen - 1) break;
+				dst[j++] = str[i];
+				i++;
+				if ( i == srclen ) break;
+				dst[j++] = str[i];
 			}
-			else
+			else if (str[i] == '\\')
 			{
-				for (j = 0; j < 4; ++j)
+				i++;
+				if ( i == srclen ) break;
+				ch = NET_EscapeCharFromTable(str[i]);
+				if (ch == '\\')
 				{
-					if (str[i] == table[2 * j])
-					{
-						v8 = 1;
-						v11 = table[2 * j + 1];
-						break;
-					}
+					if (j + 1 == maxlen - 1) break;
+					dst[j++] = '\\';
+					dst[j++] = '\\';
 				}
-				if (v8 == 1)
+				else if (ch == '\n')
 				{
-					if (k + 2 >= maxlen)
-					{
-						dst[k] = 0;
-						return dst;
-					}
-					dst[k] = '\\';
-					dst[k + 1] = v11;
-					k += 2;
-					++v6;
+					if (j + 1 == maxlen - 1) break;
+					dst[j++] = '\\';
+					dst[j++] = 'n';
 				}
 				else
 				{
-					dst[k++] = str[i];
+					dst[j++] = ch;
 				}
+			}
+			else
+			{
+				dst[j++] = str[i];
 			}
 		}
 	}
-	dst[k] = 0;
+	dst[j] = 0;
 	return dst;
 }
 

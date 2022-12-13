@@ -527,8 +527,8 @@ void AccountForm::OnNotifyConnectionState(int state, QString msg)
 
         if(m_login_failure >= 10 && ui->checkBox_autoKillGame->isChecked())
         {
-            NotifyKillProcess();
             m_login_failure = 0;
+            NotifyKillProcess();
         }
     }
     else if(state == 1 || state == 2)
