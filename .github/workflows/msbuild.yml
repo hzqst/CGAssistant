@@ -1,6 +1,12 @@
 name: MSBuild
 
-on: [push]
+on:
+  push:
+    tags:
+      - "v*"
+  pull_request:
+    tags:
+      - "v*"
 
 env:
   # Path to the solution file relative to the root of the project.
@@ -126,21 +132,37 @@ jobs:
       run: windeploy.bat
       shell: cmd
  
+    - name: Create Output directory
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      run: mkdir Output
+      shell: cmd
+
+    - name: Copy Build to Output
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      run: xcopy "build" "Output" /y /e
+      shell: cmd
+
     - name: Checkout CGAssistantJS
       uses: hzqst/checkout@main
       with:
         repository: 'hzqst/CGAssistantJS'
         path: 'CGAssistantJS'
-        ssh-key: '${{ secrets.CGASSISTANTJS_PK }}'
 
-    - name: Upload binaries for CGAssistantJS
+    - name: Copy CGAssistantJS to Output
       working-directory: ${{env.GITHUB_WORKSPACE}}
-      run: |
-        xcopy "build" "CGAssistantJS" /y /e
-        cd CGAssistantJS
-        git add -A
-        git config --global user.name "Git Actions (Bot)"
-        git config --global user.email "113660872@qq.com"
-        git commit -m "Update binaries by %GITHUB_ACTOR% from commit SHA %GITHUB_SHA% "
-        git push
+      run: xcopy "CGAssistantJS" "Output" /y /e
       shell: cmd
+
+    - name: Zipping All
+      uses: vimtor/action-zip@v1
+      with:
+        files: Output/
+        dest: CGAssistant-windows-x86.zip
+
+    - name: Create Release
+      uses: softprops/action-gh-release@v1
+      if: startsWith(github.ref, 'refs/tags/')
+      with:
+        name: CGAssistant-${{ github.ref }}
+        files: |
+          CGAssistant-windows-x86.zip
