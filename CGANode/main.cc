@@ -303,7 +303,7 @@ void GetGameServerInfo(const Nan::FunctionCallbackInfo<v8::Value>& info)
 	HandleScope handle_scope(isolate);
 	auto context = isolate->GetCurrentContext();
 
-	cga_game_server_info_t info;
+	CGA::cga_game_server_info_t info;
 	if (!g_CGAInterface->GetGameServerInfo(info))
 	{
 		Nan::ThrowError("RPC Invocation failed.");
