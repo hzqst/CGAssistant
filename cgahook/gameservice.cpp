@@ -3990,7 +3990,7 @@ bool CGAService::IsPlayerFlagEnabled(int index)
 		return ((*g_playerBase)->enable_flags & index2player_flags[index]) ? true : false;
 	}
 
-	if (index == ENABLE_FLAG_SHOW_PETS)
+	if (index == ENABLE_FLAG_SHOWPETS)
 	{
 		return (*g_show_pets) ? true : false;
 	}
