@@ -24,13 +24,13 @@ QQ群: 300303705
 
 您在本声明未发出之时点使用或者复制了本仓库且本人制作的任何代码或项目且此时还在使用，则视为已接受此声明，请仔细阅读。
 
-## 链接
+## Links
 
-[源代码](https://github.com/hzqst/CGAssistant)
+[源码](https://github.com/hzqst/CGAssistant)
 
-[完整发布包 (Github)](https://github.com/hzqst/CGAssistantJS) [完整发布包 (Gitee, 国内镜像)](https://gitee.com/hzqst/CGAssistantJS)
+[完整包](https://github.com/hzqst/CGAssistant/releases)
 
-[使用攻略 (Github)](https://github.com/hzqst/CGAssistantJS/wiki) [使用攻略 (Gitee, 国内镜像)](https://gitee.com/hzqst/CGAssistantJS/wikis)
+[Wiki](https://github.com/hzqst/CGAssistantJS/wiki)
 
 ## 编译前置需求
 
