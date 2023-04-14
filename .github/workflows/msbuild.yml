@@ -150,7 +150,9 @@ jobs:
 
     - name: Copy CGAssistantJS to Output
       working-directory: ${{env.GITHUB_WORKSPACE}}
-      run: xcopy "CGAssistantJS" "Output" /y /e
+      run: |
+        chcp 936
+        xcopy "CGAssistantJS" "Output" /y /e
       shell: cmd
 
     - name: Zipping All
