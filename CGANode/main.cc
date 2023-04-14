@@ -303,16 +303,16 @@ void GetGameServerInfo(const Nan::FunctionCallbackInfo<v8::Value>& info)
 	HandleScope handle_scope(isolate);
 	auto context = isolate->GetCurrentContext();
 
-	CGA::cga_game_server_info_t info;
-	if (!g_CGAInterface->GetGameServerInfo(info))
+	CGA::cga_game_server_info_t svinfo;
+	if (!g_CGAInterface->GetGameServerInfo(svinfo))
 	{
 		Nan::ThrowError("RPC Invocation failed.");
 		return;
 	}
 
 	Local<Object> obj = Object::New(isolate);
-	obj->Set(context, String::NewFromUtf8(isolate, "ip").ToLocalChecked(), Nan::New(info.ip).ToLocalChecked());
-	obj->Set(context, String::NewFromUtf8(isolate, "port").ToLocalChecked(), Integer::New(isolate, info.port));
+	obj->Set(context, String::NewFromUtf8(isolate, "ip").ToLocalChecked(), Nan::New(svinfo.ip).ToLocalChecked());
+	obj->Set(context, String::NewFromUtf8(isolate, "port").ToLocalChecked(), Integer::New(isolate, svinfo.port));
 
 	info.GetReturnValue().Set(obj);
 }
