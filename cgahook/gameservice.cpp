@@ -3193,6 +3193,7 @@ void CGAService::Initialize(game_type type)
 		g_picbook_info = CONVERT_GAMEVAR(void *, 0x11FBE54 - 0x400000);//ok;
 		g_picbook_maxcount = CONVERT_GAMEVAR(int *, 0xF11E08 - 0x400000);//ok;
 		g_select_card = CONVERT_GAMEVAR(int *, 0xCB4198 - 0x400000);//ok;
+		g_show_pets = CONVERT_GAMEVAR(short *, 0x601854 - 0x400000);//ok;
 
 		Sys_CheckModify = CONVERT_GAMEVAR(char(__cdecl *)(const char *), 0x1BD030);//ok
 		COMMON_PlaySound = CONVERT_GAMEVAR(void(__cdecl *)(int, int, int), 0x1B1570);//ok
@@ -3965,12 +3966,18 @@ cga_player_info_t CGAService::GetPlayerInfo()
 
 void CGAService::SetPlayerFlagEnabled(int index, bool enable)
 {
-	if (index >= 0 && index < _ARRAYSIZE(index2player_flags)) {
+	if (index >= 0 && index < _ARRAYSIZE(index2player_flags))
+	{
 		m_change_player_enable_flags |= index2player_flags[index];
-		if(enable)
+
+		if (enable)
+		{
 			m_desired_player_enable_flags |= index2player_flags[index];
+		}
 		else
+		{
 			m_desired_player_enable_flags &= ~index2player_flags[index];
+		}
 	}
 }
 
@@ -3983,7 +3990,11 @@ bool CGAService::IsPlayerFlagEnabled(int index)
 		return ((*g_playerBase)->enable_flags & index2player_flags[index]) ? true : false;
 	}
 
-	if (index == ENABLE_FLAG_AVATAR_PUBLIC)
+	if (index == ENABLE_FLAG_SHOW_PETS)
+	{
+		return (*g_show_pets) ? true : false;
+	}
+	else if (index == ENABLE_FLAG_AVATAR_PUBLIC)
 	{
 		int publicState = *(int *)((char *)g_avatar_public_state + 0x828 * (*g_local_player_index));
 		return publicState ? true : false;
@@ -6977,6 +6988,16 @@ bool CGAService::WM_EnableFlags(int type, bool enable)
 			UI_HandleEnableFlags(22, 2);
 		else if (!((*g_enableflags) & PLAYER_ENABLE_FLAGS_FAMILY) && enable)
 			UI_HandleEnableFlags(22, 2);
+	}
+	else if (type == ENABLE_FLAG_SHOWPETS) {
+		if (((*g_show_pets) & PLAYER_ENABLE_FLAGS_FAMILY) && !enable)
+		{
+			(*g_show_pets) = 0;
+		}
+		else if (!((*g_show_pets) & PLAYER_ENABLE_FLAGS_FAMILY) && enable)
+		{
+			(*g_show_pets) = 1;
+		}
 	}
 	else if (type == ENABLE_FLAG_AVATAR_PUBLIC) {
 

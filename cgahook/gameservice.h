@@ -886,6 +886,7 @@ namespace CGA
 		player_pers_desc_t *g_pers_desc;
 		int *g_avatar_public_state;
 		short *g_local_player_index;
+		short *g_show_pets;
 
 		int *g_chara_table;
 		int *g_avatar_table;
