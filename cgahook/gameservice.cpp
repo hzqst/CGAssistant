@@ -3194,6 +3194,8 @@ void CGAService::Initialize(game_type type)
 		g_picbook_maxcount = CONVERT_GAMEVAR(int *, 0xF11E08 - 0x400000);//ok;
 		g_select_card = CONVERT_GAMEVAR(int *, 0xCB4198 - 0x400000);//ok;
 		g_show_pets = CONVERT_GAMEVAR(short *, 0x601854 - 0x400000);//ok;
+		g_game_server_ip = CONVERT_GAMEVAR(char *, 0xF9E858 - 0x400000);//ok;
+		g_game_server_port = CONVERT_GAMEVAR(char *, 0xF9E8D8 - 0x400000);//ok;
 
 		Sys_CheckModify = CONVERT_GAMEVAR(char(__cdecl *)(const char *), 0x1BD030);//ok
 		COMMON_PlaySound = CONVERT_GAMEVAR(void(__cdecl *)(int, int, int), 0x1B1570);//ok
@@ -7435,6 +7437,11 @@ bool CGAService::SendPetMail(int index, int petid, int itemid, const std::string
 	ULONG packed_arg = (index & 0xFF) | ((petid & 0xFF) << 8) | ((itemid & 0xFF) << 16);
 
 	return SendMessageA(g_MainHwnd, WM_CGA_SEND_PET_MAIL, (WPARAM)packed_arg, (LPARAM)msg.c_str()) ? true : false;
+}
+
+cga_game_server_info_t CGAService::GetGameServerInfo()
+{
+	return cga_game_server_info_t(std::string(g_game_server_ip), atoi(g_game_server_port));
 }
 
 void CGAService::WM_SendClientLogin(const char *acc, const char *pwd, int gametype)

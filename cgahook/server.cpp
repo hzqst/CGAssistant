@@ -292,6 +292,7 @@ DWORD WINAPI CGAServerThread(LPVOID)
 				server->register_handler("DeleteCard", timax::bind(&CGAService::DeleteCard, &g_CGAService));
 				server->register_handler("SendMail", timax::bind(&CGAService::SendMail, &g_CGAService));
 				server->register_handler("SendPetMail", timax::bind(&CGAService::SendPetMail, &g_CGAService));
+				server->register_handler("GetGameServerInfo", timax::bind(&CGAService::GetGameServerInfo, &g_CGAService));
 
 				server->start();
 

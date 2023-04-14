@@ -1913,6 +1913,46 @@ namespace msgpack {
 				}
 			};
 
+
+			//cga_game_server_info_t
+
+			template<>
+			struct convert<cga_game_server_info_t> {
+				msgpack::object const& operator()(msgpack::object const& o, cga_game_server_info_t& v) const {
+					if (o.type != msgpack::type::ARRAY) throw msgpack::type_error();
+					if (o.via.array.size != 2) throw msgpack::type_error();
+
+					v.ip = o.via.array.ptr[0].as<std::string>();
+					v.port = o.via.array.ptr[1].as<int>();
+
+					return o;
+				}
+			};
+
+			template<>
+			struct pack<cga_game_server_info_t> {
+				template <typename Stream>
+				packer<Stream>& operator()(msgpack::packer<Stream>& o, cga_game_server_info_t const& v) const {
+					// packing member variables as an array.
+					o.pack_array(2);
+					o.pack(v.ip);
+					o.pack(v.port);
+					return o;
+				}
+			};
+
+			template <>
+			struct object_with_zone<cga_game_server_info_t> {
+				void operator()(msgpack::object::with_zone& o, cga_game_server_info_t const& v) const {
+					o.type = type::ARRAY;
+					o.via.array.size = 2;
+					o.via.array.ptr = static_cast<msgpack::object*>(o.zone.allocate_align(sizeof(msgpack::object) * o.via.array.size));
+					o.via.array.ptr[0] = msgpack::object(v.ip, o.zone);
+					o.via.array.ptr[1] = msgpack::object(v.port, o.zone);
+				}
+			};
+
+
 		} // namespace adaptor
 	} // MSGPACK_API_VERSION_NAMESPACE(MSGPACK_DEFAULT_API_NS)
 } // namespace msgpack

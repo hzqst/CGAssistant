@@ -1017,6 +1017,21 @@ namespace CGA
 
 	typedef std::vector<cga_picbook_info_t> cga_picbooks_info_t;
 
+	typedef struct cga_game_server_info_s
+	{
+		cga_game_server_info_s()
+		{
+			port = 0;
+		}
+		cga_game_server_info_t(const std::string &a1, int a2) : ip(a1), port(a2)
+		{
+
+		}
+		std::string ip;
+		int port;
+	}cga_game_server_info_t;
+
+
 #define TRADE_STUFFS_ITEM 1
 #define TRADE_STUFFS_PET 2
 #define TRADE_STUFFS_PETSKILL 3
@@ -1224,6 +1239,7 @@ namespace CGA
 		virtual bool DeleteCard(int index, bool packetonly, bool &result) = 0;
 		virtual bool SendMail(int index, const std::string &msg, bool &result) = 0;
 		virtual bool SendPetMail(int index, int petid, int itempos, const std::string &msg, bool &result) = 0;
+		virtual bool GetGameServerInfo(cga_game_server_info_t &info) = 0;
 
 		virtual bool RegisterServerShutdownNotify(const std::function<void(int)> &callback) = 0;
 		virtual bool RegisterBattleActionNotify(const std::function<void(int)> &callback) = 0;

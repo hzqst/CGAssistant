@@ -723,6 +723,7 @@ namespace CGA
 		virtual bool DeleteCard(int index, bool packetonly);
 		virtual bool SendMail(int index, const std::string &msg);
 		virtual bool SendPetMail(int index, int petid, int itemid, const std::string &msg);
+		virtual cga_game_server_info_t GetGameServerInfo();
 	public:
 		int *g_server_time;
 		int *g_local_time;
@@ -910,6 +911,8 @@ namespace CGA
 		void *g_picbook_info;
 		int *g_picbook_maxcount;
 		int *g_select_card;
+		char *g_game_server_ip;
+		char *g_game_server_port;
 	public:
 		char(__cdecl *Sys_CheckModify)(const char *a1);
 		void(__cdecl *COMMON_PlaySound)(int a1, int a2, int a3);
