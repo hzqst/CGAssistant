@@ -6992,11 +6992,11 @@ bool CGAService::WM_EnableFlags(int type, bool enable)
 			UI_HandleEnableFlags(22, 2);
 	}
 	else if (type == ENABLE_FLAG_SHOWPETS) {
-		if (((*g_show_pets) & PLAYER_ENABLE_FLAGS_FAMILY) && !enable)
+		if ((*g_show_pets) && !enable)
 		{
 			(*g_show_pets) = 0;
 		}
-		else if (!((*g_show_pets) & PLAYER_ENABLE_FLAGS_FAMILY) && enable)
+		else if (!(*g_show_pets) && enable)
 		{
 			(*g_show_pets) = 1;
 		}
