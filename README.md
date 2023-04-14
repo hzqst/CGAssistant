@@ -24,23 +24,21 @@ This project is licensed under MIT License, however if it is otherwise stated be
 
 [Source Code](https://github.com/hzqst/CGAssistant)
 
-[Release Package (Github)](https://github.com/hzqst/CGAssistantJS) [Release Package (Gitee, CN mirror)](https://gitee.com/hzqst/CGAssistantJS)
+[Release](https://github.com/hzqst/CGAssistant/releases)
 
-[Wiki (Github)](https://github.com/hzqst/CGAssistantJS/wiki) [Wiki (Gitee, CN mirror)](https://gitee.com/hzqst/CGAssistantJS/wikis)
+[Wiki](https://github.com/hzqst/CGAssistantJS/wiki)
 
 ## Build Requirement
 
-Visual Studio 2017
+1. [Visual Studio 2017 / 2019 / 2022, with vc141 / vc142 / vc143 toolset](https://visualstudio.microsoft.com/)
 
-Windows SDK 10 (the msvc projects uses Windows SDK version 10.0.17763.0, please redirect to your local version if you have installed a different version of Windows SDK)
+2. Windows SDK 10 (the msvc projects uses Windows SDK version 10.0.17763.0, please redirect to your local version if you have installed a different version of Windows SDK)
 
-VC141 or VC142 Toolset (the msvc projects uses VC141 Toolset, if you want to use VC142 please change PlatformToolset in the vcxproj file and build-CGAHook.bat)
+3. [QT 5.12+ for msvc2017, win32 (x86), with QtCreator](https://www.qt.io/download)
 
-QT 5.12+ for msvc2017, win32 (x86), with QtCreator
+4. [NodeJS v14.16 (32-bit)](https://nodejs.org/download/release/v14.16.0/)
 
-NodeJS v14.16 (32-bit)
-
-node-gyp (check https://www.npmjs.com/package/node-gyp how to install node-gyp)
+5. [node-gyp] (https://www.npmjs.com/package/node-gyp)
 
 ## Build Instruction
 
@@ -56,12 +54,12 @@ Let's assume that you have all requirements installed correctly.
 
 4. Run "build-CGAHook.bat", wait until "CGAHook.dll" is generated under "build" directory. Remember to redirect the Windows SDK version for msvc project if you have installed a different version of Windows SDK other than "10.0.17763.0".
 
-5. Run "build-qhttp.bat", wait until "qhttp.dll" is generated under "build" directory.
+5. Run "build-qhttp.bat", wait until "qhttp.dll" generated under "build" directory.
 
-6. Run "build-CGAssiatant.bat", wait until "CGAssistant.exe" is generated under "build" directory.
+6. Run "build-CGAssiatant.bat", wait until "CGAssistant.exe" generated under "build" directory.
 
-7. Run "build-nodegyp.bat", wait until "node_cga.node" is generated under "build/Release" directory.
+7. Run "build-nodegyp.bat", wait until "node_cga.node" generated under "build/Release" directory.
 
 8. Run "windeploy.bat"
 
-Now you have all compiled binaries copied into "build" directory, if no error occured while compiling.
+Now you have all compiled binaries copied into "build" directory if no error occured.
