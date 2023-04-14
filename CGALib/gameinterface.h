@@ -1023,7 +1023,7 @@ namespace CGA
 		{
 			port = 0;
 		}
-		cga_game_server_info_t(const std::string &a1, int a2) : ip(a1), port(a2)
+		cga_game_server_info_s(const std::string &a1, int a2) : ip(a1), port(a2)
 		{
 
 		}
