@@ -154,7 +154,7 @@ jobs:
       shell: cmd
 
     - name: Zipping All
-      uses: hzqst/action-zip@main
+      uses: hzqst/action-zip@master
       with:
         files: Output/
         dest: CGAssistant-windows-x86.zip
