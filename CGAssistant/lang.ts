@@ -243,15 +243,15 @@ meet Lv1 enemy</source>
     </message>
     <message>
         <source>Delay</source>
-        <translation>延迟</translation>
+        <translation type="vanished">延迟</translation>
     </message>
     <message>
         <source>to</source>
-        <translation>到</translation>
+        <translation type="vanished">到</translation>
     </message>
     <message>
         <source>from</source>
-        <translation>从</translation>
+        <translation type="vanished">从</translation>
     </message>
     <message>
         <source>IF</source>
@@ -588,7 +588,7 @@ Action</source>
     </message>
     <message>
         <source>PET2</source>
-        <translation type="unfinished"></translation>
+        <translation>宠物(2)</translation>
     </message>
     <message>
         <source>Player Force
@@ -660,6 +660,50 @@ meet BOSS</source>
         <source>Wait after battle</source>
         <translation>战斗后等待</translation>
     </message>
+    <message>
+        <source>Enable autobattle</source>
+        <translation>启用自动战斗</translation>
+    </message>
+    <message>
+        <source>Block battle animation</source>
+        <translation>屏蔽战斗动画</translation>
+    </message>
+    <message>
+        <source>No extra delay for the first round</source>
+        <translation>首回合不等待额外的延迟时间</translation>
+    </message>
+    <message>
+        <source>Stop autobattle when meet Lv1 enemy</source>
+        <translation>遇见一级敌人时不启用自动战斗</translation>
+    </message>
+    <message>
+        <source>Stop autobattle when meet BOSS</source>
+        <translation>遇见BOSS时不启用自动战斗</translation>
+    </message>
+    <message>
+        <source>Play beep sound when autobattle stop</source>
+        <translation>自动战斗时播放音效</translation>
+    </message>
+    <message>
+        <source>Lock countdown number in battle</source>
+        <translation>战斗期间锁定倒计时</translation>
+    </message>
+    <message>
+        <source>Enable &quot;Pet Double Action&quot; exploit</source>
+        <translation>启用“宠物二动”利用（每回合宠物可以释放两次技能）</translation>
+    </message>
+    <message>
+        <source>Wait for X ms after battle end</source>
+        <translation>战斗结束后强制等待X毫秒</translation>
+    </message>
+    <message>
+        <source>Delay2</source>
+        <translation>战斗结束后强制等待的时间，单位：毫秒</translation>
+    </message>
+    <message>
+        <source>Delay1</source>
+        <translation>每回合自动战斗额外等待的时间，单位：毫秒</translation>
+    </message>
 </context>
 <context>
     <name>CBattleSettingModel</name>
@@ -707,23 +751,23 @@ meet BOSS</source>
     <name>CProcessWorker</name>
     <message>
         <source>InjectByMsgHook failed with LoadLibraryW, errorCode: %1</source>
-        <translation type="unfinished"></translation>
+        <translation>注入游戏失败，错误码：%1。可能因为没有以管理员权限启动，或者因为操作被安全软件拦截。</translation>
     </message>
     <message>
         <source>InjectByMsgHook failed with GetProcAddress, errorCode: %1</source>
-        <translation type="unfinished"></translation>
+        <translation>注入游戏失败，错误码：%1。可能因为没有以管理员权限启动，或者因为操作被安全软件拦截。</translation>
     </message>
     <message>
         <source>InjectByMsgHook failed with SetWindowsHookExW, errorCode: %1</source>
-        <translation type="unfinished"></translation>
+        <translation>注入游戏失败，错误码：%1。可能因为没有以管理员权限启动，或者因为操作被安全软件拦截。</translation>
     </message>
     <message>
         <source>InjectByMsgHook failed with PostMessageW, errorCode: %1</source>
-        <translation type="unfinished"></translation>
+        <translation>注入游戏失败，错误码：%1。可能因为没有以管理员权限启动，或者因为操作被安全软件拦截。</translation>
     </message>
     <message>
         <source>Timeout for reading shared data.</source>
-        <translation>读取共享内存失败。</translation>
+        <translation>读取共享内存失败。可能因为没有以管理员权限启动，或者因为操作被安全软件拦截。</translation>
     </message>
     <message>
         <source>Could not connect to local RPC server.</source>
@@ -949,7 +993,7 @@ p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:&apos;Microsoft YaHei UI&apos;; font-size:9pt; font-weight:400; font-style:normal;&quot;&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;img src=&quot;:/logo.png&quot; /&gt;&lt;/p&gt;
 &lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:16px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; line-height:160%; font-family:&apos;-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol,Liberation Sans,PingFang SC,Microsoft YaHei,Hiragino Sans GB,Wenquanyi Micro Hei,WenQuanYi Zen Hei,ST Heiti,SimHei,SimSun,WenQuanYi Zen Hei Sharp,sans-serif&apos;; font-size:16px; color:#40485b; background-color:#ffffff;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:16px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; line-height:160%; background-color:#ffffff;&quot;&gt;&lt;span style=&quot; font-family:&apos;-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol,Liberation Sans,PingFang SC,Microsoft YaHei,Hiragino Sans GB,Wenquanyi Micro Hei,WenQuanYi Zen Hei,ST Heiti,SimHei,SimSun,WenQuanYi Zen Hei Sharp,sans-serif&apos;; font-size:16px; color:#40485b; background-color:#ffffff;&quot;&gt;当前版本：2022-01-20&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:16px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; line-height:160%; background-color:#ffffff;&quot;&gt;&lt;span style=&quot; font-family:&apos;-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol,Liberation Sans,PingFang SC,Microsoft YaHei,Hiragino Sans GB,Wenquanyi Micro Hei,WenQuanYi Zen Hei,ST Heiti,SimHei,SimSun,WenQuanYi Zen Hei Sharp,sans-serif&apos;; font-size:16px; color:#40485b; background-color:#ffffff;&quot;&gt;当前版本：2023-04-14&lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:16px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; line-height:160%; background-color:#ffffff;&quot;&gt;&lt;span style=&quot; font-family:&apos;-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol,Liberation Sans,PingFang SC,Microsoft YaHei,Hiragino Sans GB,Wenquanyi Micro Hei,WenQuanYi Zen Hei,ST Heiti,SimHei,SimSun,WenQuanYi Zen Hei Sharp,sans-serif&apos;; font-size:16px; color:#40485b; background-color:#ffffff;&quot;&gt;下载最新版本：群号 300303705&lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:16px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; line-height:160%; background-color:#ffffff;&quot;&gt;&lt;span style=&quot; font-family:&apos;-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol,Liberation Sans,PingFang SC,Microsoft YaHei,Hiragino Sans GB,Wenquanyi Micro Hei,WenQuanYi Zen Hei,ST Heiti,SimHei,SimSun,WenQuanYi Zen Hei Sharp,sans-serif&apos;; font-size:16px; color:#40485b; background-color:#ffffff;&quot;&gt;或 &lt;/span&gt;&lt;a href=&quot;https://github.com/hzqst/CGAssistantJS/issues&quot;&gt;&lt;span style=&quot; font-family:&apos;-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol,Liberation Sans,PingFang SC,Microsoft YaHei,Hiragino Sans GB,Wenquanyi Micro Hei,WenQuanYi Zen Hei,ST Heiti,SimHei,SimSun,WenQuanYi Zen Hei Sharp,sans-serif&apos;; font-size:16px; text-decoration: underline; color:#005980; background-color:transparent;&quot;&gt;https://github.com/hzqst/CGAssistantJS/&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:16px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; line-height:160%; background-color:#ffffff;&quot;&gt;&lt;a href=&quot;https://github.com/hzqst/CGAssistantJS/issues&quot;&gt;&lt;span style=&quot; font-family:&apos;-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol,Liberation Sans,PingFang SC,Microsoft YaHei,Hiragino Sans GB,Wenquanyi Micro Hei,WenQuanYi Zen Hei,ST Heiti,SimHei,SimSun,WenQuanYi Zen Hei Sharp,sans-serif&apos;; font-size:16px; text-decoration: underline; color:#005980; background-color:transparent;&quot;&gt;或 &lt;/span&gt;&lt;/a&gt;&lt;a href=&quot;https://gitee.com/hzqst/CGAssistantJS/issues&quot;&gt;&lt;span style=&quot; font-family:&apos;-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol,Liberation Sans,PingFang SC,Microsoft YaHei,Hiragino Sans GB,Wenquanyi Micro Hei,WenQuanYi Zen Hei,ST Heiti,SimHei,SimSun,WenQuanYi Zen Hei Sharp,sans-serif&apos;; font-size:16px; text-decoration: underline; color:#005980; background-color:transparent;&quot;&gt;https://gitee.com/hzqst/CGAssistantJS/&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>

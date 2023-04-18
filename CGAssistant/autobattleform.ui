@@ -30,7 +30,7 @@
      </property>
      <property name="maximumSize">
       <size>
-       <width>128</width>
+       <width>192</width>
        <height>16777215</height>
       </size>
      </property>
@@ -45,6 +45,9 @@
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
+        </property>
+        <property name="toolTip">
+         <string>Enable autobattle</string>
         </property>
         <property name="text">
          <string>Auto Battle</string>
@@ -62,6 +65,9 @@
           <verstretch>0</verstretch>
          </sizepolicy>
         </property>
+        <property name="toolTip">
+         <string>Block battle animation</string>
+        </property>
         <property name="text">
          <string>High Speed</string>
         </property>
@@ -74,6 +80,9 @@
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
+        </property>
+        <property name="toolTip">
+         <string>No extra delay for the first round</string>
         </property>
         <property name="text">
          <string>First round
@@ -92,6 +101,9 @@ no delay</string>
           <verstretch>0</verstretch>
          </sizepolicy>
         </property>
+        <property name="toolTip">
+         <string>Stop autobattle when meet Lv1 enemy</string>
+        </property>
         <property name="text">
          <string>Stop when 
 meet Lv1 enemy</string>
@@ -109,6 +121,9 @@ meet Lv1 enemy</string>
           <verstretch>0</verstretch>
          </sizepolicy>
         </property>
+        <property name="toolTip">
+         <string>Stop autobattle when meet BOSS</string>
+        </property>
         <property name="text">
          <string>Stop when 
 meet BOSS</string>
@@ -125,6 +140,9 @@ meet BOSS</string>
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
+        </property>
+        <property name="toolTip">
+         <string>Play beep sound when autobattle stop</string>
         </property>
         <property name="text">
          <string>Beep when stop</string>
@@ -145,6 +163,9 @@ meet BOSS</string>
           <verstretch>0</verstretch>
          </sizepolicy>
         </property>
+        <property name="toolTip">
+         <string>Lock countdown number in battle</string>
+        </property>
         <property name="text">
          <string>Lock countdown</string>
         </property>
@@ -160,6 +181,9 @@ meet BOSS</string>
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
+        </property>
+        <property name="toolTip">
+         <string>Enable &quot;Pet Double Action&quot; exploit</string>
         </property>
         <property name="text">
          <string>Pet Double
@@ -178,6 +202,9 @@ Action</string>
           <verstretch>0</verstretch>
          </sizepolicy>
         </property>
+        <property name="toolTip">
+         <string>Wait for X ms after battle end</string>
+        </property>
         <property name="text">
          <string>Wait after battle</string>
         </property>
@@ -191,7 +218,7 @@ Action</string>
         <item row="2" column="0">
          <widget class="QLabel" name="label_delay_to">
           <property name="text">
-           <string>to</string>
+           <string>Delay2</string>
           </property>
          </widget>
         </item>
@@ -214,7 +241,7 @@ Action</string>
         <item row="0" column="0">
          <widget class="QLabel" name="label_delay">
           <property name="text">
-           <string>Delay</string>
+           <string>Delay1</string>
           </property>
          </widget>
         </item>
@@ -272,13 +299,6 @@ Action</string>
           </property>
           <property name="orientation">
            <enum>Qt::Horizontal</enum>
-          </property>
-         </widget>
-        </item>
-        <item row="1" column="0">
-         <widget class="QLabel" name="label_delay_from">
-          <property name="text">
-           <string>from</string>
           </property>
          </widget>
         </item>
