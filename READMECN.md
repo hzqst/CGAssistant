@@ -2,9 +2,9 @@
 
 ![](img/logo.png)
 
-[英文README](README.md)
+[ENGLISH README](README.md)
 
-CGAssistant 是一个用于游戏CrossGate（中译：魔力宝贝）的工具，可以让你拥有自动化的游戏体验。
+CGAssistant 是一个免费开源的用于游戏“CrossGate”（中译：魔力宝贝）的工具，可以让你拥有自动化的游戏体验。
 
 QQ群: 300303705
 
@@ -14,7 +14,7 @@ QQ群: 300303705
 
 本项目内的所有资源文件和程序，禁止在 GitHub 以外的任何地方进行转载或发布。
 
-本项目的[完整发布包](https://github.com/hzqst/CGAssistantJS)中附带的所有二进制程序（.dll .exe）均可从[源代码](https://github.com/hzqst/CGAssistant)编译而来，源代码接受所有人的监督，并且由[GitHub Actions](https://docs.github.com/en/actions/learn-github-actions)提供的构建服务自动编译，不存在携带任何恶意程序的可能。
+本项目的[完整发布包](https://github.com/hzqst/CGAssistant/releases)中附带的所有CGA相关二进制程序（.dll .exe）均从[源代码](https://github.com/hzqst/CGAssistant) 编译而来，源代码接受所有人的监督，并且由[GitHub Actions](https://docs.github.com/en/actions/learn-github-actions)提供的构建服务自动构建，不存在携带任何恶意程序的可能。
 
 即便如此，本项目对使用者的游戏账号安全仍然不作任何保证，使用者必须自己对使用后果负责，包括但不限于由项目中的任何脚本或程序问题导致的任何游戏账号损失或损害。
 
@@ -28,23 +28,21 @@ QQ群: 300303705
 
 [源码](https://github.com/hzqst/CGAssistant)
 
-[完整包](https://github.com/hzqst/CGAssistant/releases)
+[下载](https://github.com/hzqst/CGAssistant/releases)
 
-[Wiki](https://github.com/hzqst/CGAssistantJS/wiki)
+[使用攻略](https://github.com/hzqst/CGAssistant/wiki)
 
 ## 编译前置需求
 
-Visual Studio 2017 或 2019
+1. [Visual Studio 2017 / 2019 / 2022, 和 vc141 / vc142 / vc143 工具集](https://visualstudio.microsoft.com/)
 
-Windows SDK 10 (msvc工程文件里使用的是 Windows SDK version 10.0.17763.0，如果你安装了不同版本的 WindowsSDK 则需要“重定向项目”)
+2. Windows SDK 10 (工程文件里使用的是 Windows SDK version 10.0.17763.0，如果你安装了不同版本的 WindowsSDK 则需要自行“重定向项目”)
 
-VC141 或者 VC142 工具集 (msvc工程文件里使用的是 VC141工具集，如果你需要使用VC142工具集请自行修改vcxproject和build-CGAHook.bat中的PlatformToolset字段)
+3. [QT 5.12+ for msvc2017, 32位版本 (x86), 以及 QtCreator](https://www.qt.io/download)
 
-QT 5.12+ for msvc2017, win32 (x86)
+4. [NodeJS v14.16 (32位)](https://nodejs.org/download/release/v14.16.0/)
 
-NodeJS v14+ (32位 或 64位 均可)
-
-node-gyp (建议跟随 https://www.npmjs.com/package/node-gyp 的指示来安装 node-gyp)
+5. [node-gyp] (https://www.npmjs.com/package/node-gyp)
 
 ## 编译
 
