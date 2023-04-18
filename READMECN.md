@@ -28,6 +28,8 @@ QQ群: 300303705
 
 [源码](https://github.com/hzqst/CGAssistant)
 
+[脚本](https://github.com/hzqst/CGAssistantJS)
+
 [下载](https://github.com/hzqst/CGAssistant/releases)
 
 [使用攻略](https://github.com/hzqst/CGAssistant/wiki)

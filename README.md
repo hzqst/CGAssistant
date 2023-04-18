@@ -22,7 +22,9 @@ This project is licensed under MIT License, however if it is otherwise stated be
 
 [Source Code](https://github.com/hzqst/CGAssistant)
 
-[Release](https://github.com/hzqst/CGAssistant/releases)
+[Scripts](https://github.com/hzqst/CGAssistantJS)
+
+[Download](https://github.com/hzqst/CGAssistant/releases)
 
 [Wiki](https://github.com/hzqst/CGAssistant/wiki)
 
