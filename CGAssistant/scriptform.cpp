@@ -650,12 +650,23 @@ void ScriptForm::OnHttpLoadScript(QString query, QByteArray postdata, QJsonDocum
                }
            }
        }
+
        if(newobj.contains("autorestart")){
            auto qautorestart = newobj.take("autorestart");
            if(qautorestart.isBool()){
                 ui->checkBox_autorestart->setChecked(qautorestart.toBool());
            }
+           else if(qautorestart.toInt() == 2){
+                ui->checkBox_autorestart->setChecked(Qt::CheckState::Checked);
+           }
+           else if(qautorestart.toInt() == 1){
+               ui->checkBox_autorestart->setCheckState(Qt::CheckState::PartiallyChecked);
+          }
+           else if(qautorestart.toInt() == 0){
+               ui->checkBox_autorestart->setCheckState(Qt::CheckState::Unchecked);
+          }
        }
+
        if(newobj.contains("injuryprot")){
            auto qinjuryprot = newobj.take("injuryprot");
            if(qinjuryprot.isBool()){
