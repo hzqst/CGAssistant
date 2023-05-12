@@ -96,6 +96,8 @@ int main(int argc, char *argv[])
 
     QCommandLineOption scriptautorestart("scriptautorestart");
 
+    QCommandLineOption scriptautorestart2("scriptautorestart2");
+
     QCommandLineOption scriptfreezestop("scriptfreezestop");
 
     QCommandLineOption scriptautoterm("scriptautoterm");
@@ -138,6 +140,7 @@ int main(int argc, char *argv[])
     parser.addOption(loadscript);
     parser.addOption(scriptfreezestop);
     parser.addOption(scriptautorestart);
+    parser.addOption(scriptautorestart2);
     parser.addOption(scriptautoterm);
     parser.addOption(injuryprotect);
     parser.addOption(soulprotect);
@@ -280,7 +283,7 @@ int main(int argc, char *argv[])
                           );
 
     w.NotifyFillLoadScript(parser.value(loadscript),
-                           parser.isSet(scriptautorestart) ? true : false,
+                           parser.isSet(scriptautorestart2) ?  2 : ( parser.isSet(scriptautorestart) ? 1 : 0 ) ,
                            parser.isSet(scriptfreezestop) ? true : false,
                            parser.isSet(injuryprotect) ? true : false,
                            parser.isSet(soulprotect) ? true : false,

@@ -284,7 +284,7 @@ void ScriptForm::OnAutoRestart()
                 }
             }
 
-            if(ui->checkBox_autorestart->isChecked() && m_node->state() != QProcess::Running && !m_scriptPath.isEmpty())
+            if(ui->checkBox_autorestart->checkState() == Qt::CheckState::PartiallyChecked && m_node->state() != QProcess::Running && !m_scriptPath.isEmpty())
             {
                 int worldStatus = 0, gameStatus = 0;
                 if(g_CGAInterface->GetWorldStatus(worldStatus) && g_CGAInterface->GetGameStatus(gameStatus) && worldStatus == 9 && gameStatus == 3)
@@ -293,10 +293,19 @@ void ScriptForm::OnAutoRestart()
                     return;
                 }
             }
+            else if(ui->checkBox_autorestart->checkState() == Qt::CheckState::Checked && m_node->state() != QProcess::Running && !m_scriptPath.isEmpty())
+            {
+                int worldStatus = 0, gameStatus = 0;
+                if(g_CGAInterface->GetWorldStatus(worldStatus) && g_CGAInterface->GetGameStatus(gameStatus) && (worldStatus == 9 && gameStatus == 3) || (worldStatus == 10 && gameStatus == 3))
+                {
+                    on_pushButton_run_clicked();
+                    return;
+                }
+            }
         }
         else
         {
-            if(/*ui->checkBox_autoterm->isChecked() && */m_node->state() == QProcess::Running)
+            if(m_node->state() == QProcess::Running)
             {
                 on_pushButton_term_clicked();
                 return;
@@ -521,7 +530,7 @@ void ScriptForm::OnNotifyAttachProcessOk(quint32 ProcessId, quint32 ThreadId, qu
     qputenv("CGA_GAME_PORT", qportString);
 }
 
-void ScriptForm::OnNotifyFillLoadScript(QString path, bool autorestart, bool freezestop, bool injuryprot, bool soulprot, int consolemaxlines)
+void ScriptForm::OnNotifyFillLoadScript(QString path, int autorestart, bool freezestop, bool injuryprot, bool soulprot, int consolemaxlines)
 {
     if(!path.isEmpty())
     {
@@ -538,8 +547,11 @@ void ScriptForm::OnNotifyFillLoadScript(QString path, bool autorestart, bool fre
         }
     }
 
-    if(autorestart)
-        ui->checkBox_autorestart->setChecked(true);
+    if(autorestart == 1)
+        ui->checkBox_autorestart->setCheckState(Qt::CheckState::PartiallyChecked);
+    else if(autorestart >= 2)
+        ui->checkBox_autorestart->setCheckState(Qt::CheckState::Checked);
+
     if(injuryprot)
         ui->checkBox_injuryProt->setChecked(true);
     if(soulprot)

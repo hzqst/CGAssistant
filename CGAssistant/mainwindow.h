@@ -34,7 +34,7 @@ signals:
                              bool autologin, bool skipupdate, bool autochangeserver,bool autokillgame,
                              bool create_chara, int create_chara_chara, int create_chara_eye, int create_chara_mou, int create_chara_color,
                              QString create_chara_points, QString create_chara_elements, QString create_chara_name);
-    void NotifyFillLoadScript(QString path, bool autorestart, bool freezestop, bool injuryprot, bool soulprot, int consolemaxlines);
+    void NotifyFillLoadScript(QString path, int autorestart, bool freezestop, bool injuryprot, bool soulprot, int consolemaxlines);
     void NotifyFillLoadSettings(QString path);
     void NotifyFillStaticSettings(int freezetime, int chatmaxlines);
     void HttpGetGameProcInfo(QJsonDocument* doc);
