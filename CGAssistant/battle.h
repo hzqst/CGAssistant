@@ -120,6 +120,10 @@ protected:
 class CBattleTarget
 {
 public:
+    virtual ~CBattleTarget(){
+
+    }
+
     virtual int GetTargetTypeId() = 0;
     virtual int GetTargetSelectId() = 0;
     virtual void GetTargetName(QString &str) = 0;
@@ -783,52 +787,47 @@ public:
                   CBattleAction *petAction2, CBattleTarget *petTarget2*/);
     ~CBattleSetting();
 
-    virtual bool DoAction(CGA_BattleContext_t &context);
-    virtual void GetConditionName(QString &str);
-    virtual int GetConditionRelId();
-    virtual int GetConditionTypeId();
-    virtual void GetConditionValue(QString &str);
+    bool GetActions(CGA_BattleContext_t &context,
+                   CBattleAction **pPlayerAction, CBattleTarget **pPlayerTarget,
+                   CBattleAction **pPetAction, CBattleTarget **pPetTarget,
+                   CBattleTarget **pDefaultTarget,
+                   int *pConditionTargetPlayer,
+                   int *pConditionTargetPet);
+    void GetConditionName(QString &str);
+    int GetConditionRelId();
+    int GetConditionTypeId();
+    void GetConditionValue(QString &str);
 
-    virtual void GetCondition2Name(QString &str);
-    virtual int GetCondition2RelId();
-    virtual int GetCondition2TypeId();
-    virtual void GetCondition2Value(QString &str);
+    void GetCondition2Name(QString &str);
+    int GetCondition2RelId();
+    int GetCondition2TypeId();
+    void GetCondition2Value(QString &str);
 
-    virtual void GetPlayerActionName(QString &str, bool config);
-    virtual void GetPlayerTargetName(QString &str);
+    void GetPlayerActionName(QString &str, bool config);
+    void GetPlayerTargetName(QString &str);
 
-    virtual void GetPetActionName(QString &str, bool config);
-    virtual void GetPetTargetName(QString &str);
+    void GetPetActionName(QString &str, bool config);
+    void GetPetTargetName(QString &str);
 
-    //virtual void GetPetAction2Name(QString &str);
-    //virtual void GetPetTarget2Name(QString &str);
+    int GetPlayerActionTypeId();
+    QString GetPlayerSkillName();
+    int GetPlayerSkillLevel();
+    int GetPlayerTargetTypeId();
+    int GetPlayerTargetSelectId();
 
-    virtual int GetPlayerActionTypeId();
-    virtual QString GetPlayerSkillName();
-    virtual int GetPlayerSkillLevel();
-    virtual int GetPlayerTargetTypeId();
-    virtual int GetPlayerTargetSelectId();
+    int GetPetActionTypeId();
+    QString GetPetSkillName();
+    int GetPetTargetTypeId();
+    int GetPetTargetSelectId();
 
-    virtual int GetPetActionTypeId();
-    virtual QString GetPetSkillName();
-    virtual int GetPetTargetTypeId();
-    virtual int GetPetTargetSelectId();
-
-    /*virtual int GetPetAction2TypeId();
-    virtual QString GetPetSkill2Name();
-    virtual int GetPetTarget2TypeId();
-    virtual int GetPetTarget2SelectId();*/
-
-    virtual bool HasPlayerAction();
-    virtual bool HasPetAction();
+    bool HasPlayerAction();
+    bool HasPetAction();
 private:
     CBattleCondition *m_condition, *m_condition2;
     CBattleAction *m_playerAction;
     CBattleTarget *m_playerTarget;
     CBattleAction *m_petAction;
-    //CBattleAction *m_petAction2;
     CBattleTarget *m_petTarget;
-    //CBattleTarget *m_petTarget2;
     CBattleTarget *m_defaultTarget;
 };
 

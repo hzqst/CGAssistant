@@ -2383,11 +2383,8 @@ bool CBattleAction_PetSkillAttack::DoAction(int target, int defaultTarget, CGA_B
 
     if(GetSkill(context, skillpos, bUseDefaultTarget))
     {
-        //qDebug("target1=%d", target);
         target = bUseDefaultTarget ? defaultTarget : target;
-        //qDebug("target2=%d", target);
         FixTarget(context, skillpos, target);
-        //qDebug("target3=%d", target);
         if(context.m_bIsPetDoubleAction && !context.m_bIsPlayerEscaped){
             g_CGAInterface->BattlePetSkillAttack(skillpos, target, true, result);
             g_CGAInterface->BattlePetSkillAttack(skillpos, target, true, result);
@@ -2395,8 +2392,6 @@ bool CBattleAction_PetSkillAttack::DoAction(int target, int defaultTarget, CGA_B
             g_CGAInterface->BattlePetSkillAttack(skillpos, target, false, result);
         }
     }
-
-    qDebug("BattlePetSkillAttack %d %d", skillpos, target);
 
     return result;
 }
@@ -2421,7 +2416,6 @@ bool CBattleAction_PetSkillAttack::GetSkill(CGA_BattleContext_t &context, int &s
             const CGA_PetSkillList_t &petskills = pet.skills;
 
             for(int j = 0; j < petskills.size(); ++j){
-                //char *ppp = petskills.at(j).name.toLocal8Bit().data();
 
                 if(
                         petskills.at(j).name == m_SkillName &&
@@ -2440,7 +2434,7 @@ bool CBattleAction_PetSkillAttack::GetSkill(CGA_BattleContext_t &context, int &s
                         (context.m_iPetSkillAllowBit & (1 << petskills.at(j).pos))
                         ){
 
-                    //qDebug("find attack");
+
                     skillpos = petskills.at(j).pos;
                     bUseDefaultTarget = true;
                     return true;
@@ -2453,7 +2447,6 @@ bool CBattleAction_PetSkillAttack::GetSkill(CGA_BattleContext_t &context, int &s
                         (context.m_iPetSkillAllowBit & (1 << petskills.at(j).pos))
                         ){
 
-                    //qDebug("find guard");
                     skillpos = petskills.at(j).pos;
                     bUseDefaultTarget = true;
                     return true;
@@ -2797,8 +2790,6 @@ CBattleSetting::CBattleSetting(CBattleCondition *cond, CBattleCondition *cond2,
     m_playerTarget = playerTarget;
     m_petAction = petAction;
     m_petTarget = petTarget;
-    /*m_petAction2 = petAction2;
-    m_petTarget2 = petTarget2;*/
     m_defaultTarget = new CBattleTarget_Enemy(BattleTarget_Select_Random);
 }
 
@@ -2820,11 +2811,14 @@ CBattleSetting::~CBattleSetting()
         delete m_defaultTarget;
 }
 
-bool CBattleSetting::DoAction(CGA_BattleContext_t &context)
+bool CBattleSetting::GetActions(CGA_BattleContext_t &context,
+                               CBattleAction **pPlayerAction, CBattleTarget **pPlayerTarget,
+                               CBattleAction **pPetAction, CBattleTarget **pPetTarget,
+                               CBattleTarget **pDefaultTarget,
+                               int *pConditionTargetPlayer,
+                               int *pConditionTargetPet)
 {
     int conditionTarget = -1, condition2Target = -1;
-
-    //qDebug("checking condition %d %d", GetConditionTypeId(), GetCondition2TypeId());
 
     if(!m_condition && !m_condition2)
         return false;
@@ -2832,171 +2826,36 @@ bool CBattleSetting::DoAction(CGA_BattleContext_t &context)
     if(m_condition && !m_condition->Check(context, conditionTarget))
         return false;
 
-    //qDebug("checking condition 1 pass");
-
     if(m_condition2 && !m_condition2->Check(context, condition2Target))
         return false;
 
-    //qDebug("checking condition 2 pass");
+    if(!(*pPlayerAction) && m_playerAction){
+        (*pPlayerAction) = m_playerAction;
+        (*pPlayerTarget) = m_playerTarget;
 
-    if(conditionTarget != -1){
-        context.m_iConditionTarget = conditionTarget;
-        //qDebug("m_iConditionTarget = %d", conditionTarget);
-    } else if(condition2Target != -1){
-        context.m_iConditionTarget = condition2Target;
-        //qDebug("m_iConditionTarget = %d", condition2Target);
-    } else {
-        context.m_iConditionTarget = -1;
-    }
-
-    bool bHasPet = context.m_iPetPosition >= 0 && context.m_iPetId != -1;
-    bool bIsPetAction = (context.m_iPlayerStatus == 4) ? true : false;
-
-    if(!bIsPetAction)
-    {
-        if(context.m_bIsPetDoubleAction && bHasPet)
-        {
-            if(m_petAction)
-            {
-                int flags = 0;
-                int target = -1;
-                int defaultTarget = -1;
-                int defaultFlags = FL_SKILL_SINGLE | FL_SKILL_TO_PET | FL_SKILL_TO_TEAMMATE | FL_SKILL_TO_ENEMY | FL_SKILL_FRONT_ONLY | FL_SKILL_SELECT_TARGET;
-
-                qDebug("m_petAction");
-
-                flags = m_petAction->GetTargetFlags(context);
-
-                if(m_petTarget)
-                    target = m_petTarget->GetTarget(context.m_iPetPosition, flags, context);
-
-                if(m_defaultTarget)
-                    defaultTarget = m_defaultTarget->GetTarget(context.m_iPetPosition, defaultFlags, context);
-
-                if(m_petAction->DoAction(target, defaultTarget, context)){
-                    qDebug("m_petAction ok");
-                }
-            }
-            /*{
-                int flags = 0;
-                int target = -1;
-                int defaultTarget = -1;
-                int defaultFlags = FL_SKILL_SINGLE | FL_SKILL_TO_PET | FL_SKILL_TO_TEAMMATE | FL_SKILL_TO_ENEMY | FL_SKILL_FRONT_ONLY | FL_SKILL_SELECT_TARGET;
-
-                qDebug("m_petAction2");
-
-                context.m_bIsPetDoubleAction = true;
-
-                flags = m_petAction2->GetTargetFlags(context);
-
-                if(m_petTarget2)
-                    target = m_petTarget2->GetTarget(context.m_iPetPosition, flags, context);
-
-                if(m_defaultTarget)
-                    defaultTarget = m_defaultTarget->GetTarget(context.m_iPetPosition, defaultFlags, context);
-
-                if(m_petAction2->DoAction(target, defaultTarget, context)){
-                    qDebug("m_petAction2 ok");
-                }
-            }*/
-        }
-
-        if(m_playerAction)
-        {
-            int flags = 0;
-            int target = -1;
-            int defaultTarget = -1;
-            int defaultFlags = FL_SKILL_SINGLE | FL_SKILL_TO_PET | FL_SKILL_TO_TEAMMATE | FL_SKILL_TO_ENEMY | FL_SKILL_FRONT_ONLY | FL_SKILL_SELECT_TARGET;
-
-            flags = m_playerAction->GetTargetFlags(context);
-
-            if(m_playerTarget)
-                target = m_playerTarget->GetTarget(context.m_iPlayerPosition, flags, context);
-
-            if(m_defaultTarget)
-                defaultTarget = m_defaultTarget->GetTarget(context.m_iPlayerPosition, defaultFlags, context);
-
-            //qDebug("m_playerAction DoAction");
-
-            if(m_playerAction->DoAction(target, defaultTarget, context)){
-                context.m_bIsPlayerActionPerformed = true;
-                return true;
-            } else {
-                bool result = false;
-                if(g_CGAInterface->BattleDoNothing(result) && result)
-                {
-                    context.m_bIsPlayerActionPerformed = true;
-                    return true;
-                }
-            }
-            qDebug("m_playerAction failed to DoAction");
-        }
-        else
-        {
-            qDebug("m_playerAction not present, try next");
-            return false;
-        }
-    }
-
-    if(bIsPetAction && m_petAction)
-    {
-        if(context.m_bIsPlayerForceAction && m_playerAction && !context.m_bIsPlayerActionPerformed)
-        {
-            int flags = 0;
-            int target = -1;
-            int defaultTarget = -1;
-            int defaultFlags = FL_SKILL_SINGLE | FL_SKILL_TO_PET | FL_SKILL_TO_TEAMMATE | FL_SKILL_TO_ENEMY | FL_SKILL_FRONT_ONLY | FL_SKILL_SELECT_TARGET;
-
-            flags = m_playerAction->GetTargetFlags(context);
-
-            if(m_playerTarget)
-                target = m_playerTarget->GetTarget(context.m_iPlayerPosition, flags, context);
-
-            if(m_defaultTarget)
-                defaultTarget = m_defaultTarget->GetTarget(context.m_iPlayerPosition, defaultFlags, context);
-
-            //qDebug("m_playerAction DoAction");
-
-            if(m_playerAction->DoAction(target, defaultTarget, context)){
-                context.m_bIsPlayerActionPerformed = true;
-            } else {
-                bool result = false;
-                if(g_CGAInterface->BattleDoNothing(result) && result)
-                {
-                    context.m_bIsPlayerActionPerformed = true;
-                }
-            }
-        }
-
-        int flags = 0;
-        int target = -1;
-        int defaultTarget = -1;
-        int defaultFlags = FL_SKILL_SINGLE | FL_SKILL_TO_PET | FL_SKILL_TO_TEAMMATE | FL_SKILL_TO_ENEMY | FL_SKILL_FRONT_ONLY | FL_SKILL_SELECT_TARGET;
-
-        qDebug("m_petAction");
-
-        context.m_bIsPetDoubleAction = false;
-
-        flags = m_petAction->GetTargetFlags(context);
-
-        if(m_petTarget)
-            target = m_petTarget->GetTarget(context.m_iPetPosition, flags, context);
-
-        if(m_defaultTarget)
-            defaultTarget = m_defaultTarget->GetTarget(context.m_iPetPosition, defaultFlags, context);
-
-        if(m_petAction->DoAction(target, defaultTarget, context)){
-            qDebug("m_petAction ok");
-            return true;
+        if(conditionTarget != -1){
+            *pConditionTargetPlayer = conditionTarget;
+        } else if(condition2Target != -1){
+            *pConditionTargetPlayer = condition2Target;
         } else {
-            bool result = false;
-            if(g_CGAInterface->BattleDoNothing(result) && result)
-                return true;
+            *pConditionTargetPlayer = -1;
         }
     }
 
-    qDebug("action failed");
-    return false;
+    if (!(*pPetAction) && m_petAction){
+        (*pPetAction) = m_petAction;
+        (*pPetTarget) = m_petTarget;
+
+        if(conditionTarget != -1){
+            *pConditionTargetPet = conditionTarget;
+        } else if(condition2Target != -1){
+            *pConditionTargetPet = condition2Target;
+        } else {
+            *pConditionTargetPet = -1;
+        }
+    }
+
+    return true;
 }
 
 void CBattleSetting::GetPlayerActionName(QString &str, bool config)
@@ -3023,18 +2882,6 @@ void CBattleSetting::GetPetTargetName(QString &str)
     if(m_petTarget)
         m_petTarget->GetTargetName(str);
 }
-
-/*void CBattleSetting::GetPetAction2Name(QString &str)
-{
-    if(m_petAction2)
-        m_petAction2->GetActionName(str);
-}
-
-void CBattleSetting::GetPetTarget2Name(QString &str)
-{
-    if(m_petTarget2)
-        m_petTarget2->GetTargetName(str);
-}*/
 
 void CBattleSetting::GetConditionName(QString &str)
 {
@@ -3163,37 +3010,6 @@ int CBattleSetting::GetPetTargetSelectId()
         return m_petTarget->GetTargetSelectId();
     return -1;
 }
-
-/*int CBattleSetting::GetPetAction2TypeId()
-{
-    if(m_petAction2)
-        return m_petAction2->GetActionTypeId();
-    return -1;
-}
-
-QString CBattleSetting::GetPetSkill2Name()
-{
-    if(m_petAction && m_petAction->GetActionTypeId() == BattlePetAction_Skill)
-    {
-        auto sk = dynamic_cast<CBattleAction_PetSkillAttack *>(m_petAction2);
-        return sk->GetSkillName();
-    }
-    return QString();
-}
-
-int CBattleSetting::GetPetTarget2TypeId()
-{
-    if(m_petTarget2)
-        return m_petTarget2->GetTargetTypeId();
-    return -1;
-}
-
-int CBattleSetting::GetPetTarget2SelectId()
-{
-    if(m_petTarget2)
-        return m_petTarget2->GetTargetSelectId();
-    return -1;
-}*/
 
 bool CBattleSetting::HasPlayerAction()
 {
@@ -3745,11 +3561,162 @@ void CBattleWorker::GetBattleUnits()
 
 void CBattleWorker::OnPerformanceBattle()
 {
+    CBattleAction *playerAction = nullptr;
+    CBattleTarget *playerTarget = nullptr;
+    CBattleAction *petAction = nullptr;
+    CBattleTarget *petTarget = nullptr;
+    CBattleTarget *defaultTargetSetting = nullptr;
+    int conditionalTargetPlayer = -1;
+    int conditionalTargetPet = -1;
+
+    bool bHasPet = m_BattleContext.m_iPetPosition >= 0 && m_BattleContext.m_iPetId != -1;
+    bool bIsPetAction = (m_BattleContext.m_iPlayerStatus == 4) ? true : false;
+
     for(int i = 0;i < m_SettingList.size(); ++i)
     {
-        const CBattleSettingPtr &ptr = m_SettingList.at(i);
-        if(ptr->DoAction(m_BattleContext))
+        const CBattleSettingPtr &setting = m_SettingList.at(i);
+
+        setting->GetActions(m_BattleContext,
+                            &playerAction, &playerTarget,
+                            &petAction, &petTarget,
+                            &defaultTargetSetting,
+                            &conditionalTargetPlayer,
+                            &conditionalTargetPet);
+
+        if(playerAction && petAction)
+        {
+            break;
+        }
+        if(!bHasPet && playerAction)
+        {
+            break;
+        }
+        if(bIsPetAction && petAction)
+        {
+            break;
+        }
+    }
+
+    m_BattleContext.m_iConditionTarget = -1;
+
+    if (!bIsPetAction)
+    {
+        if (m_BattleContext.m_bIsPetDoubleAction && bHasPet)
+        {
+            if (petAction)
+            {
+                m_BattleContext.m_iConditionTarget = conditionalTargetPet;
+
+                int flags = 0;
+                int target = -1;
+                int defaultTarget = -1;
+                int defaultFlags = FL_SKILL_SINGLE | FL_SKILL_TO_PET | FL_SKILL_TO_TEAMMATE | FL_SKILL_TO_ENEMY | FL_SKILL_FRONT_ONLY | FL_SKILL_SELECT_TARGET;
+
+                flags = petAction->GetTargetFlags(m_BattleContext);
+
+                if(petTarget)
+                    target = petTarget->GetTarget(m_BattleContext.m_iPetPosition, flags, m_BattleContext);
+
+                if(defaultTargetSetting)
+                    defaultTarget = defaultTargetSetting->GetTarget(m_BattleContext.m_iPetPosition, defaultFlags, m_BattleContext);
+
+                if(petAction->DoAction(target, defaultTarget, m_BattleContext)){
+
+                }
+            }
+        }
+
+        if (playerAction)
+        {
+            m_BattleContext.m_iConditionTarget = conditionalTargetPlayer;
+
+            int flags = 0;
+            int target = -1;
+            int defaultTarget = -1;
+            int defaultFlags = FL_SKILL_SINGLE | FL_SKILL_TO_PET | FL_SKILL_TO_TEAMMATE | FL_SKILL_TO_ENEMY | FL_SKILL_FRONT_ONLY | FL_SKILL_SELECT_TARGET;
+
+            flags = playerAction->GetTargetFlags(m_BattleContext);
+
+            if(playerTarget)
+                target = playerTarget->GetTarget(m_BattleContext.m_iPlayerPosition, flags, m_BattleContext);
+
+            if(defaultTargetSetting)
+                defaultTarget = defaultTargetSetting->GetTarget(m_BattleContext.m_iPlayerPosition, defaultFlags, m_BattleContext);
+
+            if(playerAction->DoAction(target, defaultTarget, m_BattleContext)){
+                m_BattleContext.m_bIsPlayerActionPerformed = true;
+                return;
+            } else {
+                bool result = false;
+                if(g_CGAInterface->BattleDoNothing(result) && result)
+                {
+                    m_BattleContext.m_bIsPlayerActionPerformed = true;
+                    return;
+                }
+            }
+        }
+        else
+        {
             return;
+        }
+    }
+
+    if (bIsPetAction && petAction)
+    {
+        if(m_BattleContext.m_bIsPlayerForceAction && playerAction && !m_BattleContext.m_bIsPlayerActionPerformed)
+        {
+            m_BattleContext.m_iConditionTarget = conditionalTargetPlayer;
+
+            int flags = 0;
+            int target = -1;
+            int defaultTarget = -1;
+            int defaultFlags = FL_SKILL_SINGLE | FL_SKILL_TO_PET | FL_SKILL_TO_TEAMMATE | FL_SKILL_TO_ENEMY | FL_SKILL_FRONT_ONLY | FL_SKILL_SELECT_TARGET;
+
+            flags = playerAction->GetTargetFlags(m_BattleContext);
+
+            if(playerTarget)
+                target = playerTarget->GetTarget(m_BattleContext.m_iPlayerPosition, flags, m_BattleContext);
+
+            if(defaultTargetSetting)
+                defaultTarget = defaultTargetSetting->GetTarget(m_BattleContext.m_iPlayerPosition, defaultFlags, m_BattleContext);
+
+            if(playerAction->DoAction(target, defaultTarget, m_BattleContext)){
+                m_BattleContext.m_bIsPlayerActionPerformed = true;
+            } else {
+                bool result = false;
+                if(g_CGAInterface->BattleDoNothing(result) && result)
+                {
+                    m_BattleContext.m_bIsPlayerActionPerformed = true;
+                }
+            }
+        }
+
+        m_BattleContext.m_iConditionTarget = conditionalTargetPet;
+
+        int flags = 0;
+        int target = -1;
+        int defaultTarget = -1;
+        int defaultFlags = FL_SKILL_SINGLE | FL_SKILL_TO_PET | FL_SKILL_TO_TEAMMATE | FL_SKILL_TO_ENEMY | FL_SKILL_FRONT_ONLY | FL_SKILL_SELECT_TARGET;
+
+        m_BattleContext.m_bIsPetDoubleAction = false;
+
+        flags = petAction->GetTargetFlags(m_BattleContext);
+
+        if(petTarget)
+            target = petTarget->GetTarget(m_BattleContext.m_iPetPosition, flags, m_BattleContext);
+
+        if(defaultTargetSetting)
+            defaultTarget = defaultTargetSetting->GetTarget(m_BattleContext.m_iPetPosition, defaultFlags, m_BattleContext);
+
+        if(petAction->DoAction(target, defaultTarget, m_BattleContext)){
+            return;
+        } else {
+            bool result = false;
+            if(g_CGAInterface->BattleDoNothing(result) && result)
+            {
+                return;
+            }
+        }
     }
 }
 
