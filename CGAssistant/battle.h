@@ -93,6 +93,8 @@
 
 typedef struct CGA_BattleContext_s CGA_BattleContext_t;
 
+//Condition
+
 class CBattleCondition
 {
 public:
@@ -104,6 +106,8 @@ public:
 protected:
 };
 
+//Action
+
 class CBattleAction
 {
 public:
@@ -111,6 +115,7 @@ public:
     virtual void GetActionName(QString &str, bool config) = 0;
     virtual int GetTargetFlags(CGA_BattleContext_t &context) = 0;
     virtual bool DoAction(int target, int defaultTarget, CGA_BattleContext_t &context) = 0;
+    virtual bool CheckAvailable(CGA_BattleContext_t &context) = 0;
 protected:
 
 };
@@ -587,6 +592,9 @@ public:
     virtual int GetTargetFlags(CGA_BattleContext_t &context){
         return FL_SKILL_SINGLE | FL_SKILL_TO_PET | FL_SKILL_TO_TEAMMATE | FL_SKILL_TO_ENEMY | FL_SKILL_FRONT_ONLY | FL_SKILL_SELECT_TARGET;
     }
+    virtual bool CheckAvailable(CGA_BattleContext_t &context){
+        return true;
+    }
 };
 
 class CBattleAction_PlayerGuard : public CBattleAction
@@ -597,6 +605,9 @@ public:
     virtual bool DoAction(int target, int defaultTarget, CGA_BattleContext_t &context);
     virtual int GetTargetFlags(CGA_BattleContext_t &context){
         return 0;
+    }
+    virtual bool CheckAvailable(CGA_BattleContext_t &context){
+        return true;
     }
 };
 
@@ -609,6 +620,9 @@ public:
     virtual int GetTargetFlags(CGA_BattleContext_t &context){
         return 0;
     }
+    virtual bool CheckAvailable(CGA_BattleContext_t &context){
+        return true;
+    }
 };
 
 class CBattleAction_PlayerExchangePosition : public CBattleAction
@@ -619,6 +633,9 @@ public:
     virtual bool DoAction(int target, int defaultTarget, CGA_BattleContext_t &context);
     virtual int GetTargetFlags(CGA_BattleContext_t &context){
         return 0;
+    }
+    virtual bool CheckAvailable(CGA_BattleContext_t &context){
+        return true;
     }
 };
 
@@ -633,6 +650,9 @@ public:
     virtual int GetTargetFlags(CGA_BattleContext_t &context){
         return 0;
     }
+    virtual bool CheckAvailable(CGA_BattleContext_t &context);
+private:
+    int GetPetId(CGA_BattleContext_t &context);
 protected:
     QString m_PetName;
     int m_Type;//0 = pet, 1=recall, 2=most_level, 3=most_health
@@ -648,6 +668,7 @@ public:
     virtual QString GetSkillName(){return m_SkillName; }
     virtual int GetSkillLevel(){return m_SkillLevel; }
     virtual int GetTargetFlags(CGA_BattleContext_t &context);
+    virtual bool CheckAvailable(CGA_BattleContext_t &context);
 private:
     bool GetSkill(CGA_BattleContext_t &context, int &skillpos, int &skilllevel);
     void FixTarget(CGA_BattleContext_t &context, int skillpos, int skilllevel, int &target);
@@ -666,6 +687,7 @@ public:
     virtual int GetTargetFlags(CGA_BattleContext_t &context){
         return FL_SKILL_SINGLE | FL_SKILL_TO_PET | FL_SKILL_TO_SELF | FL_SKILL_TO_TEAMMATE | FL_SKILL_SELECT_TARGET;
     }
+    virtual bool CheckAvailable(CGA_BattleContext_t &context);
 private:
     bool GetItemPosition(CGA_BattleContext_t &context, int &itempos);
 protected:
@@ -684,6 +706,9 @@ public:
     virtual int GetTargetFlags(CGA_BattleContext_t &context){
         return 0;
     }
+    virtual bool CheckAvailable(CGA_BattleContext_t &context){
+        return true;
+    }
 };
 
 class CBattleAction_PlayerRebirth : public CBattleAction
@@ -696,6 +721,7 @@ public:
     virtual int GetTargetFlags(CGA_BattleContext_t &context){
         return 0;
     }
+    virtual bool CheckAvailable(CGA_BattleContext_t &context);
 };
 
 class CBattleAction_PlayerDoNothing : public CBattleAction
@@ -707,6 +733,9 @@ public:
     virtual bool DoAction(int target, int defaultTarget, CGA_BattleContext_t &context);
     virtual int GetTargetFlags(CGA_BattleContext_t &context){
         return 0;
+    }
+    virtual bool CheckAvailable(CGA_BattleContext_t &context){
+        return true;
     }
 };
 
@@ -720,6 +749,7 @@ public:
     virtual bool DoAction(int target, int defaultTarget, CGA_BattleContext_t &context);
     virtual QString GetSkillName(){return m_SkillName; }
     virtual int GetTargetFlags(CGA_BattleContext_t &context);
+    virtual bool CheckAvailable(CGA_BattleContext_t &context);
 private:
     bool GetSkill(CGA_BattleContext_t &context, int &skillpos, bool &bUseDefaultTarget);
     void FixTarget(CGA_BattleContext_t &context, int skillpos, int &target);

@@ -36,6 +36,7 @@ bool CBattleCondition_Ignore::Check(CGA_BattleContext_t &context, int &condition
     return true;
 }
 
+
 CBattleCondition_EnemyCount::CBattleCondition_EnemyCount(int relation, int value)
 {
     m_relation = relation;
@@ -1875,7 +1876,7 @@ void CBattleAction_PlayerChangePet::GetActionName(QString &str, bool config)
     }
 }
 
-bool CBattleAction_PlayerChangePet::DoAction(int target, int defaultTarget, CGA_BattleContext_t &context)
+int CBattleAction_PlayerChangePet::GetPetId(CGA_BattleContext_t &context)
 {
     int petid = -1;
     bool found = false;
@@ -2059,8 +2060,23 @@ bool CBattleAction_PlayerChangePet::DoAction(int target, int defaultTarget, CGA_
     }
     }
 
+}
+
+bool CBattleAction_PlayerChangePet::CheckAvailable(CGA_BattleContext_t &context)
+{
+    int petid = GetPetId(context);
+    if(petid != -1)
+    {
+        return true;
+    }
+    return false;
+}
+
+bool CBattleAction_PlayerChangePet::DoAction(int target, int defaultTarget, CGA_BattleContext_t &context)
+{
     bool result = false;
-    if(found)
+    int petid = GetPetId(context);
+    if(petid != -1)
     {
         g_CGAInterface->BattleChangePet(petid, result);
     }
@@ -2103,21 +2119,33 @@ int CBattleAction_PlayerSkillAttack::GetTargetFlags(CGA_BattleContext_t &context
     return 0;
 }
 
+bool CBattleAction_PlayerSkillAttack::CheckAvailable(CGA_BattleContext_t &context)
+{
+    int skill_pos = -1, skill_level = -1;
+
+    if(context.m_bIsSkillPerformed == false && GetSkill(context, skill_pos, skill_level)){
+        return true;
+    }
+
+    return false;
+}
+
 bool CBattleAction_PlayerSkillAttack::DoAction(int target, int defaultTarget, CGA_BattleContext_t &context)
 {
-    int skill_pos, skill_level;
+    int skill_pos = -1, skill_level = -1;
 
     bool result = false;
     if(context.m_bIsSkillPerformed == false && GetSkill(context, skill_pos, skill_level)){
-        qDebug("BattleSkillAttack %d %d %d", skill_pos, skill_level, target);
+
         FixTarget(context, skill_pos, skill_level, target);
         g_CGAInterface->BattleSkillAttack(skill_pos, skill_level, target, false, result);
     }
 
     if(!result){
-        qDebug("BattleNormalAttack %d %d", skill_pos, target);
+
         g_CGAInterface->BattleNormalAttack(defaultTarget, result);
     }
+
     return result;
 }
 
@@ -2248,9 +2276,20 @@ bool CBattleAction_PlayerUseItem::DoAction(int target, int defaultTarget, CGA_Ba
 {
     int itempos = -1;
     bool result = false;
-    if(GetItemPosition(context, itempos))
+    if(GetItemPosition(context, itempos)){
         g_CGAInterface->BattleUseItem(itempos, target, result);
+    }
     return result;
+}
+
+bool CBattleAction_PlayerUseItem::CheckAvailable(CGA_BattleContext_t &context)
+{
+    int itempos = -1;
+
+    if(GetItemPosition(context, itempos))
+        return true;
+
+    return false;
 }
 
 bool CBattleAction_PlayerUseItem::GetItemPosition(CGA_BattleContext_t &context, int &itempos)
@@ -2312,6 +2351,11 @@ bool CBattleAction_PlayerRebirth::DoAction(int target, int defaultTarget, CGA_Ba
     return false;
 }
 
+bool CBattleAction_PlayerRebirth::CheckAvailable(CGA_BattleContext_t &context){
+
+    return true;
+}
+
 CBattleAction_PlayerDoNothing::CBattleAction_PlayerDoNothing()
 {
 
@@ -2366,6 +2410,28 @@ int CBattleAction_PetSkillAttack::GetTargetFlags(CGA_BattleContext_t &context)
 
     return 0;
 }
+
+bool CBattleAction_PetSkillAttack::CheckAvailable(CGA_BattleContext_t &context){
+
+    int skillpos = -1;
+
+    bool result = false;
+    bool bUseDefaultTarget = false;
+
+    auto donothing = QObject::tr("Do Nothing");
+    if(donothing == m_SkillName)
+    {
+        return true;
+    }
+
+    if(GetSkill(context, skillpos, bUseDefaultTarget))
+    {
+        return true;
+    }
+
+    return false;
+}
+
 
 bool CBattleAction_PetSkillAttack::DoAction(int target, int defaultTarget, CGA_BattleContext_t &context)
 {
@@ -2829,7 +2895,7 @@ bool CBattleSetting::GetActions(CGA_BattleContext_t &context,
     if(m_condition2 && !m_condition2->Check(context, condition2Target))
         return false;
 
-    if(!(*pPlayerAction) && m_playerAction){
+    if(!(*pPlayerAction) && m_playerAction && m_playerAction->CheckAvailable(context)){
         (*pPlayerAction) = m_playerAction;
         (*pPlayerTarget) = m_playerTarget;
 
@@ -2842,7 +2908,7 @@ bool CBattleSetting::GetActions(CGA_BattleContext_t &context,
         }
     }
 
-    if (!(*pPetAction) && m_petAction){
+    if (!(*pPetAction) && m_petAction && m_petAction->CheckAvailable(context)){
         (*pPetAction) = m_petAction;
         (*pPetTarget) = m_petTarget;
 
@@ -3825,10 +3891,7 @@ void CBattleWorker::OnNotifyBattleAction(int flags)
 
     if(m_bAutoBattle)
     {
-        //qDebug("petid = %d m_bIsSkillPerformed = %d\n", m_BattleContext.m_iPetId, m_BattleContext.m_bIsSkillPerformed ? 1 : 0);
-
         if(CheckProtect()){
-            //qDebug("Found Lv1 enemy, stopped.");
             if(m_bBeep)
             {
                 QString beep = QCoreApplication::applicationDirPath();
@@ -3841,6 +3904,7 @@ void CBattleWorker::OnNotifyBattleAction(int flags)
         if(m_bNoSwitchAnim && m_BattleContext.m_iLastRound != m_BattleContext.m_iRoundCount )
         {
             int randDelay = m_iDelayFrom;
+
             /*int randDelay = qrand() * (m_iDelayTo - m_iDelayFrom) / RAND_MAX + m_iDelayFrom;
             if(randDelay < 1)
                 randDelay = 1;
