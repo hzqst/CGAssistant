@@ -2059,7 +2059,10 @@ int CBattleAction_PlayerChangePet::GetPetId(CGA_BattleContext_t &context)
         break;
     }
     }
+    if(found)
+        return petid;
 
+    return -1;
 }
 
 bool CBattleAction_PlayerChangePet::CheckAvailable(CGA_BattleContext_t &context)
