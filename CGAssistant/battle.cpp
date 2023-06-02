@@ -2418,7 +2418,6 @@ bool CBattleAction_PetSkillAttack::CheckAvailable(CGA_BattleContext_t &context){
 
     int skillpos = -1;
 
-    bool result = false;
     bool bUseDefaultTarget = false;
 
     auto donothing = QObject::tr("Do Nothing");
@@ -2473,11 +2472,11 @@ bool CBattleAction_PetSkillAttack::GetSkill(CGA_BattleContext_t &context, int &s
     if(!context.m_Pets.data())
         return false;
 
-    const unsigned char szAttack[] = {0xB9, 0xA5, 0xBB, 0xF7, 0};
-    QString attack = QString::fromLocal8Bit((const char *)szAttack);
+    //const unsigned char szAttack[] = {0xB9, 0xA5, 0xBB, 0xF7, 0};
+    //QString attack = QString::fromLocal8Bit((const char *)szAttack);
 
-    const unsigned char szGuard[] = {0xB7, 0xC0, 0xD3, 0xF9, 0};
-    QString guard = QString::fromLocal8Bit((const char *)szGuard);
+    //const unsigned char szGuard[] = {0xB7, 0xC0, 0xD3, 0xF9, 0};
+    //QString guard = QString::fromLocal8Bit((const char *)szGuard);
 
     for(int i = 0 ;i < context.m_Pets->size(); ++i ){
         const CGA_PetInfo_t &pet = context.m_Pets->at(i);
@@ -2497,7 +2496,7 @@ bool CBattleAction_PetSkillAttack::GetSkill(CGA_BattleContext_t &context, int &s
 
             }
 
-            for(int j = 0; j < petskills.size(); ++j){
+            /*for(int j = 0; j < petskills.size(); ++j){
                 if(
                         petskills.at(j).name == attack &&
                         (context.m_iPetSkillAllowBit & (1 << petskills.at(j).pos))
@@ -2520,7 +2519,7 @@ bool CBattleAction_PetSkillAttack::GetSkill(CGA_BattleContext_t &context, int &s
                     bUseDefaultTarget = true;
                     return true;
                 }
-            }
+            }*/
 
             break;
         }
