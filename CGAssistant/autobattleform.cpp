@@ -64,6 +64,7 @@ AutoBattleForm::AutoBattleForm(CBattleWorker *worker, CPlayerWorker *pworker, QW
     s_BattleCondType[BattleCond_Type_PlayerJob] = tr("Player Job");
     s_BattleCondType[BattleCond_Type_PlayerGold] = tr("Player Gold");
     s_BattleCondType[BattleCond_Type_BattleBGM] = tr("Battle BGM");
+    s_BattleCondType[BattleCond_Type_BattleFieldStatus] = tr("Field Status");
 
     s_BattlePlayerActionString[BattlePlayerAction_Ignore] = tr("Ignore");
     s_BattlePlayerActionString[BattlePlayerAction_Attack] = tr("Attack");
@@ -335,6 +336,15 @@ void AutoBattleForm::on_comboBox_condition_type_currentIndexChanged(int index)
         ui->comboBox_condition_value->addItem(tr("Any"), QVariant(FL_DEBUFF_ANY));
         break;
     }
+    case BattleCond_Type_BattleFieldStatus:
+    {
+        for(int i = 0;i < BattleCond_StrRel_Max; ++i)
+            ui->comboBox_condition_relation->addItem(s_BattleCondRelationString[i]);
+
+        ui->comboBox_condition_value->addItem(tr("Nothing"), QVariant(0));
+        ui->comboBox_condition_value->addItem(tr("MagicSealing"), QVariant(1));
+        break;
+    }
     }
 }
 
@@ -407,6 +417,15 @@ void AutoBattleForm::on_comboBox_condition2_type_currentIndexChanged(int index)
         ui->comboBox_condition2_value->addItem(tr("Forget"), QVariant(FL_DEBUFF_FORGET));
         ui->comboBox_condition2_value->addItem(tr("Poison"), QVariant(FL_DEBUFF_POISON));
         ui->comboBox_condition2_value->addItem(tr("Any"), QVariant(FL_DEBUFF_ANY));
+        break;
+    }
+    case BattleCond_Type_BattleFieldStatus:
+    {
+        for(int i = 0;i < BattleCond_StrRel_Max; ++i)
+            ui->comboBox_condition2_value->addItem(s_BattleCondRelationString[i]);
+
+        ui->comboBox_condition2_value->addItem(tr("Nothing"), QVariant(0));
+        ui->comboBox_condition2_value->addItem(tr("MagicSealing"), QVariant(1));
         break;
     }
     }
@@ -840,7 +859,23 @@ void AutoBattleForm::on_pushButton_add_clicked()
                 bool bValue = false;
                 int value = ui->comboBox_condition_value->currentData().toInt(&bValue);
                 if(bValue && value >= FL_DEBUFF_SLEEP && value <= FL_DEBUFF_ANY)
+                {
                     pCondition = new CBattleCondition_TeammateDebuff(relation, value);
+                }
+            }
+            break;
+        }
+        case BattleCond_Type_DoubleAction:
+        {
+            int relation = ui->comboBox_condition_relation->currentIndex();
+            if(relation >= 0 && relation < BattleCond_StrRel_Max)
+            {
+                bool bValue = false;
+                int value = ui->comboBox_condition_value->currentData().toInt(&bValue);
+                if(bValue && value >= 0 && value <= 1)
+                {
+                    pCondition = new CBattleCondition_BattleFieldStatus(relation, value);
+                }
             }
             break;
         }
@@ -1026,6 +1061,20 @@ void AutoBattleForm::on_pushButton_add_clicked()
                 int value = ui->comboBox_condition2_value->currentData().toInt(&bValue);
                 if(bValue && value >= FL_DEBUFF_SLEEP && value <= FL_DEBUFF_ANY)
                     pCondition2 = new CBattleCondition_TeammateDebuff(relation, value);
+            }
+            break;
+        }
+        case BattleCond_Type_DoubleAction:
+        {
+            int relation = ui->comboBox_condition2_relation->currentIndex();
+            if(relation >= 0 && relation < BattleCond_StrRel_Max)
+            {
+                bool bValue = false;
+                int value = ui->comboBox_condition2_value->currentData().toInt(&bValue);
+                if(bValue && value >= 0 && value <= 1)
+                {
+                    pCondition = new CBattleCondition_BattleFieldStatus(relation, value);
+                }
             }
             break;
         }

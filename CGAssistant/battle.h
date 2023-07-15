@@ -33,7 +33,8 @@
 #define BattleCond_Type_PlayerJob 23
 #define BattleCond_Type_PlayerGold 24
 #define BattleCond_Type_BattleBGM 25
-#define BattleCond_Type_Max 26
+#define BattleCond_Type_BattleFieldStatus 26
+#define BattleCond_Type_Max 27
 
 #define BattleCond_NumRel_EGT 0
 #define BattleCond_NumRel_GT 1
@@ -936,6 +937,7 @@ typedef struct CGA_BattleContext_s
     int m_iRoundCount;
     int m_iBGMIndex;
     int m_iLastRound;
+    int m_iMagicSealingRound;
     int m_iPetId;
     int m_iPetPosition;
     int m_iEnemyCount;
@@ -965,6 +967,7 @@ private slots:
     void GetBattleUnits();
     void OnPerformanceBattle();
     void OnNotifyBattleAction(int flags);
+    void OnNotifyBattleMotionPacket(const std::string &buf);
     void OnLockCountdown();
 public slots:
     void OnNotifyGetSkillsInfo(QSharedPointer<CGA_SkillList_t> skills);
@@ -987,6 +990,7 @@ public slots:
     void OnSyncList(CBattleSettingList list);
 signals:
     void NotifyBattleAction(int flags);
+    void NotifyBattleMotionPacket(const std::string &buf);
 public:
     bool m_bAutoBattle;
     bool m_bHighSpeed;

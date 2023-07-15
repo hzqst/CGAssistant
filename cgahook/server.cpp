@@ -30,6 +30,13 @@ void CGA_NotifyBattleAction(int flags)
 	}
 }
 
+void CGA_NotifyBattleMotionPacket(const std::string &buf)
+{
+	if (server && server.get()) {
+		server->pub("NotifyBattleMotionPacket", buf);
+	}
+}
+
 void CGA_NotifyPlayerMenu(const CGA::cga_player_menu_items_t &players)
 {
 	if (server && server.get()) {

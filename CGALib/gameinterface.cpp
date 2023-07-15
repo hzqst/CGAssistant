@@ -123,6 +123,7 @@ namespace CGAServiceProtocol
 	TIMAX_DEFINE_PROTOCOL(GetGameServerInfo, cga_game_server_info_t());
 	TIMAX_DEFINE_FORWARD(NotifyServerShutdown, int);
 	TIMAX_DEFINE_FORWARD(NotifyBattleAction, int);
+	TIMAX_DEFINE_FORWARD(NotifyBattleMotionPacket, std::string);
 	TIMAX_DEFINE_FORWARD(NotifyPlayerMenu, cga_player_menu_items_t);
 	TIMAX_DEFINE_FORWARD(NotifyUnitMenu, cga_unit_menu_items_t);
 	TIMAX_DEFINE_FORWARD(NotifyNPCDialog, cga_npc_dialog_t);
@@ -1505,6 +1506,32 @@ namespace CGA
 				catch (timax::rpc::exception const& e) {
 
 					OutputDebugStringA("RegisterBattleActionNotify failed");
+					OutputDebugStringA(e.get_error_message().c_str());
+				}
+			}
+			return false;
+		}
+		virtual bool RegisterBattleMotionPacketNotify(const std::function<void(int)>& callback)
+		{
+			if (m_connected)
+			{
+				try
+				{
+					m_async_client.sub(m_endpoint, CGAServiceProtocol::NotifyBattleMotionPacket,
+						[callback](int flags) {
+							if (callback)
+								callback(flags);
+						},
+						[](auto const& e) {
+							OutputDebugStringA("RegisterBattleMotionPacketNotify failed 2");
+							OutputDebugStringA(e.get_error_message().c_str());
+						}
+					);
+					return true;
+				}
+				catch (timax::rpc::exception const& e) {
+
+					OutputDebugStringA("RegisterBattleMotionPacketNotify failed");
 					OutputDebugStringA(e.get_error_message().c_str());
 				}
 			}

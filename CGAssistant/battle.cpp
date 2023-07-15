@@ -1779,6 +1779,52 @@ bool CBattleCondition_BattleBGM::Check(CGA_BattleContext_t &context, int &condit
     return false;
 }
 
+CBattleCondition_BattleFieldStatus::CBattleCondition_BattleFieldStatus(int relation, int value)
+{
+    m_relation = relation;
+    m_value = value;
+}
+
+void CBattleCondition_BattleFieldStatus::GetConditionName(QString &str)
+{
+    QString val = QObject::tr("Nothing");
+
+    if(m_value == 1)
+        val = QObject::tr("MagicSealing");
+
+    str = QObject::tr("FieldStatus %1%2").arg(s_BattleCondRelationString[m_relation], m_value);
+}
+
+bool CBattleCondition_BattleFieldStatus::Check(CGA_BattleContext_t &context, int &conditionTarget)
+{
+   switch (m_relation)
+    {
+    case BattleCond_StrRel_CONTAIN:{
+        if(m_value == 1)
+        {
+            if(context.m_iMagicSealingRound >= 0 && context.m_iRoundCount >= context.m_iMagicSealingRound && context.m_iRoundCount <= context.m_iMagicSealingRound + 1)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+    case BattleCond_StrRel_NOT_CONTAIN:{
+        if(m_value == 1)
+        {
+            if(context.m_iMagicSealingRound >= 0 && context.m_iRoundCount >= context.m_iMagicSealingRound && context.m_iRoundCount <= context.m_iMagicSealingRound + 1)
+            {
+                return false;
+            }
+        }
+        return true;
+    }
+    }
+
+    return false;
+}
+
 void CBattleAction_PlayerAttack::GetActionName(QString &str, bool config)
 {
     str = QObject::tr("Attack");
@@ -3112,6 +3158,7 @@ CBattleWorker::CBattleWorker()
     timer->start(500);
 
     connect(this, &CBattleWorker::NotifyBattleAction, this, &CBattleWorker::OnNotifyBattleAction, Qt::ConnectionType::QueuedConnection);
+    connect(this, &CBattleWorker::NotifyBattleMotionPacket, this, &CBattleWorker::OnNotifyBattleMotionPacket, Qt::ConnectionType::QueuedConnection);
 }
 
 void CBattleWorker::OnLockCountdown()
@@ -3835,18 +3882,34 @@ bool CBattleWorker::CheckProtect()
     return false;
 }
 
+void CBattleWorker::OnNotifyBattleMotionPacket(const std::string &buf)
+{
+    int bIsInGame = 0;
+
+    if(!g_CGAInterface->IsConnected() || !g_CGAInterface->IsInGame(bIsInGame) || !bIsInGame)
+        return;
+
+    int gameStatus = 0;
+    if(!g_CGAInterface->GetGameStatus(gameStatus) && gameStatus != 10)
+        return;
+
+    if(buf.find("|SKL|a2292|") > 0)
+    {
+        m_BattleContext.m_iMagicSealingRound = m_BattleContext.m_iRoundCount;
+    }
+}
+
 void CBattleWorker::OnNotifyBattleAction(int flags)
 {
-    int ingame = 0;
+    int bIsInGame = 0;
 
-    //qDebug("OnNotifyBattleAction.");
-
-    if(!g_CGAInterface->IsConnected() || !g_CGAInterface->IsInGame(ingame) || !ingame)
+    if(!g_CGAInterface->IsConnected() || !g_CGAInterface->IsInGame(bIsInGame) || !bIsInGame)
         return;
 
     if((flags & FL_BATTLE_ACTION_END) || (flags & FL_BATTLE_ACTION_BEGIN))
     {
         m_BattleContext.m_iLastRound = -1;
+        m_BattleContext.m_iMagicSealingRound = -1;
         m_BattleContext.m_bRoundZeroNotified = false;
         m_BattleContext.m_bIsPlayerActionPerformed = false;
         m_BattleContext.m_bIsPlayerEscaped = false;
@@ -3955,6 +4018,7 @@ void CBattleWorker::OnNotifyBattleAction(int flags)
 void CBattleWorker::OnNotifyAttachProcessOk(quint32 ProcessId, quint32 ThreadId, quint32 port, quint32 hWnd)
 {
     g_CGAInterface->RegisterBattleActionNotify(std::bind(&CBattleWorker::NotifyBattleAction, this, std::placeholders::_1));
+    g_CGAInterface->RegisterBattleMotionPacketNotify(std::bind(&CBattleWorker::NotifyBattleMotionPacket, this, std::placeholders::_1));
 }
 
 void CBattleWorker::OnSetAutoBattle(int state)

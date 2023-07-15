@@ -44,8 +44,7 @@ void ANSIToUnicode(const std::string &str, std::wstring &out)
 
 void WriteLog(LPCSTR fmt, ...)
 {
-	return;
-
+#if 0
 	char buffer[4096];
 	va_list argptr;
 	int cnt;
@@ -65,12 +64,12 @@ void WriteLog(LPCSTR fmt, ...)
 		fputs(buffer, fp);
 		fclose(fp);
 	}
+#endif
 }
 
 void WriteLog2(LPCSTR buffer)
 {
-	return;
-
+#if 0
 	FILE *fp = fopen("cga_log.txt", "a+");
 	if (fp)
 	{
@@ -83,6 +82,8 @@ void WriteLog2(LPCSTR buffer)
 		fputs(buffer, fp);
 		fclose(fp);
 	}
+
+#endif
 }
 
 using namespace CGA;
@@ -297,6 +298,7 @@ char *NET_EscapeStringEx2(const char *str, char *dst, int maxlen)
 }
 
 void CGA_NotifyBattleAction(int flags);
+void CGA_NotifyBattleMotionPacket(const std::string &buf);
 void CGA_NotifyPlayerMenu(const cga_player_menu_items_t &players);
 void CGA_NotifyUnitMenu(const cga_unit_menu_items_t &units);
 void CGA_NotifyNPCDialog(const cga_npc_dialog_t &dlg);
@@ -1383,6 +1385,8 @@ void CGAService::NewNET_ParseBattlePackets(int a1, const char *buf)
 	{
 		m_btl_double_action = false;
 		m_btl_pet_skill_packet_send = false;
+
+		CGA_NotifyBattleMotionPacket(buf);
 
 		if (m_btl_highspeed_enable)
 		{
@@ -3407,7 +3411,7 @@ void CGAService::Initialize(game_type type)
 		m_hFont = CreateFontW(16, 0, 0, 0, FW_THIN, false, false, false,
 			CHINESEBIG5_CHARSET, OUT_CHARACTER_PRECIS,
 			CLIP_CHARACTER_PRECIS, DEFAULT_QUALITY,
-			FF_MODERN, L"ËÎÌå");
+			FF_MODERN, L"ï¿½ï¿½ï¿½ï¿½");
 
 		m_gametextui_enable = false;
 		m_btl_highspeed_enable = false;
@@ -3474,7 +3478,7 @@ void CGAService::Initialize(game_type type)
 		m_hFont = CreateFontW(16, 0, 0, 0, FW_THIN, false, false, false,
 			CHINESEBIG5_CHARSET, OUT_CHARACTER_PRECIS,
 			CLIP_CHARACTER_PRECIS, DEFAULT_QUALITY,
-			FF_MODERN, L"ËÎÌå");
+			FF_MODERN, L"ï¿½ï¿½ï¿½ï¿½");
 
 		m_gametextui_enable = false;
 		m_btl_highspeed_enable = false;
@@ -5722,8 +5726,8 @@ bool CGAService::WM_ClickNPCDialog(int option, int index)
 	//if (*g_npc_dialog_type == -1)
 	//	return false;
 
-	//2=Âô³è ClickNPCDialog(2, -1)=È¡Ïû
-	//30=¿²´åÂ·ÕÏnpc
+	//2=ï¿½ï¿½ï¿½ï¿½ ClickNPCDialog(2, -1)=È¡ï¿½ï¿½
+	//30=ï¿½ï¿½ï¿½ï¿½Â·ï¿½ï¿½npc
 	if (*g_npc_dialog_type == 5 || *g_npc_dialog_type == 16 || *g_npc_dialog_type == 27 || *g_npc_dialog_type == 30)
 	{
 		if (index >= 0 && index <= 2)
@@ -5734,7 +5738,7 @@ bool CGAService::WM_ClickNPCDialog(int option, int index)
 		return false;
 	}
 
-	//6Âò 7Âô 22ĞŞÀí 242526³èÎï¼¼ÄÜ
+	//6ï¿½ï¿½ 7ï¿½ï¿½ 22ï¿½ï¿½ï¿½ï¿½ 242526ï¿½ï¿½ï¿½ï¼¼ï¿½ï¿½
 	if (*g_npc_dialog_type == 6 || *g_npc_dialog_type == 7 || *g_npc_dialog_type == 22 ||
 		*g_npc_dialog_type == 24 || *g_npc_dialog_type == 25 || *g_npc_dialog_type == 26)
 	{
@@ -5797,7 +5801,7 @@ bool CGAService::WM_ClickNPCDialog(int option, int index)
 		return false;
 	}
 
-	//Ñ§¼¼ÄÜ
+	//Ñ§ï¿½ï¿½ï¿½ï¿½
 	if (*g_npc_dialog_type == 17)
 	{
 		if (option == 0)
@@ -5813,7 +5817,7 @@ bool CGAService::WM_ClickNPCDialog(int option, int index)
 		return false;
 	}
 
-	//ÒÅÍü¼¼ÄÜ
+	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	if (*g_npc_dialog_type == 18)
 	{
 		if (option == 0)
