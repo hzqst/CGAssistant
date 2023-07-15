@@ -2106,8 +2106,8 @@ int CBattleAction_PlayerSkillAttack::GetTargetFlags(CGA_BattleContext_t &context
     if(!context.m_PlayerSkills.data())
         return 0;
 
-    int skill_pos, skill_level;
-    if(!GetSkill(context, skill_pos, skill_level))
+    int skill_pos = -1, skill_level = -1;
+    if(!GetSkillPos(context, skill_pos, skill_level))
         return 0;
 
     for(int i = 0;i < context.m_PlayerSkills->size(); ++i)
@@ -2126,7 +2126,7 @@ bool CBattleAction_PlayerSkillAttack::CheckAvailable(CGA_BattleContext_t &contex
 {
     int skill_pos = -1, skill_level = -1;
 
-    if(context.m_bIsSkillPerformed == false && GetSkill(context, skill_pos, skill_level)){
+    if(context.m_bIsSkillPerformed == false && GetSkillPos(context, skill_pos, skill_level)){
         return true;
     }
 
@@ -2138,7 +2138,7 @@ bool CBattleAction_PlayerSkillAttack::DoAction(int target, int defaultTarget, CG
     int skill_pos = -1, skill_level = -1;
 
     bool result = false;
-    if(context.m_bIsSkillPerformed == false && GetSkill(context, skill_pos, skill_level)){
+    if(context.m_bIsSkillPerformed == false && GetSkillPos(context, skill_pos, skill_level)){
 
         FixTarget(context, skill_pos, skill_level, target);
         g_CGAInterface->BattleSkillAttack(skill_pos, skill_level, target, false, result);
@@ -2152,15 +2152,19 @@ bool CBattleAction_PlayerSkillAttack::DoAction(int target, int defaultTarget, CG
     return result;
 }
 
-bool CBattleAction_PlayerSkillAttack::GetSkill(CGA_BattleContext_t &context, int &skillpos, int &skilllevel)
+bool CBattleAction_PlayerSkillAttack::GetSkillPos(CGA_BattleContext_t &context, int &skillpos, int &skilllevel)
 {
     if(!context.m_PlayerSkills.data())
         return false;
+
     for(int i = 0;i < context.m_PlayerSkills->size(); ++i)
     {
         const CGA_SkillInfo_t &skill = context.m_PlayerSkills->at(i);
         if(m_SkillName == skill.name)
         {
+            if(!(context.m_iSkillAllowBit & (1 << skill.id)))
+                continue;
+
             skillpos = skill.id;
             skilllevel = skill.lv;
             if(m_SkillLevel >= 1 && skilllevel > m_SkillLevel)
@@ -2168,14 +2172,13 @@ bool CBattleAction_PlayerSkillAttack::GetSkill(CGA_BattleContext_t &context, int
             int playerMp = context.m_UnitGroup[context.m_iPlayerPosition].curmp;
             const CGA_SubSkills_t &subsks = skill.subskills;
             for(int j = subsks.size() - 1; j >= 0; --j){
-                if(skilllevel >= subsks.at(j).level &&
-                        subsks.at(j).available &&
-                       playerMp >= subsks.at(j).cost){
+                if(skilllevel >= subsks.at(j).level && subsks.at(j).available && playerMp >= subsks.at(j).cost){
                     skilllevel = j;
-                    //qDebug("j = %d", skilllevel);
+                    //Found available subskill
                     return true;
                 }
             }
+            //No available subskill
             return false;
         }
     }
@@ -2426,7 +2429,7 @@ bool CBattleAction_PetSkillAttack::CheckAvailable(CGA_BattleContext_t &context){
         return true;
     }
 
-    if(GetSkill(context, skillpos, bUseDefaultTarget))
+    if(GetSkillPos(context, skillpos, bUseDefaultTarget))
     {
         return true;
     }
@@ -2449,7 +2452,7 @@ bool CBattleAction_PetSkillAttack::DoAction(int target, int defaultTarget, CGA_B
         return result;
     }
 
-    if(GetSkill(context, skillpos, bUseDefaultTarget))
+    if(GetSkillPos(context, skillpos, bUseDefaultTarget))
     {
         target = bUseDefaultTarget ? defaultTarget : target;
         FixTarget(context, skillpos, target);
@@ -2464,7 +2467,7 @@ bool CBattleAction_PetSkillAttack::DoAction(int target, int defaultTarget, CGA_B
     return result;
 }
 
-bool CBattleAction_PetSkillAttack::GetSkill(CGA_BattleContext_t &context, int &skillpos, bool &bUseDefaultTarget)
+bool CBattleAction_PetSkillAttack::GetSkillPos(CGA_BattleContext_t &context, int &skillpos, bool &bUseDefaultTarget)
 {
     if(context.m_iPetId == -1)
         return false;
@@ -3715,12 +3718,13 @@ void CBattleWorker::OnPerformanceBattle()
                 m_BattleContext.m_bIsPlayerActionPerformed = true;
                 return;
             } else {
-                bool result = false;
+                /*bool result = false;
                 if(g_CGAInterface->BattleDoNothing(result) && result)
                 {
                     m_BattleContext.m_bIsPlayerActionPerformed = true;
                     return;
-                }
+                }*/
+                return;
             }
         }
         else
@@ -3751,11 +3755,13 @@ void CBattleWorker::OnPerformanceBattle()
             if(playerAction->DoAction(target, defaultTarget, m_BattleContext)){
                 m_BattleContext.m_bIsPlayerActionPerformed = true;
             } else {
-                bool result = false;
+                /*bool result = false;
                 if(g_CGAInterface->BattleDoNothing(result) && result)
                 {
                     m_BattleContext.m_bIsPlayerActionPerformed = true;
-                }
+                }*/
+
+                return;
             }
         }
 
@@ -3779,11 +3785,12 @@ void CBattleWorker::OnPerformanceBattle()
         if(petAction->DoAction(target, defaultTarget, m_BattleContext)){
             return;
         } else {
-            bool result = false;
+            /*bool result = false;
             if(g_CGAInterface->BattleDoNothing(result) && result)
             {
                 return;
-            }
+            }*/
+            return;
         }
     }
 }

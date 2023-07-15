@@ -670,7 +670,7 @@ public:
     virtual int GetTargetFlags(CGA_BattleContext_t &context);
     virtual bool CheckAvailable(CGA_BattleContext_t &context);
 private:
-    bool GetSkill(CGA_BattleContext_t &context, int &skillpos, int &skilllevel);
+    bool GetSkillPos(CGA_BattleContext_t &context, int &skillpos, int &skilllevel);
     void FixTarget(CGA_BattleContext_t &context, int skillpos, int skilllevel, int &target);
 protected:
     QString m_SkillName;
@@ -751,7 +751,7 @@ public:
     virtual int GetTargetFlags(CGA_BattleContext_t &context);
     virtual bool CheckAvailable(CGA_BattleContext_t &context);
 private:
-    bool GetSkill(CGA_BattleContext_t &context, int &skillpos, bool &bUseDefaultTarget);
+    bool GetSkillPos(CGA_BattleContext_t &context, int &skillpos, bool &bUseDefaultTarget);
     void FixTarget(CGA_BattleContext_t &context, int skillpos, int &target);
 protected:
     QString m_SkillName;
