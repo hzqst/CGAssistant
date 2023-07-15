@@ -584,6 +584,25 @@ protected:
     int m_value;
 };
 
+class CBattleCondition_BattleFieldStatus : public CBattleCondition
+{
+public:
+    CBattleCondition_BattleFieldStatus(int relation, int value);
+    virtual void GetConditionValue(QString &str) {
+        str = QObject::tr("Nothing");
+
+        if(m_value == 1)
+            str = QObject::tr("MagicSealing");
+    }
+    virtual int GetConditionRelId() { return m_relation; }
+    virtual int GetConditionTypeId() {return BattleCond_Type_BattleFieldStatus;}
+    virtual void GetConditionName(QString &str);
+    virtual bool Check(CGA_BattleContext_t &context, int &conditionTarget);
+protected:
+    int m_relation;
+    int m_value;
+};
+
 class CBattleAction_PlayerAttack : public CBattleAction
 {
 public:
