@@ -976,12 +976,12 @@ namespace CGA
 	{
 		cga_picbook_info_s()
 		{
-			can_catch = 0; //0x0001 0=²»¿É²¶×½£¬1=¿ÉÒÔ²¶×½
-			card_type = 0; //0x0002 0=ÎÞ£¬1=Òø¿¨£¬2=½ð¿¨
-			race = 0; //0x0003 ÖÖ×å
+			can_catch = 0; //0x0001 0=ï¿½ï¿½ï¿½É²ï¿½×½ï¿½ï¿½1=ï¿½ï¿½ï¿½Ô²ï¿½×½
+			card_type = 0; //0x0002 0=ï¿½Þ£ï¿½1=ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½2=ï¿½ï¿½
+			race = 0; //0x0003 ï¿½ï¿½ï¿½ï¿½
 			index = 0; //0x0004 
 			image_id = 0; //0x0008 
-			rate_endurance = 0; //0x000C 0=°ë¿ÅÐÇ£¬3=2¿ÅÐÇ£¬5=3¿ÅÐÇ£¬9=5¿ÅÐÇ
+			rate_endurance = 0; //0x000C 0=ï¿½ï¿½ï¿½ï¿½Ç£ï¿½3=2ï¿½ï¿½ï¿½Ç£ï¿½5=3ï¿½ï¿½ï¿½Ç£ï¿½9=5ï¿½ï¿½ï¿½ï¿½
 			rate_strength = 0; //0x0010 
 			rate_defense = 0; //0x0014 
 			rate_agility = 0; //0x0018 
@@ -990,19 +990,19 @@ namespace CGA
 			element_water = 0; //0x0024 
 			element_fire = 0; //0x0028 
 			element_wind = 0; //0x002C 
-			skill_slots = 0; //0x0030 ¼¼ÄÜÀ¸
+			skill_slots = 0; //0x0030 ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 		}
 		cga_picbook_info_s(int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11, int a12, int a13, int a14, int a15, const std::string &a16)
 			: can_catch(a1), card_type(a2), race(a3), index(a4), image_id(a5), rate_endurance(a6), rate_strength(a7), rate_defense(a8), rate_agility(a9), rate_magical(a10), 
 			element_earth(a11), element_water(a12), element_fire(a13), element_wind(a14), skill_slots(a15), name(a16)
 		{
 		}
-		int can_catch; //0x0001 0=²»¿É²¶×½£¬1=¿ÉÒÔ²¶×½
-		int card_type; //0x0002 0=ÎÞ£¬1=Òø¿¨£¬2=½ð¿¨
-		int race; //0x0003 ÖÖ×å
+		int can_catch; //0x0001 0=ï¿½ï¿½ï¿½É²ï¿½×½ï¿½ï¿½1=ï¿½ï¿½ï¿½Ô²ï¿½×½
+		int card_type; //0x0002 0=ï¿½Þ£ï¿½1=ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½2=ï¿½ï¿½
+		int race; //0x0003 ï¿½ï¿½ï¿½ï¿½
 		int index; //0x0004 
 		int image_id; //0x0008 
-		int rate_endurance; //0x000C 0=°ë¿ÅÐÇ£¬3=2¿ÅÐÇ£¬5=3¿ÅÐÇ£¬9=5¿ÅÐÇ
+		int rate_endurance; //0x000C 0=ï¿½ï¿½ï¿½ï¿½Ç£ï¿½3=2ï¿½ï¿½ï¿½Ç£ï¿½5=3ï¿½ï¿½ï¿½Ç£ï¿½9=5ï¿½ï¿½ï¿½ï¿½
 		int rate_strength; //0x0010 
 		int rate_defense; //0x0014 
 		int rate_agility; //0x0018 
@@ -1011,7 +1011,7 @@ namespace CGA
 		int element_water; //0x0024 
 		int element_fire; //0x0028 
 		int element_wind; //0x002C 
-		int skill_slots; //0x0030 ¼¼ÄÜÀ¸
+		int skill_slots; //0x0030 ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 		std::string name;
 	}cga_picbook_info_t;
 
@@ -1243,6 +1243,7 @@ namespace CGA
 
 		virtual bool RegisterServerShutdownNotify(const std::function<void(int)> &callback) = 0;
 		virtual bool RegisterBattleActionNotify(const std::function<void(int)> &callback) = 0;
+		virtual bool RegisterBattleMotionPacketNotify(const std::function<void(const std::string &)>& callback) = 0;
 		virtual bool RegisterPlayerMenuNotify(const std::function<void(cga_player_menu_items_t)> &callback) = 0;
 		virtual bool RegisterUnitMenuNotify(const std::function<void(cga_unit_menu_items_t)> &callback) = 0;
 		virtual bool RegisterNPCDialogNotify(const std::function<void(cga_npc_dialog_t)> &callback) = 0;
