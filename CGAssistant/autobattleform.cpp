@@ -865,7 +865,7 @@ void AutoBattleForm::on_pushButton_add_clicked()
             }
             break;
         }
-        case BattleCond_Type_DoubleAction:
+        case BattleCond_Type_BattleFieldStatus:
         {
             int relation = ui->comboBox_condition_relation->currentIndex();
             if(relation >= 0 && relation < BattleCond_StrRel_Max)
@@ -1064,7 +1064,7 @@ void AutoBattleForm::on_pushButton_add_clicked()
             }
             break;
         }
-        case BattleCond_Type_DoubleAction:
+        case BattleCond_Type_BattleFieldStatus:
         {
             int relation = ui->comboBox_condition2_relation->currentIndex();
             if(relation >= 0 && relation < BattleCond_StrRel_Max)
