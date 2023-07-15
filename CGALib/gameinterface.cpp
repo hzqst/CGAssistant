@@ -1511,16 +1511,16 @@ namespace CGA
 			}
 			return false;
 		}
-		virtual bool RegisterBattleMotionPacketNotify(const std::function<void(int)>& callback)
+		virtual bool RegisterBattleMotionPacketNotify(const std::function<void(const std::string &)>& callback)
 		{
 			if (m_connected)
 			{
 				try
 				{
 					m_async_client.sub(m_endpoint, CGAServiceProtocol::NotifyBattleMotionPacket,
-						[callback](int flags) {
+						[callback](const std::string &buf) {
 							if (callback)
-								callback(flags);
+								callback(buf);
 						},
 						[](auto const& e) {
 							OutputDebugStringA("RegisterBattleMotionPacketNotify failed 2");
