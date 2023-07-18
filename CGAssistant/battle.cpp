@@ -1887,6 +1887,12 @@ CBattleAction_PlayerChangePet::CBattleAction_PlayerChangePet(QString &petname)
 
 void CBattleAction_PlayerChangePet::GetActionName(QString &str, bool config)
 {
+    if(config && m_Type == 0)
+    {
+        str = m_PetName;
+        return;
+    }
+
     QString type;
     switch(m_Type){
     case 0:
@@ -3078,8 +3084,7 @@ QString CBattleSetting::GetPlayerSkillName()
 {
     if(m_playerAction && m_playerAction->GetActionTypeId() == BattlePlayerAction_Skill)
     {
-        auto sk = dynamic_cast<CBattleAction_PlayerSkillAttack *>(m_playerAction);
-        return sk->GetSkillName();
+        return m_playerAction->GetSkillName();
     }
     return QString();
 }
@@ -3088,8 +3093,16 @@ int CBattleSetting::GetPlayerSkillLevel()
 {
     if(m_playerAction && m_playerAction->GetActionTypeId() == BattlePlayerAction_Skill)
     {
-        auto sk = dynamic_cast<CBattleAction_PlayerSkillAttack *>(m_playerAction);
-        return sk->GetSkillLevel();
+        return m_playerAction->GetSkillLevel();
+    }
+    return -1;
+}
+
+int CBattleSetting::GetPlayerChangePetType()
+{
+    if(m_playerAction && m_playerAction->GetActionTypeId() == BattlePlayerAction_ChangePet)
+    {
+        return m_playerAction->GetChangePetType();
     }
     return -1;
 }
@@ -3097,21 +3110,27 @@ int CBattleSetting::GetPlayerSkillLevel()
 int CBattleSetting::GetPlayerTargetTypeId()
 {
     if(m_playerTarget)
+    {
         return m_playerTarget->GetTargetTypeId();
+    }
     return -1;
 }
 
 int CBattleSetting::GetPlayerTargetSelectId()
 {
     if(m_playerTarget)
+    {
         return m_playerTarget->GetTargetSelectId();
+    }
     return -1;
 }
 
 int CBattleSetting::GetPetActionTypeId()
 {
     if(m_petAction)
+    {
         return m_petAction->GetActionTypeId();
+    }
     return -1;
 }
 
@@ -3119,8 +3138,7 @@ QString CBattleSetting::GetPetSkillName()
 {
     if(m_petAction && m_petAction->GetActionTypeId() == BattlePetAction_Skill)
     {
-        auto sk = dynamic_cast<CBattleAction_PetSkillAttack *>(m_petAction);
-        return sk->GetSkillName();
+        return m_petAction->GetSkillName();
     }
     return QString();
 }
@@ -3128,14 +3146,18 @@ QString CBattleSetting::GetPetSkillName()
 int CBattleSetting::GetPetTargetTypeId()
 {
     if(m_petTarget)
+    {
         return m_petTarget->GetTargetTypeId();
+    }
     return -1;
 }
 
 int CBattleSetting::GetPetTargetSelectId()
 {
     if(m_petTarget)
+    {
         return m_petTarget->GetTargetSelectId();
+    }
     return -1;
 }
 

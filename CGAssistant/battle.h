@@ -117,6 +117,9 @@ public:
     virtual int GetTargetFlags(CGA_BattleContext_t &context) = 0;
     virtual bool DoAction(int target, int defaultTarget, CGA_BattleContext_t &context) = 0;
     virtual bool CheckAvailable(CGA_BattleContext_t &context) = 0;
+    virtual QString GetSkillName(){return ""; }
+    virtual int GetSkillLevel(){return 0; }
+    virtual int GetChangePetType(){return 0; }
 protected:
 
 };
@@ -671,6 +674,7 @@ public:
         return 0;
     }
     virtual bool CheckAvailable(CGA_BattleContext_t &context);
+    virtual int GetChangePetType(){ return m_Type; }
 private:
     int GetPetId(CGA_BattleContext_t &context);
 protected:
@@ -862,6 +866,7 @@ public:
     int GetPlayerActionTypeId();
     QString GetPlayerSkillName();
     int GetPlayerSkillLevel();
+    int GetPlayerChangePetType();
     int GetPlayerTargetTypeId();
     int GetPlayerTargetSelectId();
 

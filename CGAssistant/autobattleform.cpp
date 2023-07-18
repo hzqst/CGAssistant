@@ -475,7 +475,6 @@ void AutoBattleForm::on_comboBox_playerAction_currentIndexChanged(int index)
     }
     case BattlePlayerAction_ChangePet:
     {
-        //TODO:Fill item list here...
         ui->comboBox_playerTarget->setEnabled(false);
         ui->comboBox_playerTargetSelect->setEnabled(false);
         ui->comboBox_playerActionValue->setEnabled(true);
@@ -1129,7 +1128,9 @@ void AutoBattleForm::on_pushButton_add_clicked()
         {
             QString petName = ui->comboBox_playerActionValue->currentText();
             if(!petName.isEmpty())
+            {
                 pPlayerAction = new CBattleAction_PlayerChangePet(petName);
+            }
         }
         break;
     }
@@ -1499,14 +1500,32 @@ bool AutoBattleForm::ParseBattleSettings(const QJsonValue &val)
 
                 auto playerActionId = setting.take("playeraction").toInt();
 
-                if(playerActionId == BattlePlayerAction_ChangePet || playerActionId == BattlePlayerAction_UseItem){
+                if(playerActionId == BattlePlayerAction_ChangePet){
                     ui->comboBox_playerAction->setCurrentIndex(playerActionId);
                     on_comboBox_playerAction_currentIndexChanged(ui->comboBox_playerAction->currentIndex());
+
+                    auto playerChangePetType = setting.take("playerchangepettype").toInt();
+                    if(playerChangePetType > 0)
+                    {
+                        ui->comboBox_playerActionValue->setCurrentIndex(playerChangePetType);
+                    }
+                    else
+                    {
+                        auto playerActionValue = setting.take("playeractionval").toString();
+                        ui->comboBox_playerActionValue->setCurrentText(playerActionValue);
+                    }
+
+                } else if(playerActionId == BattlePlayerAction_UseItem){
+                    ui->comboBox_playerAction->setCurrentIndex(playerActionId);
+                    on_comboBox_playerAction_currentIndexChanged(ui->comboBox_playerAction->currentIndex());
+
                     auto playerActionValue = setting.take("playeractionval").toString();
                     ui->comboBox_playerActionValue->setCurrentText(playerActionValue);
                 } else if(playerActionId == BattlePlayerAction_Skill) {
+
                     auto playerSkillName = setting.take("playerskillname").toString();
                     auto playerSkillLevel = setting.take("playerskilllevel").toInt();
+
                     ui->comboBox_playerAction->setCurrentText(playerSkillName);
                     ui->comboBox_playerActionValue->clear();
                     ui->comboBox_playerActionValue->addItem(tr("Lv Max"), QVariant(0));
@@ -1587,8 +1606,12 @@ void AutoBattleForm::SaveBattleSettings(QJsonObject &obj)
         row.insert("condition2val", condition2VauleStr);
 
         row.insert("playeraction", setting->GetPlayerActionTypeId());
-        if(setting->GetPlayerActionTypeId() == BattlePlayerAction_ChangePet
-                || setting->GetPlayerActionTypeId() == BattlePlayerAction_UseItem){
+        if(setting->GetPlayerActionTypeId() == BattlePlayerAction_ChangePet){
+            QString actionVauleStr;
+            setting->GetPlayerActionName(actionVauleStr, true);
+            row.insert("playeractionval", actionVauleStr);
+            row.insert("playerchangepettype", setting->GetPlayerChangePetType());
+        } else if(setting->GetPlayerActionTypeId() == BattlePlayerAction_UseItem){
             QString actionVauleStr;
             setting->GetPlayerActionName(actionVauleStr, true);
             row.insert("playeractionval", actionVauleStr);
