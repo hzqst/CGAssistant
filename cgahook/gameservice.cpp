@@ -5448,11 +5448,18 @@ bool CGAService::WM_BattleChangePet(int petid)
 {
 	if (!IsInGame())
 		return false;
+
 	if (*g_btl_player_status != 1)
 		return false;
 
-	if (petid < 0 || petid > 4)
-		petid = 255;
+	if ((petid >= 0 && petid <= 4) || petid == 255)
+	{
+
+	}
+	else
+	{
+		return false;
+	}
 
 	char buf[32];
 	sprintf(buf, "M|%X", petid);

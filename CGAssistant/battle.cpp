@@ -1948,7 +1948,7 @@ int CBattleAction_PlayerChangePet::GetPetId(CGA_BattleContext_t &context)
     }
     case 1:
     {
-        petid = -1;
+        petid = 255;
         found = true;
         break;
     }
@@ -2105,8 +2105,19 @@ int CBattleAction_PlayerChangePet::GetPetId(CGA_BattleContext_t &context)
         break;
     }
     }
+
     if(found)
+    {
+        bool bHasPet = (context.m_iPetPosition >= 0 && context.m_iPetId != -1) ? true : false;
+
+        if(bHasPet && petid == context.m_iPetId)
+            return -1;
+
+        if(!bHasPet && petid == 255)
+            return -1;
+
         return petid;
+    }
 
     return -1;
 }
@@ -3687,7 +3698,7 @@ void CBattleWorker::OnPerformanceBattle()
     int conditionalTargetPlayer = -1;
     int conditionalTargetPet = -1;
 
-    bool bHasPet = m_BattleContext.m_iPetPosition >= 0 && m_BattleContext.m_iPetId != -1;
+    bool bHasPet = (m_BattleContext.m_iPetPosition >= 0 && m_BattleContext.m_iPetId != -1) ? true : false;
     bool bIsPetAction = (m_BattleContext.m_iPlayerStatus == 4) ? true : false;
 
     for(int i = 0;i < m_SettingList.size(); ++i)
