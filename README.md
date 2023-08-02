@@ -30,21 +30,23 @@ This project is licensed under MIT License, however if it is otherwise stated be
 
 ## Build Requirement
 
-1. [Visual Studio 2017 / 2019 / 2022, with vc141 / vc142 / vc143 toolset](https://visualstudio.microsoft.com/)
+1. [Visual Studio 2017, with vc141 toolset](https://visualstudio.microsoft.com/)
 
-2. Windows SDK 10 (the msvc projects uses Windows SDK version 10.0.17763.0, please redirect to your local version if you have installed a different version of Windows SDK)
+3. Windows SDK 10 (the msvc projects uses Windows SDK version 10.0.17763.0, please redirect to your local version if you have installed a different version of Windows SDK)
 
-3. [QT 5.12+ for msvc2017, win32 (x86), with QtCreator](https://www.qt.io/download)
+4. [QT 5.12 for msvc2017, win32 (x86), with QtCreator](https://www.qt.io/download)
 
-4. [NodeJS v14.16 (32-bit)](https://nodejs.org/download/release/v14.16.0/)
+5. [NodeJS v14.16 (32-bit)](https://nodejs.org/download/release/v14.16.0/)
 
-5. [node-gyp] (https://www.npmjs.com/package/node-gyp)
+6. [node-gyp] (https://www.npmjs.com/package/node-gyp)
+
+* QT 5.15 with Visual Studio 2019 also works but you will need to configure `build-*.bat` by yourself and force `vswhere` to locate vc142 instead of vc141
 
 ## Build Instruction
 
 Let's assume that you have all requirements installed correctly.
 
-1. Add "Qt5.xxx\Tools\QtCreator\bin\" and "Qt5.xxx\5.xxx\msvc2017\bin\" to your system environment variable "PATH" just like what is mentioned in the snapshot below.
+1. Add `Qt5.**\Tools\QtCreator\bin\`, `Qt5.*\5.**\msvc20**\bin\` and `Qt5.**\Tools\QtCreator\bin\jom` (if this folder exists) to your system environment variable "PATH" just like what is mentioned in the snapshot below.
 
 ![](img/1.png)
 
