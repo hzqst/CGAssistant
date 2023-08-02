@@ -32,7 +32,7 @@ This project is licensed under MIT License, however if it is otherwise stated be
 
 1. [Visual Studio 2017, with vc141 toolset](https://visualstudio.microsoft.com/)
 
-3. Windows SDK 10 (the msvc projects uses Windows SDK version 10.0.17763.0, please redirect to your local version if you have installed a different version of Windows SDK)
+3. [Windows 10 SDK](https://developer.microsoft.com/en-us/windows/downloads/windows-sdk/)
 
 4. [QT 5.12 for msvc2017, win32 (x86), with QtCreator](https://www.qt.io/download)
 
