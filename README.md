@@ -38,7 +38,7 @@ This project is licensed under MIT License, however if it is otherwise stated be
 
 5. [NodeJS v14.16 (32-bit)](https://nodejs.org/download/release/v14.16.0/)
 
-6. [node-gyp] (https://www.npmjs.com/package/node-gyp)
+6. [node-gyp](https://www.npmjs.com/package/node-gyp)
 
 * QT 5.15 with Visual Studio 2019 also works but you will need to configure `build-*.bat` by yourself and force `vswhere` to locate vc142 instead of vc141
 
