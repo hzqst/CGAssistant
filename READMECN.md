@@ -44,7 +44,7 @@ QQ群: 300303705
 
 4. [NodeJS v14.16 (32位)](https://nodejs.org/download/release/v14.16.0/)
 
-5. [node-gyp] (https://www.npmjs.com/package/node-gyp)
+5. [node-gyp](https://www.npmjs.com/package/node-gyp)
 
 * QT 5.15 + Visual Studio 2019 也是可以的，但你需要自己调整`build-*.bat`中的配置，让`vswhere`定位到vs2019而非vs2017。
 
