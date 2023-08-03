@@ -40,7 +40,7 @@ This project is licensed under MIT License, however if it is otherwise stated be
 
 6. [node-gyp](https://www.npmjs.com/package/node-gyp)
 
-* QT 5.15 with Visual Studio 2019 also works but you will need to configure `build-*.bat` by yourself and force `vswhere` to locate vc142 instead of vc141
+* QT 5.15 with Visual Studio 2019 also works but you will need to configure `build-*.bat` by yourself and force `vswhere` to locate Visual Studio 2019 instead of Visual Studio 2017
 
 ## Build Instruction
 
