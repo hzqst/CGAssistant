@@ -179,7 +179,7 @@
           <item>
            <widget class="QSlider" name="horizontalSlider_freezeDuration">
             <property name="toolTip">
-             <string>Freeze Duration</string>
+             <string>Freeze Duration in Seconds.</string>
             </property>
             <property name="minimum">
              <number>10</number>
@@ -222,6 +222,9 @@
               <verstretch>0</verstretch>
              </sizepolicy>
             </property>
+            <property name="toolTip">
+             <string>Stop script when injury.</string>
+            </property>
             <property name="text">
              <string>Injury Protect</string>
             </property>
@@ -234,6 +237,9 @@
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
+            </property>
+            <property name="toolTip">
+             <string>Stop script when soul lost.</string>
             </property>
             <property name="text">
              <string>Soul Protect</string>
@@ -264,6 +270,9 @@
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
+            </property>
+            <property name="toolTip">
+             <string>Stop script when player freeze.</string>
             </property>
             <property name="text">
              <string>Freeze Stop</string>
