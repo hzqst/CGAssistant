@@ -56,7 +56,6 @@ void ScriptForm::dragEnterEvent(QDragEnterEvent *event)
     }
 }
 
-// 拖拽释放处理函数
 void ScriptForm::dropEvent(QDropEvent *event)
 {
     QList<QUrl> urls = event->mimeData()->urls();
@@ -248,6 +247,7 @@ void ScriptForm::OnAutoRestart()
                         return;
                     }
                 }
+
                 if(playerinfo.souls != 0 && ui->checkBox_soulProt->isChecked())
                 {
                     if(m_node->state() == QProcess::Running)
@@ -262,7 +262,7 @@ void ScriptForm::OnAutoRestart()
                 }
             }
 
-            if(ui->checkBox_freezestop->isChecked())
+            if(ui->checkBox_freezestop->isChecked() && m_node->state() == QProcess::Running)
             {
                 int x, y, index1, index2, index3;
                 if(g_CGAInterface->GetMapXY(x, y) && g_CGAInterface->GetMapIndex(index1, index2, index3))
@@ -270,10 +270,13 @@ void ScriptForm::OnAutoRestart()
                     if(x != m_LastMapX || y != m_LastMapY || index3 != m_LastMapIndex)
                     {
                         m_LastMapChange = QTime::currentTime();
+                        m_LastMapX = x;
+                        m_LastMapY = y;
                     }
                     else
                     {
-                        if(m_LastMapChange.elapsed() > 60 * 1000)
+                        int freezeDuration = ui->horizontalSlider_freezeDuration->value();
+                        if(m_LastMapChange.elapsed() > freezeDuration * 1000)
                         {
                             on_pushButton_term_clicked();
 
@@ -361,6 +364,8 @@ void ScriptForm::on_pushButton_run_clicked()
         m_bListening = true;
         m_bNavigating = false;
         m_bPathBegin = false;
+
+        m_LastMapChange = QTime::currentTime();
 
         m_output->clear();
 
