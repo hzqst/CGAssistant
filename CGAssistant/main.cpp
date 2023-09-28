@@ -112,6 +112,8 @@ int main(int argc, char *argv[])
 
     QCommandLineOption consolemaxlines("consolemaxlines", "", "consolemaxlines", "100");
 
+    QCommandLineOption scriptfreezeduration("scriptfreezeduration", "", "scriptfreezeduration", "60");
+
     QCommandLineOption chatmaxlines("chatmaxlines", "", "chatmaxlines", "100");
 
     QCommandLineParser parser;
@@ -147,6 +149,7 @@ int main(int argc, char *argv[])
     parser.addOption(loadsettings);
     parser.addOption(killfreeze);
     parser.addOption(consolemaxlines);
+    parser.addOption(scriptfreezeduration);
     parser.addOption(chatmaxlines);
     parser.process(a);
 
@@ -287,7 +290,8 @@ int main(int argc, char *argv[])
                            parser.isSet(scriptfreezestop) ? true : false,
                            parser.isSet(injuryprotect) ? true : false,
                            parser.isSet(soulprotect) ? true : false,
-                           parser.value(consolemaxlines).toInt() );
+                           parser.value(consolemaxlines).toInt(),
+                           parser.value(scriptfreezeduration).toInt() );
 
     w.NotifyFillLoadSettings(parser.value(loadsettings));
 

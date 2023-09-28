@@ -31,7 +31,7 @@ public slots:
     void on_pushButton_run_clicked();
     void on_pushButton_debug_clicked();
     void on_pushButton_term_clicked();
-    void OnNotifyFillLoadScript(QString path, int autorestart, bool freezestop, bool injuryprot, bool soulprot, int consolemaxlines);
+    void OnNotifyFillLoadScript(QString path, int autorestart, bool freezestop, bool injuryprot, bool soulprot, int consolemaxlines, int scriptfreezeduration);
     void RunNavigatorScript(int x, int y, int enter, QString *result);
     void StopNavigatorScript();
     void OnHttpLoadScript(QString query, QByteArray postdata, QJsonDocument* doc);

@@ -543,7 +543,7 @@ void ScriptForm::OnNotifyAttachProcessOk(quint32 ProcessId, quint32 ThreadId, qu
     qputenv("CGA_GAME_PORT", qportString);
 }
 
-void ScriptForm::OnNotifyFillLoadScript(QString path, int autorestart, bool freezestop, bool injuryprot, bool soulprot, int consolemaxlines)
+void ScriptForm::OnNotifyFillLoadScript(QString path, int autorestart, bool freezestop, bool injuryprot, bool soulprot, int consolemaxlines, int scriptfreezeduration)
 {
     if(!path.isEmpty())
     {
@@ -572,7 +572,10 @@ void ScriptForm::OnNotifyFillLoadScript(QString path, int autorestart, bool free
     if(freezestop)
         ui->checkBox_freezestop->setChecked(true);
 
+    ui->horizontalSlider_freezeDuration->setValue(scriptfreezeduration);
+
     m_ConsoleMaxLines = consolemaxlines;
+
     m_output->setMaximumBlockCount(m_ConsoleMaxLines);
 }
 
@@ -690,6 +693,18 @@ void ScriptForm::OnHttpLoadScript(QString query, QByteArray postdata, QJsonDocum
            auto qsoulprot = newobj.take("soulprot");
            if(qsoulprot.isBool()){
                 ui->checkBox_soulProt->setChecked(qsoulprot.toBool());
+           }
+       }
+       if(newobj.contains("freezestop")){
+           auto freezestop = newobj.take("freezestop");
+           if(freezestop.isBool()){
+                ui->checkBox_freezestop->setChecked(freezestop.toBool());
+           }
+       }
+       if(newobj.contains("freezeduration")){
+           auto scriptfreezeduration = newobj.take("scriptfreezeduration");
+           if(scriptfreezeduration.toInt() >= 10 && scriptfreezeduration.toInt() <= 600 ){
+                ui->horizontalSlider_freezeDuration->setValue(scriptfreezeduration.toInt());
            }
        }
     }
