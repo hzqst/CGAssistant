@@ -43,6 +43,7 @@ private slots:
     void OnCloseWindow();
     void OnAutoRestart();
     void on_pushButton_suspend_clicked();
+    void OnSetFreezeDuration(int value);
 
 private:
     Ui::ScriptForm *ui;

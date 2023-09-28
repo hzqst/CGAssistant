@@ -43,10 +43,18 @@ ScriptForm::ScriptForm(QWidget *parent) :
     connect(m_node, &QProcess::errorOccurred, this, &ScriptForm::OnNodeStartError);
     connect(m_node, SIGNAL(readyRead()), this, SLOT(OnNodeReadyRead()));
     connect(m_node, SIGNAL(finished(int, QProcess::ExitStatus)), this, SLOT(OnNodeFinish(int, QProcess::ExitStatus)));
+    connect(ui->horizontalSlider_freezeDuration, SIGNAL(valueChanged(int)), this, SLOT(OnSetFreezeDuration(int)));
 
     QTimer *timer = new QTimer(this);
     connect(timer, SIGNAL(timeout()), this, SLOT(OnAutoRestart()));
     timer->start(1000);
+
+    ui->label_freezeDuration->setText(tr("Freeze Duration: %1 s").arg( ui->horizontalSlider_freezeDuration->value() ));
+}
+
+void ScriptForm::OnSetFreezeDuration(int value)
+{
+    ui->label_freezeDuration->setText(tr("Freeze Duration: %1 s").arg(value));
 }
 
 void ScriptForm::dragEnterEvent(QDragEnterEvent *event)
