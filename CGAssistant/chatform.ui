@@ -35,7 +35,7 @@
           </widget>
          </item>
          <item>
-          <widget class="QCheckBox" name="checkBox_BlockAllChatMsgs">
+          <widget class="QCheckBox" name="checkBox_BlockChatMsgs">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
              <horstretch>0</horstretch>
@@ -52,7 +52,10 @@
             <enum>Qt::LeftToRight</enum>
            </property>
            <property name="text">
-            <string>Block all chat messages</string>
+            <string>Block chat messages</string>
+           </property>
+           <property name="tristate">
+            <bool>true</bool>
            </property>
           </widget>
          </item>

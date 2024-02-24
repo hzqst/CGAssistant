@@ -116,7 +116,7 @@ int main(int argc, char *argv[])
 
     QCommandLineOption chatmaxlines("chatmaxlines", "", "chatmaxlines", "100");
 
-    QCommandLineOption blockallchatmsgs("blockallchatmsgs");
+    QCommandLineOption blockchatmsgs("blockchatmsgs", "", "blockchatmsgs");
 
     QCommandLineParser parser;
 
@@ -297,7 +297,13 @@ int main(int argc, char *argv[])
                            parser.value(consolemaxlines).toInt(),
                            parser.value(scriptfreezeduration).toInt() );
 
-    w.NotifyFillChatSettings(parser.isSet(blockallchatmsgs) ? true : false);
+    bool bHasBlockchatmsgs = false;
+    int val_blockchatmsgs = -1;
+    if(parser.isSet(blockchatmsgs))
+    {
+        val_blockchatmsgs = parser.value(blockchatmsgs).toInt(&bHasBlockchatmsgs);
+    }
+    w.NotifyFillChatSettings(val_blockchatmsgs);
 
     w.NotifyFillLoadSettings(parser.value(loadsettings));
 

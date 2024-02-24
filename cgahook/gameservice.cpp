@@ -1620,7 +1620,7 @@ void CGAService::NewNET_ParseChatMsg(int a1, int unitid, const char *buf, int co
 
 void __cdecl NewNET_ParseChatMsg(int a1, int unitid, const char *buf, int color, int size)
 {
-	if (g_CGAService.m_ui_block_all_chatmsgs && buf[0] == 'P' && buf[1] == '|' && unitid != -1)
+	if (g_CGAService.m_ui_block_chatmsgs > 0 && buf[0] == 'P' && buf[1] == '|' && unitid != -1)
 		return;
 
 	g_CGAService.NewNET_ParseChatMsg(a1, unitid, buf, color, size);
@@ -3468,7 +3468,7 @@ void CGAService::Initialize(game_type type)
 		//m_ui_battle_action = 0;
 		//m_ui_battle_hevent = CreateEventA(NULL, FALSE, FALSE, NULL);
 		m_trade_add_all_stuffs = false;
-		m_ui_block_all_chatmsgs = false;
+		m_ui_block_chatmsgs = 0;
 
 		if (*g_mutex)
 		{
@@ -3537,7 +3537,7 @@ void CGAService::Initialize(game_type type)
 		//m_ui_battle_action = 0;
 		//m_ui_battle_hevent = CreateEventA(NULL, FALSE, FALSE, NULL);
 		m_trade_add_all_stuffs = false;
-		m_ui_block_all_chatmsgs = false;
+		m_ui_block_chatmsgs = 0;
 
 		DetourTransactionBegin();
 		DetourAttach(&(void *&)BATTLE_PlayerAction, ::NewBATTLE_PlayerAction);
@@ -5219,9 +5219,9 @@ void CGAService::AddAllTradeItems(void)
 	m_trade_add_all_stuffs = true;
 }
 
-void CGAService::SetBlockAllChatMsg(bool bShouldBlock)
+void CGAService::SetBlockChatMsgs(int state)
 {
-	m_ui_block_all_chatmsgs = true;
+	m_ui_block_chatmsgs = state;
 }
 
 bool CGAService::WM_BattleNormalAttack(int target)

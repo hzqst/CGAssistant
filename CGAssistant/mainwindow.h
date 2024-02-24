@@ -36,7 +36,7 @@ signals:
                              QString create_chara_points, QString create_chara_elements, QString create_chara_name);
     void NotifyFillLoadScript(QString path, int autorestart, bool freezestop, bool injuryprot, bool soulprot, int consolemaxlines, int scriptfreezeduration);
     void NotifyFillLoadSettings(QString path);
-    void NotifyFillChatSettings(bool blockallchatmsgs);
+    void NotifyFillChatSettings(int blockchatmsgs);
     void NotifyFillStaticSettings(int freezetime, int chatmaxlines);
     void HttpGetGameProcInfo(QJsonDocument* doc);
     void HttpGetSettings(QJsonDocument* doc);

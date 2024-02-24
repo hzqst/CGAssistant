@@ -1240,7 +1240,7 @@ namespace CGA
 		virtual bool SendMail(int index, const std::string &msg, bool &result) = 0;
 		virtual bool SendPetMail(int index, int petid, int itempos, const std::string &msg, bool &result) = 0;
 		virtual bool GetGameServerInfo(cga_game_server_info_t &info) = 0;
-		virtual bool SetBlockAllChatMsg(bool bShouldBlock) = 0;
+		virtual bool SetBlockChatMsgs(int state) = 0;
 
 		virtual bool RegisterServerShutdownNotify(const std::function<void(int)> &callback) = 0;
 		virtual bool RegisterBattleActionNotify(const std::function<void(int)> &callback) = 0;

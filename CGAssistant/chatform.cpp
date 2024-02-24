@@ -29,7 +29,7 @@ void ChatForm::OnAutoChat()
 {
     if(g_CGAInterface->IsConnected())
     {
-        g_CGAInterface->SetBlockAllChatMsg(true);
+        g_CGAInterface->SetBlockChatMsgs((int)ui->checkBox_BlockChatMsgs->checkState());
     }
 }
 
@@ -49,9 +49,20 @@ void ChatForm::OnNotifyGetPlayerInfo(QSharedPointer<CGA_PlayerInfo_t> player)
     m_player = player;
 }
 
-void ChatForm::OnNotifyFillChatSettings(bool blockallchatmsgs)
+void ChatForm::OnNotifyFillChatSettings(int blockchatmsgs)
 {
-    ui->checkBox_BlockAllChatMsgs->setChecked(blockallchatmsgs);
+    if(blockchatmsgs == 2)
+    {
+        ui->checkBox_BlockChatMsgs->setCheckState(Qt::CheckState::Checked);
+    }
+    else if(blockchatmsgs == 1)
+    {
+        ui->checkBox_BlockChatMsgs->setCheckState(Qt::CheckState::PartiallyChecked);
+    }
+    else if(blockchatmsgs == 0)
+    {
+        ui->checkBox_BlockChatMsgs->setCheckState(Qt::CheckState::Unchecked);
+    }
 }
 
 void ChatForm::OnNotifyFillStaticSettings(int freezetime, int chatmaxlines)
@@ -151,22 +162,39 @@ bool ChatForm::ParseChatSettings(const QJsonValue &val)
 
     auto obj = val.toObject();
 
-    if(obj.contains("blockallchatmsgs"))
-        ui->checkBox_BlockAllChatMsgs->setChecked(obj.take("blockallchatmsgs").toBool());
+    if(obj.contains("blockchatmsgs"))
+    {
+        int val = obj.take("blockchatmsgs").toInt();
+        if(1)
+        {
+            if(val == 2)
+            {
+                ui->checkBox_BlockChatMsgs->setCheckState(Qt::CheckState::Checked);
+            }
+            else if(val == 1)
+            {
+                ui->checkBox_BlockChatMsgs->setCheckState(Qt::CheckState::PartiallyChecked);
+            }
+            else if(val == 0)
+            {
+                ui->checkBox_BlockChatMsgs->setCheckState(Qt::CheckState::Unchecked);
+            }
+        }
+    }
 
     return true;
 }
 
 void ChatForm::SaveChatSettings(QJsonObject &obj)
 {
-    obj.insert("blockallchatmsgs", ui->checkBox_BlockAllChatMsgs->isChecked());
+    obj.insert("blockchatmsgs", (int)ui->checkBox_BlockChatMsgs->checkState());
 }
 
 void ChatForm::on_checkBox_BlockAllChatMsgs_stateChanged(int state)
 {
     if(g_CGAInterface->IsConnected())
     {
-        g_CGAInterface->SetBlockAllChatMsg(state ? true : false);
+        g_CGAInterface->SetBlockChatMsgs(state);
     }
 }
 

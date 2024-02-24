@@ -1159,7 +1159,7 @@ namespace CGA
 		int IsItemTypeAssessable(int type);
 
 		void AddAllTradeItems(void);
-		void SetBlockAllChatMsg(bool bShouldBlock);
+		void SetBlockChatMsgs(int state);
 		bool WM_BattleNormalAttack(int target);
 		bool WM_BattleSkillAttack(int skillpos, int skilllv, int target);
 		bool WM_BattleGuard();
@@ -1320,7 +1320,7 @@ namespace CGA
 
 		bool m_trade_add_all_stuffs;
 
-		bool m_ui_block_all_chatmsgs;
+		int m_ui_block_chatmsgs;
 
 		game_type m_game_type;
 
