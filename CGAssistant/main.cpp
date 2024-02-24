@@ -153,7 +153,7 @@ int main(int argc, char *argv[])
     parser.addOption(consolemaxlines);
     parser.addOption(scriptfreezeduration);
     parser.addOption(chatmaxlines);
-    parser.addOption(blockallchatmsgs);
+    parser.addOption(blockchatmsgs);
     parser.process(a);
 
     QTranslator translator;
