@@ -507,7 +507,7 @@ int __fastcall NewOnLoginResult(void *pthis, int dummy, int a1, int result, cons
 	puts(sb.GetString());
 	fflush(stdout);
 
-	WriteLog("NtTerminateProcess\n");
+	//WriteLog("NtTerminateProcess\n");
 	NtTerminateProcess((HANDLE)-1, 0);
 	return 0;
 }
@@ -710,7 +710,7 @@ void CGAService::NewBATTLE_PlayerAction()
 	}
 	if (prevPlayerStatus != 1 && playerStatus == 1)
 	{
-		WriteLog("CGA_NotifyBattleAction player\n");
+		//WriteLog("CGA_NotifyBattleAction player\n");
 
 		int flags = FL_BATTLE_ACTION_ISPLAYER;
 		if (m_btl_double_action)
@@ -724,14 +724,14 @@ void CGAService::NewBATTLE_PlayerAction()
 	{
 		if (m_btl_pet_skill_packet_send)
 		{
-			WriteLog("m_btl_pet_skill_packet_send = true\n");
+			//WriteLog("m_btl_pet_skill_packet_send = true\n");
 			*g_btl_action_done = 1;
 			m_btl_pet_skill_packet_send = false;
 			return;
 		}
 		else
 		{
-			WriteLog("CGA_NotifyBattleAction pet\n");
+			//WriteLog("CGA_NotifyBattleAction pet\n");
 		}
 		//Notify pet action
 		int flags = 0;
@@ -753,15 +753,15 @@ void __cdecl NewNET_WriteEndBattlePacket_cgitem(int a1, int a2)
 {
 	g_CGAService.NET_WriteEndBattlePacket_cgitem(a1, a2);
 
-	WriteLog("NewNET_WriteEndBattlePacket_cgitem\n");
+	//WriteLog("NewNET_WriteEndBattlePacket_cgitem\n");
 
 	CGA_NotifyBattleAction(FL_BATTLE_ACTION_END);
 }
 
 void CGAService::NewNET_ParseTradeItemsPackets(int a1, const char *buf)
 {
-	WriteLog("NewNET_ParseTradeItemsPackets\n");
-	WriteLog(buf);
+	//WriteLog("NewNET_ParseTradeItemsPackets\n");
+	//WriteLog(buf);
 
 	NET_ParseTradeItemsPackets(a1, buf);
 
@@ -818,9 +818,9 @@ void CGAService::NewNET_ParseTradePetPackets(int a1, int index, const char *buf)
 {
 	NET_ParseTradePetPackets(a1, index, buf);
 
-	WriteLog("NewNET_ParseTradePetPackets\n");
+	//WriteLog("NewNET_ParseTradePetPackets\n");
 
-	WriteLog2(buf);
+	//WriteLog2(buf);
 
 	char name[256];
 
@@ -872,9 +872,9 @@ void CGAService::NewNET_ParseTradePetSkillPackets(int a1, int index, const char 
 {
 	NET_ParseTradePetSkillPackets(a1, index, buf);
 
-	WriteLog("NewNET_ParseTradePetSkillPackets\n");
+	//WriteLog("NewNET_ParseTradePetSkillPackets\n");
 
-	WriteLog2(buf);
+	//WriteLog2(buf);
 
 	cga_trade_stuff_info_t info(TRADE_STUFFS_PETSKILL);
 
@@ -902,7 +902,7 @@ void __cdecl NewNET_ParseTradePetSkillPackets(int a1, int index, const char *buf
 
 void CGAService::NewNET_ParseTradeGoldPackets(int a1, int gold)
 {
-	WriteLog("NewNET_ParseTradeGoldPackets\n");
+	//WriteLog("NewNET_ParseTradeGoldPackets\n");
 
 	NET_ParseTradeGoldPackets(a1, gold);
 
@@ -920,7 +920,7 @@ void __cdecl NewNET_ParseTradeGoldPackets(int a1, int gold)
 
 void CGAService::NewNET_ParseTradePlayers(int a1, const char *src, char *src2)
 {
-	WriteLog("NewNET_ParseTradePlayers\n");
+	//WriteLog("NewNET_ParseTradePlayers\n");
 
 	NET_ParseTradePlayers(a1, src, src2);
 
@@ -968,7 +968,7 @@ void __cdecl NewNET_ParseTradePlayers(int a1, const char *src, char *src2)
 
 void CGAService::NewNET_ParseHealPlayers(int a1, const char *src)
 {
-	WriteLog("NewNET_ParseHealPlayers %s\n", src);
+	//WriteLog("NewNET_ParseHealPlayers %s\n", src);
 
 	NET_ParseHealPlayers(a1, src);
 
@@ -1057,7 +1057,7 @@ void __cdecl NewNET_ParseHealPlayers(int a1, const char *src)
 
 void CGAService::NewNET_ParseHealUnits(int a1, const char *src)
 {
-	WriteLog("NewNET_ParseHealUnits\n");
+	//WriteLog("NewNET_ParseHealUnits\n");
 
 	NET_ParseHealUnits(a1, src);
 
@@ -1178,7 +1178,7 @@ void __cdecl NewNET_ParseHealUnits(int a1, const char *src)
 
 void CGAService::NewNET_ParseItemPlayers(int a1, const char *src)
 {
-	WriteLog("NewNET_ParseItemPlayers\n");
+	//WriteLog("NewNET_ParseItemPlayers\n");
 
 	NET_ParseItemPlayers(a1, src);
 
@@ -1267,7 +1267,7 @@ void __cdecl NewNET_ParseItemPlayers(int a1, const char *src)
 
 void CGAService::NewNET_ParseItemUnits(int a1, const char *src)
 {
-	WriteLog("NewNET_ParseItemUnits\n");
+	//WriteLog("NewNET_ParseItemUnits\n");
 
 	NET_ParseItemUnits(a1, src);
 
@@ -1379,7 +1379,7 @@ void __cdecl NewNET_ParseItemUnits(int a1, const char *src)
 
 void CGAService::NewNET_ParseBattlePackets(int a1, const char *buf)
 {
-	WriteLog("NewNET_ParseBattlePackets %s %s\n", (*g_playerBase)->name, buf);
+	//WriteLog("NewNET_ParseBattlePackets %s %s\n", (*g_playerBase)->name, buf);
 
 	if (*buf == 'M')
 	{
@@ -1400,7 +1400,7 @@ void CGAService::NewNET_ParseBattlePackets(int a1, const char *buf)
 				m_btl_delayanimpacket.a1 = a1;
 				strcpy(m_btl_delayanimpacket.buf, buf);
 				m_btl_delayanimpacket.lasttick = GetTickCount();
-				WriteLog("anim packet delayed\n");
+				//WriteLog("anim packet delayed\n");
 			}
 			return;
 		}
@@ -1413,7 +1413,7 @@ void CGAService::NewNET_ParseBattlePackets(int a1, const char *buf)
 		{
 			NET_ParseBattlePackets(m_btl_delayanimpacket.a1, m_btl_highspeed_enable ? "M|" : m_btl_delayanimpacket.buf);
 			m_btl_delayanimpacket.isdelay = false;
-			WriteLog("delay anim played\n");
+			//WriteLog("delay anim played\n");
 		}
 	}
 
@@ -1600,14 +1600,14 @@ void CGAService::NewNET_ParseWorkingResult(int a1, int success, int type, const 
 
 void __cdecl NewNET_ParseWorkingResult(int a1, int success, int type, const char *buf)
 {
-	//WriteLog("type=%d, success=%d, buf=%s\n", type, success, buf);
+	////WriteLog("type=%d, success=%d, buf=%s\n", type, success, buf);
 
 	g_CGAService.NewNET_ParseWorkingResult(a1, success, type, buf);
 }
 
 void CGAService::NewNET_ParseChatMsg(int a1, int unitid, const char *buf, int color, int size)
 {
-	WriteLog("NewNET_ParseChatMsg u=%d, buf=%s, color=%d, size=%d\n", unitid, buf, color, size);
+	//WriteLog("NewNET_ParseChatMsg u=%d, buf=%s, color=%d, size=%d\n", unitid, buf, color, size);
 
 	if (buf[0] == 'P' && buf[1] == '|')
 	{
@@ -1620,6 +1620,9 @@ void CGAService::NewNET_ParseChatMsg(int a1, int unitid, const char *buf, int co
 
 void __cdecl NewNET_ParseChatMsg(int a1, int unitid, const char *buf, int color, int size)
 {
+	if (g_CGAService.m_ui_block_all_chatmsgs && buf[0] == 'P' && buf[1] == '|' && unitid != -1)
+		return;
+
 	g_CGAService.NewNET_ParseChatMsg(a1, unitid, buf, color, size);
 }
 
@@ -1631,7 +1634,7 @@ void CGAService::NewNET_ParseSysMsg(int a1, const char *buf)
 	cga_chat_msg_t msg(-1, boost::locale::conv::to_utf<char>(temp, "GBK"), 0, 0);
 	CGA_NotifyChatMsg(msg);
 
-	WriteLog("NewNET_ParseSysMsg %s\n", temp);
+	//WriteLog("NewNET_ParseSysMsg %s\n", temp);
 
 	NET_ParseSysMsg(a1, buf);
 }
@@ -1643,7 +1646,7 @@ void __cdecl NewNET_ParseSysMsg(int a1, const char *buf)
 
 void CGAService::NewNET_ParseReadyTrade()
 {
-	WriteLog("NewNET_ParseConfirmTrade\n");
+	//WriteLog("NewNET_ParseConfirmTrade\n");
 
 	NET_ParseReadyTrade();
 
@@ -1657,7 +1660,7 @@ void __cdecl NewNET_ParseReadyTrade()
 
 void CGAService::NewNET_ParseConfirmTrade(int a1, int a2)
 {
-	WriteLog("NewNET_ParseConfirmTrade\n");
+	//WriteLog("NewNET_ParseConfirmTrade\n");
 
 	NET_ParseConfirmTrade(a1, a2);
 
@@ -1683,7 +1686,7 @@ void __cdecl NewNET_ParseMeetEnemy(int a1, int a2, int a3)
 
 void CGAService::NewNET_ParseDownloadMap(int sock, int index1, int index3, int xbase, int ybase, int xtop, int ytop, const char *buf)
 {
-	//WriteLog("NewNET_ParseDownloadMap %d %d %d %d %d %d\n", index1, index3, xbase, ybase, xtop, ytop);
+	////WriteLog("NewNET_ParseDownloadMap %d %d %d %d %d %d\n", index1, index3, xbase, ybase, xtop, ytop);
 	
 	cga_download_map_t msg(index1, index3, xbase, ybase, xtop, ytop);
 	CGA_NotifyDownloadMap(msg);
@@ -2250,7 +2253,7 @@ int __cdecl NewIsMapObjectEntrance(int xpos, int ypos)
 
 void CGAService::NewNET_WritePrepareCraftItemPacket_cgitem(int a1, int a2)
 {
-	//WriteLog("NewNET_WritePrepareCraftItemPacket_cgitem %d\n", a2);
+	////WriteLog("NewNET_WritePrepareCraftItemPacket_cgitem %d\n", a2);
 	if (m_work_immediate)
 	{
 		if (m_work_immediate_state == 2)
@@ -2278,7 +2281,7 @@ void __cdecl NewNET_WritePrepareCraftItemPacket_cgitem(int a1, int a2)
 
 void CGAService::NewNET_WriteWorkPacket_cgitem(int a1, int skill, int a3, int a4, const char *buf)
 {
-	//WriteLog("NET_WriteWorkPacket_cgitem %d %d %d %s\n", skill, a3, a4, buf);
+	////WriteLog("NET_WriteWorkPacket_cgitem %d %d %d %s\n", skill, a3, a4, buf);
 	if (m_work_immediate && m_work_immediate_state == 1)
 	{
 		m_work_immediate_state = 2;
@@ -3462,9 +3465,10 @@ void CGAService::Initialize(game_type type)
 		m_ui_create_character = false;
 		m_run_game_pid = 0;
 		m_run_game_tid = 0;
-		m_ui_battle_action = 0;
-		m_ui_battle_hevent = CreateEventA(NULL, FALSE, FALSE, NULL);
+		//m_ui_battle_action = 0;
+		//m_ui_battle_hevent = CreateEventA(NULL, FALSE, FALSE, NULL);
 		m_trade_add_all_stuffs = false;
+		m_ui_block_all_chatmsgs = false;
 
 		if (*g_mutex)
 		{
@@ -3530,9 +3534,10 @@ void CGAService::Initialize(game_type type)
 		m_ui_create_character = false;
 		m_run_game_pid = 0;
 		m_run_game_tid = 0;
-		m_ui_battle_action = 0;
-		m_ui_battle_hevent = CreateEventA(NULL, FALSE, FALSE, NULL);
+		//m_ui_battle_action = 0;
+		//m_ui_battle_hevent = CreateEventA(NULL, FALSE, FALSE, NULL);
 		m_trade_add_all_stuffs = false;
+		m_ui_block_all_chatmsgs = false;
 
 		DetourTransactionBegin();
 		DetourAttach(&(void *&)BATTLE_PlayerAction, ::NewBATTLE_PlayerAction);
@@ -3658,7 +3663,7 @@ void CGAService::DrawCustomText()
 {
 	if (m_btl_highspeed_enable && m_btl_delayanimpacket.isdelay && GetTickCount() > m_btl_delayanimpacket.lasttick + 3500)
 	{
-		WriteLog("end of battle with exception\n");
+		//WriteLog("end of battle with exception\n");
 		m_btl_delayanimpacket.lasttick = 0;
 		m_btl_delayanimpacket.isdelay = false;
 		NET_ParseBattlePackets(m_btl_delayanimpacket.a1, "M|END|");
@@ -5214,6 +5219,11 @@ void CGAService::AddAllTradeItems(void)
 	m_trade_add_all_stuffs = true;
 }
 
+void CGAService::SetBlockAllChatMsg(bool bShouldBlock)
+{
+	m_ui_block_all_chatmsgs = true;
+}
+
 bool CGAService::WM_BattleNormalAttack(int target)
 {
 	if (!IsInGame())
@@ -5230,7 +5240,7 @@ bool CGAService::WM_BattleNormalAttack(int target)
 	*g_btl_action_done = 1;
 	COMMON_PlaySound(57, 320, 240);
 
-	WriteLog("BattleNormalAttack %d\n", target);
+	//WriteLog("BattleNormalAttack %d\n", target);
 
 	return true;
 }
@@ -5254,7 +5264,7 @@ bool CGAService::WM_BattleSkillAttack(int skillpos, int skilllv, int target)
 
 	if (!g_skill_base[skillpos].name[0])
 	{
-		WriteLog("skill %d not valid\n", skillpos);
+		//WriteLog("skill %d not valid\n", skillpos);
 		return false;
 	}
 
@@ -5268,7 +5278,7 @@ bool CGAService::WM_BattleSkillAttack(int skillpos, int skilllv, int target)
 			NET_WritePacket(*g_net_buffer, *g_net_socket, net_header_battle, buf);
 		//*g_btl_action_done = 1;
 		//COMMON_PlaySound(57, 320, 240);
-		WriteLog("BattleSkillAttack %d %d %d\n", skillpos, skilllv, target);
+		//WriteLog("BattleSkillAttack %d %d %d\n", skillpos, skilllv, target);
 		return TRUE;
 	}
 
@@ -5277,18 +5287,18 @@ bool CGAService::WM_BattleSkillAttack(int skillpos, int skilllv, int target)
 
 	if (!(*g_btl_skill_allowbit & (1 << skillpos)))//skill not allowed!!!
 	{
-		WriteLog("skill %d not allowed\n", skillpos);
+		//WriteLog("skill %d not allowed\n", skillpos);
 		return false;
 	}
 	if (g_skill_base[skillpos].level < skilllv)
 	{
-		WriteLog("skill lv%d not enough\n", skilllv);
+		//WriteLog("skill lv%d not enough\n", skilllv);
 		return false;
 	}
 
 	if (g_skill_base[skillpos].sub[skilllv].available == 0)
 	{
-		WriteLog("skill lv%d not available, downgrade\n", skilllv);
+		//WriteLog("skill lv%d not available, downgrade\n", skilllv);
 		bool available = false;
 		for (int lv = skilllv - 1; lv >= 0; --lv)
 		{
@@ -5302,7 +5312,7 @@ bool CGAService::WM_BattleSkillAttack(int skillpos, int skilllv, int target)
 
 		if (!available)
 		{
-			WriteLog("skill lv%d not available\n", skilllv);
+			//WriteLog("skill lv%d not available\n", skilllv);
 			return false;
 		}
 	}
@@ -5322,7 +5332,7 @@ bool CGAService::WM_BattleSkillAttack(int skillpos, int skilllv, int target)
 
 		if (!available)
 		{
-			WriteLog("skill lv%d no enough mp\n", skilllv);
+			//WriteLog("skill lv%d no enough mp\n", skilllv);
 			return false;
 		}
 	}
@@ -5336,7 +5346,7 @@ bool CGAService::WM_BattleSkillAttack(int skillpos, int skilllv, int target)
 	*g_btl_action_done = 1;
 	COMMON_PlaySound(57, 320, 240);
 
-	WriteLog("BattleSkillAttack2 %d %d %d\n", skillpos, skilllv, target);
+	//WriteLog("BattleSkillAttack2 %d %d %d\n", skillpos, skilllv, target);
 
 	return true;
 }
@@ -5348,7 +5358,7 @@ bool CGAService::BattleSkillAttack(int skillpos, int skilllv, int target, bool p
 		target |= 0x10000000;
 	}
 
-	//WriteLog("BattleSkillAttack %d %d %d\n", skillpos, skilllv, target);
+	////WriteLog("BattleSkillAttack %d %d %d\n", skillpos, skilllv, target);
 
 	return SendMessageA(g_MainHwnd, WM_CGA_BATTLE_SKILLATTACK, skillpos | (skilllv << 8), target) ? true : false;
 }
@@ -5539,13 +5549,13 @@ bool CGAService::WM_BattlePetSkillAttack(int skillpos, int target)
 			m_btl_pet_skill_packet_send = true;
 		}
 
-		WriteLog("BattlePetSkillAttack FF\n");
+		//WriteLog("BattlePetSkillAttack FF\n");
 		return true;
 	}
 
 	if (!(*g_btl_petskill_allowbit & (1 << skillpos)))//skill not allowed!!!
 	{
-		WriteLog("pet skill %d not allowed\n", skillpos);
+		//WriteLog("pet skill %d not allowed\n", skillpos);
 		return false;
 	}
 
@@ -5570,7 +5580,7 @@ bool CGAService::WM_BattlePetSkillAttack(int skillpos, int target)
 		m_btl_pet_skill_packet_send = true;
 	}
 
-	WriteLog("BattlePetSkillAttack %d %d %d\n", skillpos, target, packetOnly ? 1 : 0);
+	//WriteLog("BattlePetSkillAttack %d %d %d\n", skillpos, target, packetOnly ? 1 : 0);
 
 	return true;
 }
@@ -5859,7 +5869,7 @@ bool CGAService::WM_SellNPCStore(cga_sell_items_t *items)
 
 	if (*g_npc_dialog_type != 7 && *g_npc_dialog_type != 6 && *g_npc_dialog_type != 22 && *g_npc_dialog_type != 20 && *g_npc_dialog_type != 31)
 	{
-		//WriteLog("type mismatch %d\n", *g_npc_dialog_type);
+		////WriteLog("type mismatch %d\n", *g_npc_dialog_type);
 		return false;
 	}
 
@@ -5869,7 +5879,7 @@ bool CGAService::WM_SellNPCStore(cga_sell_items_t *items)
 		{
 			if (items->at(i).itemid != 0 && (*g_playerBase)->iteminfos[items->at(i).itempos].item_id != items->at(i).itemid)
 			{
-				//WriteLog("id mismatch %d %d\n", items->at(i).itemid, (*g_playerBase)->iteminfos[items->at(i).itempos].item_id);
+				////WriteLog("id mismatch %d %d\n", items->at(i).itemid, (*g_playerBase)->iteminfos[items->at(i).itempos].item_id);
 				return false;
 			}
 			bool allow = false;
@@ -5877,7 +5887,7 @@ bool CGAService::WM_SellNPCStore(cga_sell_items_t *items)
 			{
 				if (g_npcdlg_item_base[j].valid && g_npcdlg_item_base[j].itempos == items->at(i).itempos)
 				{
-					//WriteLog("j=%d g_npcdlg_item_base[j].itempos=%d\n", j, g_npcdlg_item_base[j].itempos);
+					////WriteLog("j=%d g_npcdlg_item_base[j].itempos=%d\n", j, g_npcdlg_item_base[j].itempos);
 					allow = true;
 					break;
 				}
@@ -5907,11 +5917,11 @@ bool CGAService::WM_SellNPCStore(cga_sell_items_t *items)
 		{
 			if (items->at(i).itemid != 0 && (*g_playerBase)->iteminfos[items->at(i).itempos].item_id != items->at(i).itemid)
 			{
-				//WriteLog("id mismatch %d %d %d\n", items->at(i).itemid, (*g_playerBase)->iteminfos[items->at(i).itempos].item_id, items->at(i).itemid);
+				////WriteLog("id mismatch %d %d %d\n", items->at(i).itemid, (*g_playerBase)->iteminfos[items->at(i).itempos].item_id, items->at(i).itemid);
 				return false;
 			}
 			if ((*g_playerBase)->iteminfos[items->at(i).itempos].count != 0 && (*g_playerBase)->iteminfos[items->at(i).itempos].count < items->at(i).count) {
-				//WriteLog("count mismatch %d %d\n", (*g_playerBase)->iteminfos[items->at(i).itempos].count, items->at(i).count);
+				////WriteLog("count mismatch %d %d\n", (*g_playerBase)->iteminfos[items->at(i).itempos].count, items->at(i).count);
 				return false;
 			}
 			sprintf(buf, "%d\\z%d", items->at(i).itempos, items->at(i).count);
@@ -6314,7 +6324,7 @@ bool CGAService::WM_StartWork(int skill_index, int sub_index)
 			break;
 		}
 		if (!isavailable) {
-			WriteLog("WM_StartWork WORK_TYPE_HEALING subindex %d not available", sub_index);
+			//WriteLog("WM_StartWork WORK_TYPE_HEALING subindex %d not available", sub_index);
 			return false;
 		}
 
@@ -6334,7 +6344,7 @@ bool CGAService::WM_StartWork(int skill_index, int sub_index)
 		int sub_index2 = sub_index & 0xFF;
 		int sub_type = (sub_index >> 8) & 0xFF;
 		if (sub_index2 < 0 || sub_index2 > 50 || !g_skill_base[skill_index].craft[sub_index2].available) {
-			WriteLog("WM_StartWork subtype %d, subindex %d not available", sub_type, sub_index2);
+			//WriteLog("WM_StartWork subtype %d, subindex %d not available", sub_type, sub_index2);
 			return false;
 		}
 		UI_OpenCraftDialog(skill_index, sub_index, sub_type);
@@ -6362,7 +6372,7 @@ bool CGAService::WM_StartWork(int skill_index, int sub_index)
 			break;
 		}
 		if (!isavailable) {
-			WriteLog("WM_StartWork WORK_TYPE_PET subindex %d not available", sub_index);
+			//WriteLog("WM_StartWork WORK_TYPE_PET subindex %d not available", sub_index);
 			return false;
 		}
 
@@ -7229,7 +7239,7 @@ void CGAService::WM_FixMapWarpStuck(int type)
 {
 	if (type == 0)
 	{
-		WriteLog("FixMapWarpStuck type 0\n");
+		//WriteLog("FixMapWarpStuck type 0\n");
 
 		*g_disable_move = 0;
 		if (m_game_type == cg_item_6000)
@@ -7239,7 +7249,7 @@ void CGAService::WM_FixMapWarpStuck(int type)
 	}
 	else if (type == 1)
 	{
-		WriteLog("FixMapWarpStuck type 1\n");
+		//WriteLog("FixMapWarpStuck type 1\n");
 
 		if (IsMapObjectEntrance(g_player_xpos->decode(), g_player_ypos->decode()))
 		{

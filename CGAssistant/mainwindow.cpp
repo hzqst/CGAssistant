@@ -80,6 +80,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(playerFrom, &PlayerForm::SaveItemTweaker, itemForm, &ItemForm::SaveItemTweaker);
     connect(playerFrom, &PlayerForm::SaveBattleSettings, autoBattleForm, &AutoBattleForm::SaveBattleSettings);
     connect(playerFrom, &PlayerForm::SaveChatSettings, chatForm, &ChatForm::SaveChatSettings);
+
     connect(this, &MainWindow::NotifyChangeWindow, processFrom, &ProcessForm::OnNotifyChangeWindow);
 
     connect(this, &MainWindow::NotifyFillAutoLogin, accountForm, &AccountForm::OnNotifyFillAutoLogin);
@@ -87,6 +88,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(this, &MainWindow::NotifyFillLoadSettings, playerFrom, &PlayerForm::OnNotifyFillLoadSettings);
     connect(this, &MainWindow::NotifyFillStaticSettings, processWorker, &CProcessWorker::OnNotifyFillStaticSettings);
     connect(this, &MainWindow::NotifyFillStaticSettings, chatForm, &ChatForm::OnNotifyFillStaticSettings);
+    connect(this, &MainWindow::NotifyFillChatSettings, chatForm, &ChatForm::OnNotifyFillChatSettings);
 
     connect(playerWorker, &CPlayerWorker::NotifyGetSkillsInfo, autoBattleForm, &AutoBattleForm::OnNotifyGetSkillsInfo, Qt::ConnectionType::QueuedConnection);
     connect(playerWorker, &CPlayerWorker::NotifyGetPetsInfo, autoBattleForm, &AutoBattleForm::OnNotifyGetPetsInfo, Qt::ConnectionType::QueuedConnection);

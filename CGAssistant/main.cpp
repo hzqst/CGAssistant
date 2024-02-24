@@ -116,6 +116,8 @@ int main(int argc, char *argv[])
 
     QCommandLineOption chatmaxlines("chatmaxlines", "", "chatmaxlines", "100");
 
+    QCommandLineOption blockallchatmsgs("blockallchatmsgs");
+
     QCommandLineParser parser;
 
     parser.setSingleDashWordOptionMode(QCommandLineParser::ParseAsLongOptions);
@@ -151,6 +153,7 @@ int main(int argc, char *argv[])
     parser.addOption(consolemaxlines);
     parser.addOption(scriptfreezeduration);
     parser.addOption(chatmaxlines);
+    parser.addOption(blockallchatmsgs);
     parser.process(a);
 
     QTranslator translator;
@@ -167,7 +170,6 @@ int main(int argc, char *argv[])
     QHttpServer qserver(qApp);
 
     MainWindow w;
-
 
     for(unsigned int qport = 14396; qport < 14396 + 1000; ++qport)
     {
@@ -264,6 +266,8 @@ int main(int argc, char *argv[])
 
     w.show();
 
+    w.NotifyFillStaticSettings(parser.value(killfreeze).toInt(), parser.value(chatmaxlines).toInt());
+
     w.NotifyFillAutoLogin(parser.value(gameType).toInt(),
                           parser.value(loginUser),
                           parser.value(loginPwd),
@@ -293,9 +297,9 @@ int main(int argc, char *argv[])
                            parser.value(consolemaxlines).toInt(),
                            parser.value(scriptfreezeduration).toInt() );
 
-    w.NotifyFillLoadSettings(parser.value(loadsettings));
+    w.NotifyFillChatSettings(parser.isSet(blockallchatmsgs) ? true : false);
 
-    w.NotifyFillStaticSettings(parser.value(killfreeze).toInt(), parser.value(chatmaxlines).toInt());
+    w.NotifyFillLoadSettings(parser.value(loadsettings));
 
     return a.exec();
 }

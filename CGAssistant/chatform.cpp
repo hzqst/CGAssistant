@@ -1,6 +1,7 @@
 #include "chatform.h"
 #include "ui_chatform.h"
 
+#include <QTimer>
 #include <QDateTime>
 
 extern CGA::CGAInterface *g_CGAInterface;
@@ -13,11 +14,23 @@ ChatForm::ChatForm(QWidget *parent) :
 
     m_ChatMaxLines = 100;
     ui->textEdit_chat->document()->setMaximumBlockCount(m_ChatMaxLines);
+
+    QTimer *timer = new QTimer(this);
+    connect(timer, SIGNAL(timeout()), this, SLOT(OnAutoChat()));
+    timer->start(1000);
 }
 
 ChatForm::~ChatForm()
 {
     delete ui;
+}
+
+void ChatForm::OnAutoChat()
+{
+    if(g_CGAInterface->IsConnected())
+    {
+        g_CGAInterface->SetBlockAllChatMsg(true);
+    }
 }
 
 void ChatForm::on_lineEdit_returnPressed()
@@ -36,6 +49,10 @@ void ChatForm::OnNotifyGetPlayerInfo(QSharedPointer<CGA_PlayerInfo_t> player)
     m_player = player;
 }
 
+void ChatForm::OnNotifyFillChatSettings(bool blockallchatmsgs)
+{
+    ui->checkBox_BlockAllChatMsgs->setChecked(blockallchatmsgs);
+}
 
 void ChatForm::OnNotifyFillStaticSettings(int freezetime, int chatmaxlines)
 {
@@ -132,10 +149,24 @@ bool ChatForm::ParseChatSettings(const QJsonValue &val)
     if(!val.isObject())
         return false;
 
+    auto obj = val.toObject();
+
+    if(obj.contains("blockallchatmsgs"))
+        ui->checkBox_BlockAllChatMsgs->setChecked(obj.take("blockallchatmsgs").toBool());
+
     return true;
 }
 
 void ChatForm::SaveChatSettings(QJsonObject &obj)
 {
-
+    obj.insert("blockallchatmsgs", ui->checkBox_BlockAllChatMsgs->isChecked());
 }
+
+void ChatForm::on_checkBox_BlockAllChatMsgs_stateChanged(int state)
+{
+    if(g_CGAInterface->IsConnected())
+    {
+        g_CGAInterface->SetBlockAllChatMsg(state ? true : false);
+    }
+}
+

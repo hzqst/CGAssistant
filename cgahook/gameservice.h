@@ -1159,6 +1159,7 @@ namespace CGA
 		int IsItemTypeAssessable(int type);
 
 		void AddAllTradeItems(void);
+		void SetBlockAllChatMsg(bool bShouldBlock);
 		bool WM_BattleNormalAttack(int target);
 		bool WM_BattleSkillAttack(int skillpos, int skilllv, int target);
 		bool WM_BattleGuard();
@@ -1307,17 +1308,19 @@ namespace CGA
 		int m_run_game_pid;
 		int m_run_game_tid;
 
-		int m_ui_battle_action;
+		/*int m_ui_battle_action;
 		struct 
 		{
 			int change_petid;
 			int select_skill_index;
 			bool select_skill_ok;
 			int select_target;
-		}m_ui_battle_action_param;
-		HANDLE m_ui_battle_hevent;
+		}m_ui_battle_action_param;*/
+		//HANDLE m_ui_battle_hevent;
 
 		bool m_trade_add_all_stuffs;
+
+		bool m_ui_block_all_chatmsgs;
 
 		game_type m_game_type;
 

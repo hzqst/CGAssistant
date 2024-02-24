@@ -283,6 +283,7 @@ public slots:
     void OnSetNoSwitchAnim(int state);
     void OnSetGameTextUI(int state);
     void OnSetAntiAFKKick(int state);
+    void OnSetBlockAllChatMsgs(int state);
     void OnDownloadMap(int xsize, int ysize);
     void OnTabChanged(int tabindex);
     void OnSetUseFoodAt(QString str);
@@ -330,6 +331,7 @@ private:
     bool m_bHighSpeedBattle;
     bool m_bGameTextUI;
     bool m_bAntiAFKKick;
+
     QSharedPointer<CGA_PlayerInfo_t> m_player;
     QSharedPointer<CGA_PetList_t> m_pets;
 

@@ -121,6 +121,8 @@ namespace CGAServiceProtocol
 	TIMAX_DEFINE_PROTOCOL(LoginGameServer, void(std::string, std::string, int, int, int, int));
 	TIMAX_DEFINE_PROTOCOL(CreateCharacter, void(cga_create_chara_t));
 	TIMAX_DEFINE_PROTOCOL(GetGameServerInfo, cga_game_server_info_t());
+	TIMAX_DEFINE_PROTOCOL(SetBlockAllChatMsg, void(bool));
+
 	TIMAX_DEFINE_FORWARD(NotifyServerShutdown, int);
 	TIMAX_DEFINE_FORWARD(NotifyBattleAction, int);
 	TIMAX_DEFINE_FORWARD(NotifyBattleMotionPacket, std::string);
@@ -1458,6 +1460,18 @@ namespace CGA
 			if (m_connected) {
 				try {
 					info = m_client.call(std::chrono::milliseconds(10000), m_endpoint, CGAServiceProtocol::GetGameServerInfo);
+					return true;
+				}
+				catch (timax::rpc::exception const &e) { if (e.get_error_code() != timax::rpc::error_code::TIMEOUT) m_connected = false; OutputDebugStringA("rpc exception from " __FUNCTION__); OutputDebugStringA(e.get_error_message().c_str()); }
+				catch (msgpack::parse_error &e) { OutputDebugStringA("parse exception from " __FUNCTION__); OutputDebugStringA(e.what()); }
+			}
+			return false;
+		}
+		virtual bool SetBlockAllChatMsg(bool bShouldBlock)
+		{
+			if (m_connected) {
+				try {
+					info = m_client.call(std::chrono::milliseconds(10000), m_endpoint, CGAServiceProtocol::SetBlockAllChatMsg, bShouldBlock);
 					return true;
 				}
 				catch (timax::rpc::exception const &e) { if (e.get_error_code() != timax::rpc::error_code::TIMEOUT) m_connected = false; OutputDebugStringA("rpc exception from " __FUNCTION__); OutputDebugStringA(e.get_error_message().c_str()); }

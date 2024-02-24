@@ -806,7 +806,7 @@ meet BOSS</source>
     </message>
     <message>
         <source>[Enter] to send chat</source>
-        <translation>[回车] 发送聊天消息</translation>
+        <translation type="vanished">[回车] 发送聊天消息</translation>
     </message>
     <message>
         <source>Display Time</source>
@@ -855,6 +855,14 @@ Chat database will not work properly.</source>
         <source>Error: Failed to create index for uploadtime.
 Chat database will not work properly.</source>
         <translation type="vanished">创建索引uploadtime失败，消息数据库可能无法正常工作。</translation>
+    </message>
+    <message>
+        <source>[Enter] to send chat message</source>
+        <translation>[回车] 发送聊天消息</translation>
+    </message>
+    <message>
+        <source>Block all chat messages</source>
+        <translation type="unfinished">屏蔽所有聊天消息</translation>
     </message>
 </context>
 <context>

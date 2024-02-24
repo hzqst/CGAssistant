@@ -276,7 +276,6 @@ void CPlayerWorker::OnDownloadMap(int xsize, int ysize)
     m_IsDownloadingMap = true;
 }
 
-
 void CPlayerWorker::OnQueueAntiAFKKick()
 {
     if(!m_bAntiAFKKick)

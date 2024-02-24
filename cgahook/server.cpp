@@ -127,11 +127,11 @@ void CGA_CreateSharedData(int port)
 {
 	ULONG ProcessId = GetCurrentProcessId();
 
-	WCHAR szLockName[32];	
+	WCHAR szLockName[64];	
 	wsprintfW(szLockName, L"CGASharedDataLock_%d", ProcessId);
 	g_hDataLock = CreateMutexW(NULL, TRUE, szLockName);
 
-	WCHAR szMappingName[32];
+	WCHAR szMappingName[64];
 	wsprintfW(szMappingName, L"CGASharedData_%d", ProcessId);
 	g_hFileMapping = CreateFileMappingW(INVALID_HANDLE_VALUE, NULL, PAGE_READWRITE, 0, sizeof(CGA::CGAShare_t), szMappingName);
 	if (g_hFileMapping && GetLastError() != ERROR_ALREADY_EXISTS)
@@ -300,6 +300,7 @@ DWORD WINAPI CGAServerThread(LPVOID)
 				server->register_handler("SendMail", timax::bind(&CGAService::SendMail, &g_CGAService));
 				server->register_handler("SendPetMail", timax::bind(&CGAService::SendPetMail, &g_CGAService));
 				server->register_handler("GetGameServerInfo", timax::bind(&CGAService::GetGameServerInfo, &g_CGAService));
+				server->register_handler("SetBlockAllChatMsg", timax::bind(&CGAService::SetBlockAllChatMsg, &g_CGAService));
 
 				server->start();
 

@@ -20,6 +20,7 @@ public:
     ~ChatForm();
 
 public slots:
+    void OnNotifyFillChatSettings(bool blockallchatmsgs);
     void OnNotifyFillStaticSettings(int freezetime, int chatmaxlines);
     void OnNotifyGetPlayerInfo(QSharedPointer<CGA_PlayerInfo_t> player);
     void OnNotifyChatMsg(int unitid, QString msg, int size, int color);
@@ -29,6 +30,9 @@ public slots:
 private slots:
     void on_lineEdit_returnPressed();
 
+    void on_checkBox_BlockAllChatMsgs_stateChanged(int state);
+
+    void OnAutoChat();
 private:
     Ui::ChatForm *ui;
     QSharedPointer<CGA_PlayerInfo_t> m_player;
