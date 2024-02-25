@@ -293,7 +293,9 @@ void CProcessWorker::OnQueueQueryProcess()
                     int port = 0;
                     quint32 hwnd = 0;
 
-                    if(ReadSharedData(pid, port, hwnd) && g_CGAInterface->IsConnected() && g_CGAInterface->GetPort() == port)
+                    if(ReadSharedData(pid, tid, port, hwnd) &&
+                            g_CGAInterface->IsConnected() &&
+                            g_CGAInterface->GetPort() == port)
                     {
                         if(hwnd != GetAttachedHwnd()){
 
