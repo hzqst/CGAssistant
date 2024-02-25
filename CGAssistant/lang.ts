@@ -870,7 +870,7 @@ Chat database will not work properly.</source>
     </message>
     <message>
         <source>Block chat messages</source>
-        <translation type="unfinished"></translation>
+        <translation>屏蔽聊天消息</translation>
     </message>
 </context>
 <context>
