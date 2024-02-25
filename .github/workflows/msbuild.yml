@@ -139,11 +139,16 @@ jobs:
 
     - name: Copy Build to Output
       working-directory: ${{env.GITHUB_WORKSPACE}}
-      run: |
-        for /f "delims=" %%i in ('where node') do set NODE_PATH=%%i
-        copy "%NODE_PATH%" "Output\node.exe" /y
-        xcopy "build" "Output" /y /e
+      run: xcopy "build" "Output" /y /e
       shell: cmd
+
+    - name: Copy node.exe
+      run: |
+        echo "Current PATH: $env:PATH"
+        $nodePath = (Get-Command node).Source
+        echo "Node.js path: $nodePath"
+        Copy-Item -Path $nodePath -Destination "${{env.GITHUB_WORKSPACE}}/Output/node.exe" -Force
+      shell: pwsh
 
     - name: Checkout CGAssistantJS
       uses: hzqst/checkout@main
