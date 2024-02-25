@@ -196,6 +196,19 @@ CGA_PID=#%1, POLCN_PID=#%2, GID=%3</source>
         <source>Auto KillGame</source>
         <translation>10次登录失败关闭游戏</translation>
     </message>
+    <message>
+        <source>Log. Duration</source>
+        <translation>登录间隔</translation>
+    </message>
+    <message>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The minimum duration between two login query. (unit: second)&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;两次登录游戏尝试之间的最小间隔，单位：秒&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+    </message>
+    <message>
+        <source>Login Duration:
+%1 s</source>
+        <translation>登录间隔:\n%1 秒</translation>
+    </message>
 </context>
 <context>
     <name>AutoBattleForm</name>
@@ -1979,7 +1992,7 @@ Check &quot;chrome://inspect&quot; in chrome to debug the node process.</source>
     </message>
     <message>
         <source>Freeze Duration: %1 s</source>
-        <translation>静止超时时间:%1秒</translation>
+        <translation>静止超时时间: %1秒</translation>
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Full-Checked: Restart script no matter what.&lt;/p&gt;&lt;p&gt;Partially-Checked: Restart script only when current player is not in battle status.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>

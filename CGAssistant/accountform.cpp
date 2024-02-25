@@ -114,6 +114,8 @@ AccountForm::AccountForm(QWidget *parent) :
     m_game_pid = 0;
     m_game_tid = 0;
     m_serverid = 0;
+
+    ui->label_loginDuration->setText(tr("Login Duration:\n%1 s").arg( ui->horizontalSlider_loginDuration->value() ));
 }
 
 AccountForm::~AccountForm()
@@ -228,7 +230,10 @@ void AccountForm::OnAutoLogin()
                 }
                 else
                 {
-                    on_pushButton_logingame_clicked();
+                    if(m_logingame.elapsed() > ui->horizontalSlider_loginDuration->value() * 1000)
+                    {
+                        on_pushButton_logingame_clicked();
+                    }
                     return;
                 }
             }
@@ -332,7 +337,10 @@ void AccountForm::OnPOLCNFinish(int exitCode, QProcess::ExitStatus exitStatus)
 
                 if(ui->checkBox_autoLogin->isChecked())
                 {
-                    on_pushButton_logingame_clicked();
+                    if(m_logingame.elapsed() > ui->horizontalSlider_loginDuration->value() * 1000)
+                    {
+                        on_pushButton_logingame_clicked();
+                    }
                 }
             }
             else
@@ -508,6 +516,9 @@ void AccountForm::on_pushButton_logingame_clicked()
                                         ui->comboBox_bigserver->currentData().toInt(),
                                         ui->comboBox_server->currentData().toInt(),
                                         ui->comboBox_character->currentData().toInt());
+
+
+        m_logingame = QTime::currentTime();
     }
 }
 
@@ -539,7 +550,7 @@ void AccountForm::OnNotifyConnectionState(int state, QString msg)
 
 void AccountForm::OnNotifyFillAutoLogin(int game, QString user, QString pwd, QString gid,
                                         int bigserver, int server, int character,
-                                        bool autologin, bool skipupdate, bool autochangeserver,bool autokillgame,
+                                        bool autologin, bool skipupdate, bool autochangeserver,bool autokillgame,int loginduration,
                                         bool create_chara, int create_chara_chara, int create_chara_eye, int create_chara_mou, int create_chara_color,
                                         QString create_chara_points, QString create_chara_elements, QString create_chara_name)
 {
@@ -579,6 +590,12 @@ void AccountForm::OnNotifyFillAutoLogin(int game, QString user, QString pwd, QSt
 
     if(autokillgame)
         ui->checkBox_autoKillGame->setChecked(true);
+
+    if(loginduration >= 0 && loginduration <= 120)
+    {
+        ui->horizontalSlider_loginDuration->setValue(loginduration);
+        on_horizontalSlider_loginDuration_valueChanged(loginduration)
+    }
 
     if(create_chara)
     {
@@ -794,3 +811,9 @@ void AccountForm::on_checkBox_createChara_stateChanged(int arg1)
         ui->lineEdit_CharaElements->setEnabled(false);
     }
 }
+
+void AccountForm::on_horizontalSlider_loginDuration_valueChanged(int value)
+{
+    ui->label_loginDuration->setText(tr("Login Duration:\n%1 s").arg( value ));
+}
+
