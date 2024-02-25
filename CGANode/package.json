@@ -5,9 +5,9 @@
   "main": "cgaapi.js",
   "private": true,
   "dependencies": {
+    "async": "latest",
     "bindings": "~1.2.1",
-    "nan": "^2.0.0",
-	"async": "latest"
+    "nan": "^2.18.0"
   },
   "scripts": {
     "test": "node cgaapi.js"

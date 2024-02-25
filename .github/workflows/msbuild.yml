@@ -89,7 +89,7 @@ jobs:
         if exist "%InstallDir%\Common7\Tools\vsdevcmd.bat" (  
           "%InstallDir%\Common7\Tools\vsdevcmd.bat" -arch=x86 -winsdk=10.0.17763.0
           cd qhttp
-          qmake qhttp.pro -spec win32-msvc "CONFIG+=32bit release" "CONFIG+=qtquickcompiler" "INCLUDEPATH+=%GITHUB_WORKSPACE%\winsdk\Include\10.0.17763.0\ucrt" "LIBS += -L%GITHUB_WORKSPACE%\winsdk\Lib\10.0.17763.0\um\x86" "LIBS += -L%GITHUB_WORKSPACE%\winsdk\Lib\10.0.17763.0\ucrt\x86"
+          qmake qhttp.pro -spec win32-msvc "CONFIG+=32bit" "CONFIG+=qtquickcompiler release" "INCLUDEPATH+=%GITHUB_WORKSPACE%\winsdk\Include\10.0.17763.0\ucrt" "LIBS += -L%GITHUB_WORKSPACE%\winsdk\Lib\10.0.17763.0\um\x86" "LIBS += -L%GITHUB_WORKSPACE%\winsdk\Lib\10.0.17763.0\ucrt\x86"
           "${{env.Qt5_Dir}}/../../Tools/QtCreator/bin/jom/jom.exe" -f MakeFile qmake_all
           "${{env.Qt5_Dir}}/../../Tools/QtCreator/bin/jom/jom.exe"
           copy "%GITHUB_WORKSPACE%\qhttp\xbin\qhttp.dll" "%GITHUB_WORKSPACE%\build\"
@@ -105,7 +105,7 @@ jobs:
         if exist "%InstallDir%\Common7\Tools\vsdevcmd.bat" (
           "%InstallDir%\Common7\Tools\vsdevcmd.bat" -arch=x86 -winsdk=10.0.17763.0
           cd CGAssistant
-          qmake CGAssistant.pro -spec win32-msvc "CONFIG+=32bit release" "CONFIG+=qtquickcompiler" "INCLUDEPATH+=%GITHUB_WORKSPACE%\winsdk\Include\10.0.17763.0\ucrt" "LIBS += -L%GITHUB_WORKSPACE%\winsdk\Lib\10.0.17763.0\um\x86" "LIBS += -L%GITHUB_WORKSPACE%\winsdk\Lib\10.0.17763.0\ucrt\x86"
+          qmake CGAssistant.pro -spec win32-msvc "CONFIG+=32bit" "CONFIG+=qtquickcompiler release" "INCLUDEPATH+=%GITHUB_WORKSPACE%\winsdk\Include\10.0.17763.0\ucrt" "LIBS += -L%GITHUB_WORKSPACE%\winsdk\Lib\10.0.17763.0\um\x86" "LIBS += -L%GITHUB_WORKSPACE%\winsdk\Lib\10.0.17763.0\ucrt\x86"
           "${{env.Qt5_Dir}}/../../Tools/QtCreator/bin/jom/jom.exe" -f MakeFile qmake_all
           "${{env.Qt5_Dir}}/../../Tools/QtCreator/bin/jom/jom.exe"
           copy "%GITHUB_WORKSPACE%\CGassistant\release\CGassistant.exe" "%GITHUB_WORKSPACE%\build\"
@@ -124,17 +124,7 @@ jobs:
 
     - name: Build node-gyp
       working-directory: ${{env.GITHUB_WORKSPACE}}
-      run: |
-        for /f "usebackq tokens=*" %%i in (`vswhere -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath`) do (
-          set InstallDir=%%i
-        )
-        if exist "%InstallDir%\Common7\Tools\vsdevcmd.bat" (
-          "%InstallDir%\Common7\Tools\vsdevcmd.bat" -arch=x86
-          cd CGANode
-          call node-gyp configure build --arch=ia32
-          mkdir "..\build\Release\"
-          copy "build\Release\node_cga.node" "..\build\Release\"
-        )
+      run: build-CGANode.bat
       shell: cmd
 
     - name: Deploy qt and msvc redistribution
