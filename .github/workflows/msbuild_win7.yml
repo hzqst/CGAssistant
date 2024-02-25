@@ -118,18 +118,20 @@ jobs:
         node-version: '14.16'
         architecture: 'x86'
 
-    - name: Set up Python 2.7
+    - name: Install node-gyp
+      working-directory: ${{env.GITHUB_WORKSPACE}}
       uses: actions/setup-python@v2
       with:
         python-version: '3.1.4'
         architecture: 'x86'
-
-    - name: Install node-gyp
-      working-directory: ${{env.GITHUB_WORKSPACE}}
       run: npm install -g node-gyp
 
     - name: Build node-gyp
       working-directory: ${{env.GITHUB_WORKSPACE}}
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.1.4'
+        architecture: 'x86'
       run: build-nodegyp.bat
       shell: cmd
 
