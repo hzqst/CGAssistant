@@ -89,7 +89,7 @@ jobs:
         if exist "%InstallDir%\Common7\Tools\vsdevcmd.bat" (  
           "%InstallDir%\Common7\Tools\vsdevcmd.bat" -arch=x86 -winsdk=10.0.17763.0
           cd qhttp
-          qmake qhttp.pro -spec win32-msvc "CONFIG+=32bit" "CONFIG+=qtquickcompiler" "INCLUDEPATH+=%GITHUB_WORKSPACE%\winsdk\Include\10.0.17763.0\ucrt" "LIBS += -L%GITHUB_WORKSPACE%\winsdk\Lib\10.0.17763.0\um\x86" "LIBS += -L%GITHUB_WORKSPACE%\winsdk\Lib\10.0.17763.0\ucrt\x86"
+          qmake qhttp.pro -spec win32-msvc "CONFIG+=32bit release" "CONFIG+=qtquickcompiler" "INCLUDEPATH+=%GITHUB_WORKSPACE%\winsdk\Include\10.0.17763.0\ucrt" "LIBS += -L%GITHUB_WORKSPACE%\winsdk\Lib\10.0.17763.0\um\x86" "LIBS += -L%GITHUB_WORKSPACE%\winsdk\Lib\10.0.17763.0\ucrt\x86"
           "${{env.Qt5_Dir}}/../../Tools/QtCreator/bin/jom/jom.exe" -f MakeFile qmake_all
           "${{env.Qt5_Dir}}/../../Tools/QtCreator/bin/jom/jom.exe"
           copy "%GITHUB_WORKSPACE%\qhttp\xbin\qhttp.dll" "%GITHUB_WORKSPACE%\build\"
@@ -105,7 +105,7 @@ jobs:
         if exist "%InstallDir%\Common7\Tools\vsdevcmd.bat" (
           "%InstallDir%\Common7\Tools\vsdevcmd.bat" -arch=x86 -winsdk=10.0.17763.0
           cd CGAssistant
-          qmake CGAssistant.pro -spec win32-msvc "CONFIG+=32bit" "CONFIG+=qtquickcompiler" "INCLUDEPATH+=%GITHUB_WORKSPACE%\winsdk\Include\10.0.17763.0\ucrt" "LIBS += -L%GITHUB_WORKSPACE%\winsdk\Lib\10.0.17763.0\um\x86" "LIBS += -L%GITHUB_WORKSPACE%\winsdk\Lib\10.0.17763.0\ucrt\x86"
+          qmake CGAssistant.pro -spec win32-msvc "CONFIG+=32bit release" "CONFIG+=qtquickcompiler" "INCLUDEPATH+=%GITHUB_WORKSPACE%\winsdk\Include\10.0.17763.0\ucrt" "LIBS += -L%GITHUB_WORKSPACE%\winsdk\Lib\10.0.17763.0\um\x86" "LIBS += -L%GITHUB_WORKSPACE%\winsdk\Lib\10.0.17763.0\ucrt\x86"
           "${{env.Qt5_Dir}}/../../Tools/QtCreator/bin/jom/jom.exe" -f MakeFile qmake_all
           "${{env.Qt5_Dir}}/../../Tools/QtCreator/bin/jom/jom.exe"
           copy "%GITHUB_WORKSPACE%\CGassistant\release\CGassistant.exe" "%GITHUB_WORKSPACE%\build\"
@@ -115,7 +115,7 @@ jobs:
     - name: Setup node environment
       uses: actions/setup-node@v2
       with:
-        node-version: '14.16'
+        node-version: '20.11.1'
         architecture: 'x86'
 
     - name: Install node-gyp

@@ -8,7 +8,7 @@ if exist "%InstallDir%\Common7\Tools\vsdevcmd.bat" (
 
     cd qhttp
 
-    qmake qhttp.pro -spec win32-msvc "CONFIG+=qtquickcompiler"
+    qmake qhttp.pro -spec win32-msvc "CONFIG+=qtquickcompiler release"
 
     jom -f MakeFile qmake_all
 

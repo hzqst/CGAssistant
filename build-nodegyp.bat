@@ -1,6 +1,6 @@
 cd /d "%~dp0"
 
-for /f "usebackq tokens=*" %%i in (`vswhere -version [15^,16^) -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath`) do (
+for /f "usebackq tokens=*" %%i in (`vswhere -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath`) do (
   set InstallDir=%%i
 )
 
