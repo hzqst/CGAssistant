@@ -118,19 +118,23 @@ jobs:
         node-version: '14.16'
         architecture: 'x86'
 
-    - name: Install node-gyp
-      working-directory: ${{env.GITHUB_WORKSPACE}}
-      run: npm install -g node-gyp
-
     - name: Set up Python
       uses: actions/setup-python@v5
       with:
-        python-version: '3.6.7'
+        python-version: '2.7'
         architecture: 'x86'
 
     - name: Set NODE_GYP_FORCE_PYTHON Environment Variable
       run: echo "NODE_GYP_FORCE_PYTHON=$(python -c "import sys; print(sys.executable)")" >> $Env:GITHUB_ENV
       shell: powershell
+
+    - name: Install node-gyp
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      run: npm install -g node-gyp
+      shell: cmd
+      env:
+        NODE_GYP_FORCE_PYTHON: ${{ env.NODE_GYP_FORCE_PYTHON }}
+        npm_config_python: ${{ env.NODE_GYP_FORCE_PYTHON }}
 
     - name: Build node-gyp
       working-directory: ${{env.GITHUB_WORKSPACE}}
@@ -138,6 +142,7 @@ jobs:
       shell: cmd
       env:
         NODE_GYP_FORCE_PYTHON: ${{ env.NODE_GYP_FORCE_PYTHON }}
+        npm_config_python: ${{ env.NODE_GYP_FORCE_PYTHON }}
 
     - name: Deploy qt and msvc redistribution
       working-directory: ${{env.GITHUB_WORKSPACE}}
