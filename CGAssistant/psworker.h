@@ -59,9 +59,9 @@ signals:
     void NotifyQueryProcess(CProcessItemList list);
     //void NotifyServerShutdown(int port);
 private:
-    bool IsProcessAttached(quint32 ProcessId);
+    bool IsProcessAttached(quint32 ProcessId, quint32 ThreadId);
     bool InjectByMsgHook(quint32 ThreadId, quint32 hWnd, QString &szDllPath, int &errorCode, QString &errorString);
-    bool ReadSharedData(quint32 ProcessId, int &port, quint32 &hWnd);
+    bool ReadSharedData(quint32 ProcessId, quint32 ThreadId, int &port, quint32 &hWnd);
     void ConnectToServer(quint32 ProcessId, quint32 ThreadId, int port, quint32 hWnd);
     bool CreateAttachMutex(quint32 ProcessId, quint32 ThreadId);
     void Disconnect();

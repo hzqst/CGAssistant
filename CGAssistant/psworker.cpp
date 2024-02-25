@@ -22,10 +22,13 @@ CProcessWorker::CProcessWorker(QObject *parent) : QObject(parent)
     qRegisterMetaType<CProcessItemList>("CProcessItemList");
 
     QTimer *timer = new QTimer(this);
+
     connect(timer, SIGNAL(timeout()), this, SLOT(OnQueueQueryProcess()));
     timer->start(500);
-    connect(timer, SIGNAL(timeout()), this, SLOT(OnCheckFreezeProcess()));
-    timer->start(1000);
+
+    QTimer *timer2 = new QTimer(this);
+    connect(timer2, SIGNAL(timeout()), this, SLOT(OnCheckFreezeProcess()));
+    timer2->start(1000);
 
     m_AttachMutex = NULL;
     m_AttachHwnd = 0;
@@ -42,11 +45,12 @@ quint32 CProcessWorker::GetAttachedHwnd()
     return (quint32)m_AttachHwnd;
 }
 
-bool CProcessWorker::IsProcessAttached(quint32 ProcessId)
+bool CProcessWorker::IsProcessAttached(quint32 ProcessId, quint32 ThreadId)
 {
     bool bAttached = false;
-    WCHAR szMutex[32];
-    wsprintfW(szMutex, L"CGAAttachMutex_%d", ProcessId);
+
+    WCHAR szMutex[64];
+    wsprintfW(szMutex, L"CGAAttachMutex_%d_%d", ProcessId, ThreadId);
     HANDLE hAttachMutex = OpenMutexW(MUTEX_ALL_ACCESS, FALSE, szMutex);
     if(hAttachMutex)
     {
@@ -97,12 +101,12 @@ bool CProcessWorker::InjectByMsgHook(quint32 ThreadId, quint32 hWnd, QString &dl
     return (errorCode == 0) ? true : false;
 }
 
-bool CProcessWorker::ReadSharedData(quint32 ProcessId, int &port, quint32 &hWnd)
+bool CProcessWorker::ReadSharedData(quint32 ProcessId, quint32 ThreadId, int &port, quint32 &hWnd)
 {
     bool bSuccess = false;
 
     WCHAR szLockName[32];
-    wsprintfW(szLockName, L"CGASharedDataLock_%d", ProcessId);
+    wsprintfW(szLockName, L"CGASharedDataLock_%d_%d", ProcessId, ThreadId);
 
     HANDLE hDataLock = OpenMutexW(MUTEX_ALL_ACCESS, FALSE, szLockName);
     if(hDataLock)
@@ -110,7 +114,7 @@ bool CProcessWorker::ReadSharedData(quint32 ProcessId, int &port, quint32 &hWnd)
         if(WAIT_OBJECT_0 == WaitForSingleObject(hDataLock, 500))
         {
             WCHAR szMappingName[32];
-            wsprintfW(szMappingName, L"CGASharedData_%d", ProcessId);
+            wsprintfW(szMappingName, L"CGASharedData_%d_%d", ProcessId, ThreadId);
             HANDLE hFileMapping = CreateFileMappingW(INVALID_HANDLE_VALUE, NULL, PAGE_READONLY, 0, sizeof(CGA::CGAShare_t), szMappingName);
             if (hFileMapping)
             {
@@ -122,6 +126,7 @@ bool CProcessWorker::ReadSharedData(quint32 ProcessId, int &port, quint32 &hWnd)
                     port = data->Port;
                     hWnd = (quint32)data->hWnd;
                     bSuccess = true;
+
                     UnmapViewOfFile(pViewOfFile);
                 }
                 CloseHandle(hFileMapping);
@@ -140,7 +145,7 @@ void CProcessWorker::OnRetryAttachProcess()
 
     int port = 0;
     quint32 hwnd = 0;
-    if(!ReadSharedData(timer->m_ProcessId, port, hwnd))
+    if(!ReadSharedData(timer->m_ProcessId, timer->m_ThreadId, port, hwnd))
     {
         if(timer->m_retry > 10)
         {
@@ -186,6 +191,7 @@ void CProcessWorker::ConnectToServer(quint32 ProcessId, quint32 ThreadId, int po
 void CProcessWorker::Disconnect()
 {
     g_CGAInterface->Disconnect();
+
     if(m_AttachMutex != NULL)
     {
         CloseHandle(m_AttachMutex);
@@ -200,22 +206,22 @@ void CProcessWorker::OnAutoAttachProcess(quint32 ProcessId, quint32 ThreadId)
     m_AutoAttachPID = ProcessId;
     m_AutoAttachTID = ThreadId;
 
-    qDebug("OnAutoAttachProcess %d %d", ProcessId, ThreadId);
+   // qDebug("OnAutoAttachProcess %d %d", ProcessId, ThreadId);
 }
 
 void CProcessWorker::OnQueueAttachProcess(quint32 ProcessId, quint32 ThreadId, quint32 hWnd, QString dllPath)
 {
-    qDebug("OnQueueAttachProcess %d %d", ProcessId, ThreadId);
+    //qDebug("OnQueueAttachProcess %d %d", ProcessId, ThreadId);
 
     int port = 0;
     quint32 hwnd = 0;
-    if(!ReadSharedData(ProcessId, port, hwnd))
+    if(!ReadSharedData(ProcessId, ThreadId, port, hwnd))
     {
         int errorCode = -1;
         QString errorString;
         if(!InjectByMsgHook(ThreadId, hWnd, dllPath, errorCode, errorString))
         {
-            qDebug("OnQueueAttachProcess %d %d, failed to InjectByMsgHook", ProcessId, ThreadId);
+            //qDebug("OnQueueAttachProcess %d %d, failed to InjectByMsgHook", ProcessId, ThreadId);
             NotifyAttachProcessFailed(ProcessId, ThreadId, errorCode, errorString);
             return;
         }
@@ -225,7 +231,7 @@ void CProcessWorker::OnQueueAttachProcess(quint32 ProcessId, quint32 ThreadId, q
     }
     else
     {
-        qDebug("OnQueueAttachProcess %d %d, failed to ReadSharedData", ProcessId, ThreadId);
+        //qDebug("OnQueueAttachProcess %d %d, failed to ReadSharedData", ProcessId, ThreadId);
 
         //Already attached to game
         Disconnect();
@@ -235,16 +241,18 @@ void CProcessWorker::OnQueueAttachProcess(quint32 ProcessId, quint32 ThreadId, q
 
 bool CProcessWorker::CreateAttachMutex(quint32 ProcessId, quint32 ThreadId)
 {
-    WCHAR szMutex[32];
-    wsprintfW(szMutex, L"CGAAttachMutex_%d", ProcessId);
-    auto AttachMutex = CreateMutexW(NULL, TRUE, szMutex);
-    if(AttachMutex == NULL)
+    WCHAR szMutex[64];
+    wsprintfW(szMutex, L"CGAAttachMutex_%d_%d", ProcessId, ThreadId);
+
+    auto hAttachMutex = CreateMutexW(NULL, TRUE, szMutex);
+
+    if(hAttachMutex == NULL)
     {
         NotifyAttachProcessFailed(ProcessId, ThreadId, -4, tr("Game already attached by another instance of CGAssistant."));
         return false;
     }
 
-    m_AttachMutex = AttachMutex;
+    m_AttachMutex = hAttachMutex;
     return true;
 }
 
@@ -255,22 +263,24 @@ void CProcessWorker::OnQueueQueryProcess()
     const wchar_t szFindGameClass[] = { 39764, 21147, 23453, 36125, 0 };
 
     HWND hWnd = NULL;
-    DWORD pid, tid;
+    DWORD pid = 0, tid = 0;
     WCHAR szText[256];
+    DWORD dwCurrentPID = GetCurrentProcessId();
 
     while ((hWnd = FindWindowExW(NULL, hWnd, szFindGameClass, NULL)) != NULL)
     {
-        if((tid = GetWindowThreadProcessId(hWnd, (LPDWORD)&pid)) != 0 && pid != GetCurrentProcessId())
+        if((tid = GetWindowThreadProcessId(hWnd, (LPDWORD)&pid)) != 0 && pid != dwCurrentPID)
         {
             if(GetWindowTextW(hWnd, szText, 256))
             {
-                bool attached = IsProcessAttached(pid);
+                bool attached = IsProcessAttached(pid, tid);
+
                 CProcessItemPtr item(new CProcessItem((quint32)pid, (quint32)tid, (quint32)hWnd, szText, attached));
                 list.append(item);
 
                 if(!attached && m_AutoAttachPID == pid && m_AutoAttachTID == tid){
 
-                    qDebug("OnQueueAttachProcess %d %d", (quint32)pid, (quint32)tid);
+                    //qDebug("OnQueueAttachProcess %d %d", (quint32)pid, (quint32)tid);
 
                     OnQueueAttachProcess( (quint32)pid, (quint32)tid, (quint32)hWnd, QString("cgahook.dll") );
 
@@ -286,7 +296,9 @@ void CProcessWorker::OnQueueQueryProcess()
                     if(ReadSharedData(pid, port, hwnd) && g_CGAInterface->IsConnected() && g_CGAInterface->GetPort() == port)
                     {
                         if(hwnd != GetAttachedHwnd()){
-                            qDebug("Should not connect to port %d, disconnect", port);
+
+                            //qDebug("Should not connect to port %d, disconnect", port);
+
                             g_CGAInterface->Disconnect();
                         }
                     }

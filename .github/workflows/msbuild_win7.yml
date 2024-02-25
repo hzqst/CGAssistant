@@ -118,6 +118,11 @@ jobs:
         node-version: '14.16'
         architecture: 'x86'
 
+    - name: Set up Python 2.7
+      uses: actions/setup-python@v2
+      with:
+        python-version: '2.7'
+
     - name: Install node-gyp
       working-directory: ${{env.GITHUB_WORKSPACE}}
       run: npm install -g node-gyp

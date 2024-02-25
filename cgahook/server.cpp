@@ -15,6 +15,7 @@ extern CGA::CGAService g_CGAService;
 
 extern int g_MainPort;
 extern HWND g_MainHwnd;
+extern ULONG g_MainProcessId;
 extern ULONG g_MainThreadId;
 extern HANDLE g_hQuitEvent;
 extern HANDLE g_hPortMutex;
@@ -125,14 +126,12 @@ BOOL CGA_CreatePortMutex(int port)
 
 void CGA_CreateSharedData(int port)
 {
-	ULONG ProcessId = GetCurrentProcessId();
-
 	WCHAR szLockName[64];	
-	wsprintfW(szLockName, L"CGASharedDataLock_%d", ProcessId);
+	wsprintfW(szLockName, L"CGASharedDataLock_%d_%d", g_MainProcessId, g_MainThreadId);
 	g_hDataLock = CreateMutexW(NULL, TRUE, szLockName);
 
 	WCHAR szMappingName[64];
-	wsprintfW(szMappingName, L"CGASharedData_%d", ProcessId);
+	wsprintfW(szMappingName, L"CGASharedData_%d_%d", g_MainProcessId, g_MainThreadId);
 	g_hFileMapping = CreateFileMappingW(INVALID_HANDLE_VALUE, NULL, PAGE_READWRITE, 0, sizeof(CGA::CGAShare_t), szMappingName);
 	if (g_hFileMapping && GetLastError() != ERROR_ALREADY_EXISTS)
 	{
@@ -141,7 +140,7 @@ void CGA_CreateSharedData(int port)
 		{
 			CGA::CGAShare_t *data = (CGA::CGAShare_t *)pViewOfFile;
 
-			data->ProcessId = ProcessId;
+			data->ProcessId = g_MainProcessId;
 			data->ThreadId = g_MainThreadId;
 			data->hWnd = (int)g_MainHwnd;
 			data->Port = port;
