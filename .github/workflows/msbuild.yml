@@ -148,6 +148,13 @@ jobs:
         repository: 'hzqst/CGAssistantJS'
         path: 'CGAssistantJS'
 
+    - name: npm install in CGAssistantJS
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      run: |
+        cd CGAssistantJS
+        npm install
+      shell: cmd
+
     - name: Copy CGAssistantJS to Output
       working-directory: ${{env.GITHUB_WORKSPACE}}
       run: |
