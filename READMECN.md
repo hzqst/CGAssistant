@@ -36,17 +36,13 @@ QQ群: 300303705
 
 ## 编译前置需求
 
-1. [Visual Studio 2017, 和 vc141 工具集](https://visualstudio.microsoft.com/)
+1. [Visual Studio 2019, 和 vc142 工具集, 和 Windows SDK](https://visualstudio.microsoft.com/)
 
-2. [Windows 10 SDK](https://developer.microsoft.com/en-us/windows/downloads/windows-sdk/)
+2. [QT 5.12 for msvc2017, 32位版本 (x86), 以及 QtCreator](https://www.qt.io/download)
 
-3. [QT 5.12 for msvc2017, 32位版本 (x86), 以及 QtCreator](https://www.qt.io/download)
+3. [NodeJS v20.11.1 LTS (32位)](https://nodejs.org/)
 
-4. [NodeJS v14.16 (32位)](https://nodejs.org/download/release/v14.16.0/)
-
-5. [node-gyp](https://www.npmjs.com/package/node-gyp)
-
-* QT 5.15 + Visual Studio 2019 也是可以的，但你需要自己调整`build-*.bat`中的配置，让`vswhere`定位到vs2019而非vs2017。
+4. [node-gyp](https://www.npmjs.com/package/node-gyp)
 
 ## 编译
 

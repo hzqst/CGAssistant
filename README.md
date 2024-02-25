@@ -30,17 +30,13 @@ This project is licensed under MIT License, however if it is otherwise stated be
 
 ## Build Requirement
 
-1. [Visual Studio 2017, with vc141 toolset](https://visualstudio.microsoft.com/)
+1. [Visual Studio 2019, with vc142 toolset, with Windows SDK](https://visualstudio.microsoft.com/)
 
-3. [Windows 10 SDK](https://developer.microsoft.com/en-us/windows/downloads/windows-sdk/)
+2. [QT 5.15 win32 (x86) for msvc2019, with QtCreator](https://www.qt.io/download)
 
-4. [QT 5.12 for msvc2017, win32 (x86), with QtCreator](https://www.qt.io/download)
+3. [NodeJS v20.11.1 LTS (32-bit)](https://nodejs.org/)
 
-5. [NodeJS v14.16 (32-bit)](https://nodejs.org/download/release/v14.16.0/)
-
-6. [node-gyp](https://www.npmjs.com/package/node-gyp)
-
-* QT 5.15 with Visual Studio 2019 also works but you will need to configure `build-*.bat` by yourself and force `vswhere` to locate Visual Studio 2019 instead of Visual Studio 2017
+4. [node-gyp](https://www.npmjs.com/package/node-gyp)
 
 ## Build Instruction
 
@@ -54,7 +50,7 @@ Let's assume that you have all requirements installed correctly.
 
 3. Run "build-boost.bat", wait until all boost static libs are generated. (this may takes couple of minutes, depending on your CPU performance)
 
-4. Run "build-CGAHook.bat", wait until "CGAHook.dll" is generated under "build" directory. Remember to redirect the Windows SDK version for msvc project if you have installed a different version of Windows SDK other than "10.0.17763.0".
+4. Run "build-CGAHook.bat", wait until "CGAHook.dll" is generated under "build" directory.
 
 5. Run "build-qhttp.bat", wait until "qhttp.dll" generated under "build" directory.
 
