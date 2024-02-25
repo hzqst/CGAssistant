@@ -1,4 +1,4 @@
-name: MSBuild
+name: MSBuild_win7
 
 on:
   push:
@@ -115,7 +115,7 @@ jobs:
     - name: Setup node environment
       uses: actions/setup-node@v2
       with:
-        node-version: '20.11.1'
+        node-version: '14.16'
         architecture: 'x86'
 
     - name: Install node-gyp
@@ -168,7 +168,7 @@ jobs:
       uses: hzqst/action-zip@master
       with:
         files: Output/
-        dest: CGAssistant-windows-x86-win10.zip
+        dest: CGAssistant-windows-x86-win7.zip
 
     - name: Create Release
       uses: softprops/action-gh-release@v1
@@ -176,4 +176,4 @@ jobs:
       with:
         name: CGAssistant-${{ github.ref }}
         files: |
-          CGAssistant-windows-x86-win10.zip
+          CGAssistant-windows-x86-win7.zip
