@@ -140,7 +140,8 @@ jobs:
     - name: Copy Build to Output
       working-directory: ${{env.GITHUB_WORKSPACE}}
       run: |
-        copy "node.exe" "Output" /y
+        for /f "delims=" %%i in ('where node') do set NODE_PATH=%%i
+        copy "%NODE_PATH%" "Output\node.exe" /y
         xcopy "build" "Output" /y /e
       shell: cmd
 
