@@ -143,11 +143,12 @@ jobs:
       shell: cmd
 
     - name: Copy node.exe
+      working-directory: ${{env.GITHUB_WORKSPACE}}
       run: |
         echo "Current PATH: $env:PATH"
         $nodePath = (Get-Command node).Source
         echo "Node.js path: $nodePath"
-        Copy-Item -Path $nodePath -Destination "${{env.GITHUB_WORKSPACE}}/Output/node.exe" -Force
+        Copy-Item -Path $nodePath -Destination "Output/node.exe" -Force
       shell: pwsh
 
     - name: Checkout CGAssistantJS
