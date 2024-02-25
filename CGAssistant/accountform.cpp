@@ -594,7 +594,7 @@ void AccountForm::OnNotifyFillAutoLogin(int game, QString user, QString pwd, QSt
     if(loginduration >= 0 && loginduration <= 120)
     {
         ui->horizontalSlider_loginDuration->setValue(loginduration);
-        on_horizontalSlider_loginDuration_valueChanged(loginduration)
+        on_horizontalSlider_loginDuration_valueChanged(loginduration);
     }
 
     if(create_chara)
