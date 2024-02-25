@@ -1608,6 +1608,17 @@ void __cdecl NewNET_ParseWorkingResult(int a1, int success, int type, const char
 void CGAService::NewNET_ParseChatMsg(int a1, int unitid, const char *buf, int color, int size)
 {
 	//WriteLog("NewNET_ParseChatMsg u=%d, buf=%s, color=%d, size=%d\n", unitid, buf, color, size);
+	if (m_ui_block_chatmsgs > 0 && buf[0] == 'P' && buf[1] == '|')
+	{
+		if (m_ui_block_chatmsgs >= 2)
+			return;
+
+		if (m_ui_block_chatmsgs == 1)
+		{
+			if (!IsPlayerInTeam(unitid))
+				return;
+		}
+	}
 
 	if (buf[0] == 'P' && buf[1] == '|')
 	{
@@ -1639,18 +1650,6 @@ bool CGAService::IsPlayerInTeam(int unitId)
 
 void __cdecl NewNET_ParseChatMsg(int a1, int unitid, const char *buf, int color, int size)
 {
-	if (g_CGAService.m_ui_block_chatmsgs > 0 && buf[0] == 'P' && buf[1] == '|' && unitid != -1)
-	{
-		if(g_CGAService.m_ui_block_chatmsgs >= 2)
-			return;
-
-		if (g_CGAService.m_ui_block_chatmsgs == 1)
-		{
-			if(!g_CGAService.IsPlayerInTeam(unitid))
-				return;
-		}
-	}
-
 	g_CGAService.NewNET_ParseChatMsg(a1, unitid, buf, color, size);
 }
 
