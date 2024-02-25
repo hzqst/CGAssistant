@@ -198,7 +198,7 @@ CGA_PID=#%1, POLCN_PID=#%2, GID=%3</source>
     </message>
     <message>
         <source>Log. Duration</source>
-        <translation>登录间隔</translation>
+        <translation type="vanished">登录间隔</translation>
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The minimum duration between two login query. (unit: second)&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
@@ -207,7 +207,15 @@ CGA_PID=#%1, POLCN_PID=#%2, GID=%3</source>
     <message>
         <source>Login Duration:
 %1 s</source>
-        <translation>登录间隔:\n%1 秒</translation>
+        <translation type="vanished">登录间隔:\n%1 秒</translation>
+    </message>
+    <message>
+        <source>%1 s</source>
+        <translation>%1 秒</translation>
+    </message>
+    <message>
+        <source>Login Duration</source>
+        <translation>登录间隔</translation>
     </message>
 </context>
 <context>

@@ -115,7 +115,7 @@ AccountForm::AccountForm(QWidget *parent) :
     m_game_tid = 0;
     m_serverid = 0;
 
-    ui->label_loginDuration->setText(tr("Login Duration:\n%1 s").arg( ui->horizontalSlider_loginDuration->value() ));
+    ui->label_loginDuration->setText(tr("%1 s").arg( ui->horizontalSlider_loginDuration->value() ));
 }
 
 AccountForm::~AccountForm()
@@ -130,7 +130,7 @@ bool AccountForm::IsGltExpired()
     if(m_glt.isEmpty())
         return true;
 
-    if(m_loginresult.elapsed() > 1000*60)
+    if(m_loginresult.isValid() && m_loginresult.elapsed() > 1000*60)
         return true;
 
     if(m_glt_map && m_glt_lock)
@@ -156,7 +156,7 @@ bool AccountForm::IsGltExpired()
 
 void AccountForm::OnAutoLogin()
 {
-    if(m_loginquery.elapsed() > 15 * 1000)
+    if(m_loginquery.isValid() && m_loginquery.elapsed() > 15 * 1000)
     {
         if(m_POLCN->state() == QProcess::ProcessState::Running)
         {
@@ -230,7 +230,7 @@ void AccountForm::OnAutoLogin()
                 }
                 else
                 {
-                    if(m_logingame.elapsed() > ui->horizontalSlider_loginDuration->value() * 1000)
+                    if(!m_logingame.isValid() || m_logingame.elapsed() > ui->horizontalSlider_loginDuration->value() * 1000)
                     {
                         on_pushButton_logingame_clicked();
                     }
@@ -330,14 +330,15 @@ void AccountForm::OnPOLCNFinish(int exitCode, QProcess::ExitStatus exitStatus)
                     m_game_pid = (quint32)obj.take("game_pid").toInt();
                     m_game_tid = (quint32)obj.take("game_tid").toInt();
                     NotifyAutoAttachProcess(m_game_pid, m_game_tid);
-                    qDebug("NotifyAutoAttachProcess %d %d", m_game_pid, m_game_tid);
+
+                    //qDebug("NotifyAutoAttachProcess %d %d", m_game_pid, m_game_tid);
 
                     ui->textEdit_output->append(tr("Wait for game process to login...\n"));
                 }
 
                 if(ui->checkBox_autoLogin->isChecked())
                 {
-                    if(m_logingame.elapsed() > ui->horizontalSlider_loginDuration->value() * 1000)
+                    if(!m_logingame.isValid() || m_logingame.elapsed() > ui->horizontalSlider_loginDuration->value() * 1000)
                     {
                         on_pushButton_logingame_clicked();
                     }
@@ -420,7 +421,8 @@ bool AccountForm::QueryAccount(QString &label, QString &errorMsg)
 
     //qDebug("query");
 
-    m_loginquery = QTime::currentTime();
+    //m_loginquery = QTime::currentTime();
+    m_loginquery.start();
     m_StdOut.clear();
 
     QString argstr = QString("-account %1 -pwd %2 -gametype %3 -rungame %4 -skipupdate %5")
@@ -518,7 +520,8 @@ void AccountForm::on_pushButton_logingame_clicked()
                                         ui->comboBox_character->currentData().toInt());
 
 
-        m_logingame = QTime::currentTime();
+        //m_logingame = QTime::currentTime();
+        m_logingame.start();
     }
 }
 
@@ -723,6 +726,15 @@ void AccountForm::OnHttpLoadAccount(QString query, QByteArray postdata, QJsonDoc
               on_checkBox_createChara_stateChanged(qautocreatechara.toBool() ? 1 : 0);
             }
        }
+       if(newobj.contains("loginduration")){
+           auto qloginduration = newobj.take("loginduration");
+
+           int val_loginduration = qloginduration.toInt();
+           if(val_loginduration >= 0 && val_loginduration <= 120){
+               ui->horizontalSlider_loginDuration->setValue(val_loginduration);
+               on_horizontalSlider_loginDuration_valueChanged(val_loginduration);
+           }
+       }
        if(newobj.contains("createcharachara")){
            auto qcreatecharachara = newobj.take("createcharachara");
 
@@ -814,6 +826,6 @@ void AccountForm::on_checkBox_createChara_stateChanged(int arg1)
 
 void AccountForm::on_horizontalSlider_loginDuration_valueChanged(int value)
 {
-    ui->label_loginDuration->setText(tr("Login Duration:\n%1 s").arg( value ));
+    ui->label_loginDuration->setText(tr("%1 s").arg( value ));
 }
 
