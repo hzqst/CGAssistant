@@ -125,7 +125,7 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v5
       with:
-        python-version: '3.1.4'
+        python-version: '3.6.7'
         architecture: 'x86'
 
     - name: Set NODE_GYP_FORCE_PYTHON Environment Variable
