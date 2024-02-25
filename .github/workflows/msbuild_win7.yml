@@ -127,8 +127,17 @@ jobs:
       with:
         python-version: '3.1.4'
         architecture: 'x86'
-    - run: build-nodegyp.bat
+
+    - name: Set NODE_GYP_FORCE_PYTHON Environment Variable
+      run: echo "NODE_GYP_FORCE_PYTHON=$(python -c "import sys; print(sys.executable)")" >> $Env:GITHUB_ENV
+      shell: powershell
+
+    - name: Build node-gyp
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      run: build-nodegyp.bat
       shell: cmd
+      env:
+        NODE_GYP_FORCE_PYTHON: ${{ env.NODE_GYP_FORCE_PYTHON }}
 
     - name: Deploy qt and msvc redistribution
       working-directory: ${{env.GITHUB_WORKSPACE}}
