@@ -100,7 +100,7 @@ int main(int argc, char *argv[])
 
     QCommandLineOption scriptfreezestop("scriptfreezestop");
 
-    QCommandLineOption scriptautoterm("scriptautoterm");
+    QCommandLineOption scriptfreezestop2("scriptfreezestop2");
 
     QCommandLineOption injuryprotect("injuryprotect");
 
@@ -115,8 +115,6 @@ int main(int argc, char *argv[])
     QCommandLineOption scriptfreezeduration("scriptfreezeduration", "", "scriptfreezeduration", "60");
 
     QCommandLineOption chatmaxlines("chatmaxlines", "", "chatmaxlines", "100");
-
-    QCommandLineOption blockchatmsgs("blockchatmsgs", "", "blockchatmsgs");
 
     QCommandLineParser parser;
 
@@ -143,9 +141,9 @@ int main(int argc, char *argv[])
     parser.addOption(createcharaname);
     parser.addOption(loadscript);
     parser.addOption(scriptfreezestop);
+    parser.addOption(scriptfreezestop2);
     parser.addOption(scriptautorestart);
     parser.addOption(scriptautorestart2);
-    parser.addOption(scriptautoterm);
     parser.addOption(injuryprotect);
     parser.addOption(soulprotect);
     parser.addOption(loadsettings);
@@ -153,7 +151,6 @@ int main(int argc, char *argv[])
     parser.addOption(consolemaxlines);
     parser.addOption(scriptfreezeduration);
     parser.addOption(chatmaxlines);
-    parser.addOption(blockchatmsgs);
     parser.process(a);
 
     QTranslator translator;
@@ -291,19 +288,11 @@ int main(int argc, char *argv[])
 
     w.NotifyFillLoadScript(parser.value(loadscript),
                            parser.isSet(scriptautorestart2) ?  2 : ( parser.isSet(scriptautorestart) ? 1 : 0 ) ,
-                           parser.isSet(scriptfreezestop) ? true : false,
+                           parser.isSet(scriptfreezestop2) ? 2 : ( parser.isSet(scriptfreezestop) ? 1 : 0 ),
                            parser.isSet(injuryprotect) ? true : false,
                            parser.isSet(soulprotect) ? true : false,
                            parser.value(consolemaxlines).toInt(),
                            parser.value(scriptfreezeduration).toInt() );
-
-    bool bHasBlockchatmsgs = false;
-    int val_blockchatmsgs = -1;
-    if(parser.isSet(blockchatmsgs))
-    {
-        val_blockchatmsgs = parser.value(blockchatmsgs).toInt(&bHasBlockchatmsgs);
-    }
-    w.NotifyFillChatSettings(val_blockchatmsgs);
 
     w.NotifyFillLoadSettings(parser.value(loadsettings));
 

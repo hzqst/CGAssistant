@@ -16,7 +16,7 @@ ChatForm::ChatForm(QWidget *parent) :
     ui->textEdit_chat->document()->setMaximumBlockCount(m_ChatMaxLines);
 
     QTimer *timer = new QTimer(this);
-    connect(timer, SIGNAL(timeout()), this, SLOT(OnAutoChat()));
+    connect(timer, SIGNAL(timeout()), this, SLOT(OnTimer()));
     timer->start(1000);
 }
 
@@ -25,11 +25,22 @@ ChatForm::~ChatForm()
     delete ui;
 }
 
-void ChatForm::OnAutoChat()
+void ChatForm::OnTimer()
 {
     if(g_CGAInterface->IsConnected())
     {
-        g_CGAInterface->SetBlockChatMsgs((int)ui->checkBox_BlockChatMsgs->checkState());
+        switch(ui->checkBox_BlockChatMsgs->checkState())
+        {
+        case Qt::CheckState::Checked:
+            g_CGAInterface->SetBlockChatMsgs(2);
+            break;
+        case Qt::CheckState::PartiallyChecked:
+            g_CGAInterface->SetBlockChatMsgs(1);
+            break;
+        case Qt::CheckState::Unchecked:
+            g_CGAInterface->SetBlockChatMsgs(0);
+            break;
+        }
     }
 }
 
@@ -165,20 +176,17 @@ bool ChatForm::ParseChatSettings(const QJsonValue &val)
     if(obj.contains("blockchatmsgs"))
     {
         int val = obj.take("blockchatmsgs").toInt();
-        if(1)
+        if(val == 2)
         {
-            if(val == 2)
-            {
-                ui->checkBox_BlockChatMsgs->setCheckState(Qt::CheckState::Checked);
-            }
-            else if(val == 1)
-            {
-                ui->checkBox_BlockChatMsgs->setCheckState(Qt::CheckState::PartiallyChecked);
-            }
-            else if(val == 0)
-            {
-                ui->checkBox_BlockChatMsgs->setCheckState(Qt::CheckState::Unchecked);
-            }
+            ui->checkBox_BlockChatMsgs->setCheckState(Qt::CheckState::Checked);
+        }
+        else if(val == 1)
+        {
+            ui->checkBox_BlockChatMsgs->setCheckState(Qt::CheckState::PartiallyChecked);
+        }
+        else if(val == 0)
+        {
+            ui->checkBox_BlockChatMsgs->setCheckState(Qt::CheckState::Unchecked);
         }
     }
 
@@ -194,7 +202,18 @@ void ChatForm::on_checkBox_BlockAllChatMsgs_stateChanged(int state)
 {
     if(g_CGAInterface->IsConnected())
     {
-        g_CGAInterface->SetBlockChatMsgs(state);
+        switch(state)
+        {
+        case Qt::CheckState::Checked:
+            g_CGAInterface->SetBlockChatMsgs(2);
+            break;
+        case Qt::CheckState::PartiallyChecked:
+            g_CGAInterface->SetBlockChatMsgs(1);
+            break;
+        case Qt::CheckState::Unchecked:
+            g_CGAInterface->SetBlockChatMsgs(0);
+            break;
+        }
     }
 }
 

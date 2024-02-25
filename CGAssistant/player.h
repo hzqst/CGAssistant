@@ -283,7 +283,6 @@ public slots:
     void OnSetNoSwitchAnim(int state);
     void OnSetGameTextUI(int state);
     void OnSetAntiAFKKick(int state);
-    void OnSetBlockAllChatMsgs(int state);
     void OnDownloadMap(int xsize, int ysize);
     void OnTabChanged(int tabindex);
     void OnSetUseFoodAt(QString str);

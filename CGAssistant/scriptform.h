@@ -41,7 +41,7 @@ private slots:
     void OnNodeReadyRead();
     void OnNodeFinish(int exitCode, QProcess::ExitStatus exitStatus);
     void OnCloseWindow();
-    void OnAutoRestart();
+    void OnTimer();
     void on_pushButton_suspend_clicked();
     void OnSetFreezeDuration(int value);
 

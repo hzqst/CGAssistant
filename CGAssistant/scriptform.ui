@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>673</width>
+    <width>1142</width>
     <height>414</height>
    </rect>
   </property>
@@ -253,7 +253,7 @@
           <item>
            <widget class="QCheckBox" name="checkBox_autorestart">
             <property name="toolTip">
-             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Full-Checked: auto restart script no matter what.&lt;/p&gt;&lt;p&gt;Semi-Checked: auto restart script only when not in battle status.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Full-Checked: Restart script no matter what.&lt;/p&gt;&lt;p&gt;Partially-Checked: Restart script only when current player is not in battle status.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
             </property>
             <property name="text">
              <string>Auto Restart</string>
@@ -272,10 +272,13 @@
              </sizepolicy>
             </property>
             <property name="toolTip">
-             <string>Stop script when player freeze.</string>
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Full-Checked: Stop script when current player's position stays unchanged for &amp;lt;Freeze Duration&amp;gt; seconds no matter what.&lt;/p&gt;&lt;p&gt;Partially-Checked: Stop script when current player's position stays unchanged for &amp;lt;Freeze Duration&amp;gt; seconds only if current player is not in battle state.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
             </property>
             <property name="text">
              <string>Freeze Stop</string>
+            </property>
+            <property name="tristate">
+             <bool>true</bool>
             </property>
            </widget>
           </item>

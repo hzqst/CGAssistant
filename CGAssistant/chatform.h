@@ -32,7 +32,7 @@ private slots:
 
     void on_checkBox_BlockAllChatMsgs_stateChanged(int state);
 
-    void OnAutoChat();
+    void OnTimer();
 private:
     Ui::ChatForm *ui;
     QSharedPointer<CGA_PlayerInfo_t> m_player;

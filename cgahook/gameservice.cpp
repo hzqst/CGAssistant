@@ -1618,10 +1618,38 @@ void CGAService::NewNET_ParseChatMsg(int a1, int unitid, const char *buf, int co
 	NET_ParseChatMsg(a1, unitid, buf, color, size);
 }
 
+bool CGAService::IsPlayerInTeam(int unitId)
+{
+	if (!*g_is_in_team)
+		return false;
+
+	for (int i = 0; i < 5; ++i)
+	{
+		if (g_team_player_base[i].valid)
+		{
+			if (g_team_player_base[i].unit_id == unitId)
+			{
+				return true;
+			}
+		}
+	}
+
+	return false;
+}
+
 void __cdecl NewNET_ParseChatMsg(int a1, int unitid, const char *buf, int color, int size)
 {
 	if (g_CGAService.m_ui_block_chatmsgs > 0 && buf[0] == 'P' && buf[1] == '|' && unitid != -1)
-		return;
+	{
+		if(g_CGAService.m_ui_block_chatmsgs >= 2)
+			return;
+
+		if (g_CGAService.m_ui_block_chatmsgs == 1)
+		{
+			if(!g_CGAService.IsPlayerInTeam(unitid))
+				return;
+		}
+	}
 
 	g_CGAService.NewNET_ParseChatMsg(a1, unitid, buf, color, size);
 }

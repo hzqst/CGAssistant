@@ -1160,6 +1160,7 @@ namespace CGA
 
 		void AddAllTradeItems(void);
 		void SetBlockChatMsgs(int state);
+		bool IsPlayerInTeam(int unitId);
 		bool WM_BattleNormalAttack(int target);
 		bool WM_BattleSkillAttack(int skillpos, int skilllv, int target);
 		bool WM_BattleGuard();

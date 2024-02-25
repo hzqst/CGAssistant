@@ -46,7 +46,7 @@ ScriptForm::ScriptForm(QWidget *parent) :
     connect(ui->horizontalSlider_freezeDuration, SIGNAL(valueChanged(int)), this, SLOT(OnSetFreezeDuration(int)));
 
     QTimer *timer = new QTimer(this);
-    connect(timer, SIGNAL(timeout()), this, SLOT(OnAutoRestart()));
+    connect(timer, SIGNAL(timeout()), this, SLOT(OnTimer()));
     timer->start(1000);
 
     ui->label_freezeDuration->setText(tr("Freeze Duration: %1 s").arg( ui->horizontalSlider_freezeDuration->value() ));
@@ -233,85 +233,94 @@ void ScriptForm::OnCloseWindow()
     }
 }
 
-void ScriptForm::OnAutoRestart()
+void ScriptForm::OnTimer()
 {
     if(g_CGAInterface->IsConnected())
     {
         int ingame = 0;
         if(g_CGAInterface->IsInGame(ingame) && ingame)
         {
-            CGA::cga_player_info_t playerinfo;
-            if(g_CGAInterface->GetPlayerInfo(playerinfo))
-            {
-                if(playerinfo.health != 0 && ui->checkBox_injuryProt->isChecked())
-                {
-                    if(m_node->state() == QProcess::Running)
-                    {
-                        on_pushButton_term_clicked();
-                        return;
-                    }
-                    else
-                    {
-                        return;
-                    }
-                }
+            int worldStatus = 0, gameStatus = 0;
 
-                if(playerinfo.souls != 0 && ui->checkBox_soulProt->isChecked())
-                {
-                    if(m_node->state() == QProcess::Running)
-                    {
-                        on_pushButton_term_clicked();
-                        return;
-                    }
-                    else
-                    {
-                        return;
-                    }
-                }
-            }
-
-            if(ui->checkBox_freezestop->isChecked() && m_node->state() == QProcess::Running)
+            if(g_CGAInterface->GetWorldStatus(worldStatus) && g_CGAInterface->GetGameStatus(gameStatus) && gameStatus == 3)
             {
-                int x, y, index1, index2, index3;
-                if(g_CGAInterface->GetMapXY(x, y) && g_CGAInterface->GetMapIndex(index1, index2, index3))
+                bool bIsInBattleState = (worldStatus == 10) ? true : false;
+                bool bIsInNormalState = (worldStatus == 9) ? true : false;
+
+                CGA::cga_player_info_t playerinfo;
+                if(g_CGAInterface->GetPlayerInfo(playerinfo))
                 {
-                    if(x != m_LastMapX || y != m_LastMapY || index3 != m_LastMapIndex)
+                    if(playerinfo.health != 0 && ui->checkBox_injuryProt->isChecked())
                     {
-                        m_LastMapChange = QTime::currentTime();
-                        m_LastMapX = x;
-                        m_LastMapY = y;
-                    }
-                    else
-                    {
-                        int freezeDuration = ui->horizontalSlider_freezeDuration->value();
-                        if(m_LastMapChange.elapsed() > freezeDuration * 1000)
+                        if(m_node->state() == QProcess::Running)
                         {
                             on_pushButton_term_clicked();
+                            return;
+                        }
+                        else
+                        {
+                            return;
+                        }
+                    }
 
-                            g_CGAInterface->LogBack();
+                    if(playerinfo.souls != 0 && ui->checkBox_soulProt->isChecked())
+                    {
+                        if(m_node->state() == QProcess::Running)
+                        {
+                            on_pushButton_term_clicked();
+                            return;
+                        }
+                        else
+                        {
                             return;
                         }
                     }
                 }
-            }
 
-            if(ui->checkBox_autorestart->checkState() == Qt::CheckState::PartiallyChecked && m_node->state() != QProcess::Running && !m_scriptPath.isEmpty())
-            {
-                int worldStatus = 0, gameStatus = 0;
-                if(g_CGAInterface->GetWorldStatus(worldStatus) && g_CGAInterface->GetGameStatus(gameStatus) && worldStatus == 9 && gameStatus == 3)
+                if(m_node->state() == QProcess::Running &&
+                        (
+                            (ui->checkBox_freezestop->checkState() == Qt::CheckState::PartiallyChecked && !bIsInBattleState) ||
+                             ui->checkBox_freezestop->checkState() == Qt::CheckState::Checked
+                        )
+                )
                 {
-                    on_pushButton_run_clicked();
-                    return;
+                    int x = 0, y = 0, index1 = 0, index2 = 0, index3 = 0;
+                    if(g_CGAInterface->GetMapXY(x, y) && g_CGAInterface->GetMapIndex(index1, index2, index3))
+                    {
+                        if(x != m_LastMapX || y != m_LastMapY || index3 != m_LastMapIndex)
+                        {
+                            m_LastMapChange = QTime::currentTime();
+                            m_LastMapX = x;
+                            m_LastMapY = y;
+                            m_LastMapIndex = index3;
+                        }
+                        else
+                        {
+                            int freezeDuration = ui->horizontalSlider_freezeDuration->value();
+                            if(m_LastMapChange.elapsed() > freezeDuration * 1000)
+                            {
+                                on_pushButton_term_clicked();
+                                g_CGAInterface->LogBack();
+                                return;
+                            }
+                        }
+                    }
                 }
-            }
-            else if(ui->checkBox_autorestart->checkState() == Qt::CheckState::Checked && m_node->state() != QProcess::Running && !m_scriptPath.isEmpty())
-            {
-                int worldStatus = 0, gameStatus = 0;
-                if(g_CGAInterface->GetWorldStatus(worldStatus) && g_CGAInterface->GetGameStatus(gameStatus) && (worldStatus == 9 && gameStatus == 3) || (worldStatus == 10 && gameStatus == 3))
+
+                if(m_node->state() != QProcess::Running && !m_scriptPath.isEmpty())
                 {
-                    on_pushButton_run_clicked();
-                    return;
+                    if(ui->checkBox_autorestart->checkState() == Qt::CheckState::PartiallyChecked && bIsInNormalState)
+                    {
+                        on_pushButton_run_clicked();
+                        return;
+                    }
+                    if(ui->checkBox_autorestart->checkState() == Qt::CheckState::Checked && (bIsInNormalState || bIsInBattleState))
+                    {
+                        on_pushButton_run_clicked();
+                        return;
+                    }
                 }
+
             }
         }
         else
