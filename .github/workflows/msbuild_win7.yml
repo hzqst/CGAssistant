@@ -121,7 +121,8 @@ jobs:
     - name: Set up Python 2.7
       uses: actions/setup-python@v2
       with:
-        python-version: '2.7'
+        python-version: '3.1.4'
+        architecture: 'x86'
 
     - name: Install node-gyp
       working-directory: ${{env.GITHUB_WORKSPACE}}

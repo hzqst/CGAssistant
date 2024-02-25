@@ -1615,7 +1615,7 @@ void CGAService::NewNET_ParseChatMsg(int a1, int unitid, const char *buf, int co
 
 		if (m_ui_block_chatmsgs == 1)
 		{
-			if (!IsPlayerInTeam(unitid))
+			if (!IsPlayerInTeam(unitid) && unitid != (*g_playerBase)->unitid)
 				return;
 		}
 	}
