@@ -10,6 +10,8 @@ if exist "%InstallDir%\Common7\Tools\vsdevcmd.bat" (
 
     "%InstallDir%\Common7\Tools\vsdevcmd.bat" -arch=x86
 
+    call npm install nan@latest --save
+
     call node-gyp configure build --arch=ia32
 
     mkdir "..\build\Release\"
