@@ -76,9 +76,9 @@ int main(int argc, char *argv[])
 
     QCommandLineOption autokillgame("autokillgame");
 
-    QCommandLineOption autocreatechara("autocreatechara");
-
     QCommandLineOption loginduration("loginduration", "", "loginduration", "0");
+
+    QCommandLineOption autocreatechara("autocreatechara");
 
     QCommandLineOption createcharachara("createcharachara", "", "createcharachara");
 
@@ -279,8 +279,8 @@ int main(int argc, char *argv[])
                           parser.isSet(skipupdate) ? true : false,
                           parser.isSet(autochangeserver) ? true : false,
                           parser.isSet(autokillgame) ? true : false,
-                          parser.isSet(autocreatechara) ? true : false,
                           parser.value(loginduration).toInt(),
+                          parser.isSet(autocreatechara) ? true : false,
                           parser.value(createcharachara).toInt(),
                           parser.value(createcharaeye).toInt(),
                           parser.value(createcharamouth).toInt(),
