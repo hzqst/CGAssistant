@@ -174,7 +174,7 @@ void AccountForm::OnAutoLogin()
     if(!ui->checkBox_autoLogin->isChecked())
     {
         if(g_CGAInterface->IsConnected()){
-            g_CGAInterface->LoginGameServer("", "", 0, 0, 0, 0);
+            g_CGAInterface->LoginGameServer("", "", -1, -1, -1, -1);
         }
 
         ui->label_status->setText(tr("Auto-Login off."));
