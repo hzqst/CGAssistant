@@ -6,8 +6,6 @@
 
 CGAssistant is a helper for you to play CrossGate with highly automated game experience.
 
-QQ Group: 300303705
-
 ## Warning
 
 This project is only for academic purposes, commercial use is prohibited.
