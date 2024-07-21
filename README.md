@@ -44,18 +44,18 @@ Let's assume that you have all requirements installed correctly.
 
 ![](img/1.png)
 
-2. Run "init-dep.bat", wait until all required submodules / dependencies are pulled. (this may takes couple of minutes, depending on your network connection and download speed)
+2. Run `init-dep.bat`, wait until all required submodules / dependencies are pulled. (this may takes couple of minutes, depending on your network connection and download speed)
 
-3. Run "build-boost.bat", wait until all boost static libs are generated. (this may takes couple of minutes, depending on your CPU performance)
+3. Run `build-boost.bat`, wait until all boost static libs are generated. (this may takes couple of minutes, depending on your CPU performance)
 
-4. Run "build-CGAHook.bat", wait until "CGAHook.dll" is generated under "build" directory.
+4. Run `build-CGAHook.bat`, wait until `CGAHook.dll` is generated under `build` directory.
 
-5. Run "build-qhttp.bat", wait until "qhttp.dll" generated under "build" directory.
+5. Run `build-qhttp.bat`, wait until `qhttp.dll` generated under `build` directory.
 
-6. Run "build-CGAssiatant.bat", wait until "CGAssistant.exe" generated under "build" directory.
+6. Run `build-CGAssiatant.bat`, wait until `CGAssistant.exe` generated under `build` directory.
 
-7. Run "build-nodegyp.bat", wait until "node_cga.node" generated under "build/Release" directory.
+7. Run `build-nodegyp.bat`, wait until `node_cga.node` generated under `build/Release` directory.
 
-8. Run "windeploy.bat"
+8. Run `windeploy.bat`
 
-Now you have all compiled binaries copied into "build" directory if no error occured.
+Now you have all compiled binaries copied into `build` directory if no error occured.
