@@ -1178,6 +1178,8 @@ namespace CGA
 
 		virtual bool GetPicBooksInfo(cga_picbooks_info_t &info) = 0;
 		virtual bool GetCardsInfo(cga_cards_info_t &info) = 0;
+		virtual bool GetCardsRecvMsg(cga_cards_recv_msgs_t&info) = 0;
+		virtual bool SetCardRecvMsgState(int index, int item, int state) = 0;
 		virtual bool IsItemValid(int itempos, bool &valid) = 0;
 		virtual bool GetItemInfo(int itempos, cga_item_info_t &info) = 0;
 		virtual bool GetItemsInfo(cga_items_info_t &info) = 0;
