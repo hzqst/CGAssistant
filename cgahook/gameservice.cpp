@@ -802,7 +802,8 @@ void CGAService::NewNET_ParseTradeItemsPackets(int a1, const char *buf)
 			itempos,
 			level,
 			type,
-			false
+			false,
+			0
 		);
 	}
 
@@ -4798,7 +4799,7 @@ void CGAService::WM_GetItemsInfo(cga_items_info_t *info)
 				(*g_playerBase)->iteminfos[itempos].level,
 				(*g_playerBase)->iteminfos[itempos].type,
 				(*g_playerBase)->iteminfos[itempos].assessed ? true : false,
-				(*g_playerBase)->iteminfos[itempos].access_flags
+				(*g_playerBase)->iteminfos[itempos].assess_flags
 			);
 		}
 	}

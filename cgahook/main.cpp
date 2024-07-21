@@ -272,7 +272,7 @@ LRESULT CALLBACK NewWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
 		g_CGAService.WM_GetCardsInfo((CGA::cga_cards_info_t *)wParam);
 		return 1;
 	case WM_CGA_GET_CARDS_RECV_MSG:
-		g_CGAService.WM_GetCardsRecvMsg((CGA::cga_cards_recv_msg_t*)wParam);
+		g_CGAService.WM_GetCardsRecvMsg((CGA::cga_cards_recv_msgs_t*)wParam);
 		return 1;
 	case WM_CGA_PLAY_GESTURE:
 		g_CGAService.WM_PlayGesture((int)wParam);

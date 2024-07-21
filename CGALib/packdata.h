@@ -1884,7 +1884,7 @@ namespace msgpack {
 					v.index = o.via.array.ptr[0].as<int>();
 					v.name = o.via.array.ptr[1].as<std::string>();
 					for (int i = 0; i < 10; ++i)
-						v.msgs[i] = o.via.array.ptr[2 + i].as<tCard_Recv_Msg>();
+						v.msgs[i] = o.via.array.ptr[2 + i].as<cga_card_recv_msg_payload_t>();
 					return o;
 				}
 			};
