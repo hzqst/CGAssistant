@@ -837,16 +837,16 @@ void GetCardsRecvMsg(const Nan::FunctionCallbackInfo<v8::Value>& info)
 	for (size_t i = 0; i < myinfos.size(); ++i)
 	{
 		Local<Object> obj = Object::New(isolate);
-		const CGA::cga_card_recv_msgs_t &myinfo = myinfos.at(i);
+		const auto &myinfo = myinfos.at(i);
 		obj->Set(context, String::NewFromUtf8(isolate, "index").ToLocalChecked(), Integer::New(isolate, myinfo.index));
 		obj->Set(context, String::NewFromUtf8(isolate, "name").ToLocalChecked(), Nan::New(myinfo.name).ToLocalChecked());
 
-		Local<Array> arrmsgs = Array::New(isolate);
-		for (size_t i = 0; i < myinfo.msgs.size(); ++i)
+		Local<Array> msgs = Array::New(isolate);
+		for (size_t i = 0; i < 10; ++i)
 		{
-			arrmsgs->Set(context, i, Nan::New(myinfo.msgs[i]).ToLocalChecked());
+			msgs->Set(context, i, Nan::New(myinfo.msgs[i]).ToLocalChecked());
 		}
-		obj->Set(context, String::NewFromUtf8(isolate, "msgs").ToLocalChecked(), arrmsgs);
+		obj->Set(context, String::NewFromUtf8(isolate, "msgs").ToLocalChecked(), msgs);
 
 		arr->Set(context, i, obj);
 	}
