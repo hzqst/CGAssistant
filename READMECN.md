@@ -6,15 +6,11 @@
 
 CGAssistant 是一个免费开源的用于游戏“CrossGate”的自动化程序。
 
-QQ群: 300303705
-
 ## 特别声明
 
 本项目仅供学习交流，禁止用于商业用途。
 
 本项目内的所有资源文件和程序，禁止在 GitHub 以外的任何地方进行转载或发布。
-
-本项目的[完整发布包](https://github.com/hzqst/CGAssistant/releases)中附带的所有CGA相关二进制程序（.dll .exe）均从[源代码](https://github.com/hzqst/CGAssistant) 编译而来，源代码接受所有人的监督，并且由[GitHub Actions](https://docs.github.com/en/actions/learn-github-actions)提供的构建服务自动构建。
 
 使用者必须自己对使用后果负责，包括但不限于由项目中的任何程序问题导致的任何游戏账号及虚拟资产损失或损害。
 
@@ -52,18 +48,18 @@ QQ群: 300303705
 
 ![](img/1.png)
 
-2. 运行 "init-dep.bat", 等待所有子模块和依赖项目下载完成。 (这一步可能需要花费几分钟时间, 具体取决于你的网速，如果速度很慢或者下载出错请自行尝试科学上网)
+2. 运行 `init-dep.bat`, 等待所有子模块和依赖项目下载完成。 (这一步可能需要花费几分钟时间, 具体取决于你的网速，如果速度很慢或者下载出错请自行尝试科学上网)
 
-3. 运行 "build-boost.bat", 等待boost的所有静态库编译完成。 (这一步可能需要花费数十分钟时间，具体取决于你的CPU性能)
+3. 运行 `build-boost.bat`, 等待boost的所有静态库编译完成。 (这一步可能需要花费数十分钟时间，具体取决于你的CPU性能)
 
-4. 运行 "build-CGAHook.bat", 等待 "CGAHook.dll" 生成成功后会自动复制到 "build" 目录下。
+4. 运行 `build-CGAHook.bat`, 等待 `CGAHook.dll` 生成成功后会自动复制到 `build` 目录下。
 
-5. 运行 "build-qhttp.bat", 等待 "qhttp.dll" 生成成功后会自动复制到 "build" 目录下。
+5. 运行 `build-qhttp.bat`, 等待 `qhttp.dll` 生成成功后会自动复制到 `build` 目录下。
 
-6. 运行 "build-CGAssiatant.bat", 等待 "CGAssistant.exe" 生成成功后会自动复制到 "build" 目录下。
+6. 运行 `build-CGAssiatant.bat`, 等待 `CGAssistant.exe` 生成成功后会自动复制到 `build` 目录下。
 
-7. 运行 "build-nodegyp.bat", 等待 "node_cga.node" 生成成功后会自动复制到 "build/Release" 目录下。
+7. 运行 `build-nodegyp.bat`, 等待 `node_cga.node` 生成成功后会自动复制到 `build/Release` 目录下。
 
-8. 运行 "windeploy.bat"
+8. 运行 `windeploy.bat`
 
 如果没有错误发生，那么所有编译好的二进制文件应该都会在 "build" 目录下。
