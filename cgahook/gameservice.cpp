@@ -3222,6 +3222,7 @@ void CGAService::Initialize(game_type type)
 		g_create_chara_wind = CONVERT_GAMEVAR(int *, 0x10C0A70 - 0x400000);//ok;
 		g_login_character = CONVERT_GAMEVAR(login_character_t *, 0x11FBD2A - 0x400000);//ok;
 		g_card_info = CONVERT_GAMEVAR(card_info_t *, 0x10C0A78 - 0x400000);//ok;
+		g_card_recv_msg = CONVERT_GAMEVAR(card_recv_msg_t*, 0x10623A8 - 0x400000);//ok;
 		g_update_game_version_button = CONVERT_GAMEVAR(btn_rect_t *, 0x608FA0 - 0x400000);//ok;
 		g_game_version = CONVERT_GAMEVAR(int *, 0x9CFDBE - 0x400000);//ok;
 		g_picbook_info = CONVERT_GAMEVAR(void *, 0x11FBE54 - 0x400000);//ok;
@@ -4226,6 +4227,31 @@ void CGAService::WM_GetCardsInfo(cga_cards_info_t *info)
 	}
 }
 
+void CGAService::WM_GetCardsRecvMsg(cga_cards_recv_msgs_t* info)
+{
+	if (!IsInGame())
+		return;
+
+	for (int i = 0; i < 60; ++i)
+	{
+		if (g_card_info[i].valid)
+		{
+			info->emplace_back(
+				i,
+				boost::locale::conv::to_utf<char>(g_card_info[i].name, "GBK")
+			);
+			auto &inf = info->at(info->size() - 1);
+			for (int j = 0; j < 10; ++j)
+			{
+				auto& card_rcv_msg = g_card_recv_msg[i * 10 + j];
+				inf.msgs[j].date = boost::locale::conv::to_utf<char>(card_rcv_msg.sdate, "GBK");
+				inf.msgs[j].msg = boost::locale::conv::to_utf<char>(card_rcv_msg.msg, "GBK");
+				inf.msgs[j].state = card_rcv_msg.state;
+			}
+		}
+	}
+}
+
 cga_picbooks_info_t CGAService::GetPicBooksInfo()
 {
 	cga_picbooks_info_t info;
@@ -4242,6 +4268,31 @@ cga_cards_info_t CGAService::GetCardsInfo()
 	SendMessageA(g_MainHwnd, WM_CGA_GET_CARDS_INFO, (WPARAM)&info, 0);
 
 	return info;
+}
+
+cga_cards_recv_msgs_t CGAService::GetCardsRecvMsg()
+{
+	cga_cards_recv_msgs_t info;
+
+	SendMessageA(g_MainHwnd, WM_CGA_GET_CARDS_RECV_MSG, (WPARAM)&info, 0);
+
+	return info;
+}
+
+bool CGAService::SetCardRecvMsgState(int index, int item, int state)
+{
+	if (!IsInGame())
+		return false;
+	if (index >= 60 || index < 0)
+		return false;
+	if (item >= 10 || item < 0)
+		return false;
+
+	if (g_card_info[index].valid)
+	{
+		g_card_recv_msg[index * 10 + item].state = state;
+	}
+	return true;
 }
 
 bool CGAService::IsPetValid(int petid)
@@ -4659,6 +4710,7 @@ void CGAService::WM_GetItemInfo(int itempos, cga_item_info_t *info)
 			info->level = 0;
 			info->type = 0;
 			info->assessed = false;
+			info->assess_flags = 0;
 		}
 		else if (itempos >= 0 && itempos < _ARRAYSIZE((*g_playerBase)->iteminfos))
 		{
@@ -4689,6 +4741,7 @@ void CGAService::WM_GetItemInfo(int itempos, cga_item_info_t *info)
 			info->level = (*g_playerBase)->iteminfos[itempos].level;
 			info->type = (*g_playerBase)->iteminfos[itempos].type;
 			info->assessed = (*g_playerBase)->iteminfos[itempos].assessed ? true : false;
+			info->assess_flags = (*g_playerBase)->iteminfos[itempos].assess_flags;
 		}
 	}
 }
@@ -4744,7 +4797,8 @@ void CGAService::WM_GetItemsInfo(cga_items_info_t *info)
 				itempos,
 				(*g_playerBase)->iteminfos[itempos].level,
 				(*g_playerBase)->iteminfos[itempos].type,
-				(*g_playerBase)->iteminfos[itempos].assessed ? true : false
+				(*g_playerBase)->iteminfos[itempos].assessed ? true : false,
+				(*g_playerBase)->iteminfos[itempos].access_flags
 			);
 		}
 	}
@@ -4797,7 +4851,8 @@ void CGAService::WM_GetBankItemsInfo(cga_items_info_t *info)
 				100 + itempos,
 				0,
 				0,
-				false
+				false,
+				0
 			);
 		}
 	}

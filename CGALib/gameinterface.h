@@ -439,9 +439,10 @@ namespace CGA
 			level = 0;
 			type = 0;
 			assessed = true;
+			assess_flags = 0;
 		}
-		cga_item_info_s(std::string &a1, std::string &a2, std::string &a3, int a4, int a5, int a6, int a7, int a8, bool a9)
-			: name(a1), attr(a2), info(a3), itemid(a4), count(a5), pos(a6), level(a7), type(a8), assessed(a9)
+		cga_item_info_s(std::string &a1, std::string &a2, std::string &a3, int a4, int a5, int a6, int a7, int a8, bool a9, int a10)
+			: name(a1), attr(a2), info(a3), itemid(a4), count(a5), pos(a6), level(a7), type(a8), assessed(a9), assess_flags(a10)
 		{
 		}
 		std::string name;
@@ -453,6 +454,7 @@ namespace CGA
 		int level;
 		int type;
 		bool assessed;
+		int assess_flags;
 	}cga_item_info_t;
 
 	typedef std::vector<cga_item_info_t> cga_items_info_t;
@@ -971,6 +973,38 @@ namespace CGA
 	}cga_card_info_t;
 
 	typedef std::vector<cga_card_info_t> cga_cards_info_t;
+
+	typedef struct cga_card_recv_msg_payload_s
+	{
+		cga_card_recv_msg_payload_s()
+		{
+			state = 0;
+		}
+		cga_card_recv_msg_payload_s(int a1, std::string& a2, std::string& a3)
+			: state(a1), date(a2), msg(a3)
+		{
+		}
+		int state;
+		std::string date;
+		std::string msg;
+	}cga_card_recv_msg_payload_t;
+
+	typedef struct cga_card_recv_msgs_s
+	{
+		cga_card_recv_msgs_s()
+		{
+			index = 0;
+		}
+		cga_card_recv_msgs_s(int a1, std::string& a2)
+			: index(a1), name(a2)
+		{
+		}
+		int index;
+		std::string name;
+		cga_card_recv_msg_payload_t msgs[10];
+	}cga_card_recv_msgs_t;
+
+	typedef std::vector<cga_card_recv_msgs_t> cga_cards_recv_msgs_t;
 
 	typedef struct cga_picbook_info_s
 	{

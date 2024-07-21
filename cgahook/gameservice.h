@@ -204,6 +204,16 @@ namespace CGA
 
 	static_assert(sizeof(card_info_t) == 116, "Size check");
 
+	//010623A6
+	typedef struct card_recv_msg
+	{
+		short state;
+		char sdate[18];
+		char msg[300];
+	}card_recv_msg_t;
+
+	static_assert(sizeof(card_recv_msg_t) == 320, "Size check");
+
 #define PLAYER_ENABLE_FLAGS_PK (1<<2)
 #define PLAYER_ENABLE_FLAGS_TEAMCHAT (1<<3)
 #define PLAYER_ENABLE_FLAGS_JOINTEAM (1<<0)
@@ -621,6 +631,8 @@ namespace CGA
 		virtual cga_subskills_info_t GetSubSkillsInfo(int index);
 		virtual cga_picbooks_info_t GetPicBooksInfo();
 		virtual cga_cards_info_t GetCardsInfo();
+		virtual cga_cards_recv_msgs_t GetCardsRecvMsg();
+		virtual bool SetCardRecvMsgState(int index, int item, int state);
 		virtual bool IsPetValid(int petid);
 		virtual cga_pet_info_t GetPetInfo(int index);
 		virtual cga_pets_info_t GetPetsInfo();
@@ -906,6 +918,7 @@ namespace CGA
 		login_character_t *g_login_character;
 
 		card_info_t *g_card_info;
+		card_recv_msg_t* g_card_recv_msg;
 		btn_rect_t *g_update_game_version_button;
 		int *g_game_version;
 		void *g_picbook_info;
@@ -1189,6 +1202,7 @@ namespace CGA
 		void WM_GetSubSkillInfo(int index, int stage, cga_subskill_info_t *info);
 		void WM_GetSubSkillsInfo(int index, cga_subskills_info_t *info);
 		void WM_GetCardsInfo(cga_cards_info_t *info);
+		void WM_GetCardsRecvMsg(cga_cards_recv_msgs_t* info);
 		void WM_GetPicBooksInfo(cga_picbooks_info_t *info);
 		void WM_GetPetInfo(int index, cga_pet_info_t *info);
 		void WM_GetPetsInfo(cga_pets_info_t *info);
@@ -1409,5 +1423,6 @@ namespace CGA
 #define WM_CGA_DELETE_CARD WM_USER+10072
 #define WM_CGA_SEND_MAIL WM_USER+10073
 #define WM_CGA_SEND_PET_MAIL WM_USER+10074
+#define WM_CGA_GET_CARDS_RECV_MSG WM_USER+10075
 
 #define CGA_PORT_BASE 4396

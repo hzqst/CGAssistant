@@ -614,6 +614,7 @@ void GetItemInfo(const Nan::FunctionCallbackInfo<v8::Value>& info)
 	obj->Set(context, String::NewFromUtf8(isolate, "level").ToLocalChecked(), Integer::New(isolate, myinfo.level));
 	obj->Set(context, String::NewFromUtf8(isolate, "type").ToLocalChecked(), Integer::New(isolate, myinfo.type));
 	obj->Set(context, String::NewFromUtf8(isolate, "assessed").ToLocalChecked(), Boolean::New(isolate, myinfo.assessed));
+	obj->Set(context, String::NewFromUtf8(isolate, "assess_flags").ToLocalChecked(), Integer::New(isolate, myinfo.assess_flags));
 	info.GetReturnValue().Set(obj);
 }
 
@@ -644,6 +645,7 @@ void GetItemsInfo(const Nan::FunctionCallbackInfo<v8::Value>& info)
 		obj->Set(context, String::NewFromUtf8(isolate, "level").ToLocalChecked(), Integer::New(isolate, myinfo.level));
 		obj->Set(context, String::NewFromUtf8(isolate, "type").ToLocalChecked(), Integer::New(isolate, myinfo.type));
 		obj->Set(context, String::NewFromUtf8(isolate, "assessed").ToLocalChecked(), Boolean::New(isolate, myinfo.assessed));
+		obj->Set(context, String::NewFromUtf8(isolate, "assess_flags").ToLocalChecked(), Integer::New(isolate, myinfo.assess_flags));
 		arr->Set(context, i, obj);
 	}
 	info.GetReturnValue().Set(arr);
@@ -817,6 +819,71 @@ void GetCardsInfo(const Nan::FunctionCallbackInfo<v8::Value>& info)
 		arr->Set(context, i, obj);
 	}
 	info.GetReturnValue().Set(arr);
+}
+
+void GetCardsRecvMsg(const Nan::FunctionCallbackInfo<v8::Value>& info)
+{
+	auto isolate = info.GetIsolate();
+	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
+
+	CGA::cga_cards_recv_msgs_t myinfos;
+	if (!g_CGAInterface->GetCardsRecvMsg(myinfos))
+	{
+		Nan::ThrowError("RPC Invocation failed.");
+		return;
+	}
+	Local<Array> arr = Array::New(isolate);
+	for (size_t i = 0; i < myinfos.size(); ++i)
+	{
+		Local<Object> obj = Object::New(isolate);
+		const CGA::cga_card_recv_msgs_t &myinfo = myinfos.at(i);
+		obj->Set(context, String::NewFromUtf8(isolate, "index").ToLocalChecked(), Integer::New(isolate, myinfo.index));
+		obj->Set(context, String::NewFromUtf8(isolate, "name").ToLocalChecked(), Nan::New(myinfo.name).ToLocalChecked());
+
+		Local<Array> arrmsgs = Array::New(isolate);
+		for (size_t i = 0; i < myinfo.msgs.size(); ++i)
+		{
+			arrmsgs->Set(context, i, Nan::New(myinfo.msgs[i]).ToLocalChecked());
+		}
+		obj->Set(context, String::NewFromUtf8(isolate, "msgs").ToLocalChecked(), arrmsgs);
+
+		arr->Set(context, i, obj);
+	}
+	info.GetReturnValue().Set(arr);
+}
+
+void SetCardRecvMsgState(const Nan::FunctionCallbackInfo<v8::Value>& info)
+{
+	auto isolate = info.GetIsolate();
+	HandleScope handle_scope(isolate);
+	auto context = isolate->GetCurrentContext();
+
+	if (info.Length() < 1 || !info[0]->IsInt32()) {
+		Nan::ThrowTypeError("Arg[0] must be integer.");
+		return;
+	}
+
+	if (info.Length() < 2 || !info[1]->IsInt32()) {
+		Nan::ThrowTypeError("Arg[1] must be integer.");
+		return;
+	}
+
+	if (info.Length() < 3 || !info[2]->IsInt32()) {
+		Nan::ThrowTypeError("Arg[2] must be integer.");
+		return;
+	}
+
+	int index = info[0]->Int32Value(context).ToChecked();
+	int item = info[1]->Int32Value(context).ToChecked();
+	int state = info[2]->Int32Value(context).ToChecked();
+	if (!g_CGAInterface->SetCardRecvMsgState(index, item, state))
+	{
+		Nan::ThrowError("RPC Invocation failed.");
+		return;
+	}
+
+	info.GetReturnValue().Set(true);
 }
 
 void GetPicBooksInfo(const Nan::FunctionCallbackInfo<v8::Value>& info)
