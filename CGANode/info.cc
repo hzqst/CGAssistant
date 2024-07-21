@@ -842,9 +842,9 @@ void GetCardsRecvMsg(const Nan::FunctionCallbackInfo<v8::Value>& info)
 		obj->Set(context, String::NewFromUtf8(isolate, "name").ToLocalChecked(), Nan::New(myinfo.name).ToLocalChecked());
 
 		Local<Array> msgs = Array::New(isolate);
-		for (size_t i = 0; i < 10; ++i)
+		for (size_t j = 0; j < 10; ++j)
 		{
-			msgs->Set(context, i, Nan::New(myinfo.msgs[i]).ToLocalChecked());
+			msgs->Set(context, j, Nan::New(myinfo.msgs[j]).ToLocalChecked());
 		}
 		obj->Set(context, String::NewFromUtf8(isolate, "msgs").ToLocalChecked(), msgs);
 
